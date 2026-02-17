@@ -1,0 +1,95 @@
+# LOG DE AVANCES TÉCNICOS - PROYECTO PYATZ
+Fecha de inicio: 11 de Febrero de 2026
+
+## 1. OBJETIVO ACTUAL
+Sustituir datos hardcodeados en el componente LWC 'techQuoteEditor' por datos reales de Salesforce, enfocándonos en la pestaña de "Datos Técnicos" y la vinculación con el objeto Quote y Location.
+
+## 2. METADATOS UTILIZADOS
+### Objeto: Quote (Cotización)
+- Name (Estándar): Mapeado como "Asunto del presupuesto".
+- QuoteNumber (Estándar): Folio autogenerado (Solo lectura).
+- Introduction_Text__c (Personalizado - Rich Text): Texto de introducción técnica.
+- AccountId (Estándar): Relación con el Cliente para filtrar Sedes.
+
+### Objeto: Location (Ubicación)
+- Utilizado para representar las "Sedes" vinculadas a través del objeto 'AssociatedLocation'.
+
+## 3. CAMBIOS REALIZADOS (11/02/2026)
+...
+- **Guardado Dinámico**: Implementada la lógica de guardado en el Paso 4 que persiste los cambios de Asunto e Introducción en la base de datos de Salesforce.
+- **Notificaciones**: Añadidos mensajes Toast para confirmar el éxito del guardado.
+- **Navegación**: El componente ahora regresa automáticamente al listado tras guardar.
+
+## 5. INTEGRACIÓN DEL CATÁLOGO DE SERVICIOS (PASO 3)
+*Explicación para personal no técnico:*
+
+### ¿Qué es esto?
+Es la conexión entre la cotización y la "lista de precios oficial" de la empresa. En lugar de escribir los nombres de los servicios a mano, el sistema ahora los busca en una base de datos centralizada.
+
+### ¿Por qué lo hacemos?
+1. **Precisión:** Evita errores en los nombres de los servicios y asegura que se usen los precios vigentes.
+2. **Control:** Permite saber exactamente qué se está vendiendo (servicios vs. artículos).
+3. **Automatización:** Al seleccionar un producto, el sistema ya sabe cuánto cuesta, ahorrando tiempo al vendedor.
+
+### Cambios realizados:
+- **Buscador Inteligente:** Se creó una función que "viaja" al catálogo de Salesforce y trae los resultados que coincidan con lo que el usuario escribe.
+- **Sincronización de Precios:** El sistema detecta automáticamente el precio unitario configurado para cada cliente.
+
+## 7. CONFIGURACIÓN DINÁMICA DE LÍNEAS DE NEGOCIO
+*Explicación para personal no técnico:*
+
+### Automatización completa
+El sistema ya no depende de una lista fija de opciones. Ahora, el componente "revisa" automáticamente el catálogo de productos de Salesforce cada vez que se abre.
+
+### Beneficios:
+- **Cero mantenimiento**: Si la empresa añade una nueva línea de negocio en sus productos, el sistema la mostrará automáticamente sin necesidad de actualizar el código.
+- **Realismo**: El usuario solo verá opciones que realmente tienen productos asociados en el sistema, evitando errores de selección.
+
+## 9. MEJORAS EN LA GENERACIÓN DEL PDF
+*Explicación para personal no técnico:*
+
+### ¿Qué corregimos?
+Antes, el PDF podía mostrar "código extraño" (etiquetas HTML) en la introducción y a veces la sección ni siquiera aparecía.
+
+### Mejoras aplicadas:
+1. **Interpretación de Formato:** El PDF ahora entiende negritas, listas y otros formatos que el usuario use en la introducción. Se verá exactamente como se escribió.
+2. **Visibilidad Inteligente:** El sistema es ahora lo suficientemente inteligente para saber que si escribiste una introducción, esta DEBE aparecer en el PDF. Ya no hace falta marcar casillas adicionales.
+
+## 11. GESTIÓN DE SEDES SELECCIONADAS
+*Explicación para personal no técnico:*
+
+### ¿Qué mejoramos?
+La tabla de sedes (sucursales o ubicaciones del cliente) ahora es interactiva. Permite ver la información detallada de cada una y seleccionar cuáles se verán afectadas por la cotización técnica.
+
+### Características:
+- **Checkbox de Selección**: El usuario puede marcar una o varias sedes.
+- **Datos Detallados**: Se visualiza el código de la sede, el contacto responsable, su teléfono y la dirección completa (ya formateada para fácil lectura).
+- **Conexión Real**: Los datos provienen directamente del catálogo de ubicaciones del cliente en Salesforce.
+
+## 13. SISTEMA DE PLANTILLAS DINÁMICAS (14/02/2026)
+*Explicación para personal no técnico:*
+
+### ¿Qué es esto?
+Es un sistema que permite insertar textos predefinidos (Plantillas) en el presupuesto, pero con una mejora: los nombres de los clientes se llenan solos.
+
+### Cómo funciona:
+- **Carpetas por Sección**: Los textos se organizan en carpetas (Introducciones, Garantías, Servicios).
+- **Renderización Inteligente**: Al elegir una plantilla, el sistema cambia automáticamente códigos como `{!Quote.Account.Name}` por el nombre real del cliente.
+- **Autogestión**: El administrador puede editar estas plantillas directamente en Salesforce sin necesidad de programación.
+
+## 14. SEGURIDAD Y PRIVACIDAD (P&L)
+*Explicación para personal no técnico:*
+
+### Protección de Datos Sensibles
+Se ha implementado un bloqueo por contraseña para el botón de **Análisis de Rentabilidad (P&L)**. Esto evita que personal no autorizado vea los costos internos y márgenes de utilidad.
+
+### Gestión de Contraseña por el Administrador:
+Para cambiar la contraseña sin tocar el código, el administrador debe:
+1. Ir a **Configuración** > **Etiquetas Personalizadas** (Custom Labels).
+2. Localizar la etiqueta llamada: `PL_Access_Password`.
+3. Pulsar en **Editar** y cambiar el valor en el campo "Valor".
+4. Guardar los cambios. El sistema se actualizará instantáneamente.
+
+### Ventajas:
+- **Seguridad**: La validación se realiza en el servidor de Salesforce, lo que la hace muy difícil de burlar.
+- **Autonomía**: El administrador puede cambiar la clave periódicamente sin ayuda técnica.

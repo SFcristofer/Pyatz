@@ -1,0 +1,18 @@
+<template>
+    <!-- Muestra la Lista si estamos en modo list -->
+    <template if:true={isListView}>
+        <c-tech-quote-list 
+            oncreatenew={handleCreateNew}
+            oneditquote={handleEditQuote}>
+        </c-tech-quote-list>
+    </template>
+
+    <!-- Muestra el Editor si estamos en modo edit -->
+    <template if:true={isEditView}>
+        <c-tech-quote-editor 
+            record-id={selectedRecordId}
+            oncancel={handleShowList}
+            onsave={handleShowList}>
+        </c-tech-quote-editor>
+    </template>
+</template>

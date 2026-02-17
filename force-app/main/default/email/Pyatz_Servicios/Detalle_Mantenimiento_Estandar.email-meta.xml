@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Descripción técnica estándar para servicios de mantenimiento</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Mantenimiento Estándar</name>
+    <style>none</style>
+    <subject>Detalle de Servicio</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

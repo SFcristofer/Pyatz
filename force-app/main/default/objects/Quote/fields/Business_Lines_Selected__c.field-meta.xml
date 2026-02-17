@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Business_Lines_Selected__c</fullName>
+    <description>Almacena las líneas de negocio seleccionadas en el editor técnico.</description>
+    <externalId>false</externalId>
+    <label>Líneas de Negocio Seleccionadas</label>
+    <length>1000</length>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

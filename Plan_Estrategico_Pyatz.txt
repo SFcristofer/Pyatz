@@ -1,0 +1,790 @@
+Sesión Análisis y Diseño Pyatz-20260106_120213-Grabación de la reunión
+
+0:19
+¿Con qué continuamos equipo? Ayer nos había dicho que íbamos a ver o el proceso de las pólizas una disculpa. ¿Ando afónico, EH? Este no nos había dicho que íbamos a ver el proceso a las pólizas, pero.
+
+0:36
+Ya ves que nos mostraba un diagrama donde venían como 2 opciones no, una es las los bomberazos y la otra era no recuerdo el nombre era o K tenemos nosotros 3 tipos de venta para con el cliente el tema de las pólizas, que eso si lo tenemos que ver directamente con la licenciada Gabriela. Si quieren podemos empezar a ver el proceso de las otras 2 que son de las que si nos encargamos de este lado de hidrosanitario.
+
+1:04
+O K los 3 tipos de venta que tenemos, entonces tenemos la venta por póliza, que esos son contratos que se renuevan cada año, en donde ya tenemos una planeación anual, que sabemos cuántas veces vamos a ir en el año, etcétera. Las otras 2 ventas que tenemos que son caen más de lado de extraordinario, son ventas por servicio programado y ventas por bomberazo empecemos con el con el tipo de venta por servicio programado particularmente, Ah, déjenlo aquí donde puedo compartir mi pantalla 1 segundo.
+
+1:47
+O K díganme si ahí ya pueden ver mi ventana ya se ve o k diferencias que nosotros tenemos entre.
+
+2:13
+Aquí está la diferencia que nosotros tenemos entre un bomberzo y un servicio programado. Cuando es un servicio extraordinario en el servicio extraordinario, básicamente es cuando el cliente a nosotros nos hace llegar una necesidad. Esa necesidad nos dice, necesitamos que nos ayuden a cotizar tal servicio en esta secuencia de eventos. Lo que sucede es que una vez que surge la necesidad del cliente, nosotros hacemos 2 cosas, primero que nada.
+
+2:41
+Programamos un levantamiento si es algo muy básico que nos pide el cliente que ya dominamos y que no necesitamos mucha información al respecto. Pasamos directamente al proceso de la cotización en los archivos de costeo que nosotros ya habíamos revisado el día de ayer. Vamos a ver lo desde no tenemos aquí, lo tenemos aquí en Costeos para 6 UPS, acá está.
+
+3:06
+Entonces, a partir de que un cliente nos solicita a nosotros un servicio extraordinario, que esto puede ser un servicio extraordinario de desazolve, un servicio extraordinario de limpieza de trampa de grasa, aunque eso no es tan común, un servicio extraordinario de recolección de grasa, etcétera. Lo más frecuente que nosotros trabajamos en servicios extraordinarios desde aquí de 2 programados puede ser el tema de desazolves, modificaciones de instalaciones hidrosanitarias, cambios de trampa de grasa, etcétera.
+
+3:35
+Para eso sino se requiere un levantamiento, porque tenemos la información completa por parte del cliente con la información que él nos proporciona. Lo primero que nosotros es que venimos y descargamos en este, que es nuestro archivo de costeo los materiales que vamos a necesitar. A partir de esos materiales que vamos a necesitar, nosotros definimos un precio de venta. Bueno, definimos un costo operativo a partir de ahí, con lo que vimos ayer con la licenciada Gaby en el PNL, definimos un precio de venta.
+
+4:01
+Con un porcentaje de utilidad determinado y ya que tenemos ese costo es en el mismo proceso que veíamos en la parte de ayer. En la parte de ayer vemos que ya que tenemos este costo nos vamos y geo generamos una cotización, la cotización se envía si el cliente nos las autoriza a nosotros una vez que tenemos un servicio programado, tenemos lo que nosotros conocemos como el famosísimo correo de enhorabuena que estábamos viendo ayer.
+
+4:31
+Un 1 segundo, por ejemplo, este de aquí nos hace llegar, en este caso en ingeniero Mauricio, un correo en donde nos marca la necesidad del cliente y nos dice, enhorabuena, se autoriza el servicio de instalación de nueva trampa de grasa. Este fue un servicio que previamente tuvo el tema de se hizo una cotización, se le envió al cliente. Todo esto existe en pay prime y se manda aquí el correo de enhorabuena en el que se le escribe todo lo que se va a necesitar, materiales, etcétera. Entonces todo esto es muy planeado.
+
+5:00
+A partir de ahí, este se evalúa el tema de la solución que ya se definió previamente y se manda la información para poder ejecutar con el servicio y es muy estándar el proceso con respecto a lo que vimos ayer. Donde sí se gira esta operación es en la parte de cuando son servicios de bomberazos, que es lo que les comentaba ayer lali, que es donde realmente se ve un cambio en el proceso cuando tenemos un servicio de bomberazo.
+
+5:23
+Varía porque lo primero que sucede es que el ingenieros o los clientes le llaman alguno de los comerciales, llámese la licenciada Gabriel, el ingeniero Mauricio, uno de los responsables comerciales que es Gabriel Barroso, inclusive nosotros como analistas y nos solicitan este un servicio de emergencia.
+
+5:40
+En este servicio de emergencia básicamente la parte administrativa es y esto no existe como tal. Al inicio dentro de un sistema primero nos llaman nos dicen la necesidad, nosotros como el área hidrosanitaria que los bomberazos siempre van a ser o desazolves o alguna reparación urgente que tengan, es lo que sí o sí manejamos en bomberazo otro tipo de servicio, no lo hacemos de esta manera este a diferencia de otros servicios planeados donde podemos definir un costeo, aquí primero se va al tema de la ejecución.
+
+6:09
+Se se llama la gente, vemos quiénes están disponibles, se prepara un equipo de trabajo para que vayan a atender la solución del cliente. Nosotros en estos archivos de costeos ya tenemos como unos costeos para desasolver previamente desarrollados. Por ejemplo, estos costeos ya los tienen como un machote que tiene el área de almacén, que son los que nos ayudan a surtir todo el tema de los servicios.
+
+6:33
+Una vez que los técnicos ya fueron a diferencia de en otras situaciones, aquí lo que sucede es que en igeo y creo que es algo importante. Nosotros cuando tenemos un bomberazo en igeo como lo habíamos visto ayer en el tema de nuestro proceso, supongamos para diferentes. Ah turing. Ayer estamos viendo el cuenta de turing. Vamos a seguir con ahí, a diferencia de.
+
+7:06
+¿Cómo los vivimos en igeo? A diferencia de el proceso estándar en el que nosotros agarramos y creamos un presupuesto a partir de una cotización, aquí lo que nosotros hacemos es que si bien generamos un presupuesto, este presupuesto, nosotros le definimos. Por ejemplo, aquí nosotros aquí lo que tenemos que hacer es que generamos un presupuesto para este presupuesto. Se venceros porque aún no tenemos mucha información.
+
+7:35
+Entonces, ser un presupuesto muy estándar, que en el momento no va a ser el final, no le agregamos notas, no le agregamos nada más allá de la descripción de lo que tenemos entendido en el momento que se va a realizar, donde debe decir una se entre presupuesto más Turín o presupuesto.
+
+8:06
+Por supuesto, esta es la parte donde les decimos que nosotros tenemos como unas plantillas previamente cargadas en las que nosotros también se las vamos a recargar a ustedes o les vamos a dar información donde ya nos da estas notas cláusulas son esas dependiendo del del servicio que hayamos elegido. Nosotros seleccionamos la sede en la que se va a realizar el servicio, pero a diferencia de otros.
+
+8:34
+De otros servicios, nosotros aquí generamos una partida en ceros donde nosotros cargamos. Aquí insisto, tenemos para nosotros poder generar estas cotizaciones descripciones previamente cargadas como éste, aquí se selecciono Desazolve uno y automáticamente me carga esta descripción y le damos una descripción manualmente. Muy general, el servicio incluye desazolve urgente en área de pochambre.
+
+9:01
+Cantidad uno importe y aquí es donde nosotros dejamos el importe en ceros o en uno, dependiendo cuál es el valor, ya que nosotros realizamos esto inmediatamente, lo que nosotros aquí ponemos trabajo único, puntual, no ponemos observaciones de pago más allá de lo que nosotros, porque insisto, aún no sabemos qué vamos a realizar y generamos nosotros primero lo que es un presupuesto en ceros.
+
+9:26
+Este presupuesto después lo vamos a venir nosotros a poder este modificar para modificar costos, descripciones, las acciones reales que se tuvieron o el servicio real que se realizó, porque muchas veces nos pasa que nos llaman por oye, tengo atorado un mingitorio y voy a iniciar mi operación y no puedo estar así porque vamos a tener revisión del director perfecto.
+
+9:47
+Vamos, pero lo que era en realidad un desasove de un mingitorio realmente teniendo un registro, un registro obstruido o una tubería obstruida y se convierte en algo más grande o terminamos llevando un vector algo por el estilo 1. Segundo, por favor, sí.
+
+10:45
+Listo. Disculpen equipo. ¿Entonces, una vez que nosotros tenemos nuestro costeo en ceros o nuestra cotización previo en ceros en igeo, cómo es el proceso? Vengo aquí y lo que yo hago es que convierto esto en un contrato. Problema que nosotros tenemos es que como no tenemos una opción para poder generar una orden de trabajo sin un costeo previo, tenemos que hacer toda esta secuencia de eventos y después, manualmente, tenemos que venir a modificar otra vez.
+
+11:10
+La descripción del contrato, la descripción de la cotización y como vieron, algo que sucede ni GEO es que la descripción de la cotización se pasa el contrato y se pasa la orden de trabajo. Ya cuando nosotros le vamos a cargar las evidencias al cliente manualmente, tenemos que regresar nosotros a modificar todo esto manualmente.
+
+11:27
+Para que la descripción de la cotización con el contrato con la orden de trabajo empaten en la descripción. Por qué particularmente, como les comento la licenciada Gabriela, nuestro principal cliente en este caso es Liverpool, y si algo tiene Liverpool es que es extremadamente quisquilloso con el tema de su materialidad, con el tema de sus evidencias. Entonces por eso tenemos que hacer muy cuidadosos en que todo match.
+
+11:53
+Pero bueno, para convertir, al menos como lo hacemos en igeo convertir en contrato como les comenté aquí, nos carga automáticamente en el contrato la descripción de lo que se va a hacer, que es lo que ya viene. Precargado en igeo más la descripción que nosotros modificamos manualmente en esta sección de aquí continuamos en la parte de abajo. Y algo que nosotros les comentábamos es que nosotros como tal no facturamos desde igeo. Nosotros realizamos todo el proceso de facturación desde same.
+
+12:19
+Me viene aquí básicamente informaciones de importes de facturación, de fechas de pagos, datos del contrato si lo modificamos manualmente con la fecha de inicio su como es algo urgente, supongamos que nos están pidiendo hoy y se calcula que se termine hoy mismo va, nos ponen la falta en la que inicia el primer contrato. Esto nos funciona mucho cuando hacemos lo de póliza, porque si bien creamos el contrato hoy, quizás mi fecha del primer servicio yo la tengo hasta el día 28 de noviembre. Como nosotros nos manejamos en pólizas, digo cuando lo veamos en la parte de policía.
+
+12:49
+Esta parte de nosotros nos funciona, es porque les digo, si bien mi contrato dice hoy que se lo envié al cliente, mi primer fecha de servicio es en esta fecha para efectos de lo que son desasolves de Bomberazo o servicios de Bomberazo empata todo en la misma fecha va nos da una opción de generar un número de contrato manualmente. Realmente nosotros estamos trabajando con el consecutivo que nos que nos proporciona igeo. Si tenemos que agregar observaciones privadas sobre este contrato, aquí lo podemos hacer para consultas internas.
+
+13:16
+Este observaciones para la renovación, si los clientes nos especifican que cuando renovamos las pólizas, en este caso no lo vamos a utilizar porque es un servicio único y puntual para las pólizas. Si no sirve ahí porque podemos dejar como notas para la siguiente renovación. Si la agregamos en algo o el cliente quiere agregar algo en su póliza de este año, lo podemos dejar ahí. Anotado va si le podemos agregar al contrato alguna condición, cláusula, anexo, descripción o explicación. En esta parte es donde lo podemos generar, al igual que en los otros formatos.
+
+13:45
+Aquí le pongo que no voy a generar facturas en esta parte de seleccionar plantilla nosotros ponemos estándar y siguiente paso. Esto es un poco de lo que habíamos visto con Gaby que nos mostraba el timeline no que nos permite generar las fechas, en este caso como en el intervalo de tiempo es en mismo día, realmente no me lo va a generar y me va a indicar que es en el mismo día que yo le puse de inicio y de fin. Luego aquí ya que me genera el contrato y este es el resumen del contrato, me da la opción de generar las órdenes de trabajo.
+
+14:14
+Ya genero las órdenes de trabajo, en este caso solamente vamos a utilizar una y GEO siempre me da la opción de obtener fechas candidatas, solamente me da la fecha con la fecha del rango que yo le di en el contrato. Como solamente es un único día, es el único que me genera y aquí yo le doy a generar las órdenes de trabajo y en este momento es cuando yo vengo aquí y ya signo el técnico un poco como lo veíamos en el día de ayer. ¿Qué sucede aquí? Yo tengo que hacer todo este recorrido.
+
+14:42
+Para poder generar una orden de trabajo en los bomberazos, porque insisto, aunque el cliente nos dice ven por un mingitorio o ven porque tengo un registro tapado, muchas veces se terminan realizando más cosas o inclusive se extiende a más jornadas y es ahí donde vamos modificando la orden de trabajo, entonces aquí nos vamos un poco en reversa el proceso administrativo en lugar de ir con.
+
+15:04
+Como se los dije, con una cotización, con un bueno, con un levantamiento que pasa a ser un presupuesto que pasa a ser una cotización que viene en un correo de autorización del cliente y luego de eso en un correo de enhorabuena. Aquí la detección es más rápida. Pasamos directamente al tema de generar una cotización en ceros porque no sabemos cuánto vamos a cobrar por el servicio.
+
+15:24
+Que pasamos a a detonar a la gente almacén para que suministre o muchas veces aquí lo que sucede es que como a veces estos bomberazos son en fin de semana, no hay persona fija de almacén que pueda ser como un proceso de entrega. Entonces los técnicos se suministran manualmente, se coordinan por chat con la gente de almacén, pero no existe ese proceso interdepartamental formal en el que se emite una emisión a partir de la autorización del cliente se emite una emisión de orden para que el almacén prepare los materiales. Después hay una entrega, el técnico, el técnico.
+
+15:54
+Luego tiene una recepción y se van aquí directamente pasamos a la necesidad, la cotización en ceros, la orden de trabajo, el técnico se suministra solo, no proceso de entrega recepción, sí hace un proceso de registro de evidencia de lo que toma y luego sale directamente al servicio. Una vez que nosotros ya fueron y ejecutaron los técnicos en el servicio, supongamos aquí la orden de trabajo vamos a poner como que ellos ya la hayan ya la hayan terminado de ejecutar.
+
+16:22
+Lo que nosotros aquí vamos a ponerle, sí a todo revisión el técnico tal recoger firma del cliente o k ya lo Benito. Estoy poniendo que el técnico aquí ya firmó la orden de trabajo o K o k ahí.
+
+16:55
+De aquí es donde empieza nuestro proceso en reversa, tenemos una junta con el técnico para que nos indique todos los trabajos que ellos realizaron y de la información que ellos nos dan, nosotros podemos generar 2 documentos, uno y es necesario porque la situación así lo amerita, es decir, cuando las cosas tuvieron una desviación de lo que se tuvo que realizar.
+
+17:20
+Porque no iban por un mingitorio, pero terminó siendo algo muy complejo, con más estructura en lo que quizás un cliente acostumbrado a un presupuesto, por decir un número de 10 pesos * 1 Desazolve, cuando nos solicitaron la ayuda porque ellos creían que harían eso y se convirtió en algo de 50 pesos porque implicó más cosas. Generamos nosotros una memoria descriptiva, estas memorias descriptivas, nosotros las redactamos manualmente en el que describimos dónde se realizaron los trabajos, en este caso nuestra información de quién fue el proveedor.
+
+17:49
+Somos nosotros. ¿Quién fue el responsable comercial y el responsable de la supervisión técnica, el objetivo del servicio, cuál fue la situación actual con la que nos encontramos? ¿Imágenes de lo que se identificó, ya sea de la problemática, y después cuál fue la solución? En este caso viene como propuesta del proyecto porque da una memoria descriptiva para proponer un proyecto de reparación.
+
+18:11
+Ahora sí que no avanzar sin el luz verde del cliente. Normalmente cuando son servicios correctivos, aquí ya les damos directamente. Teníamos esta información, sucedía esto y al final nosotros esta fue la solución y hicimos esto y esta fue la evidencia, a diferencia del certificado de servicio que nosotros entregamos, que van a tener fotos del antes y del después.
+
+18:31
+Aquí sí viene la redacción de cuál fue la motivación de incrementar las actividades o de la sucesión de eventos que nos llevó a a esta solución. 1 segundo, entonces nosotros generamos 2 documentos, uno, la memoria descriptiva para poderla juntar, nosotros en esa materialidad junto con el cliente va, luego una vez que nosotros ya tenemos la información completa, aquí nos vamos en reversa.
+
+19:03
+Nos tenemos que regresar primero a nuestra, a nuestro archivo de Costeo.
+
+19:29
+¿Con la información que el técnico a nosotros nos nos redacta, por qué no pasa o k? Ahí están viendo el documento que dice Costeos para sales force están viendo necesario, no estamos viendo la página del Drive.
+
+20:00
+O K 1 segundo, ya lo voy a agregar aquí. Listo, listo, perfecto 1 segundo.
+
+20:11
+O K una vez que los técnicos como se los comentaba, ya nos regresan con toda la información de los materiales que utilizaron en el momento, pueden haber compras exprés de Ah, es que estamos aquí atorados y necesitamos comprar esto, ellos se van a una tlapalería cercana a un home depot, etcétera, compran lo que necesitan o les suministramos y les llevamos lo que necesitan. Para eso terminamos descargando toda la información en el archivo de Costeo que ya conocemos, una vez que tenemos el número final y el monto final con el que nosotros vamos a hacer la cotización.
+
+20:41
+Como les comentaba, aquí nos regresamos antes de modificar el contrato, aquí lo primero que vamos a modificar es el tema de la cotización, entonces es en esta parte en la que vamos un poco en Reversa no 1 segundo de mi presupuesto que yo tenía en ceros, aquí es donde yo ingresaría al presupuesto, daría en la parte de editar presupuesto y en esta parte ahora si pondría en la parte de aquí siempre nosotros iniciamos con una nomenclatura que es pías.
+
+21:11
+Readsport el número de cotización que nos lo genera automáticamente GEO, ahorita no vi cuál era, les voy a comentar esta parte que sí no me gusta, dijo que igual y nos puede ayudar en eso @ponemos nosotros el cliente supongamos en este caso es turing un guión y ponemos aquí una pequeña descripción del servicio, no nos resuelve con gente pochamble.
+
+21:35
+Cuando yo estoy creando Por Primera Vez un presupuesto ahorita porque no me di la tarea de verlo, pero Por Primera Vez un presupuesto que le damos crear nuevo presupuesto y nos manda esta página, yo no puedo ver el número del presupuesto que estoy creando hasta que brinco esta ventana, que en este caso es el 4606, entonces aquí en igeo yo me tengo que regresar otra vez para modificar este número.
+
+21:57
+Y ponerlo ahora, sí. 4606. ¿Nosotros como empresa, ese número automático que nos genera IGE o es el que nos sirve para vincularlo a lo largo de todo nuestro proceso ensail todos los documentos alineados a este proyecto van a decir 4606, las órdenes de compra se van a vincular al presupuesto 4606, entonces, realmente ese número rige todo más que el de las órdenes de trabajo? Sí, está bien adelante, Ah o K perfecto, entonces.
+
+22:26
+En este proceso de los bomberazos aquí yo ya vendría a modificar lo que sería la descripción con todas las actividades reales que se realizaron, modificaría el costo real y una vez que yo ya modificara esto, lo que haría aquí sería darle en finalizar. Aquí es donde este presupuesto como tal ya se convirtió en un contrato previamente. La descripción que yo haya modificado me tendría que venir directamente aquí al contrato para dar en donde dice editar contrato.
+
+22:55
+Porque aunque yo lo modifique en la cotización, cosa que tampoco me encanta, aunque yo ya haya hecho una modificación en la cotización en esta parte de servicios contratados, no me va a traer esa modificación de la cotización automáticamente aquí en igeo sí tenemos que venir y manualmente copiar la nueva descripción y venirla a pegar aquí. Es decir, si yo hago una modificación en la cotización, no me genera esa actualización automáticamente en el contrato.
+
+23:22
+¿Por qué? Porque de una misma cotización yo puedo generar varios contratos. Entonces, al momento de que se de que se cree un contrato, toma la descripción que viene en ese momento y es la que conserva. Si queremos hacerle una modificación, tendríamos que aquí venir manualmente a darle editar y modificar manualmente la descripción que aquí tenemos y viceversa. Si yo modifico algo aquí en el contrato, no me lo refleje en la cotización.
+
+23:47
+Una vez que yo ya terminé de modificar lo que haya tenido que modificar de la descripción, ya le doy finalizar. Contraproducente de Igeo nuevamente si yo me tuviera que venir aquí a la orden de trabajo en donde viene la sección de servicios a realizar todos estos servicios que vienen agregados, porque aquí puedo agregar más servicios, añadir tratamientos como lo llamé Igeo.
+
+24:09
+Y toda la descripción que vienen. Vienen igual las que se generaron en su momento en la cotización, en el contrato y en la o DTY. Es aquí donde me tengo que venir manualmente a también volver a modificar y copiar la descripción actual o si agregué más tratamientos en la cotización, venir manualmente. Agregar tanto el tratamiento como la descripción del tratamiento. Entonces es esta pequeña parte como engorrosa de multipasos enigeo cuando realizamos estos servicios de bomberazos.
+
+24:34
+Una vez que ya terminamos de copiar y hacer todas estas modificaciones, es cuando ahora sí exporto el PDF que vimos ayer, que es el certificado de servicio, lo envío por correo electrónico al cliente para realizar la cobranza, por ejemplo.
+
+25:00
+Digo, yo lo acostumbro ver desde el tema de Gmail, realmente todos lo acostumbran ver más desde Piedrive seguro en Piedrive y una vez que nosotros le enviamos al cliente esta información, nosotros lo que esperamos de vuelta de ellos es un pedido. ¿Este pedido es el que a nosotros nos permite cobrar dentro de su portal, ingresar nuestra factura, no?
+
+25:29
+O K no me está cargando información que raro, bueno, entonces ese es como tal la secuencia de eventos digo ahorita no me está cargando aquí información se me hace raro que raro.
+
+26:05
+Acá está ya perdón este y aquí es cuando, por ejemplo, este es un ejemplo del correo, una vez que ya se terminaron los servicios de bomberazos, lo que hace es que se manda un correo electrónico adjuntando el servicio, la certificado de servicio y adjuntando la cotización o el presupuesto.
+
+26:23
+Y es ahí donde termina el proceso de la parte comercial de Bomberazo. Finalmente nosotros recibimos un pedido y eso se lo pasamos a facturación y ahí termina nuestra labor en los bomberazos es esta parte donde les comenté a la licenciada que va un poco en reversa el proceso.
+
+26:39
+Aquí en el momento no hay una orden de compra como tal, sino que la todas las adquisiciones que se hagan después al momento de regresar aquí, determinando el proyecto de urgencia, nosotros enviamos un correo directamente al área de adquisiciones manualmente, lo pasamos a adquisiciones de oye, hicimos todas estas compras, ahora ayúdame a hacer las órdenes de compra para que las podamos ingresar al sistema, aunque ya se hayan realizado esas compras. Es esa parte en la que vamos un poco en reversa con respecto a nuestro proceso estándar. Dudas hasta aquí.
+
+27:09
+No creo que creo que fue bastante claro. ¿Ustedes chicos, tienen alguna duda? Chris buen resta ahora no meteado no, sí, de mi parte también está entendido o K perfecto este entonces un poco de cosas que nos gustaría ver aquí y que nos ayudarían un poco en la parte de los bomberazos.
+
+27:33
+No tener que hacer esta parte de ir y venir para poder llenar los documentos, que sí tenemos que hacerlo en este tema de bomberos porque generamos una cotización en ceros. Poder desarrollar eso más rápido sería una gran ayuda. ¿Otra parte ahora en el tema de los servicios? Bueno, brincando el tema de los servicios extraordinarios planeados, nosotros actualmente que sucede.
+
+27:56
+Cuando un cliente ya le hace un cliente nuevo o un cliente que ya tenemos activo en el momento, nos piden un servicio como les comenté, que no es un bomberazo, sino que es algo que están planeando y que les tenemos que entregar una propuesta y una cotización, particularmente para el tema de desazolves o el tema de íntima o el tema de bacteria o trampa de grasa. Nosotros hacemos un levantamiento con ellos.
+
+28:23
+Actualmente, como es nuestro proceso, nuestros analistas van directamente a la tienda para hacer un recorrido dentro de las instalaciones de la tienda y nosotros actualmente tenemos este archivo en este archivo. Nosotros lo que hacemos es que indicamos nuestro Estado muy chiquito, acá esta esta más chunguito.
+
+28:49
+En este es un formato de levantamiento que básicamente en Excel. Nosotros lo que revisamos es en qué área estamos trabajando, en qué zona estamos trabajando, en qué nivel se encuentra esa área y hacemos de todas las tiendas lo siguiente, hacemos un levantamiento de en cada uno de los niveles de las de las tiendas que nosotros visitamos, cuántos sanitarios tienen, cuántas cocinas tienen, cuántas tarjas tienen, cuántas coladeras, cuántos lavamanos y en qué áreas se ubican.
+
+29:17
+¿Nosotros ven que les habíamos comentado que teníamos el proyecto dónde está en Drive? Nosotros cuando estábamos evaluando desarrollar un programa, hacer un desarrollo interno de esta parte de Peatware, nosotros estábamos pensando en esta parte. Actualmente nosotros lo que hacemos es que como les enseñé, nosotros realizamos este levantamiento mediante un Excel.
+
+29:45
+Este Excel nosotros venimos se queda aquí y de aquí es donde nosotros totalizamos los valores que tienen las tiendas para nosotros poder calcular. ¿En el caso de los Desazolves, cuántas jornadas se necesitan para desasolvar todas las instalaciones? Nosotros tenemos un promedio como de 80 o de entre 80 y 100 puntos de Desazolve por cada noche para un equipo de x cantidad de personas.
+
+30:09
+Entonces, conocer estos totales nos ayudan a calcular los insumos, las jornadas, etcétera, pero todo queda en este archivo. Cuando nosotros tenemos la necesidad de esto, llevarlo a un costeo, tenemos que estar consultando como los 2 elementos y todo nace en este Excel. Entonces, si alguien más quiere consultar el levantamiento de una tienda, ya sea del área de ambiental para ver un tema de cuántas trampas de grasa tiene o cuántos sanitarios tienen para poner las unidades higiénico femeninas, tienen que venir a nosotros.
+
+30:37
+Cuando estábamos viendo esta parte que les comento del pears one, que fue como en el momento en lo que se nos ocurrió, estábamos nosotros pensando justamente poder nosotros desarrollar un 1 segundo dentro de la parte de aquí veníamos viendo como cuando estamos proyectando un cliente la información, cuando damos de alta un cliente aquí vendríamos como los los datos de contacto de las personas, los datos de la empresa.
+
+31:03
+Este, sus teléfonos, etcétera, pero también nosotros lo que estábamos buscando es que dentro del mismo sistema en la información del cliente, poder guardar ahí como tal el tema del levantamiento de sus instalaciones para que quede en la misma información del cliente, que es lo que nosotros vemos en sus instalaciones y que las personas cuando estén cotizando lo puedan consultar desde ahí.
+
+31:27
+Entonces, por ejemplo, aquí nosotros parece Juan cuando que es lo que les estoy comentando cuando tenemos una oportunidad nueva. Entonces pensábamos en una pestaña de este estilo, donde ah, el cliente me llamó el cliente Turín para hacerle un levantamiento para un desazolve. Entonces que eso quedara guardado cada una de sus oportunidades. Tener aquí el tema de o k definición de la oportunidad.
+
+31:51
+¿Qué están buscando, qué están buscando, si están buscando un producto, si están buscando un servicio, de qué área de negocio? Nosotros tenemos varias en este tema de aromatizantes, retención de sólidos, íntima, gracias, biencemáticos, etcétera. Descripción como de lo que busca el cliente y aquí ya vendríamos con el tema de la solicitud de levantamiento, no este. ¿Cuál es el nombre comercial de la del cliente? El contacto de la persona que nos va a recibir como toda la información para poder ejecutar ese levantamiento que queda registrada.
+
+32:20
+Habíamos pensado en un apartado, como decía, el cliente nos solicita ciertas cosas para poder entrar Asus instalaciones, que ahí mismo queda el registro de para ese cliente en específico en la solicitud de accesos nos pide este cliente que lleven ine, que lleven, que lleven tal certificación, que lleven tal equipo de protección personal en específico y una vez que nosotros estemos dentro de las instalaciones del cliente, poder nosotros tener justamente ese levantamiento.
+
+32:46
+Cuando nosotros estamos haciendo estos levantamientos, nosotros usamos los documentos, el primero que les mostré para ir llevando registro de qué cantidad de muebles hay, muebles en Tiendase por muebles, Coladeras, Mingitorios, Lavamanos, tarjas de servicio, etcétera, WC, etcétera, y el otro es un archivo que ahorita les voy a mostrar en el que vamos anotando de nuestro levantamiento con base en el servicio que nos pidieron las cosas que podríamos ir necesitando en cantidades.
+
+33:16
+Déjenme se los muestro, por ejemplo este igual archivo que nos llevamos impreso o en dado caso en una tablet, pero solamente ya damos la información en la que viene un folio de levantamiento, un folio de costeo que puede ser el x número viene fecha de Costeo responsable de Costeo.
+
+33:45
+Y viene aquí decir esta parte de la información del cliente, si es nuevo, si activo, su dirección, etcétera. Pero aquí lo que nosotros metemos es como la cantidad de cosas, son partidas que después vamos a utilizar en el costeo de la cantidad de cosas que vamos a necesitar. Ah, yo estimo que aquí se va a necesitar, van a ser 3 jornadas con 6 personas, en la cual voy a utilizar 3 máquinas, K, 63, lava, lozas. Todo lo que en el momento en el sitio podemos ir definiendo, lo vamos definiendo.
+
+34:14
+Una vez que terminamos este proceso de levantamiento y tenemos estos 2 archivos, regresamos a nuestro archivo de Costeo para volver a descargar esta información. Qué nos ahorraría mucho espacio si esta información de las partidas que yo voy precargando que están vinculadas a un levantamiento, después yo simplemente lo pudiera consultar o mandarlo llamar para tener esa información.
+
+34:36
+Que actualmente todo vive en diferentes exeles y la idea es que todo pueda vivir dentro del cliente con equis levantamiento, con fecha, con tal y que vengan ahí como estas necesidades que fuimos definiendo después, que nosotros ya tenemos esta información llena, volvemos a nuestro proceso estándar de nuestro levantamiento, que nosotros utilizamos el archivo que vimos hace un momento y este que estamos viendo aquí, donde ponemos alcance, facilidades, dificultades, etcétera.
+
+35:01
+Vamos a nuestro archivo de Costeo, definimos un costo, definimos una utilidad, definimos un precio, después nos vamos a nuestra cotización, realizamos la cotización o el presupuesto, se envía al cliente en un correo electrónico y luego esperamos su aceptación para iniciar nuestro otro proceso que es el correo de enhorabuena, dispersar la información a la gente, empezar a preparar materiales si se requiere, hacer las órdenes de compra abastecimientos y luego ya la entrega técnico y ya la ejecución del servicio.
+
+35:30
+Todos esos, todos esos elementos, nosotros no existen, digo, las órdenes de compra existen desde sai las ejecuta la persona de adquisiciones, las generan las compras, las abastecen él, las ingresa al sistema, a las existencias y luego ya queda enganchada de almacén. ¿Hacer la entrega de los materiales actualmente para hacer esta entrega de materiales, como vamos a abrir el proceso de empresa, este va a haber una emisión de orden que sale de sai, pero actualmente qué realizamos nosotros?
+
+35:58
+De nuestros mismos costeos lo que yo hago es que yo aquí pongo aquí nosotros en el mismo Excel. Actualmente tenemos esta parte de acá de la columna P a la columna T donde viene. Cantidades reales, entregada técnico, cantidades reales recibidas de técnico, almacén y de almacén a técnico, fecha de entrega, fecha de entrega, nombre y firma de los responsables que entregaron nombre y firma de los responsables que recibieron.
+
+36:25
+¿Actualmente qué hacemos nosotros? Básicamente nosotros lo que hacemos es que de este archivo ocultamos todo el tema de información en cuanto a costos. Nosotros tenemos habilitado el tema de lo que son las partidas que van a utilizar, la cantidad que van a utilizar y cuántas jornadas van a estar trabajando los técnicos no se hace, se elimina todo lo de costos de aquí. Básicamente se imprime un PDF con esta información.
+
+36:53
+Y es lo que se le entrega impreso de almacén para que puedan hacer esta dispersión. Si hay cosas que se van a comprar aquí se dejan indicadas y ya tiene que existir una orden de compra por parte de adquisiciones, pero ya es algo que está hecho desde antes. Dudas hasta este punto, amigos, entonces nada más. Aquí ustedes lo preparan el archivo, este lo generan como un PDF, lo generan como un PDF, lo envían y ya no.
+
+37:23
+Es r exacto, digo este documento PDF este en toda esta información viene el folio de de o DTY, viene también el folio del presupuesto. Entonces en este folio de cotización que les digo que es el número que rige todo y que nos genera actualmente en un número secuencial automáticamente y geo que viene desde la cotización. Esto lo ponemos aquí en el número de costeo del número de costeo también se vincula el número de levantamiento a todo se va vinculando.
+
+37:50
+Entonces nosotros actualmente esto es lo que imprimimos y lo entregamos almacén para que ellos puedan suministrar el equipo previamente con un correo de enhorabuena en que les dicen, Hey, este es un correo de enhorabuena del presupuesto tal y van a llegar a recibir ellos esta emisión de orden con el presupuesto tal y ya saben que viene autorizado y viene Machado, entonces cuando es un servicio extraordinario programado que requiere un levantamiento, son esos documentos que consultamos, pero que insisto, ahorita quedan en 2 exeles diferentes.
+
+38:20
+Y para que cualquier otra área lo consulte, tiene que acercarse con nosotros para poder tener esta información actualmente. ¿Qué nos gustaría que dentro de la misma información del cliente podamos tener como los diferentes levantamientos que se le han hecho, con las diferentes oportunidades que hemos visto y estas partidas de necesidades que proyectamos en su momento? Normalmente todo esto nosotros lo terminamos integrando en el piedrive.
+
+38:43
+En un negocio de piedrive nosotros subimos las cotizaciones de los proveedores, los levantamientos, el costeo, toda esta información, pero a piedrive tenemos solamente acceso a las áreas comerciales, es decir, los vendedores y los analistas, pero cualquier otra área que lo quiera consultar, como ahí también hay temas de costos desde la cotización, el pedido del cliente, etcétera, ahorita las personas no pueden acceder a piedrive para consultarlo.
+
+39:09
+Entonces, por eso es esta necesidad de que toda esta información que actualmente vive en Paydrik pueda existir como en este ambiente, para que la gente lo pueda consultar dentro de la información del cliente. ¿Vale, vale, correcto? Entonces esto fueron servicios de bomberazo como es nuestro proceso en los sistemas y servicios extraordinarios planeados para los servicios extraordinarios.
+
+39:36
+Pues es lo mismo, ya sea para ambiental o para desasolva. Ahora nosotros mande, se tienes que mandar, pero no puedo tocar. ¿Quieres que te lo comparte en este momento? Segundo.
+
+40:10
+Listo mau, les acabo de compartir el enlace de esta reunión chicos al ingeniero Mauricio monroy para que ahorita que se lo dé también lo hace tener la llamada o K de acuerdo o K Nosotros para la secuencia de los siguientes servicios, este digo el tema de los servicios de pólizas.
+
+40:37
+Dándoles un poco de contexto de introducción, nosotros tenemos, por ejemplo, un archivo. Dejé voy cerrando pestañas porque se está alentando un poco un momento.
+
+41:28
+O K, bueno, Finalmente les digo que nosotros no sé si les pueda también servir. Tenemos nosotros este todo este macroproceso que ya les había comentado la licenciada como con todo lo que nosotros ejecutamos, que básicamente tiene en este formato como de panal.
+
+41:51
+Tenemos los procesos para los productos, todo lo que es lo de venta de producto y tal que digo es muy resumido, pero aquí viene lo importante en el servicio de nuestra estrategia. E uno que son todos los servicios de póliza, nosotros le llamamos estrategias a los diferentes tipos de venta que nosotros tenemos, donde e uno es póliza e 2 son servicios extraordinarios, ya sean planeados o bomberazos. E 3 es todo lo que implica un cliente nuevo.
+
+42:18
+Cuatro son temas de venta de retardantes de fuego, que también es otra línea que manejamos y es venta vía cedis o centros de distribución de nuestros clientes. Pero bueno, hablando de grandes rasgos del proceso de póliza, actualmente nosotros lo que realizamos es que.
+
+42:36
+Como ya tenemos pólizas contratadas con los clientes y solamente es un proceso de renovación año con año, nosotros hacemos un tema de una planeación, esta planeación a nosotros nos permite. ¿Y dónde la vemos físicamente? Nosotros actualmente tenemos un archivo que me imagino que en sus documentos de bueno, en las grabaciones que previamente lo compartieron los chicos de sexford.
+
+43:01
+¿Nosotros hablamos acerca de un archivo que es un universo, no? Básicamente nosotros en este universo lo que tenemos es la información de todos nuestros clientes. Este archivo de consulta 1 segundo.
+
+43:15
+Viene una información de nuestros clientes, vienen básicamente todo este tema de las fechas que nosotros vamos a estar trabajando con nuestros clientes durante todo el año, nosotros tenemos 2 formas de visualizar esta información que es en este Excel donde nosotros tenemos servicios en el cual visitamos a nuestros clientes cada 28 días para un servicio de bacteria o carga de bacteria biliar y gestor o de trampa de grasa o los revisamos, los visitamos cada cuatro o cada 8 semanas, dependiendo de la necesidad del cliente.
+
+43:45
+Nosotros básicamente en este documento vamos descargando la información de todos nuestros clientes y vamos haciendo una planeación actualmente dentro de este archivo, nosotros tenemos esto que es un calendario operativo, este calendario operativo nosotros lo llevamos meramente en un Excel muy robusto, muy robusto, en el que nosotros marcamos fechas desde enero.
+
+44:07
+Hasta diciembre y vamos poniendo en estas líneas o en estas partidas de aquí los servicios que tenemos. ¿Básicamente ponemos en este caso lo que es el cliente sucede y el tipo de servicio, fecha y cuántas personas lo van a realizar? Nosotros vamos rellenando esta información.
+
+44:25
+Y a partir de todas las pólizas que nosotros estamos contemplando que se van a autorizar para un determinado año, es donde en este mismo archivo nosotros hacemos todos nuestros cálculos de fechas. Vamos viendo que con base nuestra capacidad instalada podamos sacar los servicios de cada día. Desde aquí hacemos toda nuestra proyección para el tema de abastecimientos, presupuestos anales, etcétera. ¿Va, entonces, cómo se ve esto a nivel de sistema para la venta de una póliza? Si nos vamos directamente GEO.
+
+44:54
+A diferencia de a diferencia de un presupuesto como nosotros normalmente lo ejecutamos, regresemos a turing los servicios de póliza, que es un poco de lo que les comentaba Gaby, tenemos a esto, no es este, es espacio sustentable, a diferencia de.
+
+45:25
+A diferencia de lo que nosotros realizamos en un presupuesto estándar, este la diferencia que nosotros tenemos con nuestras pólizas cuando son servicios de póliza anuales, es que la principal diferencia es que nosotros en estas pólizas anuales lo que hacemos es que desde un mismo presupuesto nosotros generamos todas las o DTS que vamos a tener con ese cliente en el año.
+
+45:50
+Entonces nosotros desde el mismo presupuesto, las descripciones cambian, porque en esas descripciones nosotros ya les ponemos. Cuántas veces los vamos a visitar en el año cada con qué periodicidad, cuántas personas van a asistir, qué servicios tienen contratado, etcétera. Y a diferencia de tener solamente una orden de trabajo, tienen múltiples órdenes de trabajo. Hay clientes que tienen no solamente un contrato, sino que tienen 567 contratos.
+
+46:17
+Porque tienen diferentes servicios contratados y los pagan de diferentes maneras, va esta parte es donde actualmente se tienen que redactar muy manualmente toda esta parte de las diferentes descripciones que se tienen en las pólizas de servicio. Por ejemplo, a diferencia de un servicio único que solamente trae la fecha de ejecución, este trae todas las fechas de ejecuciones durante el año, el 7 de marzo, 9 de mayo, 11 de Julio, 12 de septiembre, etcétera, con base en la planeación que nosotros vayamos haciendo.
+
+46:47
+De ahí el proceso es muy parecido. Qué estamos nosotros haciendo actualmente para proporcionarles, por ejemplo, este es un proceso comercial estándar que nosotros manejamos. Estamos nosotros generando este documento con, por ejemplo, información inicial, que nosotros referimos del cliente, que son como los campos que necesitamos tener para poderlos llenar dentro del sistema, pensando en un tema de confinamiento de residuos higiénicos bueno, de residuos de personas menstruantes.
+
+47:16
+Este nosotros tenemos diferentes variables que por ejemplo estas son las variables que nosotros utilizaríamos en un levantamiento pensado específicamente para el servicio de Intima no sé con que más en donde nosotros. A diferencia del levantamiento estándar que nosotros manejamos para el tema de desazolves, aquí necesitan conocer cosas diferentes, por lo cual necesitaríamos también tener como diferentes plantillas precargadas para poder hacer diferentes tipos de levantamiento.
+
+47:45
+¿Aquí también se necesitan números de sanitarios, números de cubículos, la frecuencia de recolección que se está buscando en el momento, números de contenedores que ya se tienen instalados en caso de un cliente que no cuenta con el servicio o si sí cuenta con el servicio, cuántos contenedores tienen en el momento y se quieren expandir o quieren expandir alcanzar el servicio? No.
+
+48:04
+Días en la que los clientes nos permiten ejecutar el servicio, horario en el que nos permiten ejecutar el servicio, etcétera, entonces de las diferentes necesidades por tipo de servicio que nosotros vamos a requerir, estamos generando estos archivos para que tengan como las plantillas que vamos a ir requiriendo de cada tipo de servicio. Ay, me fui muy chiquito, un segundo aquí está.
+
+48:31
+También información que nosotros requerimos para afectar al levantamiento. Esto básicamente va a ser lo mismo para todas las diferentes, para todos los diferentes servicios. Un segundo reacciona, reacciona, reacciona, reacciona, reacciona, reacciona, reacciona.
+
+49:06
+Listo, entonces esta es la información, digo de este documento, vamos a tener un documento y no sé si en este formato a ustedes les funcione, en el que vamos a tener un documento de texto en el que vamos a ir recargando en estos diferentes rubros la información que requerimos durante un levantamiento, una plantilla de cómo buscamos verlo nosotros y vienen diferentes notas de las variables que consideramos en cada uno de los servicios. Aquí como ven, yo les había comentado el tema de las memorias descriptivas realmente.
+
+49:34
+Mucho de estas memorias descriptivas cuando se esta haciendo la venta de un servicio de póliza es muy estándar. Tenemos algunos campos que sí se tienen que modificar manualmente, como por ejemplo lo que viene aquí en color azul, que es el tema de el nombre de los clientes, el número para hablando de íntima, el número de personas que se busca atender, los usuarios de servicio, etcétera. 1 segundo.
+
+50:07
+Este hola ya terminamos de hablar de lo que es servicios programados extraordinarios, todo el proceso para el tema de bomberazos y cómo es que cambia el proceso administrativo y operativo. Estábamos empezando a ver lo del tema de las pólizas o K creo que ahí más bien yo me tendría que loguear para enseñarles cómo estructuro el universo o K me lo va a venir. Hola Gaby para allá 1 segundo chicos, sí está bien, dejen voy dejando de comprar.
+
+50:35
+¿Digo hasta ahorita en lo que vimos, en lo que Gaby se conecta, alguna duda, equipo, la parte de las memorias descriptivas, esa que nos mostraste es una sola o hay algunas? Hay diferentes, hay diferentes tipos de memoria descriptivas también dependiendo del servicio o K Sí, sí, de hecho tenemos ciertas notas o cotizaciones estándar.
+
+51:03
+¿Que te abarcan como ciertos reworks ya premarcados en el que nada más hay que cambiarles como ciertas cosillas, no? Pero que por ejemplo, Igeo no nos permite cambiarlo de manera automática. Es decir, aunque tenemos nosotros una plantilla en donde dice como piats contribuye a nombre del cliente, nosotros tenemos que ir manualmente ponerle nombre del cliente en lugar de que lo jale automáticamente desde la información del cliente en el que estoy creando el costeo. ¿Entonces hay mucha información en estas plantillas?
+
+51:31
+¿Que se podrían, al menos de lo que nosotros queremos llenar automáticamente con la información precargada que se tiene de ese cliente, el nombre, la razón social, las direcciones, etcétera, cosa que actualmente nosotros tenemos que cargar manualmente o modificar manualmente en estas descripciones de las cotizaciones, pero sí tienen un detalle en donde en donde hay cosas que son específicamente que tienen que llenar, no?
+
+51:57
+Ah, sí, sí, sí, sí digo. Hay valores y campos que específicamente tenemos que llenar manualmente, pero hay cosas en las descripciones que sí se necesita esa parte. Automatizar un poco sí o k ya se está dando con la estado de la licenciada. Aún se viendo aquí chicas.
+
+52:44
+¿Ahí ya no están viendo mi pantalla, verdad? Equipo no o K me comentan la si la pueden dejar ingresar no la habíamos conectado. Ah ya ya ya ya ya ya hola, hola, hola Gaby, buenos buenas tardes ya.
+
+53:25
+Ah, no, disculpa aquí ando yo todo y afónico vengo saliendo de una donde me avisan, Ay, cuídate, yo te vengo saliendo de una reunión donde me autorizan los presupuestos anuales y esto se da como una revisión. Dejen, les comparto la verdad exhaustiva que nace.
+
+53:50
+De este archivo que yo llamo este el famoso universo, este archivo, yo lo empecé a generar. 2014 fue la primera vez que lo que así lo y dé en mi cabeza cuando empecé a a aprender, a usar muchísimo más a profundidad, tablas dinámicas y y a y a desarrollar como esta parte analítica.
+
+54:16
+YY un colaborador le llamó universo, porque de verdad incluye todo, todo, todo, todo, todo lo que lo que nosotros hacemos para cualquier cliente. Ya habíamos hablado que el principal es Liverpool, pero bueno, ahora sí que quien tenga esto pues tiene en gran parte del know how de lo que vendemos. Es que ahorita como hemos estado haciendo muchos análisis, muchas cosas, abro, cierro aquí, es el desglose completo.
+
+54:46
+De cada servicio que le ofrezco a cada cliente, por ejemplo, yo voy metiendo más columnas conforme más detalle quiero ir analizando en las tablas dinámicas, estoy clasificando aquí el Código bueno, el tipo de servicio, el concepto de facturación, si es bacterias, si es desazolve, si es grasa, todo este rollo.
+
+55:10
+Porque a la hora que Liverpool me autoriza me pide que así le desglose las tablas, entonces yo desde mi universo. Es por eso que desde la tabla, aquí desde esta base de datos, así lo catalogo, Ay, no les estoy compartiendo, qué grosera, no, sí estoy compartiendo pantalla o no, muchachos, no, no, no, aquí me dice dejar de compartir, si quieres vuelve a poder avísenme.
+
+55:39
+Ya la están viendo ahora sí, ah, ya ven, ahora si vuelvo a ya le van a entender a lo que estaba diciendo esta base de datos, les digo que que agre que incluye todo ondas me andan no aquí como Liverpool me pide que yo clasifique para autorizarme los presupuestos por tipo de servicio, es que yo desde mi base de datos voy estructurando todo de esta manera. ¿Repito, cuántas veces necesito la base para que cuando haga tablas dinámicas? Pues todo me.
+
+56:09
+¿Me lo traiga y lo lo jale, aquí traigo direcciones, traigo quién es el vendedor, traigo cuál es el cliente, traigo cuál es el número de tienda que o sucursal que el mismo cliente le asigna Asus Asus sucursales, porque esa es la manera en la que ellos se comunican, no? O sea dicen, Ah, sí, mi tienda 800 o mi sucursal 800, la la 8:30, la cero 90.
+
+56:38
+Esto para mí es importante, aquí en esta columna yo traigo un desglose, o sea yo digo a a este cliente, por ejemplo, plataforma logística con arte, nave 3, yo le tengo instaladas 9 bacterias, son 8 con este código de producto y una con este otro código voy a empezar a ocultar tantito para que se pueda ver porque es mucha información, es más, no sé si lo ven grande o chiquito, se ve bien ah o K va.
+
+57:08
+Aquí yo meto información sobre retenciones, por ejemplo de impuestos sobre nómina, porque más adelante hago un reporte en donde yo tengo que calcular cuánto me va a retener el el el cliente por prestar servicios fuera de la Ciudad de México. O K pongo aquí mi número de red. Se que es algo importante que tiene que ir en las cotizaciones que después va a ir.
+
+57:34
+En en temas de facturación, de órdenes de trabajo que tiene que estar ahí escrito, aquí traigo mi CSK US que utilizó hoy en día en igeo y otro que utilizo en el aspel para facturar. Aquí coloco el número de presupuestos que generé en el Igeo me pongo en el vínculo que traigo guardado en Drive porque más tarde Liverpool me pide que estas bases de datos que ya me autorizaron con los presupuestos. Yo les anexe aquí todos los.
+
+58:05
+Todos los hipervínculos hacia estas cotizaciones. Yo aquí después de hacer el contrato en Igeo vengo y coloco el dato después del contrato. Si recuerdan desde ayer hacemos la o DT, entonces aquí vengo y me capturo de esta forma todas las o DT para que cualquier punto yo tenga el control de decir en qué fecha.
+
+58:34
+¿O sea la la o DT para atender a bodega Tacubaya, con el servicio de íntima yo voy a facturar con el Laku Pol 001 guión uno y lo voy a atender con la o DT 1140041 ese día no? Y la siguiente fecha con el 114412, en la siguiente fecha con el 1144 y así sucesivamente. Todo lo que yo estructuro y armo en en Igeo vengo y lo arrojó aquí.
+
+59:05
+O K después no voy a regresar un poquito. La vez que he ido metiendo tantas columnas necesito. Nosotros queríamos hacer un cálculo de cuántos kilómetros recorremos por tienda y por visita, entonces metimos esta información aquí. ¿Cuántos residuos?
+
+59:29
+¿Este cuántos residuos generamos o se genera por parte del cliente para este tipo de servicios? Y esto también me ayuda a dar estadísticas, ayer les platicaba que hay un área que se encarga de hacer los manifiestos para el control de todo el residuo que nosotros este generamos, esta es nuestra plantilla que desarrollamos.
+
+59:56
+Y toda se alimenta de un de vellucops y de una bella base de datos que se va alimentando y aquí se van poniendo cuántos este kilos se recolectan, en qué fechas y todo eso. ¿Los muchachos aquí le van cambiando simplemente el folio y eso responde el el que se rellene de manera automática y van van mandándolos a imprimir, no?
+
+1:00:21
+Esa es una de las cosas que nos ayudaría muchísimo que se hiciera en el sistema porque lo único que le necesitas poner es clasificarla. ¿O sea ya quién es el cliente y toda la información que va aquí? La cantidad de kilos recolectados, la fecha recolección y todo lo demás debe salir en automático porque no son datos que estés cambiando a cada rato. O K ese es 111 reto, este me regreso acá.
+
+1:00:47
+La temporalidad en la que los visitamos es súper importante, porque si yo digo que aquí es cada 14 días la visita para mí, qué quiere decir que cuando yo calculo las fechas yo voy el 2 del 11 y así yo esto lo genero en el en la hoja de cálculo muy fácil porque le digo 2 + 14 y me va a arrojando las fechas, no, entonces este si es solo este servicio de íntima, voy el 2, el 15, el 29.
+
+1:01:15
+Y de ahí el 12, el 26 y luego el 12, el 26 de marzo y luego el 923. De verdad si se acuerdan, ayer les platiqué cuando generábamos las o DTS que el sistema. ¿Si tú le dices cuándo empiezas y cuándo terminas? Calcula la cantidad de órdenes de trabajo que necesitas en ese bloque de días. Entonces es de mucha ayuda porque el sistema sí es muy puntual al hacer el el cálculo como yo lo hice en esta hoja de cálculo, pues ya no me hace retrabajar porque ya nada más confirmo que sean las mismas fechas.
+
+1:01:44
+Y todo avanza. ¿Dónde puedo tener quizá alguna diferencia? ¿Si el 15 de enero era asueto, pues yo voy a mover el servicio al día 16 y el sistema no va a saber que el 15 era asueto, pero pues ya nada más es mover esa fecha, no es es algo mínimo este esto? ¿Bueno, pues me es de muchísima utilidad y por eso es importante que desde que estamos capturando, qué temporalidad va a tener la póliza?
+
+1:02:13
+Eso nos va a dar la pauta de cómo calcular las fechas. Esto de aquí me es muy importante. Por ejemplo, hay servicios como las bacterias que utilizamos, equipos dosificadores. Esos equipos tienen números de serie y son equipos que queremos controlar en su mantenimiento en campo. Si se acuerdan, ayer hablábamos del QR que nos genera el IGE o.
+
+1:02:39
+¿Donde puede tener continuidad de si a ese equipo le cambiaste las pilas o no? Esto nos ayuda porque nosotros ya hemos llegado con el IGU a asociar el número de serie con el tipo de equipo, si es de de eléctrico, si es de pilas. A eso se refiere BVEYVPY, entonces es como buscamos llevar ese control, vale este aquí yo por ejemplo, pongo los días en los que el cliente me permite acudir, puede ser de lunes a viernes.
+
+1:03:08
+¿La hora en la que salen de la oficina regularmente es a las 3:00, a la hora que llegan con el cliente 5:30, la hora que salen de las instalaciones del cliente es a las 8:00 de la noche, ellos están regresando acá como a las 11:00 Laboradas pues no es más que la resta de uno a otro, no? Esto lo hice en algún momento buscando generar un análisis de jornadas, porque ahorita con la ley se está poniendo cada vez más estricta.
+
+1:03:34
+Y con eso de que quieren reducir incluso las horas laborales para la gente este, pues yo tengo ese reto de de de meterlos dentro de ese contexto, no de tantas horas. Voy a ser bien sincera. Aquí la gente va trabajando más por resultados que por tiempo. Me es muy complicado cuando mando a alguien lejos como un tultitlán, como un.
+
+1:04:03
+El pepe y del río muchas veces hacen más tiempo en la distancia que en lo que trabajan. Entonces, si la ley me quiere acotar a tantas horas, yo me acabo a la gente en 2 días. O sea porque o sea que haces como trabajas de un smart y descansas desde aquí hasta el domingo y te vuelvo a ver el lunes. Entonces fue por eso que empecé a hacer este análisis de jornadas.
+
+1:04:29
+Y ver cómo casi casi de estos chicos mételos en en en la jornada d a que va de 8 a 5 o que va de 6 de la mañana a 3 de la tarde, porque nosotros tenemos que entrar antes de que la cocina opere porque empiezan a sacar alimentos y se haría una contaminación cruzada. Si estamos con la trampa de grasa abierta, entonces muchas veces operamos mejor en esos horarios, como de 6 a 12 del día por mucho, o de 9:10 de la noche.
+
+1:04:58
+Al día siguiente entonces, bueno, por eso es la importancia de poner este cálculo de horas. De pronto la jornada. Aquí yo me voy poniendo más controles de de para filtrar cuál es la línea, cuál es el tipo de servicio, cuál es el tipo de venta si es una póliza aquí de pronto empezaba yo a capturar extraordinarios porque me decían, hoy es un extraordinario, pero el siguiente año quiero que me lo metas como póliza.
+
+1:05:27
+Entonces yo ya me iba anticipando y ya iba capturándolos para tenerlos en la mira en mi planeación del siguiente año. Aquí coloco el número de técnicos que acuden. A mí me voló la cabeza cuando me mostraron que salesforce podías poner como el perfil que necesitas o las habilidades que necesitas de de los técnicos. YY entonces yo dije, no, pues o sea, podríamos agregar, necesito que sepa programar equipos que sepa.
+
+1:05:58
+Conocimientos básicos de plomería, bla, bla, bla, porque entonces podría tener las pautas, los parámetros que necesitamos de cada uno para poder acudir más. ¿O sea, hay límite en cuántas escribes podemos meter, hay límite, en cuántas habilidades podemos meter por por técnico? Hasta donde sé, creo que no hay un límite, o sea puedes agregar las que las que se necesitan o K va al parecer no, aquí pongo el número de días.
+
+1:06:27
+La vez que la mayor parte de nuestros servicios se ejecutan en un día, es más el área de Mauricio y de Irving de Nitrosanitario, que a veces nos toma 5 hasta 15 días hacer los servicios, para eso nosotros hacemos 15. ¿Si son 15 días = 15 órdenes de trabajo distintas, no? ¿Por qué? Porque yo voy haciendo pequeñas entregas como hacemos limpieza. Yo ya no puedo dar garantía sobre un ducto o sobre una campana que hoy limpie.
+
+1:06:57
+Y tú mañana ensucias en la mañana, entonces yo te la entregué limpio en la mañana y si tu operación ya la ensucia yo ya te hice una mini entrega, no, al final me vas a pagar todo el servicio porque ahorita fui limpiando parcialidades, entonces si ven aquí que todo dice uno, uno, pues de pronto me es necesario para hacer mis cálculos más adelante. ¿A qué me refiero con a 8 de 5? Son esas pequeñas comisiones que le pago a los muchachos cuando.
+
+1:07:25
+¿Este cuando hacen un determinado tipo de servicio, por ejemplo aquí si limpian 3 trampas de de estas dimensiones, bueno, de la misión que que tienen este lugar les pago 140 pesos por por artículo no, entonces hago un cálculo a partir de esta tabla de cuánto extra les voy a dar? Esta es la famosa ubicación que fueron las zonas que vimos en en Ligeo.
+
+1:07:52
+Aquí la línea de del área proyectos que hizo todos los planos, iba llevando un control de si ya tenía los planos o no, qué número de plano era y cuál era el código que el ige o había asignado a a este a esta zona no, o sea, está en el plano 7 ENEL. ¿n 1731 a quién elige o ahí te da estos que quién era?
+
+1:08:23
+Ah, estoy viendo tultitlán y quiero ir a buscar el punto este de íntima voy a le voy a decir sólo dame íntima. Esto sí, es una chulada, te deja filtrar más rápido y si se fijan, era él.
+
+1:08:59
+1731 este es este punto, a eso se refiere, esta niña es el Código Intima 17 con el ID 31 y ahí dice que lo asoció al plano uno punto 7.7 bodega putitlán nivel 8 damas no, eso está Chiquita lo hizo de este lado y es 1.7 1.7.
+
+1:09:27
+Y quiere decir que aquí lo asigno, que es sanitario dama nivel 8 y es este nivel 8.7 unidades es así como o sea, todo es un JPG, si se fijan hasta le ponemos. La protección de esta imagen fue desarrollada por piats de planos propiedad intelectual de piats de ingeniería tecnológica.
+
+1:09:53
+¿Su captura digital o física, reproducción, distribución o uso no autorizado, bla bla, porque luego nos veían con los planos y el cliente se ponía todo loco y decía, Quién te dio eso? ¿Porque o sea, cómo tienes algo que yo, algo que yo no tengo para empezar? Y le decíamos, no es que nosotros lo desarrollamos y dice, Ay, entonces véndemelos o Dámelos porque no tengo planes planos de mi tienda, pero nosotros lo hicimos a raíz de que cambiábamos de personal y la gente.
+
+1:10:22
+No sabía dónde estaban las cosas. Vean este es un centro de distribución, vean cuántos planos hay, entonces mandar a la gente y que encontrara todo, o sea, es un centro de distribución que para empezar tiene 2 naves. Entonces esta chiquilla, esa fue su encomienda de me vas a desarrollar los planos de cómo llegar, los planos de cómo moverse adentro y los planos de cómo encontrar las cosas.
+
+1:10:52
+Entonces por eso la importancia de la asociación que hace esto, porque en una misma planta puedo encontrar el servicio de íntima o un servicio de Desazolve, es difícil que tenga la de bacteria en el mismo, pero pero puede ser posible, no vale, entonces es por eso la importancia que tienes esto acá aquí por zona, pues me me iba yo catalogando ciudad, Ciudad de México era metropolitana, si era bajío, si era sureste, el Estado, la localidad.
+
+1:11:22
+Los contactos no de quiénes atiendo la zona Liverpool se maneja mucho por zonas, tienen hasta 9 zonas, vean aquí tengo estas son 111213 no, yo tengo que estar negociando y hablando con 13 coordinadores y a su vez cada coordinación tiene determinadas tiendas. ¿Entonces una cosa es quién es el coordinador, quién es el gerente?
+
+1:11:51
+¿Y quién es el el jefe de mantenimiento? Y en y dentro de cada tienda hay un primero, 1, segundo basta 1/3. Entonces tengo tengo que tener claridad de eso porque los accesos se tramitan con los jefes de mantenimiento y sus áreas de recursos humanos de tienda. Los pagos los veo con coordinadores, pero también los puedo ver con ellos. Y los gerentes son más top, pero a veces con ellos toco base.
+
+1:12:19
+Cuando necesito como cascadear más información depende como sea la cosa. Pero si necesito tener la información concentrada para saber con quién hablo, no podríamos decir que puedo catalogar que los gerentes yo los trato. Los coordinadores también junto con Mauricio y los Jefes los llevan el resto de los vendedores o el chico de accesos. Entonces sí hay como niveles para tener acceso a estos contactos.
+
+1:12:49
+Aquí no sé por qué repetir otra vez el el lo del tipo de venta. El origen del pedido es importante porque es quién delibera el pago. Si es el coordinador, pues vuelvo a la misma, es con quien tengo que hablar, si es jefe mantenimiento es al que le tengo que cobrar. Aquí traigo mi control de la razón social para saber a qué razón social voy a cobrar esto del del Este titulito que ven aquí como calendario, no sé si platicaste de esto.
+
+1:13:18
+El calendario, brevemente sí puedes mostrar el calendario de cómo nosotros tenemos organizado por mes, por fecha y cuáles son las partidas. Este calendario es pues todo no es nuestro plan incompleto, lo vamos Armando siempre aquí. La estructura es poner nombre del cliente entre paréntesis, el servicio, la hora en la que los atendemos, el número de cliente que tienen en el SAE y el número de técnicos que acuden.
+
+1:13:46
+Cuando empezamos a hacer la planeación, todo lo que vamos acomodando lo voy a dividir, todo lo que vamos copiando y pegando aquí, pues son principalmente la voy a tener para que me salga. ¿Son particularmente estos titulitos no? Y de esa manera es como hacemos nuestra planeación, sabemos si tenemos días muy saturados o no.
+
+1:14:21
+Este y cómo se van dando esto da hasta la pauta a los muchachos de saber cuál es la orden de trabajo que van a trabajar. ¿Lo puedo tener en el Igeo? Sí, la verdad es que soy bien nula y nunca lo he usado. Tengo 18 años haciendo mi calendario en en, en Excel y bueno hoja de cálculo y así digo.
+
+1:14:46
+Entonces y más, porque aquí yo puedo redactar y describir todo lo que se me hinche la gana y allá no, siempre no. Y aquí ya estoy muy mal acostumbrada a hacerle como como se me ocurre ahora, yo aquí le pongo 2 té de 2 técnicos y después tienes asignan a los técnicos, pues ya van y le ponen las iniciales o K entonces.
+
+1:15:12
+¿Vaya si tienen una forma diferente e innovadora y que permite el control y el conocimiento de la gente, porque ya los técnicos están muy acostumbrados a que se manda el bloque de la semana y dicen, Ah, a mí me toca este, este y este servicio porque ya ven sus iniciales, entonces ya con eso ellos se resuelven muy fácil, no?
+
+1:15:35
+Este es es esa, es la magia del mentado calendario. Yo el año pasado lo modifiqué, le metí este rollo de intentar separar como los horarios, perdón, las jornadas sí sirven. Sí, ah, mira, dicen ellos que sí les sirve. Yo pensé que no lo pelaban, pero sí, o sea, sí meten los servicios dependiendo el bloque en el que vayan a caer.
+
+1:15:58
+Van llenando las o DT van poniendo aquí. Este es un control que yo metí, cuántas personas, cuántas camionetas, no me acuerdo que era el BP, ya se me fue, bueno era o DTS, Ay, ya se me olvidó que era esto porque un día lo inventé y luego ya no le seguí. Bueno, eso es lo del calendario que se arma desde aquí. ¿Por qué pongo acá los precios?
+
+1:16:27
+¿Es mi continuidad de ver cómo van los incrementos, no? Prácticamente después de tener yo las fechas, lo único que hago de este lado es empezar a multiplicar la columna del precio por la columna que tenía acá del importe desglosado ya.
+
+1:16:58
+Esto de los códigos lo inventé Por Primera Vez este año. Entonces voy multiplicando aquí o pues oculte la del precio, pero bueno, es esta del desglosado por el precio y así voy Armando mis presupuestos. De aquí nacen luego las tablas dinámicas que me ayudan a yo a aterrizar en la información. Así aquí al comprador estratégico se los juro que el viernes me lleve así.
+
+1:17:27
+Bueno, fue, trabajé jueves de 12 de la noche a 6 de la mañana y luego todo el viernes, porque si yo esta chica hago que los centavos le cuadren perfectos, así hace ratito me dijo autorizado, autorizado, autorizado con que empiece con 25 centavos de diferencia. No, no tienes que checar dónde están y encuéntrale y busca, o sea me la pone bien cardiaca.
+
+1:17:53
+Entonces yo qué es lo que hago ya que ella me da los importes, si yo verifico que si cuadran con los míos, pero van por centavos de diferencia, yo me pongo en el precio hacerme un ajuste ahí Macabro como éste, donde empiezo a ver para que me den los centavitos de ella, dividido entre cuatro o tantos servicios al año. ¿A cuánto tendría que dar, no? Pues mi cálculo de fórmula me dio esto, lo convierto en datos y lo meto.
+
+1:18:19
+Y así hice que todo me cuadraero, o sea, valió la pena mi mi desvelo, porque de esa manera ahorita me autorizó casi el 90% del presupuesto, pero no le hubiera dedicado esas horas, se los juro que estaría pariendo chayotes. Entonces a veces los tristes sentados sí cuentan y bueno, de ahí todas las tablas que van a ver para la derecha no es más que multiplicar lo mismo que voy a cobrar, pero ahora con todo lo que me va a costar aquí calculé las comisiones.
+
+1:18:48
+Aquí calculé el número de artículos que tengo que surtir y con esto busco hacer una cierta análisis de explosión de materiales por código, la cantidad de kilómetros que vamos a transitar en el en el mes, la cantidad de visitas que vamos a hacer en el mes, la cantidad de órdenes de trabajo por mes y por cliente, la cantidad de emisiones de orden, la cantidad de manifiestos, la cantidad de residuos.
+
+1:19:19
+Para mí yo soy como palito uno en programación, porque yo tengo que hacer muchas tablas para no hacer más las dinámicas y hacer análisis, pero así es como lo he logrado y algo que nunca había hecho porque no tenía verdad la capacidad en gente, porque sí, la cabeza me lo daba, pero no el tiempo. Esta vez nos tardamos como 2 semanas, como 2 semanas en desarrollar la fórmulación de todo.
+
+1:19:47
+De todo el año, de todo lo que es póliza. ¿Digamos que aquí tengo catalogado en en esta base de datos, yo le di un número único a cada a cada póliza, no? Y con esta información me fui por medio de Velucops Trayéndome el dato de cuál era la fecha del servicio y yo decía, si es 21 de enero, entonces el mes es enero.
+
+1:20:16
+Desarrollo bueno, aquí es nomás que copy paste de de código de facturación y esto es lo que se tienen que llevar, esta es la explosión de materiales que se tienen que llevar, estos son los costos, todavía me falta afinar uno, este es el costo de la visita este y con esto voy a generar por medio del SAE las emisiones de orden o los pedidos que los que el almacén debe remisionar.
+
+1:20:43
+Hasta este punto llego con esta información a nivel del almacén, por ejemplo, que con ustedes no nos va a tocar, pero si necesito del universo llevarme todos estos datos porque tarde que temprano sirven para la orden de trabajo, sirven para hacer manifiesto, sirven para cálculo de reportes de impuestos sobre nómina, sirven para hacer presupuestos, me sirven para.
+
+1:21:11
+Para la facturación, por ejemplo, para que vean ésto yo le generó a la chica de facturación, basándome en el universo, le generó este archivo de facturación donde todo lo que estaba como en horizontal se lo giro a vertical por cliente y a ella le traigo en particular el número de presupuesto y el contrato.
+
+1:21:41
+La fecha en la que se va a ejecutar el número de orden de trabajo, el precio para que lo tenga muy en cuenta, el mes y la semana en la que se va a ejecutar. ¿Eso cuánto va a cobrar? Porque a partir de ello esta chica pone el número de pedido de Liverpool, el número de contra recibo de bueno pedido del cliente contra recibo del cliente, el estatus de pago, el folio de facturación.
+
+1:22:05
+¿El importe del pedido, porque luego tenemos que calcular si hay diferenciales, no puedes facturar nada que no cuadre ella aquí me calcula regalías que tengo con la franquicia de dickima, este me pone las fechas de pago, vamos, todo esto lo voy a buscar hacer con el SAE, pero qué si me interesa que nos llevemos a salesforce esto? Porque es parte de de lo que hablamos ayer.
+
+1:22:34
+Llegar aquí al cierre de negocio, cierre de negocio. No Diana tiene este todavía un paso extra que viene de todas estas tablas y de otra que ella va calculando. ¿Nosotros tenemos una relación de qué tiendas atendimos?
+
+1:23:01
+¿Qué tipo de servicio? ¿La o DT, todo lo que venimos acarreando desde atrás, pero aquí todavía ponemos cuántos minutos nos tardamos y eso me lo da la orden de trabajo, el IGE o me baja un reporte por o DT que me dice cuántos minutos me tomó, porque tú debes de calcular cuántos este, cuántas personas fueron? ¿Cuánto fue su nómina de ese día?
+
+1:23:31
+A pleno de control, aquí los muchachos lo hacen, es lo mismo, nada más acomodado de manera diferente. Aquí ponen los minutos, ponen la hora de inicio, ponen la hora de término y los minutos con eso ponen. Fue MFFM Manuel y este es su recibo.
+
+1:23:57
+Y con su recibo se le pagaron 5597. Por ende, esto entre 15 días multiplicado por el número de horas. Me da que su minuto cuesta 78 centavos y la persona estuvo 15 minutos. Pues entonces a esta factura le tienen que aplicar una retención del 3% sobre la base de 11, así que le tienen que retener 35 centavos. Es una ridiculez, muchachos, pero el Gobierno me está haciendo.
+
+1:24:26
+Me está aplicando una doble tributación, yo ya en México al tener dada de alta a la gente en la ciudad este yo ya le pago, o sea ya pago 111 impuesto por contratarlo no, pero cuando voy a cualquier Estado fuera de Ciudad de México, este tengo que volver a pagar y la forma de defenderme fue de Ah, me vas a cobrar doble sale, pero no me puedes cobrar todo el día, nada más me puedes cobrar el tiempo que yo ejecute mi servicio. Le dije, pues vas a ver cómo.
+
+1:24:56
+¿Y cómo nos peleamos por los mismos términos? Y le dije, pues te pago por minuto, yo tengo ese control al llevarlo al día a día. Es muy fácil, pero imagínense una auditoría para atrás, recapitula, o sea recuperar toda esta información es cardíaco y esta labor de hacer el el cálculo del impuesto sobre nómina es un trabajo en conjunto del equipo porque yo les doy la base de datos.
+
+1:25:24
+¿La niña de facturación no es cierto, los chicos de accesos YY mi asistente que toda la parte ambiental ellos van capturando quién acudió hacer el servicio o ya que lo tienen bajan el el reporte de los tiempos, luego el chico de recursos humanos por ser información sensible, el captura, el el adjunta, los recibos de nómina y captura, cuál fue la la percepción de la persona?
+
+1:25:52
+Con base en ello, pues ya con la multiplicación división, se hace el cálculo rápido y esto de la retención Diana tiene que estar pendiente del impuesto que cobra el bueno Diana. Perdón, la chica de facturación tiene que estar pendiente del impuesto que aplica por Estado. Con base en ello es que se calcula la retención y ella empieza a llenar este tema de de la de la retención.
+
+1:26:16
+¿Este y se alimenta y termina de alimentar este reporte con el pedido contra recibo, el folio de la factura, la fecha de factura, el importe, la factura, el importe retenido, el UID, el Código Postal, el PDFY, el XML, esto ya lo hace manual, es una joda, pero se los juro que el día que me quisieron revisar en Liverpool le dije, qué necesitas saber a tal fecha o tal información? Agarré y les hice el filtro Pum Pum, se los mandé y me dijeron no manches, nunca, nadie me lo ha entregado así.
+
+1:26:45
+Sí, pues, está muy, muy contrátame. ¿Pues pregúntenle a mi marido, pero la verdad es que yo, mi cerebro arrays, se quiere jalar, no, pero mi mi cerebro se resume a me quieres auditar? Órale, va, le entramos a los guamazos este entonces hasta acá llega el universo y de verdad, pues todo lo que hace que que nazca.
+
+1:27:15
+Es la base de lo que me pidió el cliente. Luego me dicen como usted diga digo, es que no es como yo diga, es como el cliente nos lo pidió. ¿Si él quiere que le alcance sea 5 veces al año, pues 5 veces yo le sugiero que sea 10, pero si él dice que 5 porque es para lo que le alcanza, pues 5 no este qué más? Pues aquí están fechas, están en fortes, está todo cómo yo lo había pensado.
+
+1:27:45
+En mi cerebro enfermó. ¿Ah, y es que no llegué hasta ahí, verdad? Es que no llegué hasta allá cuando estaba diseñando las pestañitas era que es que llegué hasta costeo, llegué hasta memoria descriptiva, no, ya no llegué hasta allá, pero era que hubiera una pestaña en donde yo capturara todos esos pequeños detalles. ¿Va a ser una joda? Pues sí.
+
+1:28:15
+Pero yo ya les voy a poder decir este campo lo jalamos para acá, este campo lo jalamos para allá este verdad así, pero que la pestaña del cliente o viera una pestaña del cliente, igual que ciertas personas tienen acceso a su información este, pues ahí se se fuera almacenando todo. Finalmente yo ya sé qué datos son ya nada más, es decir, es está el dato. ¿Qué me gusta mucho de Igeo?
+
+1:28:43
+¿Que te dan la oportunidad? Por ejemplo, si me voy ahorita a este que me puede entrar a un presupuesto que está asociado con un contrato, que ese contrato me lleva a las órdenes de trabajo de de de ese servicio en particular, este es el presupuesto, está el contrato, o sea.
+
+1:29:13
+Es es complejo porque como mi cerebro lo lo imagina, es a ver, yo a Polanco le ofrezco 7 tipos de servicio diferentes, cada servicio tiene una particularidad y póliza, entonces me lo me lo creo en mi cerebro, como entro a a Polanco, al apartado de pólizas, a ver qué tipo de póliza, bacteria o k esta esta bacteria. ¿Qué temporalidad tiene, no? Pues de enero a a diciembre de 2026.
+
+1:29:39
+¿O K cuáles son las características de esa póliza? Temporalidad y todo lo que acabamos de ver. A partir de ahí generó un un presupuesto, generó un contrato, no, o sea porque es es como el estricto paso que hay que seguir, aunque ya tengo contratos machote con ellos tengo un contrato marco este de ahí se generan las órdenes de trabajo de las órdenes de trabajo. Creo que Irving les explicó una vez nosotros ejecutamos la orden y la verificamos.
+
+1:30:09
+¿Le cambia el nombre a certificado de servicio? No estoy casada con ningún nombre, nada ustedes ni siquiera se llama o TY después se llama o t también bueno, o sea para nosotros elige o sí le le da como esa particularidad de cuando ya te la verificó el supervisor tiene como como este otro nombre no certificado de servicio, esos son los que nosotros subimos.
+
+1:30:36
+Esos son los que nosotros subimos ya al al ride este de ahí después decir que Diana se se metiera a capturar. Este es el la factura que que al final o este es el número de pedido que el cliente me que el cliente me se me.
+
+1:30:59
+Me proporcionó el contra recibo y la factura que ella generó en el s a e nada tiene que ver, pero al menos que sea mi repositorio para dar seguimiento este que el de recursos humanos pueda decir a ver, estos fueron los recibos de nómina o estas fueron las personas, y que si tiene el rango de que fue del primero de enero al 15/01/2000. Vein 6, el chico nada más tenga que subir una sola vez este.
+
+1:31:26
+Que nada más suba una sola vez los recibos de nómina a estas personas y que ya el sistema lo jale y que por el tiempo de ejecución calculen automático cuál va a ser la retención, este que por ejemplo se aplica la generación de manifiestos, se capture la información desde que está llegando la grasa o las toallas sanitarias y por ende se desarrolle el manifiesto.
+
+1:31:54
+Ya nada más para que aquí agarren y lo imprima. Aquí con el manifiesto yo tengo un proceso particular que es yo lo yo lo imprimo y lo mando con el recolector, perdón, con el la disposición final, ellos hacen su proceso interno y me lo devuelven. Y yo a su vez lo entrego con una acuse, con una hoja de acuse que también necesito firmada por parte del cliente.
+
+1:32:20
+Porque yo a ellos les entrego el original y yo me quedo con otro original, pero pero ellos para la autoridad el que ellos tengan es el bueno. Entonces necesito como ese proceso de me firmas y órale tengo aquí tu firma digital, la que recibiste y ya tú te quedaste con el original. ¿Qué más la cadita?
+
+1:32:49
+O K ya chicos creo que están, suena fácil, pero yo les quiero dejar como el compendio de todo esto en un solo lugar. Sí, de hecho no, de hecho, entonces es bastante información como en el cerebro. Sí, es bastante información y sobre todo el proceso ya cómo lo llevan no hay por hoy, pues ya de alguna manera ya está muy ya funciona.
+
+1:33:18
+Exacto, exacto. Entonces pasarlo a otro sistema es ya se puede y como nos pedías ayer, claridad y transparencia, Gaby, de lo que hemos estado revisando, algunas de esas cosas se pueden hacer. Hay algunas otras cosas que se tendrían que estar desarrollando. El Salesforce te permite poder hacer desarrollos, no necesariamente tienes que adaptarte a la caja.
+
+1:33:45
+Y que creo que ya lo había. Te lo había platicado en alguna de las pero no, no vaya. Hay módulos que se pueden customizar y se pueden hacer a la medida, no utilizando lo que lo que tú ya tienes en tu licenciamiento. Entonces yo creo que aquí lo que nos, lo que nos funciona, digo, la información como la estás construyendo está está bastante, está bastante bien. Las pantallas que nos mostraste hace ratito del sistema que tú estabas creando.
+
+1:34:15
+¿Creo que esa es la que podríamos pasarte las sales force con los campos que tú quieres y necesitas para que de ahí podamos ir ya diseñando la aplicación como tú la necesitas, desde la parte del cliente, la parte de las prospecciones, cómo llevas todo la oportunidad? Y luego ya de ahí todo lo que genera para cotizar y para generar las órdenes de trabajo.
+
+1:34:40
+Supongo que en la en la demostración que te hicieron de salesforce te mostraron muy a grandes rasgos, como funciona en caja. No sale Fox, entonces nada más. Ahí yo te preguntaría a ti de todo eso que tú viste en esa demostración. Eso es lo que tú tienes que de todo eso ves que se puede adaptar muy rápidamente a.
+
+1:35:07
+Digo, lo tendría que volver a ver o K me lo enseñaron hace como sabe Dios cuántos meses, 23 meses es. Es es importante revisarlo porque digo, a veces lo que pasa en esta parte es que hay muchas cosas que se pueden utilizar de caja y hay procesos que tiene salesforce que pues obviamente, en algunos casos no se pueden modificar. Por ejemplo, cuando hacemos un prospecto en salesforce.
+
+1:35:36
+Haz de cuenta que doy de alta la persona, por ejemplo Christopher Contreras es un prospecto de piats. A ese prospecto tú le generas una ruta para llevar como ese seguimiento de lo que pues para saber si si sí te va a comprar al final no. Una vez que tú ya llevas esa ruta o ese seguimiento en esa ficha lo que tú haces es transformarlo ya como como un cliente de base instalada o.
+
+1:36:03
+O o como cliente contacto, no suponiendo que sea de Liverpool, suponte no, que sea ya Liverpool, tu cuenta la que tú tienes. Y entonces a Liverpool ya le puedes dar el seguimiento de la generación de oportunidades, la generación de pedidos. Ya después de eso también puedes hacer la creación de las órdenes de trabajo.
+
+1:36:24
+En este caso, por ejemplo, lo que tú manejas en Igeo este como órdenes de trabajo. También en salesforce se llaman órdenes de trabajo, pero haz de cuenta que en salesforce te generan citas de servicio, que las citas de servicio lo que te hacen es que los los técnicos es lo que van a poder ver en su dispositivo móvil. Cuando vayan a ejecutar el servicio, ellos van a poder tener todas esas citas de servicio separadas. Por ejemplo, si si tú dices es una orden de trabajo, ahora en general.
+
+1:36:54
+De un proceso que se tiene que hacer anual, pero las citas de servicio se van a estar haciendo en las fechas que tú quieres, por ejemplo cada mes. Eso es cómo estaría funcionando de esa forma y este. Y ahí lo que yo te recomendaría, aparte de este gran trabajo que estás haciendo, es que o bueno, nosotros a veces cómo partimos como para hacerlo un poco más sencillito es que nos puedas pasar el registro de un solo cliente que sea el más grande.
+
+1:37:23
+Y con eso nosotros lo vamos metiendo en el sistema, lo vamos acomodando y vamos diseñando el proceso para que de ahí tengamos tu feedback y también por supuesto de tu equipo, que nos vayan diciendo, Oye, ahora necesito que se vea de esta forma o vayamos viendo si necesitamos automatizar algo porque como es un universo de información lo que tenemos ahorita y obviamente llevas mucho en la parte de Costeos.
+
+1:37:47
+Que ayudas mucho en en en esta parte de lo que tienes que hacer para el tema de las comisiones o los centavos estos que calculas en los reportes, pues nos podemos llegar a perder y a la mejor es llega un momento donde no vamos a saber ni para dónde darle. Entonces creo que ahí lo que podemos hacer para que también no este tal vez no le inviertas más tiempo más que en el tema de las plantillas, porque eso sí es importante.
+
+1:38:13
+Es que con un solo cliente vámonos, como por ejemplo con Liverpool como dices tú, con todas sus variantes. Y eso lo vamos ya plasmando en en en la organización, en la en la en el sandbox, pues en en la en en el ambiente de prueba. Y eso es lo que ya te va a ir dando visión de qué es lo que puede hacer la herramienta con tu información. Y también ya vas.
+
+1:38:37
+Como haciendo ese match, porque yo lo que veo ahorita en nigeo y siendo sincero, tú tienes un proceso completísimo en el sentido de que desde que generas la cotización, que sí tiene algunas brechas, no por ejemplo en el tema de la relación de información que tu gente tiene que ir a llenar en los comentarios y otra vez este.
+
+1:38:58
+Digamos enviarlo una vez más actualizado para que de ahí ya pueda ir la siguiente etapa o el siguiente proceso. Y luego, si no es eso, pues otra es volverlo a actualizar e ir a agregar varias de esas cosas. Entonces salesforce sí lo puede hacer mucho más sencillo, en el sentido de que todo lo que está registrado se puede generar un pequeño desarrollo, en donde con un Clic tú le das un botón y te aparecen esas plantillas ya cargadas con la información que tú necesitas.
+
+1:39:25
+De acuerdo, entonces eso eso sí lo puede hacer. ¿Cuál es el detalle aquí que tenemos? Que en el tema de lo que tendríamos que si desarrollar y que es algo que también quiero hacer transparente contigo para que no digamos como para alinear las expectativas, no porque no lo puedo hacer salesforce, sino porque vaya, hay muchos procesos que hay que desarrollar. Entonces, por ejemplo, en el tema de tu PDF que tú generas con las firmas la aplicación móvil de Finservice si te deja hacer un reporte de servicio.
+
+1:39:54
+Pero es el reporte de servicio, digamos que o sea, lo puedes customizar, pero no es como tan maleable en el sentido de poner más información como tal de que es lo que ya viene en caja. Entonces, si tú necesitas hacer que que llevemos el mismo PDF que tú ya manejas.
+
+1:40:15
+Con las fotos del time STOP, con las firmas virtuales, que eso sí lo podemos hacer. Necesitamos desarrollar esa funcionalidad, o sea, sí se puede hacer. La respuesta es todo se puede hacer en Salesforce y es lo que te permite que la plataforma que no está cerrado a que solamente tengas que utilizar lo nativo, sino que aquí se puede desarrollar. Pero pues obviamente implica, pues tiempos no. Entonces sí debemos de trazar, por ejemplo, en esta fase.
+
+1:40:42
+¿Que es lo importante en este seguimiento que tú estás planeando para dejarte como la o sea funcional, pues el proceso y que todos los técnicos y sobre todo tú, pues también tengan como todo ese seguimiento, no este, y que vayas como haciendo esa integración para no estar ir consultando en diferentes plataformas, que creo yo, ese sería como el el objetivo ajá, entonces?
+
+1:41:07
+El tema de desarrollo y lo que lleva el tiempo que conlleva. O también hay costos extra, lo que pasa es de que ahorita nosotros tenemos ya un plan de trabajo, entonces pasado en ese tiempo, pues bueno, es como queremos acotar justamente el diseño de esta primer fase de de.
+
+1:41:27
+De implementación para ver qué es lo que podemos si llevar. Por ejemplo, nosotros si estamos tomando en cuenta el primer proceso o los procesos que nos mostraste Gaby en el tema de las pólizas, en el tema de los servicios extraordinarios, en el tema de los bomberazos, nosotros lo estábamos viendo como digamos todo el proceso comercial configurado dentro de sensors y también el proceso de servicio que es tu nube de service cloud, entonces.
+
+1:41:57
+De ahí en fuera, bueno, de ahí tendremos que ver por ejemplo, el tema de las plantillas, que seguramente pues eso sí lo podemos hacer en donde tengamos que hacer esos desarrollos para que tú ya nada más. Como te decía al dar Clic en un botón, pues ya puedas traerte la información precargada de lo que ocupas. ¿Cuál es el detalle? Irving nos comentaba hace un rato que hay PDFS en donde ustedes tienen que hacer.
+
+1:42:20
+Ciertos ajustes de forma manual, por ejemplo, que tienen que hacer una actualización en un campo en específico y todo eso del lado de Salesforce. Para poder hacer ese desarrollo tendríamos que habilitar una pantalla en donde venga como un editor previo, que es como lo que tienen en igeo para poder hacer como ese cambio. Y luego ya después aplicarlo, porque salesforce lo hace, digamos que lo cierra de manera más automática si tú en un registro de salesforce.
+
+1:42:47
+Suponiendo que es como el que nos mostrabas del Liverpool, en donde viene su dirección, el nombre, toda la información, todo eso nosotros lo podemos con un botón ir a exponer en un PDF que tú nos digas cómo quieres que se vea entonces contestando la pregunta es, dependemos mucho de de ver o de acotar esos desarrollos en esta primer fase para que de ahí, pues para ustedes no haya ningún costo, si al si después de eso.
+
+1:43:17
+¿Se llegara a necesitar más, entonces ya tendríamos que verlo con ustedes para decirles, bueno lo podemos hacer, pero esto nos llevaría más más tiempo o llevaría alguna otra cosa como un control de cambios? ¿No, por qué? Porque como les comento ahorita tenemos un plan de trabajo, un tiempo ya estimado de lo que les prometimos, pues en esta propuesta inicial y la verdad es que no nos gustaría, como también decepcionarlos en ese sentido de que.
+
+1:43:44
+Vamos a hacer todo y al final del día no lleguemos a cumplir la la expectativa, no, entonces, si lo vemos, que es como por fase, queremos acotar ese proceso que que que ustedes necesitan tener como esta primera integración. Bueno, no integración, sino como esta Unión de todos estos procesos dentro de salesforce. ¿Y ya entonces, una vez que ya tengan eso, entonces sí, ya ir, EH? Digamos escalando. Y creo que los de salesforce ya les han platicado el tema de.
+
+1:44:09
+De los legos no de que ustedes pueden ir a como poniendo más funcionalidades y todo lo demás no necesariamente es comprar más licenciamiento, sino más bien es hacer nuevas funciones dentro de la plataforma que ya ustedes tienen para ir complementando y haciéndolo más integral. Es más que nada. Eso es lo que quería también transmitirles en esta en esta sesión y una disculpa otra vez por afónico. Ah, no, no te preocupes, antes estás hablando es.
+
+1:44:39
+De o K entonces, en conclusión, lo que serviría mucho es que nosotros siguiéramos trabajando en estas plantillas para darles completa claridad de cómo lo esperaríamos ver. Exacto, y a partir de ahí ustedes nos dicen, esto si se puede, esto no se puede, o esto se podría de otra forma. Exacto o K, porque hoy prácticamente es ponerme a diseñarlo. Podemos utilizar.
+
+1:45:07
+El te digo, la las pantallas que tú nos mostraste de tu sistema que estabas diseñando, las podemos utilizar para para diseñarlo. Dentro de cels, de hecho, se ve muy parecido eso que tú nos mostraste. Por ejemplo, para mí todo esto que tienes arriba de comercial, ventas, administración, operación y cierre, para mí sería como el.
+
+1:45:29
+¿La ruta del registro que tendría que estar llevando lo que tú consultes por ejemplo de Liverpool, no? Si Liverpool ya tiene distintos oportunidades de venta, pues así te aparecería y en la parte de abajo ya verías en tu sección de oportunidad. Ya ves que tienes clientes oportunidad, ahí ya estarías viendo los campos que tú necesitas ver de esa oportunidad. Si necesitas un levantamiento, pues también ahí podemos agregar tal vez una sección o podríamos agregar alguna otra este.
+
+1:45:58
+Información que tú necesitas, pero para mí ahorita sí sería importante como atacarlo, pero desde el cliente más pesado que tú tienes para que podamos diseñarlo por completo o incluso si ya ves que te comentaba ayer de los accesos de salesforce, lo que podríamos hacer también como para que te puedas dar una idea es que cuando tengamos esos accesos y ya tengamos el sandbox ya este activo.
+
+1:46:25
+¿Podemos ir cargando la información para que tú veas y qué es lo que necesitamos agregar? Por ejemplo, aquí tú ya tú tienes bastante trabajado todo lo que ocupas en ese en ese formulario. Esto mismo lo podemos replicar en salesforce o K entonces sí tendría, tendríamos que ponernos a o sea, quizá no me tardo tanto tiempo en hacer que se vea muy coquete este así con las rayitas y el o sea porque estos son imagencitas que yo iba acá.
+
+1:46:55
+Que yo iba insertando este no y que iba haciéndome estas cuajitas, que la verdad es que me senté como 3 días después de que hice todas estas pestañas y dejé de hacer cotización y de salir a vender, dije, Dios mío, no, sí es una talacha, no, no, es que no se trata de que lo hagas así como lo estás mostrando, digo lo que lo que trato de decirte aquí es.
+
+1:47:25
+¿Podemos ocupar lo que ya trabajaste para poderlo implementar? No, no, mi intención no es que nos hagas toda todo esto, pues de desde cero, sino lo que necesito es que me digas en un listado, por ejemplo, que me digas necesito un campo de fecha que se llame tal, necesito un campo de texto que se llame tal, necesito un campo de lista de selección que se llame tal cosa. ¿Es un poco como esto, no? O sea donde viene a Irving.
+
+1:47:51
+A ver para el tipo de de venta, póliza para el tipo de servicio este del de las toallas, la fase comercial. ¿Qué información necesitamos? ¿No o sea, yo? ¿Yo buscaba como anclarme un poco a a estas fases, en esas fases qué qué datos necesitamos? No este luego en la fase de información de requerimiento de levantamiento.
+
+1:48:17
+O sea, en lugar de abocarme al al exelito, como este dije, me es más rápido írselos aterrizando tarde que temprano, mi cerebro siempre piensa como tablas y fue que por eso dije, ya te entendí o k, sí, aquí lo que estás. ¿Por ejemplo, esas variables son los campos, no? Por ejemplo, el número de usuarios internos colaboradoras, y es un campo donde tú les agregas.
+
+1:48:46
+¿Número de cuenta de servicio y sí, sí cuenta con el servicio, cuántas personas no? Exacto, o sea, si digo en levantamiento le digo, oye, ya cuentas con un servicio, sí, ah, bueno, pues le pregunto, le voy a hacer todas estas preguntas, no, no cuento, bueno, pues te voy a hacer todas estas mismas preguntas, no, aquí yo lo lo llené como si fuera un ejemplo, todo esto como un ejemplo y por ejemplo lo llené así.
+
+1:49:14
+Porque lo que yo quería era que aquí abajo este yo dije una memoria descriptiva que me ayudaría. Sería una redacción como Ah, el cliente con base en información recabada significa que nombre del cliente no una población aproximada de 300 personas. ¿De dónde vienen lo de 300 personas? Pues del campo, ah, o sea tendría que estar.
+
+1:49:43
+Pon tú que aquí sean 150 y aquí sean 150, no en mi ejemplo Charro, entonces esto no es más que la suma del campo a YB de la tabla yo le ponía aquí con inteligencia artificial. Me gustaría que se pueda hacer un resumen de todo lo recopilado en las partes previas, yo tal cual copié esta tablita y le dije a chachipiti.
+
+1:50:15
+Hazme un resumen de esto y me escupió esto y por ahí lo puse. No costeo aquí, por ejemplo, que dije, bueno, pues les hicimos una pestaña para podérselas compartir donde dije, Este es el costeo que a mí me ayuda. Esta es la base. Prácticamente aquí se deberían de agregar el número de de unidades, el número de personas de mi equipo que se necesitaría.
+
+1:50:43
+Yo esto lo tengo un catalogado, si son menor a 25 ponme 2, si son mayor a 25 me pones 3 chicas y prácticamente el cálculo se tendría que dar solito con el precio. Quizá yo ahí si le modifico el precio una vez yo verifico que está dentro del margen, digo aquí el margen le quedó hasta el cielo este Pum no con este cierro y ahí mismo activo a desarrollar la cotización y que va a traer la cotización.
+
+1:51:12
+Una introducción, esta es una propuesta de introducción, misma que se puede modificar según las necesidades. ¿Por qué? ¿Porque yo le digo al cliente casi, casi, es mi mismo machote, lo que cambia es lo que dejé en azules, pero es de lo lo demás es machote, no? El desarrollo de las partidas puse el ejemplo de levantamiento un tanto complicado porque quería dar visibilidad de todas las posibilidades con respecto a la frecuencia de los servicios. En este caso voy a redactar una partida por cada frecuencia de recolección para tener los ejemplos completos. Entonces yo me jalé y me copié, aquí la tablita para irme guiando.
+
+1:51:43
+¿Por ejemplo, esta es mi, esta sería mi partida en caso de una recolección de cada 7 días, entonces lo que llené en la tabla de arriba es esta, la información, lo que está en en el en la variable y que es esta no número de contenedores, Ah, pues 6 frecuencia, 7 días, alcance de la póliza, si son cada 7 días pues voy 52 veces al año, no?
+
+1:52:12
+¿Cuántos es un año? ¿Esto no es más que la multiplicación de a por c el precio lo traeríamos del el precio lo podríamos traer del PI an el del costeo paso 5 estas 2 bueno no es más que el el es el importe unitario, este es el importe total, este es el total de pago mensual, si lo divido entre 12 meses, pues aquí debería de dar este cálculo, no?
+
+1:52:39
+Esto se puede ir capturando esto si yo puse la hora arriba. ¿Se puede calcular si yo ya pongo fechas de servicio desde arriba? Podrían traerse esas fechas o este o colocar el texto por definir default la dirección del cliente. Si yo tengo la letra v del paso uno, paso uno, paso uno, ahora quedó la V a la re no este.
+
+1:53:07
+La dirección del lugar donde necesite el servicio, pues prácticamente es el dato que puedo de traer acá no, esto ya esto que estoy poniendo de en ***** va de cajón, sí es machote, ya es machote o k o k las notas de la cotización, particularmente para este servicio, serían similares a estas. Si ya digo, conviértete en contrato, Ah, este sería mi machote de contrato o k o k.
+
+1:53:37
+¿Este la o DT recordábamos ayer que te permite hacer determinadas preguntas, no? Ajá. El cuestionado por punto de control. Entonces aquí planeaba poner el tipo de preguntas y el tipo de respuesta por default que le pueden salir a las muchachas. Las deficiencias platicábamos de si encontramos a un área de oportunidad con el cliente. Igual le cambié mi nombre porque deficiencia suena horrible.
+
+1:53:59
+Este áreas de oportunidad diría, bueno, si encuentras estos problemas o estas áreas de oportunidad, le puchas que lo encontraste y en automático te va a escupir la solución. ¿Las chicas le pueden aumentar, le pueden quitar, pero bueno, si aplica manifiesto, cuál es el machotito del manifiesto? ¿Cómo se llena y de dónde se trae la información este? ¿Bueno, esta es otra cosa, porque esto es genérico, no? Las altas no son por servicio, son por darte de alta.
+
+1:54:28
+¿Y este el cierre de evidencias o el cierre de negocio, qué datos necesitaría? Así PLANEABA Desarrollarles junto con Irving, cada tipo por cada tipo de venta y cada tipo de servicio. ¿Ah, o K o K ya entendí, vale, vale, vale, vale, vale, vale, cómo ven está, está bien o k?
+
+1:54:51
+Otras yo desarrollo las plantillitas de aquí, pero te acabo de hacer en una solo documento de texto, casi, casi lo que es la descripción de oportunidad, lo que es la descripción del levantamiento, lo que es la propuesta, la un poco, por así decirlo, la fase de de negociación, contrato y después de ganamos. No se ve tan pipis Nice como éste, pero.
+
+1:55:21
+No, no, claro, pero lo que ya es exacto es ya como lo como ya con la información que ya ya manejas o k esta bien, ahora para para hablar de una póliza tendría que ver dónde le voy a insertar toda la información que tengo de los otros lados. ¿Entonces mi cerebro ya está cabildeando cómo te lo voy a exponer para que sea entendible y no perdernos? Pero confieso.
+
+1:55:50
+Me va a llevar al menos 1 semana o K el el sentarme y decirte ahora sí aquí están todos los documentos, aquí es como como me lo imagino como se vea ajá. Y ya ustedes me digan sí ya check lo entendemos, empezamos a practicar o esto sí o esto no o k de acuerdo, así va a ser otra vez encerrón.
+
+1:56:17
+Ay, no me hablen, no tengo hijos, no tengo marido, no tengo hijos, lo voy a acabar porque de verdad es una gran ilusión mía ver todo concretado en uno, quizá no en 3 meses como lo prometieron, pero si me dicen en 6 o en este año tengo paciencia, pero que quede claro, claro que sí. De acuerdo, estoy consciente que no está papita porque para mí aterrizarlo de por sí. Es agotador, sí.
+
+1:56:46
+Y es y es bastante información, te entiendo, sí, pero años de trabajo no puedo hacer 3 meses, lo bajen claro, claro y es y es y es eso, pues final del día ya tienes un proceso muy, muy muy definido, muy acotado, es una gran, gran, gran chamba que has hecho, la verdad digo no, por no lo digo este nada más por decirlo no, pero también algún tiempo me tocó trabajar para gobierno y.
+
+1:57:13
+Entiendo todos estos lineamientos que tienes que hacer como muy muy preciso al momento de enviar la información y las auditorías y te entiendo, entonces es es eso o k está bien, entonces así como nos lo planteas está bien, lo podemos ir bueno, revisando nada más te encargamos ahí que le de seguimiento al tema del acceso a a Salesfor para ver qué te dicen.
+
+1:57:40
+¿Y entonces mañana que faltaría que viéramos alguna otra, algún otro proceso que nos quieras platicar? No, yo creo que más bien es ponernos a trabajar, sí para poder dárselo. O sea, yo lo que voy a hacer es bloquearme, miércoles, jueves, viernes, estas 2 horas, independientemente que fuera de de estas 2 horas me voy a poner con Irving a trabajar porque nos dividimos los procesos por tipo de venta o K.
+
+1:58:09
+¿Hicimos el primer machotito que fue el que les enseñé y les dije, ahora sí chavos, a partir de esto captúrenle no? ¿Cómo es que lo hacen? ¿Qué es lo que preguntan? Así váyanse al extremo para que lo tengamos lo más completo y a partir de ello, pues ya ya podamos tenerles la manera de de sí la documentación en la carnita para entregarles no y empezar a trabajarlo, entonces más bien lo que habíamos programado en estos 3 días.
+
+1:58:37
+Si me dan chance de que lo no, no nos reunamos para que nosotros nos enfoquemos y ya desarrollarlo y nos podamos ver el próximo les demos. Ajá. ¿Les demos un primer corte el lunes, les parece? Está bien, perfecto ya de cuando ellos pueden ir avanzando si ya se tiene lo de la ándale y ahorita le escribo a Jen que es la que me buscó.
+
+1:59:02
+Sí, para generar en Sandbox YE ir generando ahí usuarios de prueba, también preparar las aplicaciones también para que lo vayan ustedes conociendo. Entonces la idea es que como les comentaba a veces, nosotros trabajamos de esta forma porque entendemos que ustedes pues ya están habituados a un sistema que hace ya muchas cosas y también como que dar el salto de repente es un poco como de Ay.
+
+1:59:27
+No sé, siento que a veces también pasa ese tipo de cosas, pero lo que queremos es que también ustedes vayan viendo cómo se vería ya esa información o como ya ahí vamos bajando poco a poco esa información. El ambiente de pruebas me late, les parece la próxima semana, el el lunes de 12 a 2 también déjame te confirmo nada más.
+
+1:59:58
+Sí, sí, está bien, de 2 a 2 lo podemos regresar, si quieren les mando yo la invitación, sí te comparto acá el correo de Irving. Ah por favor ya.
+
+2:00:38
+Ah o K de acuerdo para incluirla entonces vale y este y nos ponemos a darle con todo, claro que sí, Gaby sale bueno, pues entonces por tu paciencia y apertura no a ti y a también gracias Irving por el el tiempo, gracias equipo hombre, que estén muy bien, gracias buena tarde, que estén bien buena tarde hasta luego bye hasta luego bye.

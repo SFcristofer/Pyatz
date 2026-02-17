@@ -1,0 +1,161 @@
+<template>
+    <div class="main-container">
+        <!-- HEADER DE LA PÁGINA -->
+        <div class="slds-p-around_large bg-white border-bottom slds-m-bottom_large">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div>
+                    <h1 class="slds-text-heading_medium slds-font-weight_bold text-main">Gestión de Cotizaciones Técnicas</h1>
+                    <p class="text-muted">Administra y crea nuevos presupuestos técnicos para tus clientes.</p>
+                </div>
+                <lightning-button 
+                    label="Nueva Cotización" 
+                    icon-name="utility:add" 
+                    variant="brand" 
+                    class="btn-brand-premium"
+                    onclick={handleNewQuote}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <div class="content-area slds-p-horizontal_large">
+            <!-- TARJETAS DE RESUMEN (KPIs) -->
+            <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_large">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="kpi-card">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="kpi-icon-container bg-blue-soft">
+                                <lightning-icon icon-name="utility:quote" size="small" variant="info"></lightning-icon>
+                            </div>
+                            <div class="slds-m-left_medium">
+                                <p class="text-muted">Totales</p>
+                                <h2 class="slds-text-heading_small slds-font-weight_bold">{totalCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="kpi-card">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="kpi-icon-container bg-green-soft">
+                                <lightning-icon icon-name="utility:check" size="small" variant="success"></lightning-icon>
+                            </div>
+                            <div class="slds-m-left_medium">
+                                <p class="text-muted">Aprobadas</p>
+                                <h2 class="slds-text-heading_small slds-font-weight_bold">{approvedCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="kpi-card">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="kpi-icon-container bg-orange-soft">
+                                <lightning-icon icon-name="utility:clock" size="small" variant="warning"></lightning-icon>
+                            </div>
+                            <div class="slds-m-left_medium">
+                                <p class="text-muted">Pendientes</p>
+                                <h2 class="slds-text-heading_small slds-font-weight_bold">{pendingCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="kpi-card">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="kpi-icon-container bg-red-soft">
+                                <lightning-icon icon-name="utility:close" size="small" variant="error"></lightning-icon>
+                            </div>
+                            <div class="slds-m-left_medium">
+                                <p class="text-muted">Rechazadas</p>
+                                <h2 class="slds-text-heading_small slds-font-weight_bold">{rejectedCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="kpi-card">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="kpi-icon-container bg-info-soft">
+                                <lightning-icon icon-name="utility:sync" size="small" variant="info"></lightning-icon>
+                            </div>
+                            <div class="slds-m-left_medium">
+                                <p class="text-muted">Actualizadas</p>
+                                <h2 class="slds-text-heading_small slds-font-weight_bold">{updatedCount}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLA DE COTIZACIONES -->
+            <div class="section-card">
+                <div class="section-header slds-grid slds-grid_align-spread">
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <div class="blue-square slds-m-right_small"></div>
+                        <h2 class="slds-text-heading_small">Listado de Presupuestos</h2>
+                    </div>
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <div class="slds-m-right_medium">
+                            <span class="slds-badge badge-filter active">Todos</span>
+                            <span class="slds-badge badge-filter">Aprobada</span>
+                            <span class="slds-badge badge-filter">Pendiente</span>
+                            <span class="slds-badge badge-filter">Rechazada</span>
+                            <span class="slds-badge badge-filter">Actualizada</span>
+                        </div>
+                        <div style="width: 250px;">
+                            <lightning-input type="search" variant="label-hidden" placeholder="Buscar..."></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <div class="datatable-container" style="position: relative; min-height: 200px;">
+                    <template if:true={isLoading}>
+                        <lightning-spinner alternative-text="Cargando..." size="medium"></lightning-spinner>
+                    </template>
+                    <lightning-datatable
+                        key-field="id"
+                        data={quotes}
+                        columns={columns}
+                        hide-checkbox-column
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE OPCIONES DE CLONACIÓN -->
+        <template if:true={showCloneModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_x-small">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header bg-blue-dark text-white">
+                        <h2 class="slds-text-heading_medium">Opciones de Clonación</h2>
+                        <p class="slds-text-title">Seleccione qué información desea duplicar del presupuesto original.</p>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium bg-light-gray">
+                        <div class="slds-p-around_small bg-white border-all radius-8">
+                            <div class="slds-grid slds-grid_vertical">
+                                <lightning-input type="checkbox" label="Incluir Partidas (Servicios y Artículos)" 
+                                    checked={cloneOptions.copyLineItems} onchange={handleCloneOptionChange} data-name="copyLineItems"
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input>
+                                <lightning-input type="checkbox" label="Incluir Sedes y Ubicaciones" 
+                                    checked={cloneOptions.copySedes} onchange={handleCloneOptionChange} data-name="copySedes"
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input>
+                                <lightning-input type="checkbox" label="Incluir Textos (Introducción y Garantía)" 
+                                    checked={cloneOptions.copyTexts} onchange={handleCloneOptionChange} data-name="copyTexts">
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancelar" onclick={handleCloseCloneModal} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Clonar Ahora" variant="brand" onclick={handleExecuteClone} icon-name="utility:copy" 
+                            disabled={isLoadingClone}>
+                        </lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+</template>

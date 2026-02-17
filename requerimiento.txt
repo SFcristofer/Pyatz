@@ -1,0 +1,39 @@
+1. Requerimiento: Módulo de "Levantamiento Visual" (Diagramas)
+Gaby menciona un diagrama donde vienen opciones y donde ella indica las "zonas a tratar". Para Salesforce, esto implica:
+
+LWC de Mapa de Sitio / Canvas: Un componente que permita visualizar la estructura del cliente (edificios, niveles o áreas).
+
+Asociación de Servicios por Ubicación: No basta con listar el servicio; el LWC debe permitir "marcar" en qué parte del diagrama se aplicará (ej. Edificio A - Planta Baja - Trampa de Grasa 1).
+
+Campos de Imagen Dinámicos: Capacidad de subir o seleccionar un diagrama base (croquis) y que el usuario pueda interactuar con él para definir el alcance.
+
+2. Requerimiento: Estructura de "Anexos" y "Memorias"
+Gaby dice: "Cuando yo describo en el iGEO esta palabra de asunto, perdón, de anexo... yo pongo este texto aquí y por ende lo jala para acá".
+
+Lógica de Mapeo de Texto: Debes crear un objeto relacionado o un metadato donde se guarden "Textos Predeterminados" por tipo de servicio. Al seleccionar un servicio, el LWC debe precargar el "Anexo" técnico correspondiente para que Gaby solo lo edite, no lo escriba desde cero.
+
+Componente de "Asunto" Dinámico: Un campo que concatene automáticamente variables del registro (ej: "Anexo: [Tipo de Servicio] - [Nombre del Edificio]").
+
+3. Requerimiento: Gestión de Pólizas (Calendario Anual)
+Irving menciona que las pólizas tienen una "planeación anual" y saben cuántas veces irán al año.
+
+Generador de Plan de Trabajo: El LWC, al detectar que el tipo de venta es "Póliza", debe desplegar un selector de frecuencia (Mensual, Bimestral, etc.).
+
+Objeto "Frecuencia de Servicio": Debes desarrollar la lógica para que, una vez aprobado el presupuesto, Salesforce cree automáticamente los registros de "Órdenes de Trabajo" o "Citas" para todo el año en el calendario.
+
+4. Requerimiento: Control de Interfaz (Campos Condicionales)
+Gaby menciona: "trae esta parte de concepto... si yo quiero poner una introducción, me da ese campo. Si yo no lo activo, pues no me lo pone".
+
+UI Toggle: En tu LWC, usa lightning-input type="toggle" para secciones como Introducción, Garantías o Dossier. Si el toggle está en false, el componente debe ocultar el campo y el motor de PDF debe ignorar ese bloque de código para no dejar espacios en blanco.
+
+5. Requerimiento: Manejo de "Items" de Licenciamiento
+Abner menciona que Salesforce ya da un "ítem" en el licenciamiento que se puede ocupar.
+
+Uso de Objetos Estándar: Aunque el LWC sea personalizado, debes usar los objetos Quote y QuoteLineItem para asegurar la compatibilidad con el motor de precios de Salesforce, pero con una interfaz de usuario (UI) totalmente personalizada encima.
+
+Arquitectura de Objetos Sugerida para tu LWC:
+Edificios/Ubicaciones (Custom Object): Relacionado con la Cuenta, para que Gaby elija dónde se hace el servicio.
+
+Plantillas de Memoria (Custom Setting/Metadata): Para que los textos largos de "consideraciones" se carguen solos.
+
+LWC "Presupuestador Pro": La interfaz principal que une el diagrama de edificios, el cálculo de costos (materiales + margen) y el editor de textos.

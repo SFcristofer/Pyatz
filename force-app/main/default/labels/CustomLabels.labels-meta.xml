@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>PL_Access_Password</fullName>
+        <categories>Security</categories>
+        <language>es</language>
+        <protected>false</protected>
+        <shortDescription>Contraseña para acceso al P&L de Pyatz</shortDescription>
+        <value>PYATZ_PL_2026</value>
+    </labels>
+</CustomLabels>

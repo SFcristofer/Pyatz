@@ -1,0 +1,7 @@
+<html>
+<body>
+    <p>Estimado/a <strong>{!Quote.Account.Name}</strong>,</p>
+    <p>Es un gusto para <strong>PYATZ</strong> presentarle la siguiente propuesta técnica basada en el levantamiento realizado previamente. Nuestro compromiso es brindarle soluciones de ingeniería con la más alta calidad.</p>
+    <p>A continuación, detallamos los servicios solicitados para su revisión.</p>
+</body>
+</html>
