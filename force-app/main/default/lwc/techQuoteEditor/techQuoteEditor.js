@@ -44,12 +44,8 @@ export default class TechQuoteEditor extends LightningElement {
     @track selectedProductId = '';
     @track selectedProductName = '';
 
-    // LÍNEAS DE NEGOCIO - Inicializadas para evitar parpadeos vacíos
-    @track lineaNegocioOptions = [
-        { label: 'AMBIENTAL', value: 'AMBIENTAL' },
-        { label: 'RETARDANTE', value: 'RETARDANTE' },
-        { label: 'SELLADORES', value: 'SELLADORES' }
-    ];
+    // LÍNEAS DE NEGOCIO - Ahora se cargan dinámicamente desde Salesforce
+    @track lineaNegocioOptions = [];
 
     @track sedesData = [];
     @track selectedSedesIds = [];
@@ -435,12 +431,23 @@ export default class TechQuoteEditor extends LightningElement {
         const value = event.target.dataset.value;
         const checked = event.target.checked;
         
+        // Sincronizar el estado visual en el array trackeado
+        this.lineaNegocioOptions = this.lineaNegocioOptions.map(opt => {
+            if (opt.value === value) {
+                return { ...opt, checked: checked };
+            }
+            return opt;
+        });
+
+        // Actualizar la lista de strings para el filtro SOQL en Apex
         if (checked) {
-            this.selectedLines = [...this.selectedLines, value];
+            if (!this.selectedLines.includes(value)) {
+                this.selectedLines = [...this.selectedLines, value];
+            }
         } else {
             this.selectedLines = this.selectedLines.filter(line => line !== value);
         }
-        console.log('Líneas seleccionadas:', JSON.stringify(this.selectedLines));
+        console.log('Líneas seleccionadas para filtro:', JSON.stringify(this.selectedLines));
     }
 
     loadInitialData() {
