@@ -19,9 +19,11 @@ export default class TechQuoteEditor extends LightningElement {
     @track introduccion = '';
     @track introTemplates = [];
     @track warrantyTemplates = [];
+    @track pagoTemplates = [];
     @track serviceTemplates = [];
     @track clienteNombre = 'Seleccione una sede...'; // Nueva variable dinámica
     @track folio = 'Cargando...';
+    @track agenteNombre = '';
     @track jsonMarkers = '';
     @track warranty = '';
     @track planUrl = '';
@@ -115,6 +117,7 @@ export default class TechQuoteEditor extends LightningElement {
     @track pagoTransferencia = false;
     @track pagoTarjeta = false;
     @track trabajoPuntual = false;
+    @track ventaProducto = false;
     @track trabajoMantenimiento = false;
     @track observacionesPago = '';
 
@@ -133,6 +136,10 @@ export default class TechQuoteEditor extends LightningElement {
             .then(result => { this.warrantyTemplates = result; })
             .catch(error => console.error('Error cargando garantias:', error));
 
+        getEmailTemplatesByFolder({ folderName: 'Pyatz - Observaciones de Pago' })
+            .then(result => { this.pagoTemplates = result; })
+            .catch(error => console.error('Error cargando observaciones pago:', error));
+
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Servicios' })
             .then(result => { this.serviceTemplates = result; })
             .catch(error => console.error('Error cargando servicios:', error));
@@ -140,28 +147,25 @@ export default class TechQuoteEditor extends LightningElement {
 
     handleApplyTemplate(event) {
         const templateId = event.detail.value;
-        const targetField = event.target.dataset.field; // 'introduccion', 'warranty' o 'modalDescription'
-
-        if (!this.recordId) {
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Atención',
-                message: 'Para usar plantillas dinámicas, primero debe guardar un borrador (para tener un ID de referencia).',
-                variant: 'info'
-            }));
-            return;
-        }
+        const targetField = event.currentTarget.dataset.field; // Usar currentTarget para mayor precisión en dataset
 
         this.isLoading = true;
         renderTemplate({ templateId: templateId, quoteId: this.recordId })
             .then(result => {
                 if (targetField === 'introduccion') this.introduccion = result;
                 else if (targetField === 'warranty') this.warranty = result;
+                else if (targetField === 'observacionesPago') this.observacionesPago = result;
                 else if (targetField === 'modalDescription') this.modalDescription = result;
                 this.isLoading = false;
             })
             .catch(error => {
                 this.isLoading = false;
                 console.error('Error renderizando:', error);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error al cargar plantilla',
+                    message: error.body ? error.body.message : error.message,
+                    variant: 'error'
+                }));
             });
     }
 
@@ -267,6 +271,7 @@ export default class TechQuoteEditor extends LightningElement {
     handlePagoTransferenciaChange(event) { this.pagoTransferencia = event.target.checked; }
     handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
     handleTrabajoPuntualChange(event) { this.trabajoPuntual = event.target.checked; }
+    handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
     handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
     handleObservacionesPagoChange(event) { this.observacionesPago = event.target.value; }
 
@@ -274,8 +279,30 @@ export default class TechQuoteEditor extends LightningElement {
         this.warranty = event.target.value;
     }
 
+    get hasAnyDiscount() {
+        return this.serviciosData.some(item => !item.isSeparator && item.descuento > 0);
+    }
+
     get totalVentaNeto() {
         return this.serviciosData.reduce((sum, item) => sum + (item.totalSinImpuestos || 0), 0);
+    }
+
+    get totalDescuento() {
+        return this.serviciosData.reduce((sum, item) => {
+            if (item.isSeparator) return sum;
+            const subtotalBase = item.cantidad * item.importeUnitario;
+            const desc = subtotalBase - (item.totalSinImpuestos || 0);
+            return sum + (desc > 0 ? desc : 0);
+        }, 0);
+    }
+
+    get fechaFormateada() {
+        if (!this.fechaCreacion) return '';
+        const parts = this.fechaCreacion.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return this.fechaCreacion;
     }
 
     get margenActual() {
@@ -420,11 +447,15 @@ export default class TechQuoteEditor extends LightningElement {
         this.isLoading = true;
         getInitialData({ recordId: this.recordId })
             .then(result => {
+                if (result.agenteNombre) {
+                    this.agenteNombre = result.agenteNombre;
+                }
+                
                 if (result.quote) {
                     const q = result.quote;
                     this.asunto = q.Name || '';
                     this.introduccion = q.Introduction_Text__c || '';
-                    this.clienteNombre = q.Account ? q.Account.Name : 'Cliente no identificado';
+                    this.clienteNombre = q.Account ? q.Account.Name : (result.clienteNombre || 'Cliente no identificado');
                     this.folio = q.QuoteNumber || '';
                     this.warranty = q.Warranty_Text__c || '';
                     this.observacionesPago = q.Description || '';
@@ -618,9 +649,47 @@ export default class TechQuoteEditor extends LightningElement {
         }
     }
 
+    get metodoPagoDisplay() {
+        let metodos = [];
+        if (this.pagoTransferencia) metodos.push('Transferencia');
+        if (this.pagoTarjeta) metodos.push('Tarjeta');
+        return metodos.length > 0 ? metodos.join(' / ') : 'No especificado';
+    }
+
+    get tipoTrabajoDisplay() {
+        let tipos = [];
+        if (this.trabajoPuntual) tipos.push('Trabajo único/puntual');
+        if (this.ventaProducto) tipos.push('Venta producto');
+        if (this.trabajoMantenimiento) tipos.push('Contrato de mantenimiento');
+        return tipos.length > 0 ? tipos.join(', ') : 'No especificado';
+    }
+
+    // Método para limpiar etiquetas dinámicas en el texto
+    mergeDynamicTags(text) {
+        if (!text) return '';
+        const contacto = this.selectedSedesDisplay !== 'Sede Principal' ? this.selectedSedesDisplay : '________________';
+        const cuenta = this.clienteNombre !== 'Seleccione una sede...' ? this.clienteNombre : '________________';
+        
+        return text
+            .replace(/\[\[CONTACTO\]\]/g, contacto)
+            .replace(/\[\[CUENTA\]\]/g, cuenta)
+            .replace(/\{!Contact\.Name\}/g, contacto) // Soporte para sintaxis vieja
+            .replace(/\{!Quote\.Account\}/g, cuenta);  // Soporte para sintaxis vieja
+    }
+
+    get mergedIntroduccion() {
+        return this.mergeDynamicTags(this.introduccion);
+    }
+
+    get mergedWarranty() {
+        return this.mergeDynamicTags(this.warranty);
+    }
+
     handleNext() {
         if (this.currentStep === '4') this.handleFinalize();
-        else this.currentStep = (parseInt(this.currentStep) + 1).toString();
+        else {
+            this.currentStep = (parseInt(this.currentStep) + 1).toString();
+        }
     }
 
     handleSaveDraft() {
@@ -634,20 +703,25 @@ export default class TechQuoteEditor extends LightningElement {
     handleSave(statusValue) {
         this.isLoading = true;
         
-        // Obtener AccountId de la primera sede seleccionada si no tenemos recordId
+        // CORRECCIÓN CRÍTICA: Obtener AccountId y ContactId de la primera sede seleccionada
         let inferredAccountId = null;
-        if (!this.recordId && this.selectedSedesIds.length > 0) {
+        let inferredContactId = null;
+        if (this.selectedSedesIds.length > 0) {
             const firstSede = this.sedesData.find(s => String(s.Id) === String(this.selectedSedesIds[0]));
-            if (firstSede) inferredAccountId = firstSede.AccountId;
+            if (firstSede) {
+                inferredAccountId = firstSede.AccountId;
+                inferredContactId = firstSede.Id;
+            }
         }
 
         const payload = {
             quoteId: this.recordId,
             accountId: inferredAccountId,
+            contactId: inferredContactId,
             name: this.asunto,
             status: statusValue,
-            intro: this.introduccion,
-            warranty: this.warranty,
+            intro: this.mergeDynamicTags(this.introduccion),
+            warranty: this.mergeDynamicTags(this.warranty),
             businessLines: this.selectedLinesDisplay,
             technicalSedes: this.selectedSedesDisplay,
             lineItems: JSON.stringify(this.serviciosData),
@@ -655,15 +729,23 @@ export default class TechQuoteEditor extends LightningElement {
             showWarranty: this.showDescription,
             observacionesPago: this.observacionesPago,
             pagoTransferencia: this.pagoTransferencia,
-            pagoTarjeta: this.pagoTarjeta
+            pagoTarjeta: this.pagoTarjeta,
+            ventaProducto: this.ventaProducto
         };
 
         saveTechnicalData({ data: payload })
-        .then(() => {
+        .then((newId) => {
+            this.isLoading = false;
             const msg = statusValue === 'Draft' ? 'Borrador guardado' : 'Cotización finalizada con éxito';
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: msg, variant: 'success' }));
-            this.isLoading = false;
-            this.dispatchEvent(new CustomEvent('save'));
+            
+            // Actualizar el recordId y RECARGAR para traer nombres de DB
+            if (newId) {
+                this.recordId = newId;
+                this.loadInitialData(); // Recarga dinámica de nombres y agentes
+            }
+            
+            this.dispatchEvent(new CustomEvent('save', { detail: this.recordId }));
         })
         .catch(error => {
             console.error('Error detallado al guardar:', JSON.stringify(error));

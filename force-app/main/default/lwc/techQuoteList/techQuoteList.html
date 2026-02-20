@@ -122,23 +122,22 @@
             </div>
         </div>
 
-        <!-- MODAL DE OPCIONES DE CLONACIÓN -->
+        <!-- MODAL DE OPCIONES DE CLONACIÓN (ESTILO IGEOAPP) -->
         <template if:true={showCloneModal}>
             <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_x-small">
                 <div class="slds-modal__container">
                     <header class="slds-modal__header bg-blue-dark text-white">
-                        <h2 class="slds-text-heading_medium">Opciones de Clonación</h2>
-                        <p class="slds-text-title">Seleccione qué información desea duplicar del presupuesto original.</p>
+                        <h2 class="slds-text-heading_medium">Clonar Presupuesto</h2>
+                        <p class="slds-text-title">Duplicar información técnica para un nuevo destino.</p>
                     </header>
                     <div class="slds-modal__content slds-p-around_medium bg-light-gray">
-                        <div class="slds-p-around_small bg-white border-all radius-8">
+                        
+                        <!-- OPCIONES DE CONTENIDO -->
+                        <div class="slds-p-around_small bg-white border-all radius-8 slds-m-bottom_medium">
+                            <p class="slds-text-title_bold slds-m-bottom_small">¿Qué desea copiar?</p>
                             <div class="slds-grid slds-grid_vertical">
                                 <lightning-input type="checkbox" label="Incluir Partidas (Servicios y Artículos)" 
                                     checked={cloneOptions.copyLineItems} onchange={handleCloneOptionChange} data-name="copyLineItems"
-                                    class="slds-m-bottom_x-small">
-                                </lightning-input>
-                                <lightning-input type="checkbox" label="Incluir Sedes y Ubicaciones" 
-                                    checked={cloneOptions.copySedes} onchange={handleCloneOptionChange} data-name="copySedes"
                                     class="slds-m-bottom_x-small">
                                 </lightning-input>
                                 <lightning-input type="checkbox" label="Incluir Textos (Introducción y Garantía)" 
@@ -146,6 +145,64 @@
                                 </lightning-input>
                             </div>
                         </div>
+
+                        <!-- DESTINO: CLIENTE O PROSPECTO -->
+                        <div class="slds-p-around_small bg-white border-all radius-8">
+                            <p class="slds-text-title_bold slds-m-bottom_small">Destino del Presupuesto</p>
+                            
+                            <lightning-radio-group name="destinyOption"
+                                label="Seleccione el tipo de destino"
+                                options={destinyOptions}
+                                value={destinyValue}
+                                onchange={handleDestinyChange}
+                                type="button"
+                                variant="label-hidden"
+                                class="slds-m-bottom_medium">
+                            </lightning-radio-group>
+
+                            <!-- Buscador Dinámico según Opción -->
+                            <div style="position: relative;">
+                                <template if:true={isProspecto}>
+                                    <lightning-input type="search" label="Buscar Cliente Potencial (Prospecto)" 
+                                        placeholder="Busque por nombre o empresa..."
+                                        onchange={handleProspectoSearch}
+                                        value={selectedSearchName}>
+                                    </lightning-input>
+                                </template>
+                                <template if:false={isProspecto}>
+                                    <lightning-input type="search" label="Buscar Sede (Sucursal / Contacto)" 
+                                        placeholder="Busque por nombre de sede o cliente..."
+                                        onchange={handleSedeSearch}
+                                        value={selectedSearchName}>
+                                    </lightning-input>
+                                </template>
+
+                                <!-- Resultados de Búsqueda -->
+                                <template if:true={searchResults.length}>
+                                    <div class="slds-dropdown slds-dropdown_fluid slds-p-around_xx-small" style="position: absolute; display: block; z-index: 9999;">
+                                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                            <template for:each={searchResults} for:item="res">
+                                                <li key={res.id} role="presentation" class="slds-listbox__item" onclick={handleResultSelect} data-id={res.id} data-name={res.name}>
+                                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain" role="option">
+                                                        <span class="slds-media__body">
+                                                            <span class="slds-truncate">{res.name}</span>
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template if:true={targetId}>
+                                <div class="slds-m-top_small slds-p-around_x-small bg-light-gray radius-8 slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:check" size="xx-small" variant="success" class="slds-m-right_x-small"></lightning-icon>
+                                    <span class="slds-text-body_small">Seleccionado: <strong>{selectedSearchName}</strong></span>
+                                </div>
+                            </template>
+                        </div>
+
                     </div>
                     <footer class="slds-modal__footer">
                         <lightning-button label="Cancelar" onclick={handleCloseCloneModal} class="slds-m-right_x-small"></lightning-button>

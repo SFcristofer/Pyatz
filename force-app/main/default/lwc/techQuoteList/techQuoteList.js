@@ -3,21 +3,29 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getQuotesList from '@salesforce/apex/QuoteTechnicalController.getQuotesList';
 import getQuoteStats from '@salesforce/apex/QuoteTechnicalController.getQuoteStats';
 import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
+import searchSedes from '@salesforce/apex/QuoteTechnicalController.searchSedes';
+import searchProspectos from '@salesforce/apex/QuoteTechnicalController.searchProspectos';
 
 export default class TechQuoteList extends LightningElement {
     @track quotes = [];
     @track stats = { Total: 0, Aprobada: 0, Pendiente: 0, Rechazada: 0, Actualizada: 0 };
     @track isLoading = true;
 
-    // CLONING STATE
+    // CLONING STATE (IGEOAPP STYLE)
     @track showCloneModal = false;
     @track isLoadingClone = false;
     @track selectedQuoteId = null;
-    @track cloneOptions = {
-        copyLineItems: true,
-        copySedes: true,
-        copyTexts: true
-    };
+    @track cloneOptions = { copyLineItems: true, copyTexts: true };
+    
+    @track destinyValue = 'original'; // 'original' o 'new'
+    @track targetId = null;
+    @track searchResults = [];
+    @track selectedSearchName = '';
+
+    destinyOptions = [
+        { label: 'Sede Existente', value: 'original' },
+        { label: 'Cliente Potencial', value: 'new' }
+    ];
 
     columns = [
         { label: 'Folio', fieldName: 'folio', type: 'text', initialWidth: 100 },
@@ -53,10 +61,9 @@ export default class TechQuoteList extends LightningElement {
     @wire(getQuoteStats)
     wiredStats({ error, data }) {
         if (data) {
-            console.log('Estadísticas recibidas de Apex:', JSON.stringify(data));
             this.stats = data;
         } else if (error) {
-            console.error('Error en getQuoteStats:', error);
+            console.error('Error stats:', error);
         }
     }
 
@@ -79,7 +86,6 @@ export default class TechQuoteList extends LightningElement {
     get updatedCount() { return this.stats.Actualizada; }
 
     handleNewQuote() {
-        // Disparamos un evento para que el padre cambie al modo editor
         this.dispatchEvent(new CustomEvent('createnew'));
     }
 
@@ -94,7 +100,42 @@ export default class TechQuoteList extends LightningElement {
         }
     }
 
-    // CLONING LOGIC
+    // CLONING LOGIC (IGEOAPP STYLE)
+    get isProspecto() { return this.destinyValue === 'new'; }
+
+    handleDestinyChange(event) {
+        this.destinyValue = event.target.value;
+        this.targetId = null;
+        this.selectedSearchName = '';
+        this.searchResults = [];
+    }
+
+    handleSedeSearch(event) {
+        const searchTerm = event.target.value;
+        this.selectedSearchName = searchTerm;
+        if (searchTerm.length >= 3) {
+            searchSedes({ searchTerm: searchTerm })
+                .then(result => { this.searchResults = result; })
+                .catch(error => console.error('Error sedes:', error));
+        } else { this.searchResults = []; }
+    }
+
+    handleProspectoSearch(event) {
+        const searchTerm = event.target.value;
+        this.selectedSearchName = searchTerm;
+        if (searchTerm.length >= 3) {
+            searchProspectos({ searchTerm: searchTerm })
+                .then(result => { this.searchResults = result; })
+                .catch(error => console.error('Error prospectos:', error));
+        } else { this.searchResults = []; }
+    }
+
+    handleResultSelect(event) {
+        this.targetId = event.currentTarget.dataset.id;
+        this.selectedSearchName = event.currentTarget.dataset.name;
+        this.searchResults = [];
+    }
+
     handleCloneOptionChange(event) {
         const name = event.target.dataset.name;
         this.cloneOptions = { ...this.cloneOptions, [name]: event.target.checked };
@@ -103,11 +144,26 @@ export default class TechQuoteList extends LightningElement {
     handleCloseCloneModal() {
         this.showCloneModal = false;
         this.selectedQuoteId = null;
+        this.targetId = null;
+        this.selectedSearchName = '';
+        this.destinyValue = 'original';
     }
 
     handleExecuteClone() {
+        if (!this.targetId && !this.selectedSearchName.includes('CLON')) {
+            // Permitimos clonar sin destino si no se cambió nada (clonación rápida en el mismo lugar)
+        }
+
         this.isLoadingClone = true;
-        cloneQuote({ quoteId: this.selectedQuoteId, options: this.cloneOptions })
+        const sedeId = this.isProspecto ? null : this.targetId;
+        const prospectoId = this.isProspecto ? this.targetId : null;
+
+        cloneQuote({ 
+            quoteId: this.selectedQuoteId, 
+            options: this.cloneOptions,
+            targetSedeId: sedeId,
+            targetProspectoId: prospectoId
+        })
             .then(newQuoteId => {
                 this.dispatchEvent(new ShowToastEvent({
                     title: 'Éxito',
@@ -116,8 +172,6 @@ export default class TechQuoteList extends LightningElement {
                 }));
                 this.isLoadingClone = false;
                 this.showCloneModal = false;
-                
-                // Redirigir al editor con el nuevo ID
                 this.dispatchEvent(new CustomEvent('editquote', { detail: newQuoteId }));
             })
             .catch(error => {

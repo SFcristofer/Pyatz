@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Notas de pago generales con datos bancarios BBVA</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Notas Clientes General</name>
+    <style>none</style>
+    <subject>Notas Clientes General</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

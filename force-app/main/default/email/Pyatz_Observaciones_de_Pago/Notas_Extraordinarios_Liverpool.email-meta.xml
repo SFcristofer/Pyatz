@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Notas específicas para clientes Liverpool con número de proveedor</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Notas extraordinarios Liverpool</name>
+    <style>none</style>
+    <subject>Notas extraordinarios Liverpool</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

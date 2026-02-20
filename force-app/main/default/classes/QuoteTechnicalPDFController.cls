@@ -6,10 +6,13 @@ public with sharing class QuoteTechnicalPDFController {
         Id quoteId = stdController.getId();
         
         // 1. Cargamos datos y partidas
-        this.technicalQuote = [SELECT Id, QuoteNumber, Account.Name, Opportunity.Name, 
+        this.technicalQuote = [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Opportunity.Name, 
                                      Show_Introduction__c, Introduction_Text__c, 
                                      Show_Warranty__c, Warranty_Text__c,
-                                     (SELECT Id, Product2.Name, Description FROM QuoteLineItems)
+                                     Business_Lines_Selected__c, Technical_Sedes__c, CreatedBy.Name, CreatedBy.Email, CreatedDate,
+                                     Subtotal, Tax, TotalPrice, Description,
+                                     (SELECT Id, Product2.Name, Description, Quantity, ListPrice, UnitPrice, Discount, TotalPrice 
+                                      FROM QuoteLineItems)
                               FROM Quote 
                               WHERE Id = :quoteId];
         

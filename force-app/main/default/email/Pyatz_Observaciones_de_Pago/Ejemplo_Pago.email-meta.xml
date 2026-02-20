@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Plantilla de ejemplo para observaciones de pago</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Ejemplo Pago</name>
+    <style>none</style>
+    <subject>Detalles de Pago</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

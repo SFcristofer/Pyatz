@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Notas para pólizas con múltiples pagos de distintos importes</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Notas pólizas diversos importes</name>
+    <style>none</style>
+    <subject>Notas pólizas diversos importes</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

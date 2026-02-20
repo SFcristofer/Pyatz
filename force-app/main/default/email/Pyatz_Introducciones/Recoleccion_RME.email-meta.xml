@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Plantilla para recolección de RME con etiquetas dinámicas [[CONTACTO]] y [[CUENTA]]</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>B. Recolección de RME</name>
+    <style>none</style>
+    <subject>Propuesta Técnica: Recolección de RME</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Plantilla para limpieza de trampas de grasa con etiquetas dinámicas [[CONTACTO]] y [[CUENTA]]</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>A. Limpieza de Trampa de Grasa con RME</name>
+    <style>none</style>
+    <subject>Propuesta Técnica: Limpieza de Trampa de Grasa</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

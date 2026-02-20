@@ -57,20 +57,28 @@ public with sharing class QuoteTechnicalController {
         if(recordId != null) {
             String sObjectType = recordId.getSObjectType().getDescribe().getName();
             if(sObjectType == 'Quote') {
-                Quote q = [SELECT Id, Name, QuoteNumber, AccountId, Status, Description, 
+                Quote q = [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Status, Description, 
                            Selected_Plan_URL__c, Markers_Data__c, Introduction_Text__c, 
                            Warranty_Text__c, Business_Lines_Selected__c, Technical_Sedes__c,
-                           Show_Introduction__c, Show_Warranty__c, ExpirationDate,
+                           Show_Introduction__c, Show_Warranty__c, ExpirationDate, CreatedBy.Name, CreatedDate,
                            (SELECT Id, Product2.Name, PricebookEntryId, Quantity, UnitPrice, ListPrice, Discount, Description, TotalPrice 
                             FROM QuoteLineItems)
                            FROM Quote WHERE Id = :recordId];
                 accountId = q.AccountId;
                 result.put('quote', q);
+                result.put('clienteNombre', q.Account.Name != null ? q.Account.Name : 'Cliente no identificado');
+                result.put('agenteNombre', q.CreatedBy.Name);
+                result.put('fechaCreacion', q.CreatedDate.format('yyyy-MM-dd'));
             } else if(sObjectType == 'Opportunity') {
                 Opportunity opp = [SELECT Id, Name, AccountId, Account.Name, Pricebook2Id FROM Opportunity WHERE Id = :recordId];
                 accountId = opp.AccountId;
                 result.put('opportunity', opp);
+                result.put('agenteNombre', UserInfo.getName());
+                result.put('fechaCreacion', Datetime.now().format('yyyy-MM-dd'));
             }
+        } else {
+            result.put('agenteNombre', UserInfo.getName());
+            result.put('fechaCreacion', Datetime.now().format('yyyy-MM-dd'));
         }
 
         // NECESIDADES (Si hay cuenta)
@@ -131,14 +139,12 @@ public with sharing class QuoteTechnicalController {
 
         String query = '%' + searchTerm + '%';
         
-        // Construcción dinámica de la consulta
         String soql = 'SELECT Id, Product2.Name, Product2.Description, UnitPrice ' +
                       'FROM PricebookEntry ' +
                       'WHERE Pricebook2Id = :pricebookId ' +
                       'AND (Product2.Name LIKE :query OR Product2.ProductCode LIKE :query) ' +
                       'AND IsActive = true ';
 
-        // Filtro por Líneas de Negocio (Family)
         if (!allowOtherLines && businessLines != null && !businessLines.isEmpty()) {
             soql += 'AND Product2.Family IN :businessLines ';
         }
@@ -175,7 +181,6 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> getEmailTemplatesByFolder(String folderName) {
         List<Map<String, String>> results = new List<Map<String, String>>();
-        // Buscamos plantillas que pertenezcan a carpetas que empiecen con 'Pyatz'
         for (EmailTemplate et : [SELECT Id, Name, Subject, Description 
                                 FROM EmailTemplate 
                                 WHERE Folder.Name = :folderName AND IsActive = true
@@ -192,15 +197,20 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled
     public static String renderTemplate(Id templateId, Id quoteId) {
         try {
-            Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, null, quoteId);
-            String htmlBody = rendered.getHtmlBody();
+            if (quoteId == null) {
+                EmailTemplate et = [SELECT HtmlValue, Body FROM EmailTemplate WHERE Id = :templateId];
+                return et.HtmlValue != null ? et.HtmlValue : et.Body;
+            }
             
-            // Limpieza: Extraer solo lo que está entre <body> y </body> para evitar etiquetas anidadas
-            if (htmlBody.contains('<body')) {
+            Quote q = [SELECT ContactId FROM Quote WHERE Id = :quoteId];
+            
+            Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, q.ContactId, quoteId);
+            String htmlBody = rendered.getHtmlBody();
+            if (htmlBody != null && htmlBody.contains('<body')) {
                 htmlBody = htmlBody.substringAfter('>');
                 htmlBody = htmlBody.substringBeforeLast('</body>');
             }
-            return htmlBody.trim();
+            return htmlBody != null ? htmlBody.trim() : '';
         } catch (Exception e) {
             throw new AuraHandledException('Error al procesar la plantilla: ' + e.getMessage());
         }
@@ -208,15 +218,15 @@ public with sharing class QuoteTechnicalController {
 
     @AuraEnabled
     public static Boolean validatePLPassword(String passwordAttempt) {
-        // Obtenemos la contraseña desde el Custom Label
         String correctPassword = System.Label.PL_Access_Password;
         return passwordAttempt == correctPassword;
     }
 
     @AuraEnabled
-    public static void saveTechnicalData(Map<String, Object> data) {
+    public static Id saveTechnicalData(Map<String, Object> data) {
         Id recordId = (Id)data.get('quoteId');
         Id accountId = (Id)data.get('accountId');
+        Id contactId = (Id)data.get('contactId');
         String name = (String)data.get('name');
         String status = (String)data.get('status');
         String intro = (String)data.get('intro');
@@ -228,10 +238,8 @@ public with sharing class QuoteTechnicalController {
         Boolean showWarranty = (Boolean)data.get('showWarranty');
         String observacionesPago = (String)data.get('observacionesPago');
 
-        // Objeto para la operación
         Quote q;
 
-        // 1. CASO ACTUALIZACIÓN (Si ya es una Quote)
         if (recordId != null && recordId.getSObjectType().getDescribe().getName() == 'Quote') {
             q = new Quote(
                 Id = recordId,
@@ -245,12 +253,10 @@ public with sharing class QuoteTechnicalController {
                 Show_Warranty__c = showWarranty,
                 Description = observacionesPago
             );
+            if (contactId != null) q.ContactId = contactId;
             update q;
-        } 
-        // 2. CASO CREACIÓN
-        else {
+        } else {
             Id standardPricebookId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1].Id;
-            
             q = new Quote(
                 Name = name,
                 Status = status,
@@ -265,19 +271,34 @@ public with sharing class QuoteTechnicalController {
                 Pricebook2Id = standardPricebookId
             );
 
-            // Intentar recuperar datos de cuenta/contacto
-            Account acc;
-            if (accountId != null) {
-                acc = [SELECT Id, Name, (SELECT Id, Name, Phone, Email, MailingStreet, MailingCity, MailingState FROM Contacts LIMIT 1) FROM Account WHERE Id = :accountId];
+            if (contactId != null) {
+                Contact con = [SELECT Id, AccountId, Name, Phone, Email, MailingStreet, MailingCity, MailingState, Account.Name FROM Contact WHERE Id = :contactId];
+                q.ContactId = con.Id;
+                q.Phone = con.Phone;
+                q.Email = con.Email;
+                q.BillingName = con.Account.Name;
+                q.BillingStreet = con.MailingStreet;
+                q.BillingCity = con.MailingCity;
+                q.BillingState = con.MailingState;
+                accountId = con.AccountId;
+            } else if (accountId != null) {
+                Account acc = [SELECT Id, Name, (SELECT Id, Name, Phone, Email, MailingStreet, MailingCity, MailingState FROM Contacts LIMIT 1) FROM Account WHERE Id = :accountId];
+                if (!acc.Contacts.isEmpty()) {
+                    Contact mainCon = acc.Contacts[0];
+                    q.ContactId = mainCon.Id;
+                    q.Phone = mainCon.Phone;
+                    q.Email = mainCon.Email;
+                    q.BillingName = acc.Name;
+                    q.BillingStreet = mainCon.MailingStreet;
+                    q.BillingCity = mainCon.MailingCity;
+                    q.BillingState = mainCon.MailingState;
+                }
             }
 
             if (recordId != null && recordId.getSObjectType().getDescribe().getName() == 'Opportunity') {
                 Opportunity opp = [SELECT Id, Pricebook2Id, AccountId FROM Opportunity WHERE Id = :recordId];
                 q.OpportunityId = opp.Id;
                 if (opp.Pricebook2Id != null) q.Pricebook2Id = opp.Pricebook2Id;
-                if (acc == null) {
-                    acc = [SELECT Id, Name, (SELECT Id, Name, Phone, Email, MailingStreet, MailingCity, MailingState FROM Contacts LIMIT 1) FROM Account WHERE Id = :opp.AccountId];
-                }
             } else if (accountId != null) {
                 Opportunity newOpp = new Opportunity(
                     Name = 'Op. Técnica - ' + name, AccountId = accountId,
@@ -287,38 +308,21 @@ public with sharing class QuoteTechnicalController {
                 q.OpportunityId = newOpp.Id;
             }
 
-            if (acc != null && !acc.Contacts.isEmpty()) {
-                Contact mainCon = acc.Contacts[0];
-                q.ContactId = mainCon.Id;
-                q.Phone = mainCon.Phone;
-                q.Email = mainCon.Email;
-                q.BillingName = acc.Name;
-                q.BillingStreet = mainCon.MailingStreet;
-                q.BillingCity = mainCon.MailingCity;
-                q.BillingState = mainCon.MailingState;
-            }
-
             insert q;
             recordId = q.Id;
         }
 
-        // PROCESAR PARTIDAS (QuoteLineItems)
         if (String.isNotBlank(lineItemsJson)) {
             List<Object> items = (List<Object>)JSON.deserializeUntyped(lineItemsJson);
             List<QuoteLineItem> linesToInsert = new List<QuoteLineItem>();
-            
-            // Limpiamos partidas anteriores si el registro ya existía
             delete [SELECT Id FROM QuoteLineItem WHERE QuoteId = :recordId];
-
             for (Object obj : items) {
                 Map<String, Object> item = (Map<String, Object>)obj;
                 if (item.get('isSeparator') != null && (Boolean)item.get('isSeparator')) continue;
-
                 Decimal cantidad = Decimal.valueOf(String.valueOf(item.get('cantidad')));
                 Decimal unitPrice = Decimal.valueOf(String.valueOf(item.get('importeUnitario')));
                 Decimal descuento = item.get('descuento') != null ? Decimal.valueOf(String.valueOf(item.get('descuento'))) : 0;
                 String tipoDescuento = (String)item.get('tipoDescuento');
-
                 QuoteLineItem qli = new QuoteLineItem(
                     QuoteId = recordId,
                     PricebookEntryId = (Id)item.get('productId'),
@@ -326,65 +330,102 @@ public with sharing class QuoteTechnicalController {
                     UnitPrice = unitPrice,
                     Description = (String)item.get('detalleTecnico')
                 );
-
-                // Si es porcentaje, usamos el campo nativo de Salesforce
-                if (tipoDescuento == 'porcentaje' && descuento > 0) {
-                    qli.Discount = descuento;
-                } 
-                // Si es monto fijo, lo manejamos restándolo del UnitPrice para que el TotalPrice sea correcto
-                else if (tipoDescuento == 'monto' && descuento > 0) {
-                    qli.UnitPrice = unitPrice - (descuento / cantidad);
-                }
-
+                if (tipoDescuento == 'porcentaje' && descuento > 0) qli.Discount = descuento;
+                else if (tipoDescuento == 'monto' && descuento > 0) qli.UnitPrice = unitPrice - (descuento / cantidad);
                 linesToInsert.add(qli);
             }
             if (!linesToInsert.isEmpty()) insert linesToInsert;
         }
+        return recordId;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchSedes(String searchTerm) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        String query = '%' + searchTerm + '%';
+        for (Contact con : [SELECT Id, Name, Account.Name, MailingCity FROM Contact 
+                           WHERE Name LIKE :query OR Account.Name LIKE :query LIMIT 10]) {
+            Map<String, String> res = new Map<String, String>();
+            res.put('id', con.Id);
+            res.put('name', con.Name + ' [' + con.Account.Name + '] - ' + (con.MailingCity != null ? con.MailingCity : 'N/A'));
+            results.add(res);
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchProspectos(String searchTerm) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        String query = '%' + searchTerm + '%';
+        for (Lead l : [SELECT Id, Name, Company, City FROM Lead WHERE Name LIKE :query OR Company LIKE :query LIMIT 10]) {
+            Map<String, String> res = new Map<String, String>();
+            res.put('id', l.Id);
+            res.put('name', l.Name + ' (' + l.Company + ') - ' + (l.City != null ? l.City : 'N/A'));
+            results.add(res);
+        }
+        return results;
     }
 
     @AuraEnabled
-    public static Id cloneQuote(Id quoteId, Map<String, Boolean> options) {
+    public static Id cloneQuote(Id quoteId, Map<String, Boolean> options, Id targetSedeId, Id targetProspectoId) {
         try {
-            // 1. Obtener datos del original
             Quote original = [SELECT Id, Name, AccountId, OpportunityId, Pricebook2Id, 
                                      Introduction_Text__c, Warranty_Text__c, Business_Lines_Selected__c, 
                                      Technical_Sedes__c, Show_Introduction__c, Show_Warranty__c,
                                      Description, Phone, Email, BillingName, BillingStreet, BillingCity, BillingState,
                                      (SELECT Id, PricebookEntryId, Quantity, UnitPrice, ListPrice, Discount, Description FROM QuoteLineItems)
                               FROM Quote WHERE Id = :quoteId];
-
-            // 2. Crear el clon
-            Quote clone = original.clone(false, true, false, false);
-            clone.Name = 'CLON: ' + original.Name;
-            clone.Status = 'Draft';
-            clone.Source_Quote__c = original.Id; // Vinculación para rastreo
-            
-            // 3. Aplicar opciones de clonación
-            if (options.get('copyTexts') == false) {
-                clone.Introduction_Text__c = '';
-                clone.Warranty_Text__c = '';
+            Id finalAccountId;
+            Id finalContactId;
+            Id finalOpportunityId;
+            if (targetProspectoId != null) {
+                Lead l = [SELECT Id, Name, Company, Phone, Email, Street, City, State FROM Lead WHERE Id = :targetProspectoId];
+                Account acc = new Account(Name = l.Company, Phone = l.Phone);
+                insert acc;
+                finalAccountId = acc.Id;
+                Contact con = new Contact(FirstName = l.Name.substringBefore(' '), LastName = l.Name.substringAfter(' '), AccountId = acc.Id, Email = l.Email, Phone = l.Phone, MailingStreet = l.Street, MailingCity = l.City, MailingState = l.State);
+                insert con;
+                finalContactId = con.Id;
+                Opportunity opp = new Opportunity(Name = 'Op. Prospecto - ' + original.Name, AccountId = acc.Id, StageName = 'Prospecting', CloseDate = Date.today().addDays(30), Pricebook2Id = original.Pricebook2Id);
+                insert opp;
+                finalOpportunityId = opp.Id;
+            } else if (targetSedeId != null) {
+                Contact con = [SELECT Id, Name, AccountId FROM Contact WHERE Id = :targetSedeId];
+                finalAccountId = con.AccountId;
+                finalContactId = con.Id;
+                Opportunity opp = new Opportunity(Name = 'Op. Clonada - ' + original.Name, AccountId = finalAccountId, StageName = 'Prospecting', CloseDate = Date.today().addDays(30), Pricebook2Id = original.Pricebook2Id);
+                insert opp;
+                finalOpportunityId = opp.Id;
+            } else {
+                finalAccountId = original.AccountId;
+                finalContactId = original.ContactId;
+                finalOpportunityId = original.OpportunityId;
             }
-            if (options.get('copySedes') == false) {
-                clone.Technical_Sedes__c = '';
+            Quote clone = new Quote(
+                Name = 'CLON: ' + original.Name, Status = 'Draft', Source_Quote__c = original.Id,
+                OpportunityId = finalOpportunityId, ContactId = finalContactId, ExpirationDate = Date.today().addDays(30),
+                Pricebook2Id = original.Pricebook2Id, Business_Lines_Selected__c = original.Business_Lines_Selected__c,
+                Show_Introduction__c = original.Show_Introduction__c, Show_Warranty__c = original.Show_Warranty__c
+            );
+            if (finalContactId != null) {
+                Contact c = [SELECT Name, Phone, Email, MailingStreet, MailingCity, MailingState FROM Contact WHERE Id = :finalContactId];
+                clone.Phone = c.Phone; clone.Email = c.Email; clone.BillingStreet = c.MailingStreet; clone.BillingCity = c.MailingCity; clone.BillingState = c.MailingState;
+                clone.Technical_Sedes__c = c.Name + ' (' + (c.MailingCity != null ? c.MailingCity : '') + ')';
             }
-
+            if (options.get('copyTexts') == true) {
+                clone.Introduction_Text__c = original.Introduction_Text__c;
+                clone.Warranty_Text__c = original.Warranty_Text__c;
+            }
             insert clone;
-
-            // 4. Clonar Partidas si se solicitó
             if (options.get('copyLineItems') == true && !original.QuoteLineItems.isEmpty()) {
                 List<QuoteLineItem> clonedLines = new List<QuoteLineItem>();
                 for (QuoteLineItem oli : original.QuoteLineItems) {
-                    QuoteLineItem cli = oli.clone(false, true, false, false);
-                    cli.QuoteId = clone.Id;
-                    clonedLines.add(cli);
+                    clonedLines.add(new QuoteLineItem(QuoteId = clone.Id, PricebookEntryId = oli.PricebookEntryId, Quantity = oli.Quantity, UnitPrice = oli.UnitPrice, Discount = oli.Discount, Description = oli.Description));
                 }
                 insert clonedLines;
             }
-
             return clone.Id;
-        } catch (Exception e) {
-            throw new AuraHandledException('Error al clonar el presupuesto: ' + e.getMessage());
-        }
+        } catch (Exception e) { throw new AuraHandledException('Error al clonar: ' + e.getMessage()); }
     }
 
     @AuraEnabled(cacheable=true)
