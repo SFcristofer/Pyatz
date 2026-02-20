@@ -647,6 +647,7 @@ export default class TechQuoteEditor extends LightningElement {
         if (product) {
             this.selectedProductId = product.id;
             this.selectedProductName = product.name;
+            this.modalDescription = product.description || ''; // Inyección automática de la descripción del producto
             this.searchResults = []; 
             this.modalTableData = this.modalTableData.map(row => {
                 let newRow = { ...row, importeTotal: product.unitPrice };

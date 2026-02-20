@@ -241,14 +241,7 @@
                                 <tbody>
                                     <template for:each={serviciosData} for:item="item">
                                         <tr key={item.id}>
-                                            <td>
-                                                <strong>{item.descripcion}</strong>
-                                                <template if:true={item.detalleTecnicoHtml}>
-                                                    <div class="slds-m-top_xx-small slds-text-color_weak" style="font-size: 8pt; font-style: italic;">
-                                                        <lightning-formatted-rich-text value={item.detalleTecnicoHtml}></lightning-formatted-rich-text>
-                                                    </div>
-                                                </template>
-                                            </td>
+                                            <td><strong>{item.descripcion}</strong></td>
                                             <td style="text-align: center;">{item.cantidad}</td>
                                             <td style="text-align: right;"><lightning-formatted-number value={item.importeUnitario} format-style="currency"></lightning-formatted-number></td>
                                             <template if:true={hasAnyDiscount}><td style="color: #d8000c;">{item.descuentoDisplay}</td></template>
@@ -257,6 +250,20 @@
                                     </template>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- SECCIÓN: DETALLES TÉCNICOS ADICIONALES (FUERA DE TABLA) -->
+                        <div class="slds-p-horizontal_medium slds-m-top_medium">
+                            <template for:each={serviciosData} for:item="item">
+                                <template if:true={item.detalleTecnicoHtml}>
+                                    <div key={item.id} class="slds-m-bottom_small" style="border-bottom: 0.5pt solid #eee; padding-bottom: 4pt;">
+                                        <div style="font-weight: bold; color: #0070d2; font-size: 9pt;">Detalle: {item.descripcion}</div>
+                                        <div style="font-size: 9pt; color: #333; margin-top: 2pt; text-align: justify;">
+                                            <lightning-formatted-rich-text value={item.detalleTecnicoHtml}></lightning-formatted-rich-text>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
                         </div>
 
                         <div class="slds-grid slds-grid_align-end slds-p-horizontal_medium slds-m-top_medium">
