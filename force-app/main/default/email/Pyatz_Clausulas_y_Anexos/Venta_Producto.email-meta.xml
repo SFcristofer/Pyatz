@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Cláusulas específicas para la venta de productos</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Venta producto</name>
+    <style>none</style>
+    <subject>Venta producto</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

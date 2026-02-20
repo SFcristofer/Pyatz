@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Cláusulas generales para pólizas de clientes</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Pólizas clientes general</name>
+    <style>none</style>
+    <subject>Pólizas clientes general</subject>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

@@ -132,9 +132,9 @@ export default class TechQuoteEditor extends LightningElement {
             .then(result => { this.introTemplates = result; })
             .catch(error => console.error('Error cargando intros:', error));
         
-        getEmailTemplatesByFolder({ folderName: 'Pyatz - Garantias' })
+        getEmailTemplatesByFolder({ folderName: 'Pyatz - Clausulas y Anexos' })
             .then(result => { this.warrantyTemplates = result; })
-            .catch(error => console.error('Error cargando garantias:', error));
+            .catch(error => console.error('Error cargando clausulas:', error));
 
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Observaciones de Pago' })
             .then(result => { this.pagoTemplates = result; })

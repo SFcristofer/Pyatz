@@ -55,6 +55,7 @@
                 <div class="line-business">{!technicalQuote.Business_Lines_Selected__c}</div>
 
                 <div style="margin-top: 5pt; font-size: 10pt;">
+                    <div><strong>Número de Presupuesto:</strong> {!technicalQuote.QuoteNumber}</div>
                     <div><strong>Creado por:</strong> {!technicalQuote.CreatedBy.Name}</div>
                     <div><strong>Fecha:</strong> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!technicalQuote.CreatedDate}" /></apex:outputText></div>
                 </div>
