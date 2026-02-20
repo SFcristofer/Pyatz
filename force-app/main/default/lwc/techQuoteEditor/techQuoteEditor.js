@@ -528,40 +528,27 @@ export default class TechQuoteEditor extends LightningElement {
                         this.updateBusinessLineCheckboxes();
                     }
 
-                    // CARGAR PARTIDAS EXISTENTES
-                    if (q.QuoteLineItems) {
-                        this.serviciosData = q.QuoteLineItems.map(item => {
-                            let descDisp = '-';
-                            if (item.Discount && item.Discount > 0) {
-                                descDisp = `${item.Discount}%`;
-                            } else if (item.ListPrice > item.UnitPrice) {
-                                descDisp = `$${(item.ListPrice - item.UnitPrice).toFixed(2)}`;
-                            }
-
-                            return {
-                                id: item.Id,
-                                productId: item.PricebookEntryId,
-                                descripcion: item.Product2.Name,
-                                detalleTecnico: item.Description,
-                                detalleTecnicoHtml: item.Description,
-                                cantidad: item.Quantity,
-                                importeUnitario: item.ListPrice || item.UnitPrice,
-                                descuentoDisplay: descDisp,
-                                totalSinImpuestos: item.TotalPrice,
-                                sedes: 'Cargada de DB',
-                                isSeparator: false
-                            };
-                        });
-                        this.calculateTotals();
-                    }
-
+                    // RECUPERAR ANÁLISIS P&L Y MARKERS (CON DECODIFICACIÓN DE SEGURIDAD)
                     const rawMarkers = q.Markers_Data__c;
                     if (rawMarkers) {
-                        // Si es un objeto, lo convertimos a string. Si ya es el error "[object Object]", lo ignoramos.
+                        try {
+                            // Intentar decodificar Base64 si es posible, si no procesar como JSON normal
+                            let decodedData;
+                            try {
+                                decodedData = JSON.parse(window.atob(rawMarkers)); // Decodificar Base64
+                            } catch (e) {
+                                decodedData = typeof rawMarkers === 'object' ? rawMarkers : JSON.parse(rawMarkers);
+                            }
+
+                            if (decodedData.pl1) this.pl1 = decodedData.pl1;
+                            if (decodedData.pl2) this.pl2 = decodedData.pl2;
+                        } catch (e) {
+                            console.warn('Markers no es un formato reconocido, procesando como string simple');
+                        }
+
+                        // Mantener compatibilidad con markers visuales si existieran
                         const markerStr = typeof rawMarkers === 'object' ? JSON.stringify(rawMarkers) : String(rawMarkers);
-                        if (markerStr.includes('[object Object]')) {
-                            this.jsonMarkers = '';
-                        } else {
+                        if (!markerStr.includes('[object Object]')) {
                             this.jsonMarkers = markerStr;
                         }
                     } else {
@@ -746,10 +733,32 @@ export default class TechQuoteEditor extends LightningElement {
     }
 
     handleNext() {
-        if (this.currentStep === '4') this.handleFinalize();
-        else {
+        if (this.currentStep === '4') {
+            this.handleFinalize();
+        } else {
+            // AUTOGUARDADO SILENCIOSO AL CAMBIAR DE PASO
+            if (this.currentStep === '1' || this.currentStep === '2') {
+                this.autoSaveDraft();
+            }
             this.currentStep = (parseInt(this.currentStep) + 1).toString();
         }
+    }
+
+    autoSaveDraft() {
+        // Ejecutamos un guardado sin mostrar notificaciones de éxito invasivas
+        const payload = this.preparePayload('Draft');
+        saveTechnicalData({ data: payload })
+            .then(newId => {
+                if (newId) {
+                    this.recordId = newId;
+                    // RECARGAR DATOS PARA TRAER EL FOLIO (QuoteNumber)
+                    this.loadInitialData();
+                    console.log('Autoguardado exitoso. RecordId:', this.recordId);
+                }
+            })
+            .catch(error => {
+                console.error('Error en autoguardado:', error);
+            });
     }
 
     handleSaveDraft() {
@@ -757,13 +766,10 @@ export default class TechQuoteEditor extends LightningElement {
     }
 
     handleFinalize() {
-        this.handleSave('Presented'); // O 'Approved' según el flujo de Pyatz
+        this.handleSave('Presented'); 
     }
 
-    handleSave(statusValue) {
-        this.isLoading = true;
-        
-        // CORRECCIÓN CRÍTICA: Obtener AccountId y ContactId de la primera sede seleccionada
+    preparePayload(statusValue) {
         let inferredAccountId = null;
         let inferredContactId = null;
         if (this.selectedSedesIds.length > 0) {
@@ -774,7 +780,7 @@ export default class TechQuoteEditor extends LightningElement {
             }
         }
 
-        const payload = {
+        return {
             quoteId: this.recordId,
             accountId: inferredAccountId,
             contactId: inferredContactId,
@@ -790,8 +796,14 @@ export default class TechQuoteEditor extends LightningElement {
             observacionesPago: this.observacionesPago,
             pagoTransferencia: this.pagoTransferencia,
             pagoTarjeta: this.pagoTarjeta,
-            ventaProducto: this.ventaProducto
+            ventaProducto: this.ventaProducto,
+            markersData: window.btoa(JSON.stringify({ pl1: this.pl1, pl2: this.pl2 }))
         };
+    }
+
+    handleSave(statusValue) {
+        this.isLoading = true;
+        const payload = this.preparePayload(statusValue);
 
         saveTechnicalData({ data: payload })
         .then((newId) => {
@@ -799,27 +811,17 @@ export default class TechQuoteEditor extends LightningElement {
             const msg = statusValue === 'Draft' ? 'Borrador guardado' : 'Cotización finalizada con éxito';
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: msg, variant: 'success' }));
             
-            // Actualizar el recordId y RECARGAR para traer nombres de DB
             if (newId) {
                 this.recordId = newId;
-                this.loadInitialData(); // Recarga dinámica de nombres y agentes
+                this.loadInitialData();
             }
-            
             this.dispatchEvent(new CustomEvent('save', { detail: this.recordId }));
         })
         .catch(error => {
             console.error('Error detallado al guardar:', JSON.stringify(error));
             this.isLoading = false;
-            let errorMessage = 'Error desconocido';
-            if (error.body && error.body.message) errorMessage = error.body.message;
-            else if (error.message) errorMessage = error.message;
-            
-            this.dispatchEvent(new ShowToastEvent({ 
-                title: 'Error al persistir', 
-                message: 'Detalle: ' + errorMessage, 
-                variant: 'error',
-                mode: 'sticky'
-            }));
+            let errorMessage = error.body ? error.body.message : error.message;
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error al persistir', message: errorMessage, variant: 'error', mode: 'sticky' }));
         });
     }
 
@@ -921,5 +923,14 @@ export default class TechQuoteEditor extends LightningElement {
     removeZona(event) {
         const zonaToRemove = event.target.dataset.name;
         this.zonasAfectadas = this.zonasAfectadas.filter(z => z !== zonaToRemove);
+    }
+
+    handleUploadFinished(event) {
+        const uploadedFiles = event.detail.files;
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Archivo adjuntado',
+            message: 'Se han cargado ' + uploadedFiles.length + ' archivos correctamente.',
+            variant: 'success'
+        }));
     }
 }

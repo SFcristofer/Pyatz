@@ -237,6 +237,7 @@ public with sharing class QuoteTechnicalController {
         Boolean showIntro = (Boolean)data.get('showIntro');
         Boolean showWarranty = (Boolean)data.get('showWarranty');
         String observacionesPago = (String)data.get('observacionesPago');
+        String markersData = (String)data.get('markersData');
 
         Quote q;
 
@@ -251,7 +252,8 @@ public with sharing class QuoteTechnicalController {
                 Technical_Sedes__c = technicalSedes,
                 Show_Introduction__c = showIntro,
                 Show_Warranty__c = showWarranty,
-                Description = observacionesPago
+                Description = observacionesPago,
+                Markers_Data__c = markersData
             );
             if (contactId != null) q.ContactId = contactId;
             update q;
@@ -268,7 +270,8 @@ public with sharing class QuoteTechnicalController {
                 Show_Warranty__c = showWarranty,
                 Description = observacionesPago,
                 ExpirationDate = Date.today().addDays(30),
-                Pricebook2Id = standardPricebookId
+                Pricebook2Id = standardPricebookId,
+                Markers_Data__c = markersData
             );
 
             if (contactId != null) {
