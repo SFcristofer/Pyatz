@@ -36,6 +36,64 @@
     display: inline-block;
 }
 
+/* ESTILOS PARA EL MODAL P&L PRO */
+.pl-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.pl-table th {
+    background-color: #1b3a61 !important;
+    color: white !important;
+    padding: 12px 8px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.pl-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+}
+
+.pl-section-header {
+    background-color: #f1f5f9;
+    font-weight: bold;
+    color: #475569;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.pl-input-cell {
+    background-color: #f0f7ff;
+}
+
+.pl-calculated-value {
+    font-weight: 600;
+    color: #1e293b;
+    text-align: right;
+}
+
+.pl-result-row {
+    background-color: #f8fafc;
+    border-top: 2px solid #1b3a61;
+}
+
+.pl-profit {
+    color: #059669;
+    font-weight: 800;
+}
+
+.pl-loss {
+    color: #dc2626;
+    font-weight: 800;
+}
+
+.bg-blue-soft { background-color: #e0f2fe; }
+.bg-green-soft { background-color: #dcfce7; }
+
 /* REDIMENSIONAMIENTO DIRECTO DEL COMPONENTE ESTÁNDAR */
 /* Sin contenedores extras, aplicamos directamente a la etiqueta */
 .rich-text-editor {

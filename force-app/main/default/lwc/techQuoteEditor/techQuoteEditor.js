@@ -101,9 +101,61 @@ export default class TechQuoteEditor extends LightningElement {
     @track showPLModal = false;
     @track showPasswordModal = false;
     @track passwordInput = '';
-    @track showDiscountColumn = false; // Controla la visibilidad de la columna de descuento
+    @track showDiscountColumn = false; 
+    
+    // ESTRUCTURA P&L COMPARATIVA (Año 1 y Año 2)
+    @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+    @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+
+    // Fórmulas de cálculo genéricas para reutilizar
+    calculatePL(data) {
+        const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
+        const ind = venta * (data.indirecto / 100);
+        const com1 = venta * (data.comision1 / 100);
+        const com2 = venta * (data.comision2 / 100);
+        const reg = venta * (data.regalia / 100);
+        const fin = venta * 0.000611 * data.dias; // Tasa diaria estimada del ejemplo
+        
+        const utilidadBruta = venta - data.costo - ind - com1 - com2 - reg - fin;
+        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
+        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
+        
+        const costoTotal = parseFloat(data.costo) + ind + com1 + com2 + reg + fin + isr + ru;
+        const margenDolares = venta - costoTotal;
+        const margenPct = venta > 0 ? (margenDolares / venta) * 100 : 0;
+
+        return {
+            venta: venta.toFixed(2),
+            ind: ind.toFixed(2),
+            com1: com1.toFixed(2),
+            com2: com2.toFixed(2),
+            reg: reg.toFixed(2),
+            fin: fin.toFixed(2),
+            isr: isr.toFixed(2),
+            ru: ru.toFixed(2),
+            costoTotal: costoTotal.toFixed(2),
+            resPesos: margenDolares.toFixed(2),
+            resPct: margenPct.toFixed(2)
+        };
+    }
+
+    get res1() { return this.calculatePL(this.pl1); }
+    get res2() { return this.calculatePL(this.pl2); }
+
+    // Manejadores de cambios
+    handlePL1Change(event) {
+        const field = event.target.dataset.field;
+        this.pl1 = { ...this.pl1, [field]: parseFloat(event.target.value) || 0 };
+    }
+
+    handlePL2Change(event) {
+        const field = event.target.dataset.field;
+        this.pl2 = { ...this.pl2, [field]: parseFloat(event.target.value) || 0 };
+    }
+
+    @track showDiscountColumn = false; 
     @track costoOperativo = 0;
-    @track utilidadDeseada = 35; // 35% por defecto
+    @track utilidadDeseada = 35; 
 
     @track showTotal = true;
     @track showTaxes = true;

@@ -149,6 +149,42 @@
                             <lightning-button label="P&L" icon-name="utility:calculator" class="btn-azul-pastel" onclick={handleOpenPLModal}></lightning-button>
                         </div>
                     </div>
+
+                    <!-- RESTAURACIÓN: RESUMEN DE TOTALES Y CONFIGURACIÓN PDF -->
+                    <div class="totales-title-area slds-p-around_medium bg-white">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="blue-square slds-m-right_small"></div>
+                            <h3 class="slds-text-title_bold">Resumen de Totales</h3>
+                        </div>
+                    </div>
+                    <div class="slds-p-around_none datatable-container">
+                        <lightning-datatable key-field="id" data={totalesData} columns={totalesColumns} hide-checkbox-column></lightning-datatable>
+                    </div>
+                    <div class="slds-p-around_large bg-white border-top">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="custom-checkbox-card">
+                                    <lightning-input type="checkbox" label="Mostrar el importe total del presupuesto" 
+                                        checked={showTotal} onchange={handleShowTotalChange}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="custom-checkbox-card">
+                                    <lightning-input type="checkbox" label="Mostrar los impuestos en el pdf" 
+                                        checked={showTaxes} onchange={handleShowTaxesChange}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="custom-checkbox-card">
+                                    <lightning-input type="checkbox" label="Mostrar el importe en las líneas" 
+                                        checked={showLineItems} onchange={handleShowLineItemsChange}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="section-card slds-m-bottom_large">
@@ -346,6 +382,16 @@
                             </lightning-input>
                         </div>
 
+                        <!-- FILTRO DINÁMICO POR LÍNEA -->
+                        <div class="custom-checkbox-card slds-m-bottom_medium bg-white">
+                            <lightning-input 
+                                type="checkbox" 
+                                label="Permitir agregar productos y servicios de otras lineas de negocio"
+                                checked={allowOtherLines}
+                                onchange={handleAllowOtherLinesChange}>
+                            </lightning-input>
+                        </div>
+
                         <div class="section-card slds-p-around_medium slds-m-bottom_medium">
                             <p class="slds-text-title_bold slds-m-bottom_x-small">Buscar articulo o servicio</p>
                             <lightning-input type="search" placeholder="Escriba aquí para buscar..." variant="label-hidden" onchange={handleProductSearch} value={selectedProductName}></lightning-input>
@@ -476,23 +522,110 @@
         </template>
 
         <template if:true={showPLModal}>
-            <section class="slds-modal slds-fade-in-open slds-modal_small">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header"><h2>P&L Interno</h2></header>
-                    <div class="slds-modal__content slds-p-around_large bg-light-gray">
-                        <div class="slds-grid slds-wrap">
-                            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
-                                <p>Total: <lightning-formatted-number value={totalVentaNeto} format-style="currency"></lightning-formatted-number></p>
-                                <lightning-input type="number" label="Costo" value={costoOperativo} onchange={handleCostoChange}></lightning-input>
-                                <p style={marginStyle}>Margen: {margenActual}%</p>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
-                                <lightning-input type="number" label="% Utilidad" value={utilidadDeseada} onchange={handleUtilidadDeseadaChange}></lightning-input>
-                                <p>Sugerido: <lightning-formatted-number value={precioSugerido} format-style="currency"></lightning-formatted-number></p>
-                            </div>
-                        </div>
+            <section class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container" style="max-width: 90%; width: 900px;">
+                    <header class="slds-modal__header bg-blue-dark text-white">
+                        <h2 class="slds-text-heading_medium">Dashboard de Análisis de Rentabilidad</h2>
+                        <p class="slds-text-title">Comparativa de Operación: Año 1 vs Año 2</p>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_none">
+                        <table class="pl-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left; padding-left: 20px;">CONCEPTO / INDICADOR</th>
+                                    <th>SERV / AÑO 1</th>
+                                    <th>SERV / AÑO 2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- GRUPO 1: ENTRADAS -->
+                                <tr class="pl-section-header">
+                                    <td colspan="3">1. CAMPOS DE CAPTURA (DATOS DE ENTRADA)</td>
+                                </tr>
+                                <tr>
+                                    <td>COSTO DIRECTO (Materiales + MO)</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.costo} data-field="costo" onchange={handlePL1Change} formatter="currency" step="0.01"></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.costo} data-field="costo" onchange={handlePL2Change} formatter="currency" step="0.01"></lightning-input></td>
+                                </tr>
+                                <tr>
+                                    <td>MARGEN ESPERADO (%)</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.margen} data-field="margen" onchange={handlePL1Change} step="0.01"></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.margen} data-field="margen" onchange={handlePL2Change} step="0.01"></lightning-input></td>
+                                </tr>
+                                <tr class="bg-blue-soft">
+                                    <td class="slds-font-weight_bold">PRECIO DE VENTA SUGERIDO</td>
+                                    <td class="pl-calculated-value text-blue" style="font-size: 1.1rem;">${res1.venta}</td>
+                                    <td class="pl-calculated-value text-blue" style="font-size: 1.1rem;">${res2.venta}</td>
+                                </tr>
+
+                                <!-- GRUPO 2: GASTOS -->
+                                <tr class="pl-section-header">
+                                    <td colspan="3">2. GASTOS OPERATIVOS E INDIRECTOS</td>
+                                </tr>
+                                <tr>
+                                    <td>Indirecto (15%)</td>
+                                    <td class="pl-calculated-value">${res1.ind}</td>
+                                    <td class="pl-calculated-value">${res2.ind}</td>
+                                </tr>
+                                <tr>
+                                    <td>Comisión Comercial (2%)</td>
+                                    <td class="pl-calculated-value">${res1.com1}</td>
+                                    <td class="pl-calculated-value">${res2.com1}</td>
+                                </tr>
+                                <tr>
+                                    <td>Regalía Franquicia (5%)</td>
+                                    <td class="pl-calculated-value">${res1.reg}</td>
+                                    <td class="pl-calculated-value">${res2.reg}</td>
+                                </tr>
+                                <tr>
+                                    <td>Días de Financiamiento</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.dias} data-field="dias" onchange={handlePL1Change}></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.dias} data-field="dias" onchange={handlePL2Change}></lightning-input></td>
+                                </tr>
+                                <tr class="bg-light-gray">
+                                    <td>Costo Financiamiento</td>
+                                    <td class="pl-calculated-value">${res1.fin}</td>
+                                    <td class="pl-calculated-value">${res2.fin}</td>
+                                </tr>
+
+                                <!-- GRUPO 3: IMPUESTOS -->
+                                <tr class="pl-section-header">
+                                    <td colspan="3">3. IMPUESTOS (BASADOS EN UTILIDAD BRUTA)</td>
+                                </tr>
+                                <tr>
+                                    <td>ISR (6% s/Utilidad)</td>
+                                    <td class="pl-calculated-value">${res1.isr}</td>
+                                    <td class="pl-calculated-value">${res2.isr}</td>
+                                </tr>
+                                <tr>
+                                    <td>RU (5% s/Utilidad)</td>
+                                    <td class="pl-calculated-value">${res1.ru}</td>
+                                    <td class="pl-calculated-value">${res2.ru}</td>
+                                </tr>
+
+                                <!-- TOTALES FINALES -->
+                                <tr class="pl-result-row">
+                                    <td class="slds-font-weight_bold" style="font-size: 1rem;">COSTO TOTAL DE OPERACIÓN</td>
+                                    <td class="pl-calculated-value" style="font-size: 1rem;">${res1.costoTotal}</td>
+                                    <td class="pl-calculated-value" style="font-size: 1rem;">${res2.costoTotal}</td>
+                                </tr>
+                                <tr class="bg-green-soft">
+                                    <td class="slds-text-heading_small slds-font-weight_bold">UTILIDAD NETA FINAL (Margen Real)</td>
+                                    <td class="slds-text-align_right">
+                                        <span class="pl-profit" style="font-size: 1.2rem;">${res1.resPesos}</span>
+                                        <div class="slds-text-title_bold text-muted">{res1.resPct}%</div>
+                                    </td>
+                                    <td class="slds-text-align_right">
+                                        <span class="pl-profit" style="font-size: 1.2rem;">${res2.resPesos}</span>
+                                        <div class="slds-text-title_bold text-muted">{res2.resPct}%</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <footer class="slds-modal__footer"><lightning-button label="Cerrar" onclick={handleClosePLModal}></lightning-button></footer>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cerrar Análisis P&L" variant="neutral" onclick={handleClosePLModal}></lightning-button>
+                    </footer>
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>

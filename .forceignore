@@ -10,3 +10,7 @@ package.xml
 
 # LWC Jest
 **/__tests__/**
+
+# Pyatz: Ignorar conjuntos de valores estándar para evitar reactivación de familias
+force-app/main/default/standardValueSets/Product2Family.standardValueSet-meta.xml
+force-app/main/default/standardValueSets/QuoteStatus.standardValueSet-meta.xml
