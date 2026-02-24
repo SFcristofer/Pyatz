@@ -419,14 +419,20 @@ export default class TechQuoteEditor extends LightningElement {
         const newItems = this.modalTableData
             .filter(row => row.cantidad > 0 && row.importeTotal > 0)
             .map(row => {
-                const subtotal = parseFloat(row.totalSinImpuestos);
-                const taxAmount = subtotal * (row.impuestos / 100);
+                // Truncate detalleTecnico to 255 characters for Salesforce API limit
+                const rawDetalleTecnico = this.modalDescription ? this.modalDescription.replace(/(<([^>]+)>)/gi, "") : '';
+                let truncatedDetalleTecnico = rawDetalleTecnico;
+                if (rawDetalleTecnico.length > 255) {
+                    truncatedDetalleTecnico = rawDetalleTecnico.substring(0, 255);
+                    console.warn('PYATZ WARN: La descripción técnica de la partida ha sido truncada a 255 caracteres para ajustarse al límite del campo QuoteLineItem.Description. Original:', rawDetalleTecnico);
+                }
+
                 return {
                     id: `${this.selectedProductId}-${row.id}-${Date.now()}`,
                     productId: this.selectedProductId,
                     descripcion: `${this.selectedProductName} - ${row.sede}`,
-                    detalleTecnico: this.modalDescription ? this.modalDescription.replace(/(<([^>]+)>)/gi, "") : '', 
-                    detalleTecnicoHtml: this.modalDescription,
+                    detalleTecnico: truncatedDetalleTecnico, // Usar la versión truncada
+                    detalleTecnicoHtml: this.modalDescription, // Mantener el HTML completo para la previsualización/PDF
                     indicacionesEjecucion: this.zonasAfectadas.join(', '),
                     crearNuevasZonas: this.convertZonas,
                     cantidad: row.cantidad,
