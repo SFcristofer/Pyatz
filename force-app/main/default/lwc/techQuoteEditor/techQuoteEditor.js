@@ -514,7 +514,14 @@ export default class TechQuoteEditor extends LightningElement {
                     const q = result.quote;
                     this.asunto = q.Name || '';
                     this.introduccion = q.Introduction_Text__c || '';
-                    this.clienteNombre = q.Account ? q.Account.Name : (result.clienteNombre || 'Cliente no identificado');
+                    
+                    // Solo actualizar clienteNombre si el servidor trae un nombre real
+                    if (q.Account && q.Account.Name) {
+                        this.clienteNombre = q.Account.Name;
+                    } else if (result.clienteNombre && result.clienteNombre !== 'Cliente no identificado') {
+                        this.clienteNombre = result.clienteNombre;
+                    }
+                    
                     this.folio = q.QuoteNumber || '';
                     this.warranty = q.Warranty_Text__c || '';
                     this.observacionesPago = q.Description || '';
@@ -610,6 +617,10 @@ export default class TechQuoteEditor extends LightningElement {
     get isStep4() { return this.currentStep === '4'; }
 
     get nextButtonLabel() { return this.currentStep === '4' ? 'Guardar y Finalizar' : 'Siguiente'; }
+
+    get maxRowSelection() {
+        return this.estrategiaVenta === 'E5' ? 200 : 1; // 200 para múltiples selecciones, 1 para selección única
+    }
 
     get selectedLinesDisplay() {
         return this.selectedLines.length > 0 ? this.selectedLines.join(', ') : 'Ninguna seleccionada';
@@ -780,6 +791,9 @@ export default class TechQuoteEditor extends LightningElement {
             }
         }
 
+        // Solo enviar las líneas si hay selección real
+        const cleanLines = this.selectedLines.length > 0 ? this.selectedLines.join(', ') : '';
+
         return {
             quoteId: this.recordId,
             accountId: inferredAccountId,
@@ -788,7 +802,7 @@ export default class TechQuoteEditor extends LightningElement {
             status: statusValue,
             intro: this.mergeDynamicTags(this.introduccion),
             warranty: this.mergeDynamicTags(this.warranty),
-            businessLines: this.selectedLinesDisplay,
+            businessLines: cleanLines,
             technicalSedes: this.selectedSedesDisplay,
             lineItems: JSON.stringify(this.serviciosData),
             showIntro: this.showDescription, 

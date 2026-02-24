@@ -130,7 +130,7 @@
                 <div class="section-card slds-m-bottom_large">
                     <div class="section-header"><h2 class="slds-text-heading_small">Seleccionar Sede</h2></div>
                     <div class="datatable-container scrollable-table">
-                        <lightning-datatable key-field="Id" data={sedesData} columns={sedesColumns} selected-rows={selectedSedesIds} onrowselection={handleSedeSelection} max-row-selection="1"></lightning-datatable>
+                        <lightning-datatable key-field="Id" data={sedesData} columns={sedesColumns} selected-rows={selectedSedesIds} onrowselection={handleSedeSelection} max-row-selection={maxRowSelection}></lightning-datatable>
                     </div>
                 </div>
             </template>
@@ -372,16 +372,6 @@
                         <h2 class="slds-text-heading_medium">Nueva linea del presupuesto</h2>
                     </header>
                     <div class="slds-modal__content slds-p-around_large bg-light-gray">
-                        <!-- FILTRO DINÁMICO POR LÍNEA -->
-                        <div class="custom-checkbox-card slds-m-bottom_medium bg-white">
-                            <lightning-input 
-                                type="checkbox" 
-                                label="Permitir agregar productos y servicios de otras lineas de negocio"
-                                checked={allowOtherLines}
-                                onchange={handleAllowOtherLinesChange}>
-                            </lightning-input>
-                        </div>
-
                         <!-- FILTRO DINÁMICO POR LÍNEA -->
                         <div class="custom-checkbox-card slds-m-bottom_medium bg-white">
                             <lightning-input 
