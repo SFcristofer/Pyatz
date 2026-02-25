@@ -384,16 +384,33 @@
 
                         <div class="section-card slds-p-around_medium slds-m-bottom_medium">
                             <p class="slds-text-title_bold slds-m-bottom_x-small">Buscar articulo o servicio</p>
-                            <lightning-input type="search" placeholder="Escriba aquí para buscar..." variant="label-hidden" onchange={handleProductSearch} value={selectedProductName}></lightning-input>
-                            <template if:true={searchResults.length}>
-                                <div class="slds-dropdown slds-dropdown_fluid slds-p-around_xx-small" style="position: relative; display: block;">
-                                    <ul class="slds-listbox slds-listbox_vertical">
-                                        <template for:each={searchResults} for:item="res">
-                                            <li key={res.id} class="slds-listbox__item" onclick={handleProductSelect} data-id={res.id}>{res.name} - <lightning-formatted-number value={res.unitPrice} format-style="currency"></lightning-formatted-number></li>
-                                        </template>
-                                    </ul>
-                                </div>
-                            </template>
+                            <div class="search-container">
+                                <lightning-input type="search" placeholder="Escriba aquí para buscar..." variant="label-hidden" onchange={handleProductSearch} value={selectedProductName}></lightning-input>
+                                <template if:true={searchResults.length}>
+                                    <div class="product-search-results">
+                                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                            <template for:each={searchResults} for:item="res">
+                                                <li key={res.id} role="presentation" class="slds-listbox__item product-result-item" onclick={handleProductSelect} data-id={res.id}>
+                                                    <div class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                                        <span class="slds-media__figure slds-listbox__option-icon">
+                                                            <lightning-icon icon-name="standard:product" size="small"></lightning-icon>
+                                                        </span>
+                                                        <div class="slds-media__body">
+                                                            <div class="slds-grid slds-grid_align-spread">
+                                                                <span class="slds-listbox__option-text slds-listbox__option-text_entity product-name">{res.name}</span>
+                                                                <span class="product-price">
+                                                                    <lightning-formatted-number value={res.unitPrice} format-style="currency"></lightning-formatted-number>
+                                                                </span>
+                                                            </div>
+                                                            <div class="slds-listbox__option-meta slds-listbox__option-meta_entity product-desc">{res.description}</div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                         <div class="section-card slds-p-around_medium slds-m-bottom_medium">
                             <div class="slds-grid slds-grid_align-spread">
