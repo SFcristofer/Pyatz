@@ -97,9 +97,14 @@ public with sharing class QuoteTechnicalController {
             result.put('locations', [SELECT Id, Name, LocationType, Description, VisitorAddress.Address FROM Location WHERE IsInventoryLocation = false LIMIT 10]);
         }
 
-        // CONTACTOS (MOSTRANDO TODOS POR AHORA)
-        result.put('contacts', [SELECT Id, Name, Phone, Email, AccountId, Account.Name, MailingStreet, MailingCity, MailingState 
-                                FROM Contact LIMIT 100]);
+        // CONTACTOS FILTRADOS POR CUENTA
+        if (accountId != null) {
+            result.put('contacts', [SELECT Id, Name, Phone, Email, AccountId, Account.Name, MailingStreet, MailingCity, MailingState 
+                                    FROM Contact WHERE AccountId = :accountId LIMIT 100]);
+        } else {
+            result.put('contacts', [SELECT Id, Name, Phone, Email, AccountId, Account.Name, MailingStreet, MailingCity, MailingState 
+                                    FROM Contact LIMIT 50]);
+        }
         
         return result;
     }

@@ -95,6 +95,8 @@ export default class TechQuoteEditor extends LightningElement {
     @track modalDescription = '';
     @track convertZonas = false; 
 
+    @track modalSedeSearchTerm = ''; // Nueva para el buscador interno
+
     @track showSeparatorModal = false;
     @track separatorText = '';
 
@@ -103,6 +105,20 @@ export default class TechQuoteEditor extends LightningElement {
     @track passwordInput = '';
     @track showDiscountColumn = false; 
     
+    // Getter para filtrar las sedes en la tabla del modal
+    get filteredModalTableData() {
+        let list = this.modalTableData;
+        if (this.modalSedeSearchTerm) {
+            const term = this.modalSedeSearchTerm.toLowerCase();
+            list = list.filter(row => row.sede.toLowerCase().includes(term));
+        }
+        return list.map(row => ({
+            ...row,
+            rowClass: row.isSelected ? 'slds-is-selected' : '',
+            isDisabled: !row.isSelected
+        }));
+    }
+
     // ESTRUCTURA P&L COMPARATIVA (Año 1 y Año 2)
     @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
     @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
@@ -224,15 +240,27 @@ export default class TechQuoteEditor extends LightningElement {
 
     // MODAL LOGIC
     handleOpenModal() {
-        // CORRECCIÓN: Usar la variable trackeada selectedSedesIds convertida a String para asegurar coincidencia
-        const selectedSedes = this.sedesData.filter(sede => this.selectedSedesIds.includes(String(sede.Id)));
-        
-        if (selectedSedes.length === 0) {
-            this.modalTableData = [{ id: 'temp-1', sede: 'Sede Principal (Default)', cantidad: 1, importeTotal: 0, totalSinImpuestos: 0, impuestos: 16, descuento: 0, tipoDescuento: 'monto', tipoDescuentoSimbolo: '$', tipoDescuentoIcon: 'utility:moneybag' }];
+        // En lugar de filtrar, mapeamos TODAS las sedes disponibles de la cuenta
+        if (this.sedesData.length === 0) {
+            this.modalTableData = [{ 
+                id: 'temp-1', 
+                sede: 'Sede Principal (Default)', 
+                isSelected: true,
+                cantidad: 1, 
+                importeTotal: 0, 
+                totalSinImpuestos: 0, 
+                impuestos: 16, 
+                descuento: 0, 
+                tipoDescuento: 'monto', 
+                tipoDescuentoSimbolo: '$', 
+                tipoDescuentoIcon: 'utility:moneybag' 
+            }];
         } else {
-            this.modalTableData = selectedSedes.map(sede => ({
+            this.modalTableData = this.sedesData.map(sede => ({
                 id: sede.Id,
                 sede: `${sede.AccountName || 'Sede'} - ${sede.MailingCity || ''}`,
+                // Marcamos como seleccionada solo si está en la lista de sedes del presupuesto (Paso 2)
+                isSelected: this.selectedSedesIds.includes(String(sede.Id)),
                 cantidad: 1,
                 importeTotal: 0,
                 totalSinImpuestos: 0,
@@ -242,6 +270,11 @@ export default class TechQuoteEditor extends LightningElement {
                 tipoDescuentoSimbolo: '$',
                 tipoDescuentoIcon: 'utility:moneybag'
             }));
+
+            // Si no hay ninguna sede seleccionada en el Paso 2, por defecto marcamos la primera para ayudar al usuario
+            if (this.selectedSedesIds.length === 0 && this.modalTableData.length > 0) {
+                this.modalTableData[0].isSelected = true;
+            }
         }
         this.selectedProductId = '';
         this.selectedProductName = '';
@@ -249,7 +282,29 @@ export default class TechQuoteEditor extends LightningElement {
         this.zonasAfectadas = [];
         this.convertZonas = false;
         this.searchResults = [];
+        this.modalSedeSearchTerm = '';
         this.showModal = true;
+    }
+
+    handleModalSedeSearch(event) {
+        this.modalSedeSearchTerm = event.target.value;
+    }
+
+    handleSedeRowToggle(event) {
+        const id = event.target.dataset.id;
+        const checked = event.target.checked;
+        this.modalTableData = this.modalTableData.map(row => {
+            if (row.id === id) return { ...row, isSelected: checked };
+            return row;
+        });
+        this.recalculateModalData();
+    }
+
+    handleSelectAllSedes(event) {
+        const action = event.target.dataset.action;
+        const isSelected = (action === 'all');
+        this.modalTableData = this.modalTableData.map(row => ({ ...row, isSelected: isSelected }));
+        this.recalculateModalData();
     }
 
     handleCloseModal() { this.showModal = false; }
@@ -410,52 +465,76 @@ export default class TechQuoteEditor extends LightningElement {
         this.convertZonas = event.target.checked;
     }
 
+    handleSaveAndNext() {
+        this.processServiceLine(false);
+    }
+
     handleSaveServiceLine() {
+        this.processServiceLine(true);
+    }
+
+    processServiceLine(shouldClose) {
         if (!this.selectedProductId) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Aviso', message: 'Seleccione un producto', variant: 'warning' }));
             return;
         }
 
-        const newItems = this.modalTableData
-            .filter(row => row.cantidad > 0 && row.importeTotal > 0)
-            .map(row => {
-                // Truncate detalleTecnico to 255 characters for Salesforce API limit
-                const rawDetalleTecnico = this.modalDescription ? this.modalDescription.replace(/(<([^>]+)>)/gi, "") : '';
-                let truncatedDetalleTecnico = rawDetalleTecnico;
-                if (rawDetalleTecnico.length > 255) {
-                    truncatedDetalleTecnico = rawDetalleTecnico.substring(0, 255);
-                    console.warn('PYATZ WARN: La descripción técnica de la partida ha sido truncada a 255 caracteres para ajustarse al límite del campo QuoteLineItem.Description. Original:', rawDetalleTecnico);
-                }
+        const selectedRows = this.modalTableData.filter(row => row.isSelected && row.cantidad > 0 && row.importeTotal > 0);
+        
+        if (selectedRows.length === 0) {
+            this.dispatchEvent(new ShowToastEvent({ 
+                title: 'Aviso', 
+                message: 'Debe seleccionar al menos una sede con cantidad e importe mayores a cero.', 
+                variant: 'warning' 
+            }));
+            return;
+        }
 
-                return {
-                    id: `${this.selectedProductId}-${row.id}-${Date.now()}`,
-                    productId: this.selectedProductId,
-                    descripcion: `${this.selectedProductName} - ${row.sede}`,
-                    detalleTecnico: truncatedDetalleTecnico, // Usar la versión truncada
-                    detalleTecnicoHtml: this.modalDescription, // Mantener el HTML completo para la previsualización/PDF
-                    indicacionesEjecucion: this.zonasAfectadas.join(', '),
-                    crearNuevasZonas: this.convertZonas,
-                    cantidad: row.cantidad,
-                    sedes: row.sede,
-                    importeUnitario: this.isUnitario ? row.importeTotal : (row.importeTotal / row.cantidad),
-                    descuento: row.descuento,
-                    tipoDescuento: row.tipoDescuento,
-                    descuentoDisplay: row.descuento > 0 ? (row.tipoDescuento === 'porcentaje' ? `${row.descuento}%` : `$${row.descuento.toFixed(2)}`) : '-',
-                    impuesto: `${row.impuestos}%`,
-                    taxValue: taxAmount,
-                    totalSinImpuestos: subtotal,
-                    totalConImpuestos: subtotal + taxAmount
-                };
-            });
+        const newItems = selectedRows.map(row => {
+            const rawDetalleTecnico = this.modalDescription ? this.modalDescription.replace(/(<([^>]+)>)/gi, "") : '';
+            let truncatedDetalleTecnico = rawDetalleTecnico;
+            if (rawDetalleTecnico.length > 255) {
+                truncatedDetalleTecnico = rawDetalleTecnico.substring(0, 255);
+            }
+
+            const subtotal = row.totalSinImpuestos;
+            const taxAmount = subtotal * (row.impuestos / 100);
+
+            return {
+                id: `${this.selectedProductId}-${row.id}-${Date.now()}`,
+                productId: this.selectedProductId,
+                descripcion: `${this.selectedProductName} - ${row.sede}`,
+                detalleTecnico: truncatedDetalleTecnico,
+                detalleTecnicoHtml: this.modalDescription,
+                indicacionesEjecucion: this.zonasAfectadas.join(', '),
+                crearNuevasZonas: this.convertZonas,
+                cantidad: row.cantidad,
+                sedes: row.sede,
+                importeUnitario: this.isUnitario ? row.importeTotal : (row.importeTotal / row.cantidad),
+                descuento: row.descuento,
+                tipoDescuento: row.tipoDescuento,
+                descuentoDisplay: row.descuento > 0 ? (row.tipoDescuento === 'porcentaje' ? `${row.descuento}%` : `$${row.descuento.toFixed(2)}`) : '-',
+                impuesto: `${row.impuestos}%`,
+                taxValue: taxAmount,
+                totalSinImpuestos: subtotal,
+                totalConImpuestos: subtotal + taxAmount
+            };
+        });
 
         this.serviciosData = [...this.serviciosData, ...newItems];
         this.calculateTotals();
-        this.showModal = false;
         
-        // Resetear campos operativos
-        this.modalDescription = '';
-        this.zonasAfectadas = [];
-        this.convertZonas = false;
+        if (shouldClose) {
+            this.showModal = false;
+        } else {
+            // "Limpieza suave": Resetear producto pero mantener sedes/configuración
+            this.selectedProductId = '';
+            this.selectedProductName = '';
+            this.modalDescription = '';
+            this.zonasAfectadas = [];
+            this.convertZonas = false;
+            this.dispatchEvent(new ShowToastEvent({ title: 'Añadido', message: 'Líneas añadidas correctamente. Puede continuar con otro producto.', variant: 'success' }));
+        }
     }
 
     calculateTotals() {
@@ -478,11 +557,11 @@ export default class TechQuoteEditor extends LightningElement {
                 if(result && result.length > 0) {
                     this.lineaNegocioOptions = result.map(opt => ({
                         ...opt,
-                        checked: false
+                        checked: this.selectedLines.includes(opt.value)
                     }));
                 }
             })
-            .catch(error => console.error('Error cargando líneas:', error));
+            .catch(error => console.error('Error líneas:', error));
     }
 
     handleLineChange(event) {
@@ -512,69 +591,52 @@ export default class TechQuoteEditor extends LightningElement {
         this.isLoading = true;
         getInitialData({ recordId: this.recordId })
             .then(result => {
-                if (result.agenteNombre) {
-                    this.agenteNombre = result.agenteNombre;
-                }
+                if (result.agenteNombre) this.agenteNombre = result.agenteNombre;
                 
                 if (result.quote) {
                     const q = result.quote;
                     this.asunto = q.Name || '';
                     this.introduccion = q.Introduction_Text__c || '';
-                    
-                    // Solo actualizar clienteNombre si el servidor trae un nombre real
-                    if (q.Account && q.Account.Name) {
-                        this.clienteNombre = q.Account.Name;
-                    } else if (result.clienteNombre && result.clienteNombre !== 'Cliente no identificado') {
-                        this.clienteNombre = result.clienteNombre;
-                    }
-                    
                     this.folio = q.QuoteNumber || '';
                     this.warranty = q.Warranty_Text__c || '';
                     this.observacionesPago = q.Description || '';
                     this.showDescription = q.Show_Warranty__c;
                     
+                    if (q.Account && q.Account.Name) this.clienteNombre = q.Account.Name;
+                    
                     this.fechaCreacion = q.CreatedDate ? q.CreatedDate.split('T')[0] : new Date().toISOString().split('T')[0];
-                    this.fechaAprobacion = q.Approval_Date__c || '';
                     
                     if (q.Business_Lines_Selected__c) {
                         this.selectedLines = q.Business_Lines_Selected__c.split(', ');
-                        this.updateBusinessLineCheckboxes();
                     }
 
-                    // RECUPERAR ANÁLISIS P&L Y MARKERS (CON DECODIFICACIÓN DE SEGURIDAD)
-                    const rawMarkers = q.Markers_Data__c;
-                    if (rawMarkers) {
+                    // RESTAURACIÓN DE ESTADO COMPLETO (UTF-8 SEGURO)
+                    if (q.Markers_Data__c) {
                         try {
-                            // Intentar decodificar Base64 si es posible, si no procesar como JSON normal
-                            let decodedData;
-                            try {
-                                decodedData = JSON.parse(window.atob(rawMarkers)); // Decodificar Base64
-                            } catch (e) {
-                                decodedData = typeof rawMarkers === 'object' ? rawMarkers : JSON.parse(rawMarkers);
-                            }
+                            const decodedString = decodeURIComponent(escape(window.atob(q.Markers_Data__c)));
+                            const decodedData = JSON.parse(decodedString);
 
                             if (decodedData.pl1) this.pl1 = decodedData.pl1;
                             if (decodedData.pl2) this.pl2 = decodedData.pl2;
+                            if (decodedData.selectedSedesIds) this.selectedSedesIds = decodedData.selectedSedesIds;
+                            if (decodedData.serviciosData) this.serviciosData = decodedData.serviciosData;
+                            
+                            this.calculateTotals();
                         } catch (e) {
-                            console.warn('Markers no es un formato reconocido, procesando como string simple');
+                            console.warn('Fallback a QuoteLineItems:', e);
+                            if (q.QuoteLineItems) this.reconstructFromLineItems(q.QuoteLineItems, q.Technical_Sedes__c);
                         }
-
-                        // Mantener compatibilidad con markers visuales si existieran
-                        const markerStr = typeof rawMarkers === 'object' ? JSON.stringify(rawMarkers) : String(rawMarkers);
-                        if (!markerStr.includes('[object Object]')) {
-                            this.jsonMarkers = markerStr;
-                        }
-                    } else {
-                        this.jsonMarkers = '';
+                    } else if (q.QuoteLineItems) {
+                        this.reconstructFromLineItems(q.QuoteLineItems, q.Technical_Sedes__c);
                     }
                 }
                 
-                // Mapeo seguro de contactos (FILTRADOS)
+                this.loadBusinessLines();
+                
                 if (result.contacts) {
                     this.sedesData = result.contacts.map((con, index) => ({
                         ...con,
                         CodigoInterno: `CON-${index + 101}`,
-                        AccountId: con.AccountId,
                         AccountName: con.Account ? con.Account.Name : 'Sin Cuenta',
                         MailingStreet: con.MailingStreet || 'Sin calle',
                         MailingCity: con.MailingCity || 'N/A',
@@ -584,9 +646,45 @@ export default class TechQuoteEditor extends LightningElement {
                 this.isLoading = false;
             })
             .catch(error => {
-                console.error('Error inicial:', error);
+                console.error('Error carga:', error);
                 this.isLoading = false;
             });
+    }
+
+    // Método auxiliar para no ensuciar loadInitialData
+    reconstructFromLineItems(lineItems, technicalSedes) {
+        this.serviciosData = lineItems.map(item => {
+            const nombreProducto = item.Product2 ? item.Product2.Name : 'Producto';
+            let sedeExtraida = 'Sede Principal';
+            if (technicalSedes) {
+                const sedesArray = technicalSedes.split(', ');
+                for (let s of sedesArray) {
+                    if (item.Description && item.Description.includes(s)) {
+                        sedeExtraida = s;
+                        break;
+                    }
+                }
+            }
+
+            return {
+                id: item.Id,
+                productId: item.PricebookEntryId,
+                descripcion: nombreProducto,
+                detalleTecnico: item.Description,
+                detalleTecnicoHtml: item.Description,
+                cantidad: item.Quantity,
+                sedes: sedeExtraida,
+                importeUnitario: item.UnitPrice,
+                descuento: item.Discount || 0,
+                tipoDescuento: item.Discount > 0 ? 'porcentaje' : 'monto',
+                descuentoDisplay: item.Discount > 0 ? `${item.Discount}%` : '-',
+                impuesto: '16%',
+                taxValue: (item.TotalPrice || (item.Quantity * item.UnitPrice)) * 0.16,
+                totalSinImpuestos: item.TotalPrice || (item.Quantity * item.UnitPrice),
+                totalConImpuestos: (item.TotalPrice || (item.Quantity * item.UnitPrice)) * 1.16
+            };
+        });
+        this.calculateTotals();
     }
 
     updateBusinessLineCheckboxes() {
@@ -797,8 +895,18 @@ export default class TechQuoteEditor extends LightningElement {
             }
         }
 
-        // Solo enviar las líneas si hay selección real
         const cleanLines = this.selectedLines.length > 0 ? this.selectedLines.join(', ') : '';
+
+        const fullState = {
+            pl1: this.pl1,
+            pl2: this.pl2,
+            selectedSedesIds: this.selectedSedesIds,
+            serviciosData: this.serviciosData
+        };
+
+        // CODIFICACIÓN SEGURA PARA UTF-8 (Soporta acentos y caracteres especiales)
+        const stateJson = JSON.stringify(fullState);
+        const encodedState = window.btoa(unescape(encodeURIComponent(stateJson)));
 
         return {
             quoteId: this.recordId,
@@ -817,32 +925,37 @@ export default class TechQuoteEditor extends LightningElement {
             pagoTransferencia: this.pagoTransferencia,
             pagoTarjeta: this.pagoTarjeta,
             ventaProducto: this.ventaProducto,
-            markersData: window.btoa(JSON.stringify({ pl1: this.pl1, pl2: this.pl2 }))
+            markersData: encodedState
         };
     }
 
     handleSave(statusValue) {
         this.isLoading = true;
-        const payload = this.preparePayload(statusValue);
-
-        saveTechnicalData({ data: payload })
-        .then((newId) => {
+        try {
+            const payload = this.preparePayload(statusValue);
+            saveTechnicalData({ data: payload })
+            .then((newId) => {
+                this.isLoading = false;
+                const msg = statusValue === 'Draft' ? 'Borrador guardado' : 'Cotización finalizada con éxito';
+                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: msg, variant: 'success' }));
+                
+                if (newId) {
+                    this.recordId = newId;
+                    this.loadInitialData();
+                }
+                this.dispatchEvent(new CustomEvent('save', { detail: this.recordId }));
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error Apex:', error);
+                let errorMessage = error.body ? error.body.message : error.message;
+                this.dispatchEvent(new ShowToastEvent({ title: 'Error Salesforce', message: errorMessage, variant: 'error', mode: 'sticky' }));
+            });
+        } catch (error) {
             this.isLoading = false;
-            const msg = statusValue === 'Draft' ? 'Borrador guardado' : 'Cotización finalizada con éxito';
-            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: msg, variant: 'success' }));
-            
-            if (newId) {
-                this.recordId = newId;
-                this.loadInitialData();
-            }
-            this.dispatchEvent(new CustomEvent('save', { detail: this.recordId }));
-        })
-        .catch(error => {
-            console.error('Error detallado al guardar:', JSON.stringify(error));
-            this.isLoading = false;
-            let errorMessage = error.body ? error.body.message : error.message;
-            this.dispatchEvent(new ShowToastEvent({ title: 'Error al persistir', message: errorMessage, variant: 'error', mode: 'sticky' }));
-        });
+            console.error('Error JS:', error);
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error de Datos', message: 'Hay caracteres no permitidos en las descripciones.', variant: 'error' }));
+        }
     }
 
     handleCancel() {

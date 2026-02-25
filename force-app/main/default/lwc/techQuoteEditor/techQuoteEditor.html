@@ -408,9 +408,30 @@
                             </div>
                         </div>
                         <div class="section-card slds-m-bottom_none no-radius-bottom">
+                            <!-- NUEVO: BUSCADOR Y SELECCIÓN MASIVA DENTRO DEL MODAL -->
+                            <div class="slds-p-around_small bg-white border-bottom slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
+                                <div class="slds-size_2-of-3">
+                                    <lightning-input 
+                                        type="search" 
+                                        placeholder="Filtrar sedes en esta lista..." 
+                                        variant="label-hidden"
+                                        onchange={handleModalSedeSearch}
+                                        value={modalSedeSearchTerm}
+                                        class="slds-m-right_small">
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-size_1-of-3 slds-text-align_right">
+                                    <lightning-button-group>
+                                        <lightning-button label="Todas" variant="neutral" onclick={handleSelectAllSedes} data-action="all"></lightning-button>
+                                        <lightning-button label="Ninguna" variant="neutral" onclick={handleSelectAllSedes} data-action="none"></lightning-button>
+                                    </lightning-button-group>
+                                </div>
+                            </div>
+
                             <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-no-row-hover">
                                 <thead>
                                     <tr>
+                                        <th scope="col" style="width: 3.5rem;">Incluir</th>
                                         <th scope="col">Sede</th>
                                         <th scope="col">Cantidad</th>
                                         <th scope="col">Importe</th>
@@ -420,21 +441,30 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template for:each={modalTableData} for:item="row">
-                                        <tr key={row.id}>
+                                    <template for:each={filteredModalTableData} for:item="row">
+                                        <tr key={row.id} class={row.rowClass}>
+                                            <td>
+                                                <lightning-input 
+                                                    type="checkbox" 
+                                                    checked={row.isSelected} 
+                                                    data-id={row.id} 
+                                                    onchange={handleSedeRowToggle}
+                                                    variant="label-hidden">
+                                                </lightning-input>
+                                            </td>
                                             <td class="slds-text-title_bold">{row.sede}</td>
-                                            <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden" style="width: 80px;"></lightning-input></td>
-                                            <td><lightning-input type="number" formatter="currency" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden" style="width: 80px;" disabled={row.isDisabled}></lightning-input></td>
+                                            <td><lightning-input type="number" formatter="currency" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden" disabled={row.isDisabled}></lightning-input></td>
                                             <template if:true={showDiscountColumn}>
                                                 <td>
                                                     <div class="slds-grid">
-                                                        <lightning-input type="number" value={row.descuento} data-id={row.id} data-field="descuento" onchange={handleModalInputChange} variant="label-hidden" style="width: 70px;"></lightning-input>
-                                                        <lightning-button-icon icon-name={row.tipoDescuentoIcon} onclick={handleToggleDiscountType} data-id={row.id} size="small"></lightning-button-icon>
+                                                        <lightning-input type="number" value={row.descuento} data-id={row.id} data-field="descuento" onchange={handleModalInputChange} variant="label-hidden" style="width: 70px;" disabled={row.isDisabled}></lightning-input>
+                                                        <lightning-button-icon icon-name={row.tipoDescuentoIcon} onclick={handleToggleDiscountType} data-id={row.id} size="small" disabled={row.isDisabled}></lightning-button-icon>
                                                     </div>
                                                 </td>
                                             </template>
                                             <td><lightning-formatted-number value={row.totalSinImpuestos} format-style="currency"></lightning-formatted-number></td>
-                                            <td><lightning-input type="number" value={row.impuestos} data-id={row.id} data-field="impuestos" onchange={handleModalInputChange} variant="label-hidden" style="width: 60px;"></lightning-input></td>
+                                            <td><lightning-input type="number" value={row.impuestos} data-id={row.id} data-field="impuestos" onchange={handleModalInputChange} variant="label-hidden" style="width: 60px;" disabled={row.isDisabled}></lightning-input></td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -471,7 +501,8 @@
                     </div>
                     <footer class="slds-modal__footer bg-white">
                         <lightning-button label="Cancelar" onclick={handleCloseModal} class="slds-m-right_x-small"></lightning-button>
-                        <lightning-button label="Guardar Línea" variant="brand" onclick={handleSaveServiceLine}></lightning-button>
+                        <lightning-button label="Guardar y añadir otro" variant="neutral" onclick={handleSaveAndNext} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Guardar y Cerrar" variant="brand" onclick={handleSaveServiceLine}></lightning-button>
                     </footer>
                 </div>
             </section>
