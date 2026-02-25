@@ -240,8 +240,10 @@ export default class TechQuoteEditor extends LightningElement {
 
     // MODAL LOGIC
     handleOpenModal() {
-        // En lugar de filtrar, mapeamos TODAS las sedes disponibles de la cuenta
-        if (this.sedesData.length === 0) {
+        // FILTRADO ESTRICTO: Solo mostramos las sedes que el usuario seleccionó en el Paso 2
+        const selectedSedes = this.sedesData.filter(sede => this.selectedSedesIds.includes(String(sede.Id)));
+        
+        if (selectedSedes.length === 0) {
             this.modalTableData = [{ 
                 id: 'temp-1', 
                 sede: 'Sede Principal (Default)', 
@@ -256,25 +258,19 @@ export default class TechQuoteEditor extends LightningElement {
                 tipoDescuentoIcon: 'utility:moneybag' 
             }];
         } else {
-            this.modalTableData = this.sedesData.map(sede => ({
+            this.modalTableData = selectedSedes.map(sede => ({
                 id: sede.Id,
                 sede: `${sede.AccountName || 'Sede'} - ${sede.MailingCity || ''}`,
-                // Marcamos como seleccionada solo si está en la lista de sedes del presupuesto (Paso 2)
-                isSelected: this.selectedSedesIds.includes(String(sede.Id)),
-                cantidad: 1,
-                importeTotal: 0,
-                totalSinImpuestos: 0,
-                impuestos: 16,
-                descuento: 0,
-                tipoDescuento: 'monto',
-                tipoDescuentoSimbolo: '$',
+                isSelected: true, // Por defecto todas las que pasaron el filtro están seleccionadas
+                cantidad: 1, 
+                importeTotal: 0, 
+                totalSinImpuestos: 0, 
+                impuestos: 16, 
+                descuento: 0, 
+                tipoDescuento: 'monto', 
+                tipoDescuentoSimbolo: '$', 
                 tipoDescuentoIcon: 'utility:moneybag'
             }));
-
-            // Si no hay ninguna sede seleccionada en el Paso 2, por defecto marcamos la primera para ayudar al usuario
-            if (this.selectedSedesIds.length === 0 && this.modalTableData.length > 0) {
-                this.modalTableData[0].isSelected = true;
-            }
         }
         this.selectedProductId = '';
         this.selectedProductName = '';
@@ -618,8 +614,16 @@ export default class TechQuoteEditor extends LightningElement {
 
                             if (decodedData.pl1) this.pl1 = decodedData.pl1;
                             if (decodedData.pl2) this.pl2 = decodedData.pl2;
-                            if (decodedData.selectedSedesIds) this.selectedSedesIds = decodedData.selectedSedesIds;
+                            if (decodedData.selectedSedesIds) this.selectedSedesIds = [...decodedData.selectedSedesIds];
                             if (decodedData.serviciosData) this.serviciosData = decodedData.serviciosData;
+                            
+                            // RESTAURAR ESTRATEGIA Y NECESIDAD (Vital para límites de selección)
+                            if (decodedData.estrategiaVenta) this.estrategiaVenta = decodedData.estrategiaVenta;
+                            if (decodedData.necesidadId) this.necesidadId = decodedData.necesidadId;
+                            if (decodedData.necesidadNombre) {
+                                this.necesidadNombre = decodedData.necesidadNombre;
+                                this.necesidadSeleccionada = decodedData.necesidadNombre;
+                            }
                             
                             this.calculateTotals();
                         } catch (e) {
@@ -696,13 +700,13 @@ export default class TechQuoteEditor extends LightningElement {
 
     handleSedeSelection(event) {
         const selectedRows = event.detail.selectedRows;
-        this.selectedSedesIds = selectedRows.map(row => String(row.Id)); 
+        // Forzamos la creación de un nuevo array con strings limpios para asegurar que el Datatable lo reconozca al volver
+        this.selectedSedesIds = [...selectedRows.map(row => String(row.Id))]; 
         
-        // Si no tenemos clienteNombre aún, lo tomamos de la sede seleccionada
         if ((this.clienteNombre === 'Seleccione una sede...' || !this.recordId) && selectedRows.length > 0) {
             this.clienteNombre = selectedRows[0].AccountName;
         }
-        console.log('PYATZ LOG: Sedes seleccionadas:', JSON.stringify(this.selectedSedesIds));
+        console.log('PYATZ LOG: Sedes seleccionadas actualizadas:', JSON.stringify(this.selectedSedesIds));
     }
 
     get estrategiaOptions() {
@@ -901,7 +905,10 @@ export default class TechQuoteEditor extends LightningElement {
             pl1: this.pl1,
             pl2: this.pl2,
             selectedSedesIds: this.selectedSedesIds,
-            serviciosData: this.serviciosData
+            serviciosData: this.serviciosData,
+            estrategiaVenta: this.estrategiaVenta,
+            necesidadId: this.necesidadId,
+            necesidadNombre: this.necesidadNombre
         };
 
         // CODIFICACIÓN SEGURA PARA UTF-8 (Soporta acentos y caracteres especiales)

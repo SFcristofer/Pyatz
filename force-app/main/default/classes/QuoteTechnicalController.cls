@@ -49,7 +49,7 @@ public with sharing class QuoteTechnicalController {
         return result;
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static Map<String, Object> getInitialData(Id recordId) {
         Map<String, Object> result = new Map<String, Object>();
         Id accountId;
