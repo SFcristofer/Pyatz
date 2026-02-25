@@ -97,21 +97,80 @@
     border-radius: 0 0 12px 12px;
 }
 
-/* TABLAS Y DATATABLES */
-.datatable-container {
-    border-radius: 8px;
-    overflow: hidden;
+/* TABLA PERSONALIZADA CON DRAG & DROP */
+.custom-drag-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
 }
 
-.slds-table thead th {
-    background-color: #f8fafc !important;
-    font-weight: 700 !important;
-    color: var(--primary-dark) !important;
-    padding: 12px !important;
+.custom-drag-table thead th {
+    background-color: #f8fafc;
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    text-transform: uppercase;
 }
 
-.slds-table tbody tr:hover {
+.custom-drag-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+.custom-drag-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.custom-drag-table td {
+    padding: 12px;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+/* ESTILO DEL SEPARADOR (ANCHO COMPLETO) */
+.row-separator {
     background-color: #f1f5f9 !important;
+}
+
+.separator-bar {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 6px 15px;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.separator-text-cell {
+    padding: 8px 12px !important;
+}
+
+/* MANEJADOR DE ARRASTRE */
+.drag-handle {
+    cursor: grab;
+    color: #cbd5e1;
+    text-align: center;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.row-service.dragging, .row-separator.dragging {
+    opacity: 0.5;
+    background-color: #e0f2fe !important;
+    border: 2px dashed var(--primary-blue);
+}
+
+.font-bold {
+    font-weight: 700;
+    color: var(--primary-dark);
 }
 
 /* BUSCADORES Y INPUTS */

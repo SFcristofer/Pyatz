@@ -63,13 +63,17 @@ export default class TechQuoteEditor extends LightningElement {
     ];
 
     serviciosColumns = [
-        { label: 'Descripción', fieldName: 'descripcion', type: 'text', initialWidth: 300 },
+        { label: 'Descripción', fieldName: 'descripcion', type: 'text', initialWidth: 350 },
         { label: 'Sedes', fieldName: 'sedes', type: 'text', initialWidth: 200 },
         { label: 'Cant.', fieldName: 'cantidad', type: 'number', initialWidth: 80 },
-        { label: 'Importe U.', fieldName: 'importeUnitario', type: 'currency' },
-        { label: 'Desc.', fieldName: 'descuentoDisplay', type: 'text', initialWidth: 90 },
         { label: 'Total (Sin IVA)', fieldName: 'totalSinImpuestos', type: 'currency' },
-        { label: 'Acciones', type: 'action', typeAttributes: { rowActions: [{ label: 'Eliminar', name: 'delete' }] } }
+        { label: 'Acciones', type: 'action', typeAttributes: { 
+            rowActions: [
+                { label: 'Subir', name: 'move_up', iconName: 'utility:arrowup' },
+                { label: 'Bajar', name: 'move_down', iconName: 'utility:arrowdown' },
+                { label: 'Eliminar', name: 'delete', iconName: 'utility:delete' }
+            ] 
+        } }
     ];
 
     totalesColumns = [
@@ -995,8 +999,47 @@ export default class TechQuoteEditor extends LightningElement {
             });
     }
 
-    handleSaveDraft() {
-        this.handleSave('Draft');
+    @track dragStartIndex;
+
+    handleDragStart(event) {
+        this.dragStartIndex = event.target.dataset.index;
+        event.target.classList.add('dragging');
+    }
+
+    handleDragOver(event) {
+        event.preventDefault(); // Necesario para permitir el drop
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
+        const dragEndIndex = event.target.closest('tr').dataset.index;
+        
+        if (this.dragStartIndex !== dragEndIndex) {
+            this.reorderItems(this.dragStartIndex, dragEndIndex);
+        }
+        
+        // Quitar clase visual
+        const rows = this.template.querySelectorAll('tr');
+        rows.forEach(row => row.classList.remove('dragging'));
+    }
+
+    reorderItems(from, to) {
+        const data = [...this.serviciosData];
+        const itemMoved = data.splice(from, 1)[0];
+        data.splice(to, 0, itemMoved);
+        this.serviciosData = data;
+    }
+
+    handleRowAction(event) {
+        // Adaptado para botones directos en tabla personalizada
+        const actionName = event.target.dataset.action || event.detail?.action?.name;
+        const rowId = event.target.dataset.id || event.detail?.row?.id;
+        
+        if (actionName === 'delete') {
+            this.serviciosData = this.serviciosData.filter(item => item.id !== rowId);
+            this.calculateTotals();
+        } 
+        // Subir y bajar ya no son necesarios gracias al Drag & Drop
     }
 
     handleFinalize() {

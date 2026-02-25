@@ -138,9 +138,65 @@
             <!-- PASO 3: DETALLES -->
             <template if:true={isStep3}>
                 <div class="section-card slds-m-bottom_large">
-                    <div class="section-header"><h2 class="slds-text-heading_small">Servicios/Artículos</h2></div>
+                    <div class="section-header">
+                        <h2 class="slds-text-heading_small">Servicios/Artículos (Arrastre para reordenar)</h2>
+                    </div>
                     <div class="slds-p-around_none datatable-container">
-                        <lightning-datatable key-field="id" data={serviciosData} columns={serviciosColumns} hide-checkbox-column></lightning-datatable>
+                        <table class="custom-drag-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th> <!-- Icono de arrastre -->
+                                    <th>Descripción</th>
+                                    <th>Sedes</th>
+                                    <th style="width: 80px; text-align: center;">Cant.</th>
+                                    <th style="width: 120px; text-align: right;">Total (Sin IVA)</th>
+                                    <th style="width: 100px; text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody ondragover={handleDragOver} ondrop={handleDrop}>
+                                <template for:each={serviciosData} for:item="item" for:index="index">
+                                    <!-- FILA DE SEPARADOR (Ancho Completo) -->
+                                    <template if:true={item.isSeparator}>
+                                        <tr key={item.id} 
+                                            class="row-separator" 
+                                            draggable="true" 
+                                            ondragstart={handleDragStart} 
+                                            data-index={index}>
+                                            <td class="drag-handle"><lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon></td>
+                                            <td colspan="4" class="separator-text-cell">
+                                                <div class="separator-bar">
+                                                    <span>{item.descripcion}</span>
+                                                </div>
+                                            </td>
+                                            <td class="slds-text-align_center">
+                                                <lightning-button-icon icon-name="utility:delete" variant="error" size="small" onclick={handleRowAction} data-id={item.id} data-action="delete"></lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+
+                                    <!-- FILA DE SERVICIO ESTÁNDAR -->
+                                    <template if:false={item.isSeparator}>
+                                        <tr key={item.id} 
+                                            class="row-service" 
+                                            draggable="true" 
+                                            ondragstart={handleDragStart} 
+                                            data-index={index}>
+                                            <td class="drag-handle"><lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon></td>
+                                            <td class="font-bold">{item.descripcion}</td>
+                                            <td><div class="slds-truncate" title={item.sedes}>{item.sedes}</div></td>
+                                            <td class="slds-text-align_center">{item.cantidad}</td>
+                                            <td class="slds-text-align_right">
+                                                <lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number>
+                                            </td>
+                                            <td class="slds-text-align_center">
+                                                <lightning-button-icon icon-name="utility:delete" variant="border-filled" size="small" onclick={handleRowAction} data-id={item.id} data-action="delete"></lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </tbody>
+                        </table>
+
                         <div class="slds-p-around_medium slds-grid slds-grid_align-spread bg-white border-bottom">
                             <div class="slds-grid">
                                 <lightning-button label="+ Añadir servicios" variant="success" class="btn-verde slds-m-right_small" onclick={handleOpenModal}></lightning-button>
@@ -577,13 +633,30 @@
         <template if:true={showSeparatorModal}>
             <section class="slds-modal slds-fade-in-open slds-modal_x-small">
                 <div class="slds-modal__container">
-                    <header class="slds-modal__header"><h2 class="slds-text-heading_medium">Añadir Separador</h2></header>
+                    <header class="slds-modal__header custom-modal-header"><h2 class="slds-text-heading_medium">Añadir Separador / Divisor</h2></header>
                     <div class="slds-modal__content slds-p-around_medium bg-light-gray">
-                        <lightning-input label="Texto" value={separatorText} onchange={handleSeparatorTextChange}></lightning-input>
+                        <lightning-radio-group name="separatorType"
+                            label="Tipo de Divisor"
+                            options={separatorTypeOptions}
+                            value={separatorType}
+                            onchange={handleSeparatorTypeChange}
+                            type="button">
+                        </lightning-radio-group>
+
+                        <template if:true={isSeparatorText}>
+                            <div class="slds-m-top_medium">
+                                <lightning-input label="Texto del Título" value={separatorText} onchange={handleSeparatorTextChange} placeholder="Ej: ZONA NORTE, FASE 2..."></lightning-input>
+                            </div>
+                        </template>
+                        <template if:false={isSeparatorText}>
+                            <div class="slds-m-top_medium slds-text-color_weak italic">
+                                Se insertará una línea divisoria horizontal en el presupuesto.
+                            </div>
+                        </template>
                     </div>
                     <footer class="slds-modal__footer">
                         <lightning-button label="Cancelar" onclick={handleCloseSeparatorModal} class="slds-m-right_x-small"></lightning-button>
-                        <lightning-button label="Añadir" variant="brand" onclick={handleAddSeparator}></lightning-button>
+                        <lightning-button label="Añadir Divisor" variant="brand" onclick={handleAddSeparator}></lightning-button>
                     </footer>
                 </div>
             </section>
