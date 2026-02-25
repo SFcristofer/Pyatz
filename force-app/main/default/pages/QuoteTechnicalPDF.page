@@ -4,7 +4,7 @@
             <style type="text/css">
                 @page { 
                     size: letter; 
-                    margin: 0.5cm 0.5cm 2.5cm 0.5cm; 
+                    margin: 0.5cm 0.5cm 3.5cm 0.5cm; /* Margen inferior mayor para el footer */
                     @bottom-right {
                         content: "Página " counter(page) " de " counter(pages);
                         font-family: 'Helvetica', 'Arial', sans-serif;
@@ -17,8 +17,12 @@
                 }
                 body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; color: #333; line-height: 1.3; margin: 0; padding: 0; }
                 
+                /* CLASES PARA SALTOS DE PÁGINA */
+                .page-break { page-break-before: always; }
+                .no-break { page-break-inside: avoid; }
+                
                 .header-img { width: 100%; margin-bottom: 10pt; display: block; }
-                .footer-img { width: 100%; position: fixed; bottom: 0; left: 0; display: block; z-index: -1; }
+                .footer-img { width: 100%; position: fixed; bottom: 0; left: 0; display: block; height: 3cm; z-index: -1; }
                 
                 .content-body { padding: 0 20pt; }
                 
@@ -27,22 +31,26 @@
                 .data-label { font-weight: bold; width: 85px; display: inline-block; }
                 .client-name { font-size: 14pt; font-weight: bold; margin-top: 15pt; }
                 
-                .table-services { width: 100%; border-collapse: collapse; margin-top: 15pt; }
+                .table-services { width: 100%; border-collapse: collapse; margin-top: 15pt; page-break-inside: auto; }
+                .table-services tr { page-break-inside: avoid; page-break-after: auto; }
                 .table-services th { background-color: #D4EDDA; color: #333; padding: 8pt; border: 0.5pt solid #fff; text-align: center; font-size: 9pt; }
                 .table-services td { padding: 8pt; border-bottom: 0.5pt solid #eee; vertical-align: top; }
                 
-                .table-pago { width: 100%; border-collapse: collapse; margin-top: 20pt; }
+                /* Estilo especial para separadores que fuerzan salto */
+                .separator-row { background-color: #f1f5f9; font-weight: bold; color: #0070d2; text-transform: uppercase; font-size: 9pt; }
+
+                .table-pago { width: 100%; border-collapse: collapse; margin-top: 20pt; page-break-inside: avoid; }
                 .table-pago th.pago-header { background-color: #0070d2; color: white; padding: 5pt; text-align: center; font-weight: bold; border: 0.5pt solid #0070d2; }
                 .table-pago th { background-color: #D4EDDA; color: #333; padding: 5pt; text-align: center; border: 0.5pt solid #fff; }
                 .table-pago td { padding: 8pt; border: 0.5pt solid #eee; text-align: center; font-size: 9pt; }
 
-                .totals-box { width: 300pt; float: right; margin-top: 10pt; }
+                .totals-box { width: 300pt; float: right; margin-top: 10pt; page-break-inside: avoid; }
                 .total-row { display: table; width: 100%; padding: 3pt 0; }
                 .total-label { display: table-cell; text-align: right; padding-right: 10pt; font-weight: bold; }
                 .total-value { display: table-cell; text-align: right; width: 80pt; border-bottom: 0.5pt solid #eee; }
                 .grand-total { font-size: 12pt; color: #0070d2; border-bottom: 2pt solid #0070d2; }
 
-                .signature-section { margin-top: 50pt; width: 100%; }
+                .signature-section { margin-top: 50pt; width: 100%; page-break-inside: avoid; }
                 .sig-box { width: 33%; text-align: center; display: inline-block; vertical-align: bottom; }
                 .sig-line { border-top: 1px solid #333; margin: 0 20pt; padding-top: 5pt; font-size: 9pt; }
             </style>
@@ -89,35 +97,47 @@
                     </thead>
                     <tbody>
                         <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                            <tr>
-                                <td><strong>{!item.Product2.Name}</strong></td>
-                                <td align="center">{!item.Quantity}</td>
-                                <td align="right">
-                                    <apex:outputText value="{0, number, currency}">
-                                        <apex:param value="{!item.ListPrice}" />
-                                    </apex:outputText>
-                                </td>
-                                <apex:outputPanel rendered="{!anyDiscount == '1'}" layout="none">
-                                    <td align="center" style="color: #d8000c; font-weight: bold;">
-                                        <apex:outputPanel rendered="{!item.Discount != null && item.Discount > 0}">
-                                            {!item.Discount}%
-                                        </apex:outputPanel>
-                                        <apex:outputPanel rendered="{!(item.Discount == null || item.Discount == 0) && (item.ListPrice > item.UnitPrice)}">
-                                            <apex:outputText value="{0, number, currency}">
-                                                <apex:param value="{!item.ListPrice - item.UnitPrice}" />
-                                            </apex:outputText>
-                                        </apex:outputPanel>
-                                        <apex:outputPanel rendered="{!item.ListPrice == item.UnitPrice && (item.Discount == null || item.Discount == 0)}">
-                                            -
-                                        </apex:outputPanel>
+                            <!-- LÓGICA DE SEPARADOR / SALTO DE PÁGINA -->
+                            <apex:outputPanel rendered="{!item.Quantity == 0}" layout="none">
+                                <tr class="page-break separator-row">
+                                    <td colspan="{!IF(anyDiscount == '1', 5, 4)}" style="padding: 10pt; background-color: #f1f5f9; border-top: 1pt solid #0070d2;">
+                                        <strong>{!item.Product2.Name}</strong>
                                     </td>
-                                </apex:outputPanel>
-                                <td align="right">
-                                    <apex:outputText value="{0, number, currency}">
-                                        <apex:param value="{!item.TotalPrice}" />
-                                    </apex:outputText>
-                                </td>
-                            </tr>
+                                </tr>
+                            </apex:outputPanel>
+
+                            <!-- LÓGICA DE PARTIDA ESTÁNDAR -->
+                            <apex:outputPanel rendered="{!item.Quantity > 0}" layout="none">
+                                <tr>
+                                    <td><strong>{!item.Product2.Name}</strong></td>
+                                    <td align="center">{!item.Quantity}</td>
+                                    <td align="right">
+                                        <apex:outputText value="{0, number, currency}">
+                                            <apex:param value="{!item.ListPrice}" />
+                                        </apex:outputText>
+                                    </td>
+                                    <apex:outputPanel rendered="{!anyDiscount == '1'}" layout="none">
+                                        <td align="center" style="color: #d8000c; font-weight: bold;">
+                                            <apex:outputPanel rendered="{!item.Discount != null && item.Discount > 0}">
+                                                {!item.Discount}%
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!(item.Discount == null || item.Discount == 0) && (item.ListPrice > item.UnitPrice)}">
+                                                <apex:outputText value="{0, number, currency}">
+                                                    <apex:param value="{!item.ListPrice - item.UnitPrice}" />
+                                                </apex:outputText>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!item.ListPrice == item.UnitPrice && (item.Discount == null || item.Discount == 0)}">
+                                                -
+                                            </apex:outputPanel>
+                                        </td>
+                                    </apex:outputPanel>
+                                    <td align="right">
+                                        <apex:outputText value="{0, number, currency}">
+                                            <apex:param value="{!item.TotalPrice}" />
+                                        </apex:outputText>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
                         </apex:repeat>
                     </tbody>
                 </table>

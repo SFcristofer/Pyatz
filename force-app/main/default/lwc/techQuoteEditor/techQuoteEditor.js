@@ -742,6 +742,80 @@ export default class TechQuoteEditor extends LightningElement {
             : 'Sede Principal';
     }
 
+    // LÓGICA DE PAGINACIÓN VISUAL INTELIGENTE PARA EL PASO 4
+    get serviciosPaginados() {
+        const paginas = [];
+        let currentItems = [];
+        let currentTitulo = null;
+        let pageCounter = 1;
+        
+        // Sistema de puntos para estimar el espacio:
+        // Una hoja carta tiene aprox 25 puntos de capacidad.
+        let currentSpaceUsed = 0; 
+        const MAX_SPACE_PER_PAGE = 22;
+        const SPACE_INTRO = 10; // La introducción y cabecera ocupan mucho espacio
+        const SPACE_ITEM = 2;  // Cada fila de producto ocupa 2 puntos
+        const SPACE_SEPARATOR = 4; // Un separador ocupa 4 puntos
+
+        this.serviciosData.forEach((item) => {
+            const isFirstPage = pageCounter === 1;
+            const limit = isFirstPage ? (MAX_SPACE_PER_PAGE - SPACE_INTRO) : MAX_SPACE_PER_PAGE;
+            
+            let itemCost = item.isSeparator ? SPACE_SEPARATOR : SPACE_ITEM;
+            // Si tiene descripción técnica larga, ocupa más espacio
+            if (item.detalleTecnicoHtml && item.detalleTecnicoHtml.length > 150) itemCost += 2;
+
+            // ¿Debemos saltar de página? 
+            // Saltamos si: es un separador manual O si el nuevo ítem ya no cabe en esta hoja
+            if (item.isSeparator || (currentSpaceUsed + itemCost > limit)) {
+                
+                // Solo guardamos la página si tiene algo (evitar hojas en blanco al inicio)
+                if (currentItems.length > 0 || currentTitulo) {
+                    paginas.push({
+                        id: `page-${pageCounter}`,
+                        num: pageCounter,
+                        items: [...currentItems],
+                        titulo: currentTitulo,
+                        isFirst: isFirstPage,
+                        isLast: false
+                    });
+                    pageCounter++;
+                    currentItems = [];
+                    currentSpaceUsed = 0;
+                }
+
+                if (item.isSeparator) {
+                    currentTitulo = item.descripcion;
+                    currentSpaceUsed = 0; // El título del separador cuenta para la nueva hoja
+                } else {
+                    currentTitulo = null; // Reiniciar título si fue salto automático
+                    currentItems.push(item);
+                    currentSpaceUsed = itemCost;
+                }
+            } else {
+                currentItems.push(item);
+                currentSpaceUsed += itemCost;
+            }
+        });
+
+        // Añadir la última página con los ítems restantes
+        if (currentItems.length > 0 || paginas.length === 0) {
+            paginas.push({
+                id: `page-${pageCounter}`,
+                num: pageCounter,
+                items: currentItems,
+                titulo: currentTitulo,
+                isFirst: pageCounter === 1,
+                isLast: true
+            });
+        } else if (paginas.length > 0) {
+            // Marcar la última página generada como la final (para totales y firmas)
+            paginas[paginas.length - 1].isLast = true;
+        }
+
+        return paginas;
+    }
+
     handleAsuntoChange(event) { this.asunto = event.target.value; }
     handleIntroChange(event) { this.introduccion = event.target.value; }
     handleFechaAprobacionChange(event) { this.fechaAprobacion = event.target.value; }

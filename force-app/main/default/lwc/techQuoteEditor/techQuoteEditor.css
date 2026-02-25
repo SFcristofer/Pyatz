@@ -226,15 +226,37 @@
     background-color: #ecfdf5;
 }
 
-/* PREVISUALIZACIÓN PDF */
+/* PREVISUALIZACIÓN PDF REALISTA */
 .pdf-preview-container {
-    background-color: #cbd5e1;
+    background-color: #475569; /* Fondo oscuro para resaltar las hojas blancas */
     padding: 3rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem; /* Espacio real entre hojas */
 }
 
 .pdf-page {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: white;
+    width: 100%;
+    max-width: 850px; /* Tamaño aproximado carta */
+    min-height: 1100px;
+    padding: 4rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     border: none;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-footer-container {
+    margin-top: auto; /* Empuja el pie al fondo de la hoja */
+    padding-top: 2rem;
+    margin-bottom: -3rem; /* Ajuste para que la imagen pegue abajo */
+}
+
+.pdf-text-small {
+    font-size: 9pt;
 }
 
 /* BOTONES PERSONALIZADOS */
