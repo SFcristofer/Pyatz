@@ -229,6 +229,52 @@
     color: #dcfce7; /* Verde clarito para resaltar el precio sobre el azul */
 }
 
+/* FICHA TÉCNICA DEL PRODUCTO */
+.product-info-card {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.product-info-body {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #0c4a6e;
+    line-height: 1.4;
+    white-space: pre-wrap; /* Respeta los saltos de línea de la descripción */
+}
+
+.text-blue { color: #0369a1; }
+.icon-blue { --sds-c-icon-color-foreground: #0369a1; }
+.italic { font-style: italic; }
+
+/* EDITOR DE DESCRIPCIÓN ADICIONAL (ESTILO FICHA TÉCNICA) */
+.custom-description-editor {
+    --sds-c-textarea-shadow: none;
+    --slds-c-textarea-color-background: #f0f9ff;
+    --slds-c-textarea-color-border: #bae6fd;
+}
+
+.custom-description-editor :host {
+    display: block;
+}
+
+/* Forzar el estilo en el textarea interno de Salesforce */
+.custom-description-editor lightning-textarea {
+    font-size: 0.9rem;
+}
+
+.custom-description-editor textarea {
+    background: #f0f9ff !important;
+    border: 1px solid #bae6fd !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    color: #0c4a6e !important;
+    line-height: 1.4 !important;
+    min-height: 150px;
+}
+
 /* P&L DASHBOARD */
 .pl-table {
     width: 100%;

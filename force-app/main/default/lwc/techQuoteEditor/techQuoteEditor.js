@@ -884,9 +884,7 @@ export default class TechQuoteEditor extends LightningElement {
             this.selectedProductName = product.name;
             this.modalDescription = product.description || '';
             this.searchResults = [];
-            this.selectedPbeId = product.id; // Por defecto la que encontró el buscador
-
-            // NUEVO: Buscar todas las listas de precios para este producto
+            this.selectedPbeId = product.id; 
             this.isLoading = true;
             getProductPrices({ product2Id: product.productId })
                 .then(prices => {
