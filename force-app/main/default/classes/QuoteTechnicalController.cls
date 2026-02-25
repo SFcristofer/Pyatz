@@ -160,11 +160,30 @@ public with sharing class QuoteTechnicalController {
             for (PricebookEntry pbe : Database.query(soql)) {
                 Map<String, Object> item = new Map<String, Object>();
                 item.put('id', pbe.Id);
+                item.put('productId', pbe.Product2Id); // ID real del producto
                 item.put('name', pbe.Product2.Name);
                 item.put('description', pbe.Product2.Description);
                 item.put('unitPrice', pbe.UnitPrice);
                 results.add(item);
             }
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getProductPrices(Id product2Id) {
+        List<Map<String, Object>> results = new List<Map<String, Object>>();
+        for (PricebookEntry pbe : [SELECT Id, Pricebook2.Name, UnitPrice 
+                                   FROM PricebookEntry 
+                                   WHERE Product2Id = :product2Id 
+                                   AND IsActive = true 
+                                   AND Pricebook2.IsActive = true 
+                                   ORDER BY Pricebook2.Name ASC]) {
+            Map<String, Object> item = new Map<String, Object>();
+            item.put('pbeId', pbe.Id);
+            item.put('pricebookName', pbe.Pricebook2.Name);
+            item.put('unitPrice', pbe.UnitPrice);
+            results.add(item);
         }
         return results;
     }

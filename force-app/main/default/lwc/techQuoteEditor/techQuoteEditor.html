@@ -432,6 +432,25 @@
                                     </div>
                                 </template>
                             </div>
+
+                            <!-- NUEVO: OPCIONES DE LISTAS DE PRECIO -->
+                            <template if:true={productPriceOptions.length}>
+                                <div class="slds-m-top_medium">
+                                    <p class="slds-text-title_bold slds-m-bottom_x-small">Listas de Precio Disponibles:</p>
+                                    <div class="price-options-grid">
+                                        <template for:each={productPriceOptions} for:item="opt">
+                                            <div key={opt.pbeId} class={opt.className} onclick={handlePriceOptionSelect} data-id={opt.pbeId}>
+                                                <div class="price-option-content">
+                                                    <span class="price-option-name">{opt.pricebookName}</span>
+                                                    <span class="price-option-value">
+                                                        <lightning-formatted-number value={opt.unitPrice} format-style="currency"></lightning-formatted-number>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                         <div class="section-card slds-p-around_medium slds-m-bottom_medium">
                             <div class="slds-grid slds-grid_align-spread">

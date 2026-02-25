@@ -8,6 +8,7 @@ import searchNecesidades from '@salesforce/apex/QuoteTechnicalController.searchN
 import getEmailTemplatesByFolder from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolder';
 import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
 import validatePLPassword from '@salesforce/apex/QuoteTechnicalController.validatePLPassword';
+import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProductPrices';
 
 export default class TechQuoteEditor extends LightningElement {
     @api recordId; 
@@ -96,6 +97,8 @@ export default class TechQuoteEditor extends LightningElement {
     @track convertZonas = false; 
 
     @track modalSedeSearchTerm = ''; // Nueva para el buscador interno
+    @track productPriceOptions = []; // Nueva para las listas de precios
+    @track selectedPbeId = '';       // ID de la entrada de lista de precios seleccionada
 
     @track showSeparatorModal = false;
     @track separatorText = '';
@@ -879,14 +882,54 @@ export default class TechQuoteEditor extends LightningElement {
         if (product) {
             this.selectedProductId = product.id;
             this.selectedProductName = product.name;
-            this.modalDescription = product.description || ''; // Inyección automática de la descripción del producto
-            this.searchResults = []; 
-            this.modalTableData = this.modalTableData.map(row => {
-                let newRow = { ...row, importeTotal: product.unitPrice };
-                newRow.totalSinImpuestos = this.isUnitario ? (product.unitPrice * row.cantidad) : product.unitPrice;
-                return newRow;
-            });
+            this.modalDescription = product.description || '';
+            this.searchResults = [];
+            this.selectedPbeId = product.id; // Por defecto la que encontró el buscador
+
+            // NUEVO: Buscar todas las listas de precios para este producto
+            this.isLoading = true;
+            getProductPrices({ product2Id: product.productId })
+                .then(prices => {
+                    this.isLoading = false;
+                    this.productPriceOptions = prices.map(p => ({
+                        ...p,
+                        className: p.pbeId === product.id ? 'price-option selected' : 'price-option'
+                    }));
+                    // Aplicar el precio inicial a todas las sedes
+                    this.applyPriceToTable(product.unitPrice);
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    console.error('Error cargando precios:', error);
+                });
         }
+    }
+
+    handlePriceOptionSelect(event) {
+        const pbeId = event.currentTarget.dataset.id;
+        const option = this.productPriceOptions.find(p => p.pbeId === pbeId);
+        if (option) {
+            this.selectedProductId = pbeId; // Actualizamos el PBE ID para el guardado
+            this.selectedPbeId = pbeId;
+            
+            // Actualizar visualmente la selección
+            this.productPriceOptions = this.productPriceOptions.map(p => ({
+                ...p,
+                className: p.pbeId === pbeId ? 'price-option selected' : 'price-option'
+            }));
+
+            // Aplicar el nuevo precio a la tabla de sedes
+            this.applyPriceToTable(option.unitPrice);
+        }
+    }
+
+    applyPriceToTable(price) {
+        this.modalTableData = this.modalTableData.map(row => {
+            let newRow = { ...row, importeTotal: price };
+            newRow.totalSinImpuestos = this.isUnitario ? (price * row.cantidad) : price;
+            return newRow;
+        });
+        this.recalculateModalData();
     }
 
     get metodoPagoDisplay() {

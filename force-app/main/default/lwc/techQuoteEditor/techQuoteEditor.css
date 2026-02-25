@@ -184,6 +184,51 @@
     padding: 0.75rem 1rem !important;
 }
 
+/* OPCIONES DE LISTA DE PRECIO (CHIPS) */
+.price-options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.price-option {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.price-option:hover {
+    border-color: var(--primary-blue);
+    background: #f0f9ff;
+}
+
+.price-option.selected {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 112, 210, 0.3);
+}
+
+.price-option-content {
+    display: flex;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.price-option-value {
+    opacity: 0.9;
+}
+
+.price-option.selected .price-option-value {
+    color: #dcfce7; /* Verde clarito para resaltar el precio sobre el azul */
+}
+
 /* P&L DASHBOARD */
 .pl-table {
     width: 100%;
