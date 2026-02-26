@@ -15,6 +15,17 @@ export default class TechQuoteEditor extends LightningElement {
     
     @track currentStep = '1';
     @track isLoading = false;
+
+    // --- VARIABLES DE LEVANTAMIENTO TÉCNICO ---
+    @track surveyData = [];
+    @track showSurveyTable = false;
+    @track surveyType = 'Bioenzimatico';
+    @track gmUsuariasInt = 0; @track gmUsuariasExt = 0; @track gmFreqUso = '';
+    @track gmSanitarios = 0; @track gmCubiculos = 0; @track gmContenedores = 0;
+    @track gmFreqRecoleccion = ''; @track gmDiasServicio = ''; @track gmHorario = '';
+    @track gmPermisos = ''; @track gmConsideraciones = ''; @track gmCapacitacion = '';
+    @track gmPresupuesto = ''; @track gmMotivo = ''; @track gmPermiteLev = '';
+
     
     @track asunto = '';
     @track introduccion = '';
@@ -624,6 +635,21 @@ export default class TechQuoteEditor extends LightningElement {
                             if (decodedData.selectedSedesIds) this.selectedSedesIds = [...decodedData.selectedSedesIds];
                             if (decodedData.serviciosData) this.serviciosData = decodedData.serviciosData;
                             
+                            // Restaurar Levantamiento
+                            if (decodedData.surveyData) this.surveyData = decodedData.surveyData;
+                            if (decodedData.surveyType) this.surveyType = decodedData.surveyType;
+                            if (decodedData.showSurveyTable) this.showSurveyTable = decodedData.showSurveyTable;
+                            if (decodedData.gm) {
+                                this.gmUsuariasInt = decodedData.gm.uInt; this.gmUsuariasExt = decodedData.gm.uExt;
+                                this.gmFreqUso = decodedData.gm.freqU; this.gmSanitarios = decodedData.gm.sanit;
+                                this.gmCubiculos = decodedData.gm.cubic; this.gmContenedores = decodedData.gm.cont;
+                                this.gmFreqRecoleccion = decodedData.gm.freqR; this.gmDiasServicio = decodedData.gm.diasS;
+                                this.gmHorario = decodedData.gm.hor; this.gmPermisos = decodedData.gm.perm;
+                                this.gmConsideraciones = decodedData.gm.cons; this.gmCapacitacion = decodedData.gm.cap;
+                                this.gmPresupuesto = decodedData.gm.pres; this.gmMotivo = decodedData.gm.mot;
+                                this.gmPermiteLev = decodedData.gm.pLev;
+                            }
+
                             // RESTAURAR ESTRATEGIA Y NECESIDAD (Vital para límites de selección)
                             if (decodedData.estrategiaVenta) this.estrategiaVenta = decodedData.estrategiaVenta;
                             if (decodedData.necesidadId) this.necesidadId = decodedData.necesidadId;
@@ -1066,7 +1092,17 @@ export default class TechQuoteEditor extends LightningElement {
             serviciosData: this.serviciosData,
             estrategiaVenta: this.estrategiaVenta,
             necesidadId: this.necesidadId,
-            necesidadNombre: this.necesidadNombre
+            necesidadNombre: this.necesidadNombre,
+            surveyData: this.surveyData,
+            surveyType: this.surveyType,
+            showSurveyTable: this.showSurveyTable,
+            gm: {
+                uInt: this.gmUsuariasInt, uExt: this.gmUsuariasExt, freqU: this.gmFreqUso,
+                sanit: this.gmSanitarios, cubic: this.gmCubiculos, cont: this.gmContenedores,
+                freqR: this.gmFreqRecoleccion, diasS: this.gmDiasServicio, hor: this.gmHorario,
+                perm: this.gmPermisos, cons: this.gmConsideraciones, cap: this.gmCapacitacion,
+                pres: this.gmPresupuesto, mot: this.gmMotivo, pLev: this.gmPermiteLev
+            }
         };
 
         // CODIFICACIÓN SEGURA PARA UTF-8 (Soporta acentos y caracteres especiales)
@@ -1230,5 +1266,108 @@ export default class TechQuoteEditor extends LightningElement {
             message: 'Se han cargado ' + uploadedFiles.length + ' archivos correctamente.',
             variant: 'success'
         }));
+    }
+
+    // --- LÓGICA DE LEVANTAMIENTO TÉCNICO ---
+    get levantamientoBtnVariant() { return this.showSurveyTable ? 'brand' : 'neutral'; }
+    get surveyTypeOptions() {
+        return [
+            { label: 'Bioenzimático', value: 'Bioenzimatico' },
+            { label: 'Grasas / Trampas', value: 'Grasas' },
+            { label: 'Gestión Menstrual (Íntima)', value: 'Intima' },
+            { label: 'Desazolve Mecánico', value: 'DesazolveMec' },
+            { label: 'Aromatizantes', value: 'Aromatizantes' },
+            { label: 'Desazolve con Vactor', value: 'Vactor' }
+        ];
+    }
+    get isBio() { return this.surveyType === 'Bioenzimatico'; }
+    get isGrasas() { return this.surveyType === 'Grasas'; }
+    get isIntima() { return this.surveyType === 'Intima'; }
+    get isDesazolveMec() { return this.surveyType === 'DesazolveMec'; }
+    get isAromatizantes() { return this.surveyType === 'Aromatizantes'; }
+    get isVactor() { return this.surveyType === 'Vactor'; }
+
+    get isGmFreqLV() { return this.gmFreqUso === 'Lunes a viernes'; }
+    get isGmFreqAlt() { return this.gmFreqUso === 'Días alternados (ej. home office)'; }
+    get isGmRec7() { return this.gmFreqRecoleccion === '7 días'; }
+    get isGmRec14() { return this.gmFreqRecoleccion === '14 días'; }
+    get isGmRec21() { return this.gmFreqRecoleccion === '21 días'; }
+    get isGmRec28() { return this.gmFreqRecoleccion === '28 días'; }
+    get isGmRecOtro() { return this.gmFreqRecoleccion === 'Otro:'; }
+    get isGmDiasLV() { return this.gmDiasServicio === 'Lunes a Viernes'; }
+    get isGmDiasFin() { return this.gmDiasServicio === 'Sábado o domingo'; }
+    get isGmPermSi() { return this.gmPermisos === 'Si'; }
+    get isGmPermNo() { return this.gmPermisos === 'No'; }
+    get isGmCapSi() { return this.gmCapacitacion === 'Si'; }
+    get isGmCapNo() { return this.gmCapacitacion === 'No'; }
+    get isGmLevSi() { return this.gmPermiteLev === 'Si'; }
+    get isGmLevNo() { return this.gmPermiteLev === 'No'; }
+
+    toggleSurveyTable() {
+        this.showSurveyTable = !this.showSurveyTable;
+        if (this.showSurveyTable && this.surveyData.length === 0) this.handleAddSurveyRow();
+    }
+
+    handleSurveyTypeChange(event) {
+        this.surveyType = event.detail.value;
+        this.surveyData = [];
+        this.handleAddSurveyRow();
+    }
+
+    handleGmChange(event) {
+        const field = event.target.dataset.field;
+        this[field] = event.target.value;
+    }
+
+    handleAddSurveyRow() {
+        let newRow = { id: Date.now(), rowNumber: this.surveyData.length + 1 };
+        if (this.isBio) Object.assign(newRow, { nivel: '', area: '', zona: '', ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, foto: '', residuos: '', escamoche: '', instala: '', azolves: '', obs: '', coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, modelo: '', st1: 0, ovalines: 0 });
+        else if (this.isGrasas) Object.assign(newRow, { nivel: '', area: '', zona: '', sp: 0, ent: 0, modelo: '', frecuencia: '', estado: '', tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, foto: '' });
+        else if (this.isIntima) Object.assign(newRow, { nivel: '', area: '', zona: '', wc: 0, frecuencia: '', dias: '' });
+        else if (this.isDesazolveMec) Object.assign(newRow, { nivel: '', area: '', zona: '', ovalines: 0, coladeras: 0, tapon: 0, mingitorios: 0, wc: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0 });
+        else if (this.isAromatizantes) Object.assign(newRow, { nivel: '', area: '', zona: '', arm: 0 });
+        else if (this.isVactor) Object.assign(newRow, { desc: '', medida: '', material: '', servicio: '', largo: 0, ancho: 0, prof: 0, mtLineal: 0, distancia: '', permDelegacion: '', permPlaza: '', dificultad: '', alcance: '', obs: '' });
+        this.surveyData = [...this.surveyData, newRow];
+    }
+
+    handleRemoveSurveyRow(event) {
+        const index = event.target.dataset.index;
+        const data = [...this.surveyData];
+        data.splice(index, 1);
+        this.surveyData = data.map((row, idx) => ({ ...row, rowNumber: idx + 1 }));
+    }
+
+    handleSurveyChange(event) {
+        const index = event.target.dataset.index;
+        const field = event.target.dataset.field;
+        const value = event.target.value;
+        const data = [...this.surveyData];
+        data[index][field] = value;
+        if (field === 'escamoche') {
+            if (value === 'Correcto, separan orgánico e inorgánico') data[index].escamocheClass = 'cell-select bg-green-soft';
+            else if (value === 'Lo hacen a medias, basura en suelo, botes con basura revuelta') data[index].escamocheClass = 'cell-select bg-orange-soft';
+            else if (value === 'Pésimo, tarjas, pisos y coladeras con basura; no hay cuidado') data[index].escamocheClass = 'cell-select bg-red-soft';
+            else data[index].escamocheClass = 'cell-select';
+        }
+        if (field === 'estado') {
+            if (value === 'EN BUEN ESTADO') data[index].estadoClass = 'cell-select bg-green-soft';
+            else if (value === 'EN MAL ESTADO') data[index].estadoClass = 'cell-select bg-orange-soft';
+            else if (value === 'EN PESIMO ESTADO') data[index].estadoClass = 'cell-select bg-red-soft';
+            else data[index].estadoClass = 'cell-select';
+        }
+        this.surveyData = data;
+    }
+
+    get surveyTotals() {
+        let totals = { ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, st1: 0, ovalines: 0, sp: 0, ent: 0, tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, wc: 0, mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, largo: 0, ancho: 0, prof: 0, mtLinealVactor: 0 };
+        this.surveyData.forEach(row => {
+            if (this.isBio) { totals.ve += Number(row.ve || 0); totals.vp += Number(row.vp || 0); totals.c10l += Number(row.c10l || 0); totals.c20l += Number(row.c20l || 0); totals.c25l += Number(row.c25l || 0); totals.piso += Number(row.piso || 0); totals.mueble += Number(row.mueble || 0); totals.pared += Number(row.pared || 0); totals.coladeras += Number(row.coladeras || 0); totals.tapon += Number(row.tapon || 0); totals.tarja += Number(row.tarja || 0); totals.tinas += Number(row.tinas || 0); totals.tgrasa += Number(row.tgrasa || 0); totals.st1 += Number(row.st1 || 0); totals.ovalines += Number(row.ovalines || 0); }
+            else if (this.isGrasas) { totals.sp += Number(row.sp || 0); totals.ent += Number(row.ent || 0); totals.tornillo += Number(row.tornillo || 0); totals.sello += Number(row.sello || 0); totals.mampara += Number(row.mampara || 0); totals.canastilla += Number(row.canastilla || 0); totals.retSalida += Number(row.retSalida || 0); }
+            else if (this.isIntima) { totals.wc += Number(row.wc || 0); }
+            else if (this.isDesazolveMec) { totals.ovalines += Number(row.ovalines || 0); totals.coladeras += Number(row.coladeras || 0); totals.tapon += Number(row.tapon || 0); totals.mingitorios += Number(row.mingitorios || 0); totals.wc += Number(row.wc || 0); totals.mtLineal += Number(row.mtLineal || 0); totals.tarjas += Number(row.tarjas || 0); totals.cuartoHumado += Number(row.cuartoHumado || 0); }
+            else if (this.isAromatizantes) { totals.arm += Number(row.arm || 0); }
+            else if (this.isVactor) { totals.largo += Number(row.largo || 0); totals.ancho += Number(row.ancho || 0); totals.prof += Number(row.prof || 0); totals.mtLinealVactor += Number(row.mtLineal || 0); }
+        });
+        return totals;
     }
 }
