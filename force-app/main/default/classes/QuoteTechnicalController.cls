@@ -363,6 +363,36 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchParentAccounts(String searchTerm) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        String query = '%' + searchTerm + '%';
+        for (Account acc : [SELECT Id, Name, BillingCity FROM Account 
+                           WHERE Name LIKE :query ORDER BY Name ASC LIMIT 10]) {
+            Map<String, String> res = new Map<String, String>();
+            res.put('id', acc.Id);
+            res.put('name', acc.Name + (acc.BillingCity != null ? ' - ' + acc.BillingCity : ''));
+            results.add(res);
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Account> getFilteredSedes(String searchTerm, Id parentAccountId, Boolean isGlobal) {
+        String searchKey = '%' + searchTerm + '%';
+        if (isGlobal) {
+            return [SELECT Id, Name, BillingStreet, BillingCity, Phone 
+                    FROM Account 
+                    WHERE Name LIKE :searchKey 
+                    ORDER BY Name ASC LIMIT 200];
+        } else {
+            return [SELECT Id, Name, BillingStreet, BillingCity, Phone 
+                    FROM Account 
+                    WHERE ParentId = :parentAccountId AND Name LIKE :searchKey 
+                    ORDER BY Name ASC LIMIT 200];
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> searchSedes(String searchTerm) {
         List<Map<String, String>> results = new List<Map<String, String>>();
         String query = '%' + searchTerm + '%';

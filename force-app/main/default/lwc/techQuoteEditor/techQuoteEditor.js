@@ -9,9 +9,12 @@ import getEmailTemplatesByFolder from '@salesforce/apex/QuoteTechnicalController
 import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
 import validatePLPassword from '@salesforce/apex/QuoteTechnicalController.validatePLPassword';
 import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProductPrices';
+import getFilteredSedes from '@salesforce/apex/QuoteTechnicalController.getFilteredSedes';
+import searchParentAccounts from '@salesforce/apex/QuoteTechnicalController.searchParentAccounts';
 
 export default class TechQuoteEditor extends LightningElement {
     @api recordId; 
+    @track accountId; 
     
     @track currentStep = '1';
     @track isLoading = false;
@@ -48,6 +51,12 @@ export default class TechQuoteEditor extends LightningElement {
     @track necesidadNombre = '';
     @track necesidadesResults = [];
     @track necesidadSeleccionada = '';
+    @track sedeSearchTerm = '';
+    @track isGlobalSedeSearch = false;
+    @track parentSearchTerm = '';
+    @track parentSearchResults = [];
+    @track selectedParentId = '';
+    @track selectedParentName = '';
 
     @track numeroContrato = '';
     @track contratoManual = false;
@@ -606,6 +615,7 @@ export default class TechQuoteEditor extends LightningElement {
                 
                 if (result.quote) {
                     const q = result.quote;
+                    this.accountId = q.AccountId;
                     this.asunto = q.Name || '';
                     this.introduccion = q.Introduction_Text__c || '';
                     this.folio = q.QuoteNumber || '';
@@ -663,6 +673,10 @@ export default class TechQuoteEditor extends LightningElement {
                     } else if (q.QuoteLineItems) {
                         this.reconstructFromLineItems(q.QuoteLineItems, q.Technical_Sedes__c);
                     }
+                } else if (result.opportunity) {
+                    const opp = result.opportunity;
+                    this.accountId = opp.AccountId;
+                    if (opp.Account && opp.Account.Name) this.clienteNombre = opp.Account.Name;
                 }
                 
                 this.loadBusinessLines();
@@ -729,13 +743,78 @@ export default class TechQuoteEditor extends LightningElement {
 
     handleSedeSelection(event) {
         const selectedRows = event.detail.selectedRows;
-        // Forzamos la creación de un nuevo array con strings limpios para asegurar que el Datatable lo reconozca al volver
         this.selectedSedesIds = [...selectedRows.map(row => String(row.Id))]; 
         
         if ((this.clienteNombre === 'Seleccione una sede...' || !this.recordId) && selectedRows.length > 0) {
             this.clienteNombre = selectedRows[0].Name;
         }
-        console.log('PYATZ LOG: Sedes seleccionadas actualizadas:', JSON.stringify(this.selectedSedesIds));
+    }
+
+    handleSedeSearch(event) {
+        this.sedeSearchTerm = event.target.value;
+        this.fetchSedes();
+    }
+
+    handleSedeScopeChange(event) {
+        this.isGlobalSedeSearch = event.target.checked;
+        if (this.isGlobalSedeSearch) {
+            this.selectedParentId = '';
+            this.selectedParentName = '';
+        }
+        this.fetchSedes();
+    }
+
+    handleParentSearch(event) {
+        this.parentSearchTerm = event.target.value;
+        if (this.parentSearchTerm.length > 2) {
+            searchParentAccounts({ searchTerm: this.parentSearchTerm })
+                .then(result => { this.parentSearchResults = result; })
+                .catch(error => { console.error('Error buscando padres:', error); });
+        } else {
+            this.parentSearchResults = [];
+        }
+    }
+
+    handleParentSelect(event) {
+        this.selectedParentId = event.currentTarget.dataset.id;
+        this.selectedParentName = event.currentTarget.dataset.name;
+        this.parentSearchResults = [];
+        this.parentSearchTerm = '';
+        this.isGlobalSedeSearch = false; // Al elegir un padre, volvemos a modo local para ver sus hijos
+        this.fetchSedes();
+    }
+
+    handleRemoveParent() {
+        this.selectedParentId = '';
+        this.selectedParentName = '';
+        this.fetchSedes();
+    }
+
+    fetchSedes() {
+        const effectiveParentId = this.selectedParentId || this.accountId;
+        getFilteredSedes({ 
+            searchTerm: this.sedeSearchTerm, 
+            parentAccountId: effectiveParentId, 
+            isGlobal: this.isGlobalSedeSearch 
+        })
+        .then(result => {
+            this.sedesData = result.map(acc => ({
+                Id: acc.Id,
+                Name: acc.Name,
+                Phone: acc.Phone || 'N/A',
+                BillingStreet: acc.BillingStreet || 'Sin dirección',
+                BillingCity: acc.BillingCity || 'N/A'
+            }));
+        })
+        .catch(error => console.error('Error buscando sedes:', error));
+    }
+
+    get sedeScopeLabel() {
+        return this.isGlobalSedeSearch ? 'Búsqueda Directa (Todas las Cuentas)' : 'Búsqueda por Jerarquía (Padre -> Sedes)';
+    }
+
+    get sedeSearchPlaceholder() {
+        return this.isGlobalSedeSearch ? 'Buscar cualquier sede en Pyatz' : '2. Filtrar entre las sedes encontradas';
     }
 
     get estrategiaOptions() {

@@ -204,7 +204,56 @@
                 </div>
 
                 <div class="section-card slds-m-bottom_large">
-                    <div class="section-header"><h2 class="slds-text-heading_small">Seleccionar Sede</h2></div>
+                    <div class="section-header slds-grid slds-grid_align-spread">
+                        <h2 class="slds-text-heading_small">Seleccionar Sedes</h2>
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <span class="slds-m-right_small slds-text-title_bold" style="color: #0070d2;">{sedeScopeLabel}</span>
+                            <lightning-input type="toggle" label="Búsqueda Global" variant="label-hidden" 
+                                checked={isGlobalSedeSearch} onchange={handleSedeScopeChange}
+                                message-toggle-active="Directa" message-toggle-inactive="Jerarquía">
+                            </lightning-input>
+                        </div>
+                    </div>
+
+                    <!-- BUSCADOR DE CUENTA PADRE (Solo si no es búsqueda directa) -->
+                    <template if:false={isGlobalSedeSearch}>
+                        <div class="slds-p-around_medium border-bottom bg-blue-soft" style="position: relative;">
+                            <p class="slds-text-title_bold slds-m-bottom_x-small">1. Buscar Cuenta Padre / Corporativo</p>
+                            <lightning-input type="search" placeholder="Escribe el nombre del cliente (ej. Liverpool)..." 
+                                variant="label-hidden" value={parentSearchTerm} onchange={handleParentSearch}>
+                            </lightning-input>
+                            
+                            <template if:true={selectedParentName}>
+                                <div class="slds-m-top_x-small">
+                                    <lightning-pill label={selectedParentName} icon-name="standard:account" onremove={handleRemoveParent}></lightning-pill>
+                                </div>
+                            </template>
+
+                            <template if:true={parentSearchResults.length}>
+                                <div class="product-search-results" style="top: 75px;">
+                                    <ul class="slds-listbox slds-listbox_vertical">
+                                        <template for:each={parentSearchResults} for:item="p">
+                                            <li key={p.id} class="slds-listbox__item" onclick={handleParentSelect} data-id={p.id} data-name={p.name}>
+                                                <div class="slds-media slds-listbox__option_entity">
+                                                    <span class="product-name">{p.name}</span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="slds-p-around_medium border-bottom bg-light-gray">
+                        <p class="slds-text-title_bold slds-m-bottom_x-small">
+                            {sedeSearchPlaceholder}
+                        </p>
+                        <lightning-input type="search" placeholder="Escribe el nombre de la sede..." 
+                            variant="label-hidden" value={sedeSearchTerm} onchange={handleSedeSearch}>
+                        </lightning-input>
+                    </div>
+
                     <div class="datatable-container scrollable-table">
                         <lightning-datatable key-field="Id" data={sedesData} columns={sedesColumns} selected-rows={selectedSedesIds} onrowselection={handleSedeSelection} max-row-selection={maxRowSelection}></lightning-datatable>
                     </div>
