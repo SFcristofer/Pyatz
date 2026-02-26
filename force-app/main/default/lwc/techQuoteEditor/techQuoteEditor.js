@@ -64,13 +64,10 @@ export default class TechQuoteEditor extends LightningElement {
 
     // Columnas restauradas
     sedesColumns = [
-        { label: 'Código', fieldName: 'CodigoInterno', type: 'text', initialWidth: 100 },
-        { label: 'Nombre Sede', fieldName: 'AccountName', type: 'text' },
-        { label: 'Contacto', fieldName: 'Name', type: 'text' },
+        { label: 'Nombre de la Sede', fieldName: 'Name', type: 'text' },
         { label: 'Teléfono', fieldName: 'Phone', type: 'phone' },
-        { label: 'Dirección', fieldName: 'MailingStreet', type: 'text' },
-        { label: 'Municipio', fieldName: 'MailingCity', type: 'text' },
-        { label: 'Estado', fieldName: 'MailingState', type: 'text' }
+        { label: 'Dirección', fieldName: 'BillingStreet', type: 'text' },
+        { label: 'Ciudad', fieldName: 'BillingCity', type: 'text' }
     ];
 
     serviciosColumns = [
@@ -670,14 +667,13 @@ export default class TechQuoteEditor extends LightningElement {
                 
                 this.loadBusinessLines();
                 
-                if (result.contacts) {
-                    this.sedesData = result.contacts.map((con, index) => ({
-                        ...con,
-                        CodigoInterno: `CON-${index + 101}`,
-                        AccountName: con.Account ? con.Account.Name : 'Sin Cuenta',
-                        MailingStreet: con.MailingStreet || 'Sin calle',
-                        MailingCity: con.MailingCity || 'N/A',
-                        MailingState: con.MailingState || 'N/A'
+                if (result.locations) {
+                    this.sedesData = result.locations.map((acc) => ({
+                        Id: acc.Id,
+                        Name: acc.Name,
+                        Phone: acc.Phone || 'N/A',
+                        BillingStreet: acc.BillingStreet || 'Sin dirección',
+                        BillingCity: acc.BillingCity || 'N/A'
                     }));
                 }
                 this.isLoading = false;
@@ -737,7 +733,7 @@ export default class TechQuoteEditor extends LightningElement {
         this.selectedSedesIds = [...selectedRows.map(row => String(row.Id))]; 
         
         if ((this.clienteNombre === 'Seleccione una sede...' || !this.recordId) && selectedRows.length > 0) {
-            this.clienteNombre = selectedRows[0].AccountName;
+            this.clienteNombre = selectedRows[0].Name;
         }
         console.log('PYATZ LOG: Sedes seleccionadas actualizadas:', JSON.stringify(this.selectedSedesIds));
     }
@@ -1369,5 +1365,13 @@ export default class TechQuoteEditor extends LightningElement {
             else if (this.isVactor) { totals.largo += Number(row.largo || 0); totals.ancho += Number(row.ancho || 0); totals.prof += Number(row.prof || 0); totals.mtLinealVactor += Number(row.mtLineal || 0); }
         });
         return totals;
+    }
+
+    handleCloneQuote() {
+        this.dispatchEvent(new ShowToastEvent({ title: 'Aviso', message: 'Funcionalidad de clonación en desarrollo.', variant: 'info' }));
+    }
+
+    handleGenerateContract() {
+        this.dispatchEvent(new ShowToastEvent({ title: 'Aviso', message: 'Funcionalidad de generación de contrato en desarrollo.', variant: 'info' }));
     }
 }

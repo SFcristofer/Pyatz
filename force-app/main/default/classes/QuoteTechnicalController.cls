@@ -86,18 +86,14 @@ public with sharing class QuoteTechnicalController {
             result.put('necesidades', [SELECT Id, Name, Linea_de_negocio__c FROM Necesidades__c WHERE Cuenta__c = :accountId LIMIT 20]);
         }
         
-        // UBICACIONES
-        List<Id> locationIds = new List<Id>();
-        for(AssociatedLocation al : [SELECT LocationId FROM AssociatedLocation WHERE ParentRecordId = :accountId]) {
-            locationIds.add(al.LocationId);
-        }
-        if(!locationIds.isEmpty()) {
-            result.put('locations', [SELECT Id, Name, LocationType, Description, VisitorAddress.Address FROM Location WHERE Id IN :locationIds LIMIT 20]);
+        // SEDES (Cuentas Hijas relacionadas por ParentId)
+        if (accountId != null) {
+            result.put('locations', [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE ParentId = :accountId LIMIT 50]);
         } else {
-            result.put('locations', [SELECT Id, Name, LocationType, Description, VisitorAddress.Address FROM Location WHERE IsInventoryLocation = false LIMIT 10]);
+            result.put('locations', [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE ParentId != null LIMIT 20]);
         }
 
-        // CONTACTOS FILTRADOS POR CUENTA
+        // CONTACTOS FILTRADOS POR CUENTA (Para el contacto principal de la cotización)
         if (accountId != null) {
             result.put('contacts', [SELECT Id, Name, Phone, Email, AccountId, Account.Name, MailingStreet, MailingCity, MailingState 
                                     FROM Contact WHERE AccountId = :accountId LIMIT 100]);
@@ -370,11 +366,11 @@ public with sharing class QuoteTechnicalController {
     public static List<Map<String, String>> searchSedes(String searchTerm) {
         List<Map<String, String>> results = new List<Map<String, String>>();
         String query = '%' + searchTerm + '%';
-        for (Contact con : [SELECT Id, Name, Account.Name, MailingCity FROM Contact 
-                           WHERE Name LIKE :query OR Account.Name LIKE :query LIMIT 10]) {
+        for (Account acc : [SELECT Id, Name, BillingCity FROM Account 
+                           WHERE Name LIKE :query OR Parent.Name LIKE :query LIMIT 10]) {
             Map<String, String> res = new Map<String, String>();
-            res.put('id', con.Id);
-            res.put('name', con.Name + ' [' + con.Account.Name + '] - ' + (con.MailingCity != null ? con.MailingCity : 'N/A'));
+            res.put('id', acc.Id);
+            res.put('name', acc.Name + (acc.BillingCity != null ? ' - ' + acc.BillingCity : ''));
             results.add(res);
         }
         return results;

@@ -503,15 +503,24 @@
 
         <!-- FOOTER STICKY -->
         <div class="sticky-footer slds-p-around_medium bg-white border-top">
-            <div class="slds-grid slds-grid_align-spread">
-                <lightning-button label="Regresar" icon-name="utility:back" onclick={handleCancel}></lightning-button>
-                <div class="slds-grid">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <!-- IZQUIERDA: REGRESAR + CLONAR -->
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning-button label="Regresar" icon-name="utility:back" onclick={handleCancel}></lightning-button>
+                    <div class="slds-m-left_medium slds-p-left_medium" style="border-left: 1px solid #dddbda;">
+                        <lightning-button label="Clonar Cotización" icon-name="utility:copy" variant="neutral" onclick={handleCloneQuote}></lightning-button>
+                    </div>
+                </div>
+
+                <!-- DERECHA: CONTRATO (SOLO PASO 4) + NAVEGACIÓN -->
+                <div class="slds-grid slds-grid_vertical-align-center">
                     <template if:true={isStep4}>
+                        <lightning-button label="Generar Contrato" icon-name="utility:justification_text" variant="brand-outline" class="slds-m-right_small" onclick={handleGenerateContract}></lightning-button>
                         <lightning-button label="Guardar Borrador" class="slds-m-right_small" onclick={handleSaveDraft}></lightning-button>
                         <lightning-button label="Finalizar" variant="brand" onclick={handleFinalize}></lightning-button>
                     </template>
                     <template if:false={isStep4}>
-                        <lightning-button label="Siguiente" variant="brand" onclick={handleNext}></lightning-button>
+                        <lightning-button label="Siguiente" variant="brand" icon-name="utility:forward" icon-position="right" onclick={handleNext}></lightning-button>
                     </template>
                 </div>
             </div>

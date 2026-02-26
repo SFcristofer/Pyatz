@@ -434,3 +434,99 @@
     border-color: var(--primary-blue);
     background: #f0f9ff;
 }
+
+/* --- ESTILOS PREMIUM PARA TABLAS TÉCNICAS (PIXEL PERFECT) --- */
+.survey-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    width: 100%;
+    background: white;
+    border: 1px solid #94a3b8;
+}
+
+.survey-table th, .survey-table td {
+    height: 45px !important;
+    padding: 0 10px !important;
+    border: 0.5px solid #94a3b8 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 12.5px !important;
+    color: #1e293b;
+    position: relative;
+}
+
+.survey-table thead th {
+    background-color: #f8fafc !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Efecto de Iluminación Instantánea */
+.survey-table tbody tr:hover td {
+    background-color: #fef9c3 !important; /* Amarillo crema suave */
+    transition: background-color 0.1s ease;
+}
+
+/* Celda Activa (En foco) */
+.survey-table td:focus-within {
+    background-color: #fef3c7 !important; /* Amarillo cálido */
+    outline: 2px solid var(--primary-blue);
+    z-index: 10;
+}
+
+/* Inputs Integrados */
+.cell-input, .cell-select {
+    width: 100%;
+    height: 100%;
+    border: none !important;
+    background: transparent !important;
+    text-align: center !important;
+    font-size: 12.5px !important;
+    color: inherit;
+    padding: 0 !important;
+}
+
+.cell-input:focus, .cell-select:focus {
+    outline: none !important;
+}
+
+/* Grupos de Cabecera */
+.survey-header-group th {
+    background-color: #1e293b !important;
+    color: white !important;
+    border-bottom: 2px solid #0f172a !important;
+}
+
+/* Totales */
+.survey-row-totals td {
+    background-color: #f1f5f9 !important;
+    font-weight: 800 !important;
+    color: var(--primary-dark) !important;
+    border-top: 2px solid #94a3b8 !important;
+}
+
+/* Diagnóstico Vertical (GM) */
+.vertical-diag-table td {
+    height: 40px !important;
+}
+
+.diag-label {
+    background-color: #f8fafc !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    width: 60%;
+}
+
+/* Semáforos Suaves */
+.bg-green-soft { background-color: #dcfce7 !important; }
+.bg-orange-soft { background-color: #ffedd5 !important; }
+.bg-red-soft { background-color: #fee2e2 !important; }
+
+/* Scroll Dinámico */
+.survey-scroll-wrapper {
+    border-radius: 8px;
+    border: 1px solid #94a3b8;
+    overflow: hidden;
+}
+
