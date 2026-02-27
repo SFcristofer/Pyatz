@@ -1,537 +1,86 @@
-/* UI PREMIUM - PALETA CORPORATIVA PYATZ V2 */
-:host {
-    --primary-blue: #0070d2;
-    --primary-dark: #003a70;
-    --primary-gradient: linear-gradient(135deg, #1b3a61 0%, #0070d2 100%);
-    --bg-page: #f0f4f8;
-    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    --border-radius: 12px;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-}
+/* UI EXCEL PRO - TABLAS DE LEVANTAMIENTO PYATZ */
 
-.main-container {
-    background-color: var(--bg-page);
-    min-height: 100vh;
-    padding-bottom: 120px; /* Espacio extra para que el footer no tape nada */
-}
-
-/* CONTENEDOR DE PASOS */
-.progress-container {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 2rem;
-}
-
-/* CARDS MODERNAS */
-.section-card {
-    background: #ffffff;
-    border-radius: var(--border-radius);
-    border: none;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 2rem;
-    /* overflow: hidden;  <-- ELIMINADO para permitir que el buscador flote hacia afuera */
-    transition: transform 0.2s ease;
-    position: relative; 
-}
-
-.section-header {
-    background-color: #ffffff;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #f1f5f9;
-    display: flex;
-    align-items: center;
-    border-radius: var(--border-radius) var(--border-radius) 0 0; /* Restaurar redondeo superior */
-}
-
-.section-header h2 {
-    font-weight: 700;
-    color: var(--primary-dark);
-    font-size: 1.1rem;
-}
-
-.blue-square {
-    width: 5px;
-    height: 22px;
-    background: var(--primary-gradient);
-    border-radius: 10px;
-    margin-right: 12px;
-}
-
-/* FOOTER FLOTANTE PROFESIONAL (Solución a la barra de SF) */
-.sticky-footer {
-    position: fixed;
-    bottom: 55px; /* Elevado para evitar la barra de utilidades de SF */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1200px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    padding: 1rem 2.5rem;
-    z-index: 9000;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* MODALES MEJORADOS */
-.custom-modal-header {
-    background: var(--primary-gradient) !important;
-    color: white !important;
-    border-radius: 12px 12px 0 0;
-    padding: 1.5rem !important;
-}
-
-.custom-modal-header h2 {
-    color: white !important;
-    font-weight: 700;
-}
-
-.slds-modal__content {
-    border-radius: 0 0 12px 12px;
-}
-
-/* TABLA PERSONALIZADA CON DRAG & DROP */
-.custom-drag-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-}
-
-.custom-drag-table thead th {
-    background-color: #f8fafc;
-    color: var(--primary-dark);
-    font-weight: 700;
-    font-size: 0.75rem;
-    padding: 12px;
-    border-bottom: 2px solid #e2e8f0;
-    text-transform: uppercase;
-}
-
-.custom-drag-table tbody tr {
-    border-bottom: 1px solid #f1f5f9;
-    transition: background-color 0.2s ease;
-}
-
-.custom-drag-table tbody tr:hover {
-    background-color: #f8fafc;
-}
-
-.custom-drag-table td {
-    padding: 12px;
-    font-size: 0.9rem;
-    vertical-align: middle;
-}
-
-/* ESTILO DEL SEPARADOR (ANCHO COMPLETO) */
-.row-separator {
-    background-color: #f1f5f9 !important;
-}
-
-.separator-bar {
-    background: var(--primary-gradient);
-    color: white;
-    padding: 6px 15px;
-    border-radius: 4px;
-    font-weight: 800;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    display: inline-block;
-    letter-spacing: 1px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.separator-text-cell {
-    padding: 8px 12px !important;
-}
-
-/* MANEJADOR DE ARRASTRE */
-.drag-handle {
-    cursor: grab;
-    color: #cbd5e1;
-    text-align: center;
-}
-
-.drag-handle:active {
-    cursor: grabbing;
-}
-
-.row-service.dragging, .row-separator.dragging {
-    opacity: 0.5;
-    background-color: #e0f2fe !important;
-    border: 2px dashed var(--primary-blue);
-}
-
-.font-bold {
-    font-weight: 700;
-    color: var(--primary-dark);
-}
-
-/* BUSCADORES Y INPUTS */
-.section-card lightning-input[type="search"] {
-    --sds-c-input-color-border: #e2e8f0;
-    --sds-c-input-shadow: none;
-}
-
-/* Contenedor relativo para anclar resultados */
-.search-container {
-    position: relative;
-    width: 100%;
-}
-
-/* RESULTADOS DE BÚSQUEDA DE PRODUCTOS PREMIUM */
-.product-search-results {
-    position: absolute;
-    z-index: 9999; /* Muy alto para estar por encima de todo */
-    background: white;
-    left: 0;
-    right: 0; /* Esto asegura que el ancho sea el mismo que el search-container */
-    max-height: 250px;
-    overflow-y: auto;
-    margin-top: 4px;
-    border-radius: 12px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
-    border: 1px solid #e2e8f0;
-}
-
-.product-result-item {
-    transition: all 0.2s ease;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.product-result-item:last-child {
-    border-bottom: none;
-}
-
-.product-result-item:hover {
-    background-color: #f0f9ff;
-    cursor: pointer;
-}
-
-.product-name {
-    font-weight: 700;
-    color: var(--primary-dark);
-    font-size: 0.95rem;
-}
-
-.product-price {
-    background: #dcfce7;
-    color: #166534;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 0.85rem;
-}
-
-.product-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.slds-listbox__option_entity {
-    padding: 0.75rem 1rem !important;
-}
-
-/* OPCIONES DE LISTA DE PRECIO (CHIPS) */
-.price-options-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.price-option {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 8px 16px;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-}
-
-.price-option:hover {
-    border-color: var(--primary-blue);
-    background: #f0f9ff;
-}
-
-.price-option.selected {
-    background: var(--primary-blue);
-    border-color: var(--primary-blue);
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 112, 210, 0.3);
-}
-
-.price-option-content {
-    display: flex;
-    gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.price-option-value {
-    opacity: 0.9;
-}
-
-.price-option.selected .price-option-value {
-    color: #dcfce7; /* Verde clarito para resaltar el precio sobre el azul */
-}
-
-/* FICHA TÉCNICA DEL PRODUCTO */
-.product-info-card {
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 12px;
-    padding: 1rem;
-}
-
-.product-info-body {
-    margin-top: 8px;
-    font-size: 0.9rem;
-    color: #0c4a6e;
-    line-height: 1.4;
-    white-space: pre-wrap; /* Respeta los saltos de línea de la descripción */
-}
-
-.text-blue { color: #0369a1; }
-.icon-blue { --sds-c-icon-color-foreground: #0369a1; }
-.italic { font-style: italic; }
-
-/* EDITOR DE DESCRIPCIÓN ADICIONAL (ESTILO FICHA TÉCNICA) */
-.custom-description-editor {
-    --sds-c-textarea-shadow: none;
-    --slds-c-textarea-color-background: #f0f9ff;
-    --slds-c-textarea-color-border: #bae6fd;
-}
-
-.custom-description-editor :host {
-    display: block;
-}
-
-/* Forzar el estilo en el textarea interno de Salesforce */
-.custom-description-editor lightning-textarea {
-    font-size: 0.9rem;
-}
-
-.custom-description-editor textarea {
-    background: #f0f9ff !important;
-    border: 1px solid #bae6fd !important;
-    border-radius: 12px !important;
-    padding: 1rem !important;
-    color: #0c4a6e !important;
-    line-height: 1.4 !important;
-    min-height: 150px;
-}
-
-/* P&L DASHBOARD */
-.pl-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.pl-table th {
-    background: var(--primary-dark) !important;
-    color: white !important;
-    padding: 15px;
-    font-weight: 600;
-}
-
-.pl-section-header td {
-    background-color: #f8fafc;
-    font-weight: 800;
-    color: var(--primary-blue);
-    padding: 12px 20px;
-    border-top: 2px solid #e2e8f0;
-}
-
-.pl-calculated-value {
-    font-weight: 700;
-    color: var(--primary-blue);
-    text-align: right;
-}
-
-.pl-result-row {
-    background: #1e293b;
-    color: white;
-}
-
-.pl-result-row td {
-    color: #f8fafc !important;
-    padding: 15px 20px;
-}
-
-.bg-green-soft {
-    background-color: #ecfdf5;
-}
-
-/* PREVISUALIZACIÓN PDF REALISTA */
-.pdf-preview-container {
-    background-color: #475569; /* Fondo oscuro para resaltar las hojas blancas */
-    padding: 3rem 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem; /* Espacio real entre hojas */
-}
-
-.pdf-page {
-    background: white;
-    width: 100%;
-    max-width: 850px; /* Tamaño aproximado carta */
-    min-height: 1100px;
-    padding: 0; /* ELIMINADO padding para permitir sangrado de membrete */
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-    border: none;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-/* ESPACIO INTERNO PARA EL TEXTO (Replica el padding del PDF real) */
-.pdf-content-wrapper {
-    padding: 0 2rem 3.5cm 2rem;
-    flex-grow: 1;
-}
-
-.page-footer-container {
-    margin-top: auto; /* Empuja el pie al fondo de la hoja */
-    padding-top: 0;
-    margin-bottom: 0; /* Pegado al borde inferior */
-}
-
-.pdf-text-small {
-    font-size: 9pt;
-}
-
-/* BOTONES PERSONALIZADOS */
-.btn-verde {
-    --sds-c-button-brand-color-background: #10b981;
-    --sds-c-button-brand-color-border: #10b981;
-    font-weight: 700;
-}
-
-.btn-azul-pastel {
-    --sds-c-button-neutral-color-background: #e0f2fe;
-    --sds-c-button-neutral-color-border: #bae6fd;
-    --sds-c-button-neutral-text-color: #0369a1;
-}
-
-.custom-dropdown-trigger {
-    background: white;
-    border: 1px solid #e2e8f0;
-    padding: 1rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-}
-
-.custom-dropdown-trigger:hover {
-    border-color: var(--primary-blue);
-    background: #f0f9ff;
-}
-
-/* --- ESTILOS PREMIUM PARA TABLAS TÉCNICAS (PIXEL PERFECT) --- */
+/* LA TABLA */
 .survey-table {
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    width: 100%;
-    background: white;
-    border: 1px solid #94a3b8;
+    border-collapse: collapse !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff;
+    table-layout: fixed;
 }
 
-.survey-table th, .survey-table td {
-    height: 45px !important;
-    padding: 0 10px !important;
-    border: 0.5px solid #94a3b8 !important;
-    text-align: center !important;
-    vertical-align: middle !important;
-    font-size: 12.5px !important;
-    color: #1e293b;
-    position: relative;
-}
-
-.survey-table thead th {
-    background-color: #f8fafc !important;
+/* ENCABEZADOS EXCEL */
+.survey-table th {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    font-size: 10px !important;
     font-weight: 700 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    text-transform: uppercase !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 4px !important;
+    text-align: center !important;
+    height: 28px !important;
 }
 
-/* Efecto de Iluminación Instantánea */
-.survey-table tbody tr:hover td {
-    background-color: #fef9c3 !important; /* Amarillo crema suave */
-    transition: background-color 0.1s ease;
+/* CELDAS EXCEL */
+.survey-table td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 0 !important; /* El input llenará la celda */
+    height: 30px !important;
+    vertical-align: middle !important;
 }
 
-/* Celda Activa (En foco) */
-.survey-table td:focus-within {
-    background-color: #fef3c7 !important; /* Amarillo cálido */
-    outline: 2px solid var(--primary-blue);
-    z-index: 10;
-}
-
-/* Inputs Integrados */
-.cell-input, .cell-select {
-    width: 100%;
-    height: 100%;
+/* INPUTS TIPO CELDA */
+.cell-input {
+    width: 100% !important;
+    height: 30px !important;
     border: none !important;
     background: transparent !important;
     text-align: center !important;
-    font-size: 12.5px !important;
-    color: inherit;
-    padding: 0 !important;
+    font-size: 12px !important;
+    color: #1e293b !important;
+    padding: 0 4px !important;
 }
 
-.cell-input:focus, .cell-select:focus {
-    outline: none !important;
-}
-
-/* Grupos de Cabecera */
-.survey-header-group th {
-    background-color: #1e293b !important;
-    color: white !important;
-    border-bottom: 2px solid #0f172a !important;
-}
-
-/* Totales */
-.survey-row-totals td {
-    background-color: #f1f5f9 !important;
-    font-weight: 800 !important;
-    color: var(--primary-dark) !important;
-    border-top: 2px solid #94a3b8 !important;
-}
-
-/* Diagnóstico Vertical (GM) */
-.vertical-diag-table td {
-    height: 40px !important;
-}
-
-.diag-label {
+.cell-input:hover {
     background-color: #f8fafc !important;
-    text-align: left !important;
-    font-weight: 600 !important;
-    width: 60%;
 }
 
-/* Semáforos Suaves */
-.bg-green-soft { background-color: #dcfce7 !important; }
-.bg-orange-soft { background-color: #ffedd5 !important; }
-.bg-red-soft { background-color: #fee2e2 !important; }
+.cell-input:focus {
+    background-color: #ffffff !important;
+    outline: 2px solid #0070d2 !important;
+    outline-offset: -2px !important;
+    z-index: 10;
+}
 
-/* Scroll Dinámico */
-.survey-scroll-wrapper {
-    border-radius: 8px;
-    border: 1px solid #94a3b8;
-    overflow: hidden;
+/* SELECTS TIPO CELDA */
+.cell-select {
+    width: 100% !important;
+    height: 30px !important;
+    border: none !important;
+    background: transparent !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    color: #1e293b !important;
+    cursor: pointer;
+    appearance: none; /* Quita la flecha nativa para limpieza */
+}
+
+.cell-select:hover {
+    background-color: #f8fafc !important;
+}
+
+/* FILA DE TOTALES */
+.survey-row-totals td {
+    background-color: #f8fafc !important;
+    font-weight: 700 !important;
+    color: #0070d2 !important;
+    text-align: center !important;
+    font-size: 12px !important;
+}
+
+/* SCROLL DE TABLAS LARGAS */
+.table-scroll-container {
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    overflow: auto;
 }
