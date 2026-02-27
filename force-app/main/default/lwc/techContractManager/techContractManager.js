@@ -40,6 +40,24 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track fechaPrimerServicio = '';
     @track fechaLimiteServicio = '';
 
+    // Vigencia y Observaciones
+    @track fechaInicioContrato = '';
+    @track fechaFinContrato = '';
+    @track observacionesPrivadas = '';
+    @track observacionesRenovacion = '';
+
+    // Plantillas
+    @track plantillaSeleccionada = '';
+    @track contenidoLegal = '';
+
+    get plantillaOptions() {
+        return [
+            { label: 'Condiciones Estándar Pyatz', value: 'estandar' },
+            { label: 'Anexo Técnico Liverpool', value: 'liverpool' },
+            { label: 'Cláusula de Confidencialidad', value: 'confidencial' }
+        ];
+    }
+
     get selectedClientSignerDisplay() {
         return this.selectedClientSigner || 'No seleccionado';
     }
@@ -144,6 +162,34 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         else this.fechaLimiteServicio = event.target.value;
     }
 
+    handleVigenciaChange(event) {
+        const id = event.target.dataset.id;
+        if (id === 'inicio') this.fechaInicioContrato = event.target.value;
+        else this.fechaFinContrato = event.target.value;
+    }
+
+    handleObsChange(event) {
+        const id = event.target.dataset.id;
+        if (id === 'privadas') this.observacionesPrivadas = event.target.value;
+        else this.observacionesRenovacion = event.target.value;
+    }
+
+    handlePlantillaChange(event) {
+        this.plantillaSeleccionada = event.detail.value;
+        // Simulación de carga de contenido basado en selección
+        if (this.plantillaSeleccionada === 'estandar') {
+            this.contenidoLegal = '<h2>Condiciones Estándar</h2><p>El presente documento establece que los servicios se realizarán conforme a la NOM vigente...</p>';
+        } else if (this.plantillaSeleccionada === 'liverpool') {
+            this.contenidoLegal = '<h2>Anexo Liverpool</h2><ul><li>Horario de acceso: 22:00 - 06:00</li><li>EPP Obligatorio</li></ul>';
+        } else {
+            this.contenidoLegal = '<p>Texto legal personalizado...</p>';
+        }
+    }
+
+    handleContenidoChange(event) {
+        this.contenidoLegal = event.target.value;
+    }
+
     // GESTIÓN DE PARTIDAS
     handleItemToggle(event) {
         const itemId = event.target.dataset.id;
@@ -215,6 +261,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             return;
         }
 
+        // PENDIENTE DEFINIR: ¿Quieres que estas fechas o el check manual tengan algún comportamiento especial al generar el PDF?
         const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
         let url = `/apex/QuoteContractPDF?id=${this.recordId}&selectedItems=${selectedIds.join(',')}`;
         url += `&show_total=${this.selections.show_total}&show_line_prices=${this.selections.show_line_prices}`;

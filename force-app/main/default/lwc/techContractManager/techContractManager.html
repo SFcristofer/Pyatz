@@ -152,6 +152,7 @@
             </div>
 
             <!-- SECCIÓN 4: DATOS DEL CONTACTO -->
+            <!-- PENDIENTE DEFINIR: ¿Quieres que estas fechas o el check manual tengan algún comportamiento especial al generar el PDF? -->
             <div class="slds-box slds-m-top_medium bg-white">
                 <p class="slds-text-title_bold slds-m-bottom_medium">Datos del contacto</p>
                 
@@ -178,6 +179,52 @@
                             </div>
                             <div class="slds-col slds-size_1-of-2">
                                 <lightning-input type="date" label="F.Límite servicio:" onchange={handleDateChange} data-id="limiteServicio" value={fechaLimiteServicio}></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBSECCIÓN: VIGENCIA Y OBSERVACIONES -->
+                <div class="slds-m-top_large slds-p-top_medium slds-border_top">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <!-- Fechas de Vigencia -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning-input type="date" label="Fecha de inicio:" value={fechaInicioContrato} onchange={handleVigenciaChange} data-id="inicio"></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning-input type="date" label="Fecha fin:" value={fechaFinContrato} onchange={handleVigenciaChange} data-id="fin"></lightning-input>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slds-col slds-size_1-of-1"></div> <!-- Separador -->
+
+                        <!-- Observaciones Pareadas -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                            <label class="slds-form-element__label">Observaciones Privadas:</label>
+                            <lightning-input-rich-text value={observacionesPrivadas} onchange={handleObsChange} data-id="privadas" variant="bottom-toolbar"></lightning-input-rich-text>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                            <label class="slds-form-element__label">Observaciones Para la renovación:</label>
+                            <lightning-input-rich-text value={observacionesRenovacion} onchange={handleObsChange} data-id="renovacion" variant="bottom-toolbar"></lightning-input-rich-text>
+                        </div>
+
+                        <!-- GESTOR DE PLANTILLAS -->
+                        <div class="slds-col slds-size_1-of-1 slds-m-top_medium">
+                            <div class="slds-box slds-theme_shade">
+                                <lightning-combobox 
+                                    label="Plantillas de condiciones/cláusulas/anexos:" 
+                                    placeholder="Seleccione una plantilla legal..."
+                                    options={plantillaOptions}
+                                    value={plantillaSeleccionada}
+                                    onchange={handlePlantillaChange}
+                                    class="slds-m-bottom_small">
+                                </lightning-combobox>
+                                
+                                <label class="slds-form-element__label">Contenido Legal del Contrato:</label>
+                                <lightning-input-rich-text value={contenidoLegal} onchange={handleContenidoChange} placeholder="El contenido de la plantilla aparecerá aquí..."></lightning-input-rich-text>
                             </div>
                         </div>
                     </div>
