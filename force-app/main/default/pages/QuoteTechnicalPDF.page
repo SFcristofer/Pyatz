@@ -4,7 +4,7 @@
             <style type="text/css">
                 @page { 
                     size: letter; 
-                    margin: 0.5cm 0.5cm 3.5cm 0.5cm; /* Margen inferior mayor para el footer */
+                    margin: 0; 
                     @bottom-right {
                         content: "Página " counter(page) " de " counter(pages);
                         font-family: 'Helvetica', 'Arial', sans-serif;
@@ -24,7 +24,7 @@
                 .header-img { width: 100%; margin-bottom: 10pt; display: block; }
                 .footer-img { width: 100%; position: fixed; bottom: 0; left: 0; display: block; height: 3cm; z-index: -1; }
                 
-                .content-body { padding: 0 20pt; }
+                .content-body { padding: 0 20pt 3.5cm 20pt; }
                 
                 .title-quote { font-size: 16pt; font-weight: bold; margin-bottom: 2pt; color: #000; }
                 .line-business { font-size: 11pt; color: #333; margin-bottom: 12pt; font-weight: normal; }

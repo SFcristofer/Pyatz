@@ -1,0 +1,163 @@
+<template>
+    <lightning-card title="Configurador de Materialidad (Contrato)" icon-name="standard:contract" class="main-card">
+        <div class="slds-p-around_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Cargando partidas..."></lightning-spinner>
+            </template>
+
+            <!-- SECCIÓN 1: SELECCIÓN Y EDICIÓN DE SERVICIOS -->
+            <div class="slds-m-bottom_large">
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                    <lightning-icon icon-name="standard:service_contract" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <h3 class="slds-text-heading_small slds-text-title_bold">1. Definición de servicios contratados</h3>
+                </div>
+                
+                <template if:true={quoteLineItems.length}>
+                    <div class="table-container slds-scrollable_x">
+                        <table class="custom-table slds-no-row-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 3rem;">INC.</th>
+                                    <th style="width: 100px;">CÓDIGO</th>
+                                    <th style="width: 400px;">DESCRIPCIÓN / DETALLE TÉCNICO</th>
+                                    <th style="width: 80px; text-align: center;">CANT.</th>
+                                    <th style="width: 150px;">SEDE</th>
+                                    <th style="width: 80px; text-align: center;">DESC.</th>
+                                    <th style="width: 80px; text-align: center;">I.V.A.</th>
+                                    <th style="width: 120px; text-align: right;">IMPORTE</th>
+                                    <th style="width: 100px; text-align: center;">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={quoteLineItems} for:item="item" for:index="index">
+                                    <tr key={item.Id}>
+                                        <td>
+                                            <lightning-input type="checkbox" checked={item.isSelected} onchange={handleItemToggle} data-id={item.Id} variant="label-hidden"></lightning-input>
+                                        </td>
+                                        <td class="slds-text-body_small"><strong>{item.ProductCode}</strong></td>
+                                        <td>
+                                            <div class="slds-text-title_bold">{item.ProductName}</div>
+                                            <div class="slds-text-color_weak slds-text-body_small" style="white-space: pre-line; margin-top: 4px;">{item.Description}</div>
+                                        </td>
+                                        <td style="text-align: center;">{item.Quantity}</td>
+                                        <td class="slds-text-body_small">{item.Sede}</td>
+                                        <td style="text-align: center;" class="text-red">{item.DescuentoDisplay}</td>
+                                        <td style="text-align: center;">16%</td>
+                                        <td style="text-align: right;">
+                                            <strong><lightning-formatted-number value={item.TotalPrice} format-style="currency"></lightning-formatted-number></strong>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <lightning-button-icon icon-name="utility:edit" variant="bare" size="small" data-index={index} onclick={handleEditItem} title="Editar detalle de esta fila" class="slds-m-right_x-small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" variant="bare-error" size="small" data-index={index} onclick={handleRemoveItem} title="Remover de este contrato"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="slds-grid slds-grid_align-spread slds-m-top_small">
+                        <lightning-button label="Agregar Servicio Extra" icon-name="utility:add" variant="brand-outline" class="btn-add" onclick={handleOpenAddModal}></lightning-button>
+                        
+                        <!-- RESUMEN FINANCIERO PROFESIONAL -->
+                        <div class="totals-container">
+                            <div class="totals-card">
+                                <div class="total-row">
+                                    <span>Subtotal Bruto:</span>
+                                    <span><lightning-formatted-number value={totals.subtotal} format-style="currency"></lightning-formatted-number></span>
+                                </div>
+                                <div class="total-row text-red">
+                                    <span>Descuento Aplicado:</span>
+                                    <span>- <lightning-formatted-number value={totals.descuento} format-style="currency"></lightning-formatted-number></span>
+                                </div>
+                                <div class="total-row">
+                                    <span>I.V.A. Trasladado (16%):</span>
+                                    <span><lightning-formatted-number value={totals.iva} format-style="currency"></lightning-formatted-number></span>
+                                </div>
+                                <div class="total-row final">
+                                    <span>TOTAL DEL CONTRATO:</span>
+                                    <span><lightning-formatted-number value={totals.total} format-style="currency"></lightning-formatted-number></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- SECCIÓN 2: MÓDULOS DE MATERIALIDAD -->
+            <div class="slds-box bg-light-blue slds-m-top_large">
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
+                    <lightning-icon icon-name="standard:answer" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <h3 class="slds-text-heading_small slds-text-title_bold">2. Configurar módulos de materialidad y anexos</h3>
+                </div>
+
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+                        <div class="slds-box slds-theme_shade">
+                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Módulo Legal</p>
+                            <lightning-input type="checkbox" label="Cláusulas Generales Pyatz" checked onchange={handleToggle} data-id="legal_clauses"></lightning-input>
+                            <lightning-input type="checkbox" label="Anexo Confidencialidad" onchange={handleToggle} data-id="confidentiality"></lightning-input>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+                        <div class="slds-box slds-theme_shade">
+                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Módulo Técnico</p>
+                            <lightning-input type="checkbox" label="Memoria Descriptiva" checked onchange={handleToggle} data-id="technical_summary"></lightning-input>
+                            <lightning-input type="checkbox" label="Galería de Fotos" onchange={handleToggle} data-id="photo_gallery"></lightning-input>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+                        <div class="slds-box slds-theme_shade">
+                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Módulo Operativo</p>
+                            <lightning-input type="checkbox" label="Calendario de Visitas" onchange={handleToggle} data-id="annual_calendar"></lightning-input>
+                            <template lwc:if={showCalendarOptions}>
+                                <lightning-combobox value={frecuencia} options={frecuenciaOptions} onchange={handleFrecuenciaChange} variant="label-hidden" class="slds-m-top_xx-small"></lightning-combobox>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+                        <div class="slds-box slds-theme_shade">
+                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Financiero</p>
+                            <lightning-input type="checkbox" label="Tabla de Retenciones" onchange={handleToggle} data-id="tax_retentions"></lightning-input>
+                            <lightning-input type="checkbox" label="Sello de la Empresa" checked onchange={handleToggle} data-id="company_seal"></lightning-input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER PRINCIPAL -->
+            <div class="slds-m-top_large slds-border_top slds-p-top_medium slds-text-align_right">
+                <lightning-button label="Limpiar Cambios" variant="neutral" onclick={handleReset} class="slds-m-right_small"></lightning-button>
+                <lightning-button label="Finalizar y Descargar Contrato" variant="brand" icon-name="utility:print" onclick={handleGenerateContract}></lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+
+    <!-- MODAL DE EDICIÓN DE FILA -->
+    <template if:true={showEditModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Editar Detalle de Servicio</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-input label="Producto" value={editingItem.ProductName} readonly class="slds-m-bottom_small"></lightning-input>
+                    <lightning-textarea label="Descripción Técnica (Visible en el contrato)" value={editingItem.Description} onchange={handleEditInputChange} data-field="Description" class="slds-m-bottom_small"></lightning-textarea>
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="number" label="Cantidad" value={editingItem.Quantity} onchange={handleEditInputChange} data-field="Quantity"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="number" formatter="currency" label="P. Unitario" value={editingItem.UnitPrice} onchange={handleEditInputChange} data-field="UnitPrice"></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancelar" onclick={handleCloseEditModal} class="slds-m-right_x-small"></lightning-button>
+                    <lightning-button label="Guardar Cambios" variant="brand" onclick={handleSaveItemChanges}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,4 +1,5 @@
 import { LightningElement, track, api, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getInitialData from '@salesforce/apex/QuoteTechnicalController.getInitialData';
 import saveTechnicalData from '@salesforce/apex/QuoteTechnicalController.saveTechnicalData';
@@ -12,7 +13,7 @@ import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProdu
 import getFilteredSedes from '@salesforce/apex/QuoteTechnicalController.getFilteredSedes';
 import searchParentAccounts from '@salesforce/apex/QuoteTechnicalController.searchParentAccounts';
 
-export default class TechQuoteEditor extends LightningElement {
+export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @api recordId; 
     @track accountId; 
     
@@ -1451,6 +1452,23 @@ export default class TechQuoteEditor extends LightningElement {
     }
 
     handleGenerateContract() {
-        this.dispatchEvent(new ShowToastEvent({ title: 'Aviso', message: 'Funcionalidad de generación de contrato en desarrollo.', variant: 'info' }));
+        // Navegar al componente de contrato en una nueva pestaña
+        this[NavigationMixin.GenerateUrl]({
+            type: 'standard__component',
+            attributes: {
+                componentName: 'c__techContractManager'
+            },
+            state: {
+                c__recordId: this.recordId
+            }
+        }).then(url => {
+            window.open(url, '_blank');
+        });
+
+        this.dispatchEvent(new ShowToastEvent({ 
+            title: 'Éxito', 
+            message: 'Abriendo configurador de contrato...', 
+            variant: 'success' 
+        }));
     }
 }

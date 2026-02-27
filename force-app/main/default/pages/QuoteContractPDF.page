@@ -1,0 +1,170 @@
+<apex:page standardController="Quote" extensions="QuoteContractPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+    <html>
+        <head>
+            <style type="text/css">
+                /* SIN MÁRGENES BLANCOS */
+                @page { 
+                    size: letter; 
+                    margin: 0; 
+                    @bottom-right {
+                        content: "Página " counter(page) " de " counter(pages);
+                        font-family: 'Helvetica', 'Arial', sans-serif;
+                        font-size: 8pt;
+                        color: #666;
+                        padding-right: 30pt;
+                        padding-bottom: 20pt;
+                    }
+                }
+                
+                body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; color: #333; line-height: 1.3; margin: 0; padding: 0; }
+                
+                /* HEADER FIJO EN EL BORDE SUPERIOR */
+                .header-img { 
+                    position: fixed; 
+                    top: 0; 
+                    left: 0; 
+                    width: 100%; 
+                    height: 3.8cm;
+                    display: block;
+                }
+                
+                /* FOOTER FIJO EN EL BORDE INFERIOR */
+                .footer-img { 
+                    position: fixed; 
+                    bottom: 0; 
+                    left: 0; 
+                    width: 100%; 
+                    height: 3.5cm;
+                    display: block;
+                }
+                
+                /* ESPACIO PARA QUE EL TEXTO NO SE ENCIME */
+                .content-body { 
+                    padding: 4cm 30pt 3.8cm 30pt; 
+                }
+                
+                .title-contract { font-size: 16pt; font-weight: bold; margin-bottom: 2pt; color: #000; text-transform: uppercase; }
+                .line-business { font-size: 11pt; color: #333; margin-bottom: 12pt; font-weight: normal; }
+                
+                .table-services { width: 100%; border-collapse: collapse; margin-top: 15pt; }
+                .table-services th { background-color: #D4EDDA; color: #333; padding: 8pt; border: 0.5pt solid #fff; text-align: center; font-size: 9pt; }
+                .table-services td { padding: 8pt; border-bottom: 0.5pt solid #eee; vertical-align: top; }
+                
+                .section-title { font-size: 12pt; font-weight: bold; margin-top: 20pt; margin-bottom: 8pt; text-transform: uppercase; color: #0070d2; border-bottom: 1pt solid #0070d2; padding-bottom: 2pt; }
+                .legal-text { text-align: justify; margin-bottom: 10pt; line-height: 1.5; }
+
+                .totals-box { width: 250pt; float: right; margin-top: 10pt; page-break-inside: avoid; }
+                .grand-total { font-size: 12pt; color: #0070d2; border-bottom: 2pt solid #0070d2; font-weight: bold; }
+
+                .signature-section { margin-top: 40pt; width: 100%; page-break-inside: avoid; }
+                .sig-box { width: 45%; text-align: center; display: inline-block; vertical-align: bottom; }
+                .sig-line { border-top: 1px solid #333; margin: 0 20pt; padding-top: 5pt; font-size: 9pt; }
+                .spacer { width: 8%; display: inline-block; }
+            </style>
+        </head>
+        <body>
+            <!-- MEMBRETE FIJO (HEADER Y FOOTER) -->
+            <img src="/servlet/servlet.ImageServer?id=015V9000005wj9x&oid={!$Organization.Id}" class="header-img" />
+            <img src="/servlet/servlet.ImageServer?id=015V9000005wjDB&oid={!$Organization.Id}" class="footer-img" />
+
+            <div class="content-body">
+                <div class="title-contract">CONTRATO DE SERVICIOS No. {!quoteRecord.QuoteNumber}</div>
+                <div class="line-business">{!quoteRecord.Business_Lines_Selected__c}</div>
+
+                <div style="margin-top: 5pt; font-size: 10pt;">
+                    <div><strong>Referencia Presupuesto:</strong> {!quoteRecord.QuoteNumber}</div>
+                    <div><strong>Agente:</strong> {!quoteRecord.CreatedBy.Name}</div>
+                    <div><strong>Fecha de Emisión:</strong> {!fechaHoy}</div>
+                </div>
+
+                <div style="font-size: 14pt; font-weight: bold; margin-top: 15pt;">{!quoteRecord.Account.Name}</div>
+                <div style="font-size: 11pt; margin-top: 5pt;"><strong>Sede de Ejecución:</strong> {!quoteRecord.Technical_Sedes__c}</div>
+
+                <div class="legal-text" style="margin-top: 15pt;">
+                    En la Ciudad de México, al día <strong>{!fechaHoy}</strong>, celebran el presente contrato la empresa <strong>Ingeniería Tecnológica Pyatz S.A. de C.V.</strong> y por la otra parte <strong>{!quoteRecord.Account.Name}</strong>, de conformidad con las siguientes cláusulas y anexos:
+                </div>
+
+                <!-- ANEXO A -->
+                <div class="section-title">Anexo A: Servicios Contratados</div>
+                <table class="table-services">
+                    <thead>
+                        <tr>
+                            <th width="50%">CONCEPTO / DESCRIPCIÓN</th>
+                            <th width="10%">CANT</th>
+                            <th width="20%">P. UNITARIO</th>
+                            <th width="20%">IMPORTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <apex:repeat value="{!selectedLineItems}" var="item">
+                            <tr>
+                                <td>
+                                    <strong>{!item.Product2.Name}</strong><br/>
+                                    <span style="font-size: 8pt; color: #666;"><apex:outputText value="{!item.Description}" escape="false"/></span>
+                                </td>
+                                <td align="center">{!item.Quantity}</td>
+                                <td align="right">
+                                    <apex:outputText value="{0, number, currency}">
+                                        <apex:param value="{!item.UnitPrice}" />
+                                    </apex:outputText>
+                                </td>
+                                <td align="right">
+                                    <strong>
+                                        <apex:outputText value="{0, number, currency}">
+                                            <apex:param value="{!item.TotalPrice}" />
+                                        </apex:outputText>
+                                    </strong>
+                                </td>
+                            </tr>
+                        </apex:repeat>
+                    </tbody>
+                </table>
+
+                <div class="totals-box">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="padding: 8pt 0; text-align: left; font-size: 12pt; font-weight: bold; color: #0070d2;">TOTAL CONTRATADO</td>
+                            <td style="padding: 8pt 0; text-align: right; font-size: 12pt; font-weight: bold; color: #0070d2; border-bottom: 2pt solid #0070d2;">
+                                <apex:outputText value="{0, number, currency}">
+                                    <apex:param value="{!totalContrato}" />
+                                </apex:outputText>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="clear: both;"></div>
+
+                <!-- ANEXOS -->
+                <apex:outputPanel rendered="{!config['legal_clauses']}">
+                    <div class="section-title">Cláusulas Generales</div>
+                    <div class="legal-text">
+                        <strong>PRIMERA. OBJETO.</strong> Servicios técnicos según Anexo A.<br/>
+                        <strong>SEGUNDA. VIGENCIA.</strong> El contrato tendrá una vigencia de 12 meses.<br/>
+                        <strong>TERCERA. PAGO.</strong> Según condiciones comerciales establecidas.
+                    </div>
+                </apex:outputPanel>
+
+                <apex:outputPanel rendered="{!config['technical_summary']}">
+                    <div class="section-title">Anexo B: Memoria Descriptiva</div>
+                    <div style="text-align: justify; font-size: 9pt; background-color: #f9f9f9; padding: 10pt; border: 0.5pt solid #eee;">
+                        <apex:outputText value="{!quoteRecord.Introduction_Text__c}" escape="false" />
+                    </div>
+                </apex:outputPanel>
+
+                <!-- FIRMAS -->
+                <div class="signature-section">
+                    <div class="sig-box">
+                        <div class="sig-line">POR "EL CLIENTE" (FIRMA)</div>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="sig-box">
+                        <div style="margin-bottom: 10pt;">
+                            <div style="font-family: cursive; font-size: 16pt;">{!quoteRecord.CreatedBy.Name}</div>
+                        </div>
+                        <div class="sig-line">POR PYATZ: {!quoteRecord.CreatedBy.Name}</div>
+                    </div>
+                </div>
+            </div>
+        </body>
+    </html>
+</apex:page>

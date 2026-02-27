@@ -1,0 +1,81 @@
+.main-card {
+    --slds-c-card-header-spacing-block-start: 1rem;
+    --slds-c-card-header-spacing-block-end: 1rem;
+}
+
+.table-container {
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.custom-table th {
+    background-color: #f8f9fb;
+    color: #514f4d;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #dddbda;
+}
+
+.custom-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f3f2f2;
+    vertical-align: top;
+}
+
+.custom-table tr:hover {
+    background-color: #faffff;
+}
+
+.totals-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.totals-card {
+    width: 320px;
+    background: #f8f9fb;
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.total-row.final {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 2px solid #0070d2;
+    color: #0070d2;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.text-red {
+    color: #ea001e;
+}
+
+.bg-light-blue {
+    background-color: #f0f7ff;
+}
+
+.btn-add {
+    margin-top: 0.75rem;
+    --slds-c-button-spacing-block-start: 0.5rem;
+    --slds-c-button-spacing-block-end: 0.5rem;
+}

@@ -426,123 +426,125 @@
                     <!-- PAGINACIÓN DINÁMICA BASADA EN SEPARADORES -->
                     <template for:each={serviciosPaginados} for:item="pagina" for:index="idx">
                         <div key={pagina.id} class="pdf-page slds-m-bottom_large">
-                            <!-- HEADER (Se repite en cada hoja) -->
-                            <div class="slds-m-bottom_large" style="margin: -3rem -3rem 2rem -3rem;">
-                                <img src="/servlet/servlet.ImageServer?id=015V9000005wj9x&oid=00DV9000004in2j" style="width: 100%;">
+                            <!-- HEADER (Sangrado Total) -->
+                            <div class="slds-m-bottom_medium">
+                                <img src="/servlet/servlet.ImageServer?id=015V9000005wj9x&oid=00DV9000004in2j" style="width: 100%; display: block;">
                             </div>
 
-                            <!-- DATOS DE CABECERA (Solo en la primera hoja) -->
-                            <template if:true={pagina.isFirst}>
-                                <div class="slds-p-horizontal_medium">
-                                    <div style="font-size: 11pt; font-weight: bold; color: #0070d2;">{selectedLinesDisplay}</div>
-                                    <div style="font-size: 9pt; color: #666;">
-                                        <div><strong>Número de Presupuesto:</strong> {folio}</div>
-                                        <div><strong>Creado por:</strong> {agenteNombre}</div>
-                                        <div><strong>Fecha:</strong> {fechaFormateada}</div>
+                            <div class="pdf-content-wrapper">
+                                <!-- DATOS DE CABECERA (Solo en la primera hoja) -->
+                                <template if:true={pagina.isFirst}>
+                                    <div class="slds-p-horizontal_medium">
+                                        <div style="font-size: 11pt; font-weight: bold; color: #0070d2;">{selectedLinesDisplay}</div>
+                                        <div style="font-size: 9pt; color: #666;">
+                                            <div><strong>Número de Presupuesto:</strong> {folio}</div>
+                                            <div><strong>Creado por:</strong> {agenteNombre}</div>
+                                            <div><strong>Fecha:</strong> {fechaFormateada}</div>
+                                        </div>
+                                        <div style="font-size: 14pt; font-weight: bold; margin-top: 10pt;">{selectedSedesDisplay}</div>
+                                        <div style="font-size: 11pt; margin-top: 2pt;"><strong>Asunto:</strong> {asunto}</div>
                                     </div>
-                                    <div style="font-size: 14pt; font-weight: bold; margin-top: 10pt;">{selectedSedesDisplay}</div>
-                                    <div style="font-size: 11pt; margin-top: 2pt;"><strong>Asunto:</strong> {asunto}</div>
+
+                                    <div class="slds-p-horizontal_medium slds-m-top_large" style="text-align: justify; font-size: 10pt;">
+                                        <lightning-formatted-rich-text value={mergedIntroduccion}></lightning-formatted-rich-text>
+                                    </div>
+                                </template>
+
+                                <div class="pdf-section-title" style="margin-top: 20pt;">
+                                    <template if:true={pagina.titulo}>{pagina.titulo}</template>
+                                    <template if:false={pagina.titulo}>Servicios y Artículos</template>
                                 </div>
 
-                                <div class="slds-p-horizontal_medium slds-m-top_large" style="text-align: justify; font-size: 10pt;">
-                                    <lightning-formatted-rich-text value={mergedIntroduccion}></lightning-formatted-rich-text>
-                                </div>
-                            </template>
-
-                            <div class="pdf-section-title" style="margin-top: 20pt;">
-                                <template if:true={pagina.titulo}>{pagina.titulo}</template>
-                                <template if:false={pagina.titulo}>Servicios y Artículos</template>
-                            </div>
-
-                            <!-- TABLA DE PARTIDAS DE ESTA HOJA -->
-                            <div class="slds-p-horizontal_medium">
-                                <table class="slds-table slds-table_bordered slds-no-row-hover pdf-text-small">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 45%; background-color: #f8f9fa;">CONCEPTO</th>
-                                            <th style="width: 10%; text-align: center; background-color: #f8f9fa;">CANT</th>
-                                            <th style="width: 15%; text-align: right; background-color: #f8f9fa;">P. UNITARIO</th>
-                                            <template if:true={hasAnyDiscount}><th style="width: 10%; background-color: #f8f9fa;">DESC.</th></template>
-                                            <th style="width: 20%; text-align: right; background-color: #f8f9fa;">IMPORTE</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template for:each={pagina.items} for:item="item">
-                                            <tr key={item.id}>
-                                                <td><strong>{item.descripcion}</strong></td>
-                                                <td style="text-align: center;">{item.cantidad}</td>
-                                                <td style="text-align: right;"><lightning-formatted-number value={item.importeUnitario} format-style="currency"></lightning-formatted-number></td>
-                                                <template if:true={hasAnyDiscount}><td style="color: #d8000c;">{item.descuentoDisplay}</td></template>
-                                                <td style="text-align: right;"><lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number></td>
+                                <!-- TABLA DE PARTIDAS DE ESTA HOJA -->
+                                <div class="slds-p-horizontal_medium">
+                                    <table class="slds-table slds-table_bordered slds-no-row-hover pdf-text-small">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 45%; background-color: #f8f9fa;">CONCEPTO</th>
+                                                <th style="width: 10%; text-align: center; background-color: #f8f9fa;">CANT</th>
+                                                <th style="width: 15%; text-align: right; background-color: #f8f9fa;">P. UNITARIO</th>
+                                                <template if:true={hasAnyDiscount}><th style="width: 10%; background-color: #f8f9fa;">DESC.</th></template>
+                                                <th style="width: 20%; text-align: right; background-color: #f8f9fa;">IMPORTE</th>
                                             </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={pagina.items} for:item="item">
+                                                <tr key={item.id}>
+                                                    <td><strong>{item.descripcion}</strong></td>
+                                                    <td style="text-align: center;">{item.cantidad}</td>
+                                                    <td style="text-align: right;"><lightning-formatted-number value={item.importeUnitario} format-style="currency"></lightning-formatted-number></td>
+                                                    <template if:true={hasAnyDiscount}><td style="color: #d8000c;">{item.descuentoDisplay}</td></template>
+                                                    <td style="text-align: right;"><lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
 
-                            <!-- DETALLES TÉCNICOS DE ESTA HOJA -->
-                            <div class="slds-p-horizontal_medium slds-m-top_medium">
-                                <template for:each={pagina.items} for:item="item">
-                                    <template if:true={item.detalleTecnicoHtml}>
-                                        <div key={item.id} class="slds-m-bottom_small" style="border-bottom: 0.5pt solid #eee; padding-bottom: 4pt;">
-                                            <div style="font-weight: bold; color: #0070d2; font-size: 9pt;">Detalle: {item.descripcion}</div>
-                                            <div style="font-size: 9pt; color: #333; margin-top: 2pt; text-align: justify;">
-                                                <lightning-formatted-rich-text value={item.detalleTecnicoHtml}></lightning-formatted-rich-text>
+                                <!-- DETALLES TÉCNICOS DE ESTA HOJA -->
+                                <div class="slds-p-horizontal_medium slds-m-top_medium">
+                                    <template for:each={pagina.items} for:item="item">
+                                        <template if:true={item.detalleTecnicoHtml}>
+                                            <div key={item.id} class="slds-m-bottom_small" style="border-bottom: 0.5pt solid #eee; padding-bottom: 4pt;">
+                                                <div style="font-weight: bold; color: #0070d2; font-size: 9pt;">Detalle: {item.descripcion}</div>
+                                                <div style="font-size: 9pt; color: #333; margin-top: 2pt; text-align: justify;">
+                                                    <lightning-formatted-rich-text value={item.detalleTecnicoHtml}></lightning-formatted-rich-text>
+                                                </div>
                                             </div>
+                                        </template>
+                                    </template>
+                                </div>
+
+                                <!-- FOOTER DE PÁGINA (Solo en la última hoja) -->
+                                <template if:true={pagina.isLast}>
+                                    <div class="slds-grid slds-grid_align-end slds-p-horizontal_medium slds-m-top_medium">
+                                        <div class="slds-col slds-size_1-of-3">
+                                            <table style="width: 100%;">
+                                                <template for:each={totalesData} for:item="tot">
+                                                    <tr key={tot.id}><td style="color:#666;">Subtotal:</td><td align="right"><strong><lightning-formatted-number value={tot.base} format-style="currency"></lightning-formatted-number></strong></td></tr>
+                                                    <tr key={tot.id}><td style="color:#d8000c;">Descuento:</td><td align="right" style="color:#d8000c;"><strong>- <lightning-formatted-number value={totalDescuento} format-style="currency"></lightning-formatted-number></strong></td></tr>
+                                                    <tr key={tot.id}><td style="color:#666;">IVA (16%):</td><td align="right"><strong><lightning-formatted-number value={tot.valorImpuesto} format-style="currency"></lightning-formatted-number></strong></td></tr>
+                                                    <tr key={tot.id}><td style="font-size:1.1rem; color:#0070d2;"><strong>TOTAL:</strong></td><td align="right" style="font-size:1.1rem; color:#0070d2; border-bottom:2pt solid #0070d2;"><strong><lightning-formatted-number value={tot.total} format-style="currency"></lightning-formatted-number></strong></td></tr>
+                                                </template>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="pdf-section-title" style="margin-top: 25pt;">DATOS DE PAGO</div>
+                                    <div class="slds-p-horizontal_medium">
+                                        <table style="width: 100%; border: 0.5pt solid #eee;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="background-color: #D4EDDA; padding: 6pt; width: 25%; text-align: center;">Método de pago</th>
+                                                    <th style="background-color: #D4EDDA; padding: 6pt; width: 50%; text-align: center;">OBSERVACIONES SOBRE PAGOS</th>
+                                                    <th style="background-color: #D4EDDA; padding: 6pt; width: 25%; text-align: center;">TIPO DE TRABAJO</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td align="center">{metodoPagoDisplay}</td>
+                                                    <td><lightning-formatted-rich-text value={observacionesPago}></lightning-formatted-rich-text></td>
+                                                    <td align="center">{tipoTrabajoDisplay}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <template if:true={showDescription}>
+                                        <div class="slds-p-horizontal_medium slds-m-top_large slds-p-top_medium" style="border-top: 1pt solid #ccc;">
+                                            <div style="font-weight: bold; text-transform: uppercase;">Condiciones / Anexos / Cláusulas</div>
+                                            <div style="font-size: 9pt;"><lightning-formatted-rich-text value={mergedWarranty}></lightning-formatted-rich-text></div>
                                         </div>
                                     </template>
                                 </template>
                             </div>
 
-                            <!-- FOOTER DE PÁGINA (Solo en la última hoja) -->
-                            <template if:true={pagina.isLast}>
-                                <div class="slds-grid slds-grid_align-end slds-p-horizontal_medium slds-m-top_medium">
-                                    <div class="slds-col slds-size_1-of-3">
-                                        <table style="width: 100%;">
-                                            <template for:each={totalesData} for:item="tot">
-                                                <tr key={tot.id}><td style="color:#666;">Subtotal:</td><td align="right"><strong><lightning-formatted-number value={tot.base} format-style="currency"></lightning-formatted-number></strong></td></tr>
-                                                <tr key={tot.id}><td style="color:#d8000c;">Descuento:</td><td align="right" style="color:#d8000c;"><strong>- <lightning-formatted-number value={totalDescuento} format-style="currency"></lightning-formatted-number></strong></td></tr>
-                                                <tr key={tot.id}><td style="color:#666;">IVA (16%):</td><td align="right"><strong><lightning-formatted-number value={tot.valorImpuesto} format-style="currency"></lightning-formatted-number></strong></td></tr>
-                                                <tr key={tot.id}><td style="font-size:1.1rem; color:#0070d2;"><strong>TOTAL:</strong></td><td align="right" style="font-size:1.1rem; color:#0070d2; border-bottom:2pt solid #0070d2;"><strong><lightning-formatted-number value={tot.total} format-style="currency"></lightning-formatted-number></strong></td></tr>
-                                            </template>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="pdf-section-title" style="margin-top: 25pt;">DATOS DE PAGO</div>
-                                <div class="slds-p-horizontal_medium">
-                                    <table style="width: 100%; border: 0.5pt solid #eee;">
-                                        <thead>
-                                            <tr>
-                                                <th style="background-color: #D4EDDA; padding: 6pt; width: 25%; text-align: center;">Método de pago</th>
-                                                <th style="background-color: #D4EDDA; padding: 6pt; width: 50%; text-align: center;">OBSERVACIONES SOBRE PAGOS</th>
-                                                <th style="background-color: #D4EDDA; padding: 6pt; width: 25%; text-align: center;">TIPO DE TRABAJO</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td align="center">{metodoPagoDisplay}</td>
-                                                <td><lightning-formatted-rich-text value={observacionesPago}></lightning-formatted-rich-text></td>
-                                                <td align="center">{tipoTrabajoDisplay}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <template if:true={showDescription}>
-                                    <div class="slds-p-horizontal_medium slds-m-top_large slds-p-top_medium" style="border-top: 1pt solid #ccc;">
-                                        <div style="font-weight: bold; text-transform: uppercase;">Condiciones / Anexos / Cláusulas</div>
-                                        <div style="font-size: 9pt;"><lightning-formatted-rich-text value={mergedWarranty}></lightning-formatted-rich-text></div>
-                                    </div>
-                                </template>
-                            </template>
-
                             <!-- PIE DE PÁGINA (Se repite en cada hoja) -->
                             <div class="page-footer-container">
-                                <div class="slds-text-align_right slds-p-right_medium slds-text-color_weak" style="font-size: 8pt;">
+                                <div class="slds-text-align_right slds-p-right_medium slds-text-color_weak" style="font-size: 8pt; margin-bottom: 2px;">
                                     Hoja {pagina.num} de {serviciosPaginados.length}
                                 </div>
-                                <img src="/servlet/servlet.ImageServer?id=015V9000005wjDB&oid=00DV9000004in2j" style="width: 100%;">
+                                <img src="/servlet/servlet.ImageServer?id=015V9000005wjDB&oid=00DV9000004in2j" style="width: 100%; display: block;">
                             </div>
                         </div>
                     </template>
