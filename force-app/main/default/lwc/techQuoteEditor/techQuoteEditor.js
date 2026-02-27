@@ -1182,8 +1182,15 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         };
 
         // CODIFICACIÓN SEGURA PARA UTF-8 (Soporta acentos y caracteres especiales)
-        const stateJson = JSON.stringify(fullState);
-        const encodedState = window.btoa(unescape(encodeURIComponent(stateJson)));
+        let encodedState = '';
+        try {
+            const stateJson = JSON.stringify(fullState);
+            encodedState = btoa(encodeURIComponent(stateJson).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+                return String.fromCharCode('0x' + p1);
+            }));
+        } catch(e) {
+            console.error('Error encoding state:', e);
+        }
 
         return {
             quoteId: this.recordId,
