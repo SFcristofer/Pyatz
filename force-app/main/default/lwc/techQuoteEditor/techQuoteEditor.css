@@ -1,14 +1,14 @@
-/* UI EXCEL PRO - TABLAS DE LEVANTAMIENTO PYATZ */
+/* UI EXCEL PRO - RESTAURADA Y PULIDA */
 
 /* LA TABLA */
 .survey-table {
     border-collapse: collapse !important;
     border: 1px solid #cbd5e1 !important;
     background: #fff;
-    table-layout: fixed;
+    width: 100%;
 }
 
-/* ENCABEZADOS EXCEL */
+/* ENCABEZADOS */
 .survey-table th {
     background-color: #f1f5f9 !important;
     color: #475569 !important;
@@ -16,57 +16,54 @@
     font-weight: 700 !important;
     text-transform: uppercase !important;
     border: 1px solid #cbd5e1 !important;
-    padding: 4px !important;
+    padding: 8px !important;
     text-align: center !important;
-    height: 28px !important;
 }
 
-/* CELDAS EXCEL */
+/* CELDAS - CENTRADO TOTAL */
 .survey-table td {
     border: 1px solid #cbd5e1 !important;
-    padding: 0 !important; /* El input llenará la celda */
-    height: 30px !important;
+    padding: 0 !important;
+    height: 32px !important;
     vertical-align: middle !important;
+    text-align: center !important;
 }
 
-/* INPUTS TIPO CELDA */
+/* INPUTS TIPO EXCEL */
 .cell-input {
     width: 100% !important;
-    height: 30px !important;
+    height: 100% !important;
     border: none !important;
     background: transparent !important;
     text-align: center !important;
     font-size: 12px !important;
     color: #1e293b !important;
     padding: 0 4px !important;
-}
-
-.cell-input:hover {
-    background-color: #f8fafc !important;
+    display: block !important;
 }
 
 .cell-input:focus {
     background-color: #ffffff !important;
     outline: 2px solid #0070d2 !important;
     outline-offset: -2px !important;
-    z-index: 10;
 }
 
-/* SELECTS TIPO CELDA */
+/* DROPDOWNS - CORRECCIÓN DE ESTILO Y CENTRADO */
 .cell-select {
     width: 100% !important;
-    height: 30px !important;
+    height: 32px !important;
     border: none !important;
     background: transparent !important;
     text-align: center !important;
+    text-align-last: center !important; /* Centra el texto seleccionado */
     font-size: 11px !important;
-    color: #1e293b !important;
+    padding: 0 2px !important;
     cursor: pointer;
-    appearance: none; /* Quita la flecha nativa para limpieza */
 }
 
-.cell-select:hover {
-    background-color: #f8fafc !important;
+.cell-select:focus {
+    outline: 2px solid #0070d2 !important;
+    background-color: #ffffff !important;
 }
 
 /* FILA DE TOTALES */
@@ -74,11 +71,9 @@
     background-color: #f8fafc !important;
     font-weight: 700 !important;
     color: #0070d2 !important;
-    text-align: center !important;
-    font-size: 12px !important;
 }
 
-/* SCROLL DE TABLAS LARGAS */
+/* CONTENEDOR DE SCROLL */
 .table-scroll-container {
     border: 1px solid #cbd5e1;
     border-radius: 4px;
