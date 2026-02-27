@@ -1,14 +1,97 @@
-/* UI EXCEL PRO - RESTAURADA Y PULIDA */
+/* UI ARQUITECTURA SLATE - PYATZ INDUSTRIAL */
+:host {
+    --slate-900: #0f172a;
+    --slate-700: #334155;
+    --slate-200: #e2e8f0;
+    --pyatz-blue: #0070d2;
+    --bg-light: #f8fafc;
+}
 
-/* LA TABLA */
+/* CONTENEDORES - CARDS SOBRIAS */
+.section-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--slate-900);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.section-header h2 {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* PASO 1 - DATOS TÉCNICOS (LIMPIEZA) */
+.bg-blue-soft { background-color: #f1f5f9; }
+.bg-light-gray { background-color: #ffffff; }
+.radius-8 { border-radius: 4px; }
+.border-all { border: 1px solid var(--slate-200); }
+
+/* TABLA DE SERVICIOS (PASO 3) */
+.custom-drag-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.custom-drag-table th {
+    background: var(--bg-light);
+    color: var(--slate-700);
+    font-size: 0.75rem;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 2px solid var(--slate-200);
+}
+.custom-drag-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--slate-200);
+    vertical-align: middle;
+}
+
+/* VISOR DE PDF PROFESIONAL */
+.pdf-preview-container {
+    background: #e2e8f0;
+    padding: 3rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pdf-page {
+    background: white;
+    width: 100%;
+    max-width: 750px; /* Formato más pequeño y centrado */
+    min-height: 1000px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    margin-bottom: 2rem;
+    border: 1px solid #d1d5db;
+}
+
+.pdf-content-wrapper {
+    padding: 2rem;
+}
+
+/* BOTONES INTEGRADOS */
+.btn-verde { background-color: #15803d !important; color: white !important; }
+.btn-azul-pastel { background-color: #eff6ff !important; color: #1d4ed8 !important; border: 1px solid #dbeafe !important; }
+
+/* ==========================================================
+   TABLAS DE LEVANTAMIENTO (ESTILO EXCEL DE ALTA PRECISIÓN)
+   ========================================================== */
 .survey-table {
     border-collapse: collapse !important;
     border: 1px solid #cbd5e1 !important;
-    background: #fff;
-    width: 100%;
+    background: #ffffff !important;
+    width: 100% !important;
 }
-
-/* ENCABEZADOS */
 .survey-table th {
     background-color: #f1f5f9 !important;
     color: #475569 !important;
@@ -16,66 +99,44 @@
     font-weight: 700 !important;
     text-transform: uppercase !important;
     border: 1px solid #cbd5e1 !important;
-    padding: 8px !important;
+    padding: 6px !important;
     text-align: center !important;
 }
-
-/* CELDAS - CENTRADO TOTAL */
 .survey-table td {
     border: 1px solid #cbd5e1 !important;
     padding: 0 !important;
-    height: 32px !important;
+    height: 30px !important;
     vertical-align: middle !important;
     text-align: center !important;
 }
-
-/* INPUTS TIPO EXCEL */
 .cell-input {
     width: 100% !important;
-    height: 100% !important;
+    height: 30px !important;
     border: none !important;
     background: transparent !important;
     text-align: center !important;
     font-size: 12px !important;
     color: #1e293b !important;
-    padding: 0 4px !important;
     display: block !important;
 }
-
 .cell-input:focus {
     background-color: #ffffff !important;
     outline: 2px solid #0070d2 !important;
     outline-offset: -2px !important;
 }
-
-/* DROPDOWNS - CORRECCIÓN DE ESTILO Y CENTRADO */
 .cell-select {
     width: 100% !important;
-    height: 32px !important;
+    height: 30px !important;
     border: none !important;
     background: transparent !important;
     text-align: center !important;
-    text-align-last: center !important; /* Centra el texto seleccionado */
+    text-align-last: center !important;
     font-size: 11px !important;
-    padding: 0 2px !important;
-    cursor: pointer;
+    cursor: pointer !important;
 }
-
-.cell-select:focus {
-    outline: 2px solid #0070d2 !important;
-    background-color: #ffffff !important;
-}
-
-/* FILA DE TOTALES */
-.survey-row-totals td {
-    background-color: #f8fafc !important;
-    font-weight: 700 !important;
-    color: #0070d2 !important;
-}
-
-/* CONTENEDOR DE SCROLL */
 .table-scroll-container {
     border: 1px solid #cbd5e1;
     border-radius: 4px;
     overflow: auto;
+    width: 100%;
 }
