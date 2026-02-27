@@ -232,20 +232,32 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled
     public static String renderTemplate(Id templateId, Id quoteId) {
         try {
-            if (quoteId == null) {
-                EmailTemplate et = [SELECT HtmlValue, Body FROM EmailTemplate WHERE Id = :templateId];
-                return et.HtmlValue != null ? et.HtmlValue : et.Body;
+            if (quoteId == null || templateId == null) return '';
+            
+            Quote q = [SELECT ContactId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            Id contactId = q.ContactId;
+            
+            // Si la quote no tiene contacto, buscamos el primero de la cuenta
+            if (contactId == null) {
+                List<Contact> cons = [SELECT Id FROM Contact WHERE AccountId IN (SELECT AccountId FROM Quote WHERE Id = :quoteId) LIMIT 1];
+                if (!cons.isEmpty()) contactId = cons[0].Id;
             }
-            
-            Quote q = [SELECT ContactId FROM Quote WHERE Id = :quoteId];
-            
-            Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, q.ContactId, quoteId);
+
+            Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, contactId, quoteId);
             String htmlBody = rendered.getHtmlBody();
-            if (htmlBody != null && htmlBody.contains('<body')) {
-                htmlBody = htmlBody.substringAfter('>');
-                htmlBody = htmlBody.substringBeforeLast('</body>');
+            
+            if (String.isBlank(htmlBody)) {
+                return rendered.getPlainTextBody();
             }
-            return htmlBody != null ? htmlBody.trim() : '';
+
+            // Limpieza inteligente de etiquetas de estructura para inyectar en el editor
+            if (htmlBody.contains('<body')) {
+                htmlBody = htmlBody.substringAfter('>');
+                if (htmlBody.contains('</body>')) {
+                    htmlBody = htmlBody.substringBeforeLast('</body>');
+                }
+            }
+            return htmlBody.trim();
         } catch (Exception e) {
             throw new AuraHandledException('Error al procesar la plantilla: ' + e.getMessage());
         }

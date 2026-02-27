@@ -4,6 +4,8 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getQuoteLineItems from '@salesforce/apex/QuoteContractPDFController.getQuoteLineItems';
 import searchUsers from '@salesforce/apex/QuoteTechnicalController.searchUsers';
 import getInitialData from '@salesforce/apex/QuoteTechnicalController.getInitialData';
+import getEmailTemplatesByFolder from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolder';
+import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
 
 export default class TechContractManager extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -51,14 +53,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track plantillaSeleccionada = '';
     @track contenidoLegal = '';
     @track introduccionPresupuesto = '';
-
-    get plantillaOptions() {
-        return [
-            { label: 'Condiciones Estándar Pyatz', value: 'estandar' },
-            { label: 'Anexo Técnico Liverpool', value: 'liverpool' },
-            { label: 'Cláusula de Confidencialidad', value: 'confidencial' }
-        ];
-    }
+    @track plantillaOptions = []; // Ahora se cargará de la DB
 
     get selectedClientSignerDisplay() {
         return this.selectedClientSigner || 'No seleccionado';
@@ -87,6 +82,17 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     loadInitialData() {
         this.fetchLineItems();
         this.fetchQuoteData();
+        this.fetchTemplates();
+    }
+
+    fetchTemplates() {
+        getEmailTemplatesByFolder({ folderName: 'Pyatz - Condiciones de Contrato' })
+            .then(result => {
+                if (result && result.length > 0) {
+                    this.plantillaOptions = result.map(t => ({ label: t.name, value: t.id }));
+                }
+            })
+            .catch(error => console.error('Error cargando plantillas de contrato:', error));
     }
 
     fetchQuoteData() {
@@ -193,13 +199,15 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
 
     handlePlantillaChange(event) {
         this.plantillaSeleccionada = event.detail.value;
-        // Simulación de carga de contenido basado en selección
-        if (this.plantillaSeleccionada === 'estandar') {
-            this.contenidoLegal = '<h2>Condiciones Estándar</h2><p>El presente documento establece que los servicios se realizarán conforme a la NOM vigente...</p>';
-        } else if (this.plantillaSeleccionada === 'liverpool') {
-            this.contenidoLegal = '<h2>Anexo Liverpool</h2><ul><li>Horario de acceso: 22:00 - 06:00</li><li>EPP Obligatorio</li></ul>';
-        } else {
-            this.contenidoLegal = '<p>Texto legal personalizado...</p>';
+        if (this.plantillaSeleccionada) {
+            renderTemplate({ templateId: this.plantillaSeleccionada, quoteId: this.recordId })
+                .then(result => {
+                    this.contenidoLegal = result;
+                })
+                .catch(error => {
+                    console.error('Error renderizando plantilla:', error);
+                    this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo cargar el contenido de la plantilla.', variant: 'error' }));
+                });
         }
     }
 

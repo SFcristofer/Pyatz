@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>58.0</apiVersion>
+    <available>true</available>
+    <description>Contrato especializado basado en REPSE con campos dinámicos de Cuenta.</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Contrato Especializado REPSE</name>
+    <style>none</style>
+    <type>visualforce</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

@@ -1,0 +1,12 @@
+<messaging:emailTemplate subject="Condiciones Estándar de Contrato" recipientType="Contact" relatedToType="Quote">
+<messaging:htmlEmailBody >
+<html>
+<body>
+    <h2 style="color: #0070d2;">CLÁUSULAS ESTÁNDAR DE PRESTACIÓN DE SERVICIOS</h2>
+    <p><strong>1. OBJETO:</strong> El presente contrato tiene por objeto la prestación de servicios técnicos hidrosanitarios...</p>
+    <p><strong>2. RESPONSABILIDAD:</strong> Pyatz se compromete a utilizar personal capacitado y equipo de seguridad...</p>
+    <p><strong>3. CONFIDENCIALIDAD:</strong> Ambas partes acuerdan mantener estricta reserva sobre la información técnica y comercial...</p>
+</body>
+</html>
+</messaging:htmlEmailBody>
+</messaging:emailTemplate>
