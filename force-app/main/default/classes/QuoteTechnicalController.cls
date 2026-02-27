@@ -1,6 +1,21 @@
 public with sharing class QuoteTechnicalController {
     
     @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchUsers(String searchTerm) {
+        String query = '%' + searchTerm + '%';
+        List<User> users = [SELECT Id, Name, Title FROM User WHERE Name LIKE :query AND IsActive = true LIMIT 5];
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (User u : users) {
+            results.add(new Map<String, String>{
+                'id' => u.Id,
+                'name' => u.Name,
+                'title' => u.Title != null ? u.Title : 'Colaborador'
+            });
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static Map<String, Integer> getQuoteStats() {
         Map<String, Integer> stats = new Map<String, Integer>{
             'Total' => 0,

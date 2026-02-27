@@ -2,30 +2,55 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getQuoteLineItems from '@salesforce/apex/QuoteContractPDFController.getQuoteLineItems';
+import searchUsers from '@salesforce/apex/QuoteTechnicalController.searchUsers';
 
 export default class TechContractManager extends NavigationMixin(LightningElement) {
     @api recordId;
 
     @track quoteLineItems = [];
-    @track totals = { subtotal: 0, descuento: 0, iva: 0, total: 0 };
+    @track totals = { total: 0 };
     @track isLoading = true;
     
-    // Estados para modales
+    // Configuración de visualización
+    @track selections = { show_total: true, show_line_prices: true };
+
+    // Responsables
+    @track userSearchTermCreator = '';
+    @track userSearchTermManager = '';
+    @track userResultsCreator = [];
+    @track userResultsManager = [];
+    @track selectedCreator = { id: '', name: '' };
+    @track selectedManager = { id: '', name: '' };
+
+    // Firmante del Cliente (Temporal)
+    @track selectedClientSigner = '';
+    get clientSignerOptions() {
+        return [
+            { label: 'Juan Pérez (Director)', value: 'Juan Pérez' },
+            { label: 'María García (Compras)', value: 'María García' },
+            { label: 'Representante Legal', value: 'Representante Legal' }
+        ];
+    }
+
+    // Firma
+    @track signatureSource = 'creator'; // 'creator' o 'manager'
+
+    // Datos del Contacto
+    @track isManualContract = false;
+    @track fechaPrimerServicio = '';
+    @track fechaLimiteServicio = '';
+
+    get selectedClientSignerDisplay() {
+        return this.selectedClientSigner || 'No seleccionado';
+    }
+
+    // Modales
     @track showEditModal = false;
     @track editingItem = {};
     @track editingIndex = -1;
 
-    @track selections = {
-        legal_clauses: true,
-        confidentiality: false,
-        technical_summary: true,
-        photo_gallery: false,
-        annual_calendar: false,
-        tax_retentions: false,
-        company_seal: true
-    };
-
-    @track frecuencia = 'mensual';
+    get isSignatureCreator() { return this.signatureSource === 'creator'; }
+    get isSignatureManager() { return this.signatureSource === 'manager'; }
 
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
@@ -36,9 +61,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     }
 
     connectedCallback() {
-        if (this.recordId) {
-            this.fetchLineItems();
-        }
+        if (this.recordId) this.fetchLineItems();
     }
 
     fetchLineItems() {
@@ -58,30 +81,90 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             })
             .catch(error => {
                 this.isLoading = false;
-                console.error('Error cargando partidas:', error);
+                console.error(error);
             });
     }
 
-    // ACCIÓN: Eliminar fila del contrato
+    // BÚSQUEDA DE USUARIOS
+    handleUserSearch(event) {
+        const type = event.target.dataset.type;
+        const term = event.target.value;
+        if (type === 'creator') this.userSearchTermCreator = term;
+        else this.userSearchTermManager = term;
+
+        if (term.length >= 2) {
+            searchUsers({ searchTerm: term })
+                .then(result => {
+                    if (type === 'creator') this.userResultsCreator = result;
+                    else this.userResultsManager = result;
+                })
+                .catch(error => console.error(error));
+        } else {
+            this.userResultsCreator = [];
+            this.userResultsManager = [];
+        }
+    }
+
+    handleUserSelect(event) {
+        const type = event.currentTarget.dataset.type;
+        const id = event.currentTarget.dataset.id;
+        const name = event.currentTarget.dataset.name;
+
+        if (type === 'creator') {
+            this.selectedCreator = { id, name };
+            this.userResultsCreator = [];
+            this.userSearchTermCreator = '';
+        } else {
+            this.selectedManager = { id, name };
+            this.userResultsManager = [];
+            this.userSearchTermManager = '';
+        }
+    }
+
+    handleRemoveCreator() { this.selectedCreator = { id: '', name: '' }; }
+    handleRemoveManager() { this.selectedManager = { id: '', name: '' }; }
+
+    handleClientSignerChange(event) {
+        this.selectedClientSigner = event.detail.value;
+    }
+
+    // GESTIÓN DE FIRMA (Excluyente)
+    handleSignatureToggle(event) {
+        this.signatureSource = event.target.dataset.id;
+    }
+
+    // GESTIÓN DATOS CONTACTO
+    handleManualContractToggle(event) {
+        this.isManualContract = event.target.checked;
+    }
+
+    handleDateChange(event) {
+        const id = event.target.dataset.id;
+        if (id === 'primerServicio') this.fechaPrimerServicio = event.target.value;
+        else this.fechaLimiteServicio = event.target.value;
+    }
+
+    // GESTIÓN DE PARTIDAS
+    handleItemToggle(event) {
+        const itemId = event.target.dataset.id;
+        this.quoteLineItems = this.quoteLineItems.map(item => {
+            if (item.Id === itemId) return { ...item, isSelected: event.target.checked };
+            return item;
+        });
+        this.calculateTotals();
+    }
+
     handleRemoveItem(event) {
         const index = event.target.dataset.index;
         const data = [...this.quoteLineItems];
         data.splice(index, 1);
         this.quoteLineItems = data;
         this.calculateTotals();
-        
-        this.dispatchEvent(new ShowToastEvent({
-            title: 'Ítem Removido',
-            message: 'El servicio fue eliminado del contrato local.',
-            variant: 'info'
-        }));
     }
 
-    // ACCIÓN: Editar fila
     handleEditItem(event) {
-        const index = event.target.dataset.index;
-        this.editingIndex = index;
-        this.editingItem = { ...this.quoteLineItems[index] };
+        this.editingIndex = event.target.dataset.index;
+        this.editingItem = { ...this.quoteLineItems[this.editingIndex] };
         this.showEditModal = true;
     }
 
@@ -91,124 +174,53 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         this.editingItem[field] = value;
     }
 
-    handleCloseEditModal() {
-        this.showEditModal = false;
-    }
-
     handleSaveItemChanges() {
-        // Actualizar la línea y recalcular el total de la fila
         const data = [...this.quoteLineItems];
-        const updatedItem = { ...this.editingItem };
-        
-        // Recalcular TotalPrice si cambió Cantidad o UnitPrice
-        updatedItem.TotalPrice = updatedItem.Quantity * updatedItem.UnitPrice;
-        
-        data[this.editingIndex] = updatedItem;
+        const updated = { ...this.editingItem };
+        updated.TotalPrice = updated.Quantity * updated.UnitPrice;
+        data[this.editingIndex] = updated;
         this.quoteLineItems = data;
         this.calculateTotals();
         this.showEditModal = false;
-
-        this.dispatchEvent(new ShowToastEvent({
-            title: 'Cambios Guardados',
-            message: 'Se actualizó el servicio en este contrato.',
-            variant: 'success'
-        }));
     }
 
-    handleItemToggle(event) {
-        const itemId = event.target.dataset.id;
-        const checked = event.target.checked;
-        this.quoteLineItems = this.quoteLineItems.map(item => {
-            if (item.Id === itemId) return { ...item, isSelected: checked };
-            return item;
-        });
-        this.calculateTotals();
-    }
+    handleCloseEditModal() { this.showEditModal = false; }
 
     calculateTotals() {
-        let subtotal = 0;
-        let descTotal = 0;
-        
+        let total = 0;
         this.quoteLineItems.forEach(item => {
             if (item.isSelected) {
-                const rowBase = (item.Quantity || 0) * (item.UnitPrice || 0);
-                subtotal += rowBase;
-                if (item.Discount) {
-                    descTotal += (rowBase * (item.Discount / 100));
-                }
+                const base = (item.Quantity || 0) * (item.UnitPrice || 0);
+                const desc = item.Discount ? (base * (item.Discount / 100)) : 0;
+                total += (base - desc) * 1.16;
             }
         });
-
-        const subtotalNeto = subtotal - descTotal;
-        const iva = subtotalNeto * 0.16;
-        
-        this.totals = {
-            subtotal: subtotal,
-            descuento: descTotal,
-            iva: iva,
-            total: subtotalNeto + iva
-        };
-    }
-
-    // CONFIGURACIÓN VISUAL
-    get showCalendarOptions() {
-        return this.selections.annual_calendar;
-    }
-
-    get frecuenciaOptions() {
-        return [
-            { label: 'Semanal (52)', value: 'semanal' },
-            { label: 'Quincenal (24)', value: 'quincenal' },
-            { label: 'Mensual (12)', value: 'mensual' },
-            { label: 'Bimestral (6)', value: 'bimestral' },
-            { label: 'Único (1)', value: 'unico' }
-        ];
+        this.totals = { total };
     }
 
     handleToggle(event) {
-        const id = event.target.dataset.id;
-        this.selections[id] = event.target.checked;
-    }
-
-    handleFrecuenciaChange(event) {
-        this.frecuencia = event.detail.value;
+        this.selections[event.target.dataset.id] = event.target.checked;
     }
 
     handleReset() {
-        this.fetchLineItems(); // Recargar todo del servidor
-        this.selections = {
-            legal_clauses: true,
-            confidentiality: false,
-            technical_summary: true,
-            photo_gallery: false,
-            annual_calendar: false,
-            tax_retentions: false,
-            company_seal: true
-        };
+        this.fetchLineItems();
+        this.selectedCreator = { id: '', name: '' };
+        this.selectedManager = { id: '', name: '' };
+        this.signatureSource = 'creator';
     }
 
     handleGenerateContract() {
-        const selectedIds = this.quoteLineItems
-            .filter(item => item.isSelected)
-            .map(item => item.Id);
-
-        if (selectedIds.length === 0) {
-            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione al menos un servicio.', variant: 'warning' }));
+        if (!this.selectedCreator.id) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'El campo "Creado por" es obligatorio.', variant: 'error' }));
             return;
         }
 
-        let baseUrl = '/apex/QuoteContractPDF?id=' + this.recordId;
-        baseUrl += '&selectedItems=' + selectedIds.join(',');
-        
-        Object.keys(this.selections).forEach(key => {
-            if (this.selections[key]) baseUrl += `&${key}=true`;
-        });
+        const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
+        let url = `/apex/QuoteContractPDF?id=${this.recordId}&selectedItems=${selectedIds.join(',')}`;
+        url += `&show_total=${this.selections.show_total}&show_line_prices=${this.selections.show_line_prices}`;
+        url += `&createdBy=${this.selectedCreator.id}&managedBy=${this.selectedManager.id}&sigSource=${this.signatureSource}`;
+        url += `&clientSigner=${encodeURIComponent(this.selectedClientSigner)}`;
 
-        if (this.selections.annual_calendar) {
-            baseUrl += `&frecuencia=${this.frecuencia}`;
-        }
-
-        window.open(baseUrl, '_blank');
-        this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Generando contrato...', variant: 'success' }));
+        window.open(url, '_blank');
     }
 }

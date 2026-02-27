@@ -5,50 +5,42 @@
                 <lightning-spinner alternative-text="Cargando partidas..."></lightning-spinner>
             </template>
 
-            <!-- SECCIÓN 1: SELECCIÓN Y EDICIÓN DE SERVICIOS -->
-            <div class="slds-m-bottom_large">
+            <!-- SECCIÓN 1: SERVICIOS -->
+            <div class="slds-m-bottom_medium">
                 <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
                     <lightning-icon icon-name="standard:service_contract" size="small" class="slds-m-right_x-small"></lightning-icon>
                     <h3 class="slds-text-heading_small slds-text-title_bold">1. Definición de servicios contratados</h3>
                 </div>
                 
                 <template if:true={quoteLineItems.length}>
-                    <div class="table-container slds-scrollable_x">
+                    <div class="table-container slds-scrollable_x slds-m-bottom_small">
                         <table class="custom-table slds-no-row-hover">
                             <thead>
                                 <tr>
                                     <th style="width: 3rem;">INC.</th>
                                     <th style="width: 100px;">CÓDIGO</th>
-                                    <th style="width: 400px;">DESCRIPCIÓN / DETALLE TÉCNICO</th>
+                                    <th style="width: 400px;">DESCRIPCIÓN</th>
                                     <th style="width: 80px; text-align: center;">CANT.</th>
                                     <th style="width: 150px;">SEDE</th>
-                                    <th style="width: 80px; text-align: center;">DESC.</th>
-                                    <th style="width: 80px; text-align: center;">I.V.A.</th>
                                     <th style="width: 120px; text-align: right;">IMPORTE</th>
-                                    <th style="width: 100px; text-align: center;">ACCIONES</th>
+                                    <th style="width: 80px; text-align: center;">ACCIONES</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template for:each={quoteLineItems} for:item="item" for:index="index">
                                     <tr key={item.Id}>
-                                        <td>
-                                            <lightning-input type="checkbox" checked={item.isSelected} onchange={handleItemToggle} data-id={item.Id} variant="label-hidden"></lightning-input>
-                                        </td>
+                                        <td><lightning-input type="checkbox" checked={item.isSelected} onchange={handleItemToggle} data-id={item.Id} variant="label-hidden"></lightning-input></td>
                                         <td class="slds-text-body_small"><strong>{item.ProductCode}</strong></td>
                                         <td>
                                             <div class="slds-text-title_bold">{item.ProductName}</div>
-                                            <div class="slds-text-color_weak slds-text-body_small" style="white-space: pre-line; margin-top: 4px;">{item.Description}</div>
+                                            <div class="slds-text-color_weak slds-text-body_small" style="white-space: pre-line;">{item.Description}</div>
                                         </td>
                                         <td style="text-align: center;">{item.Quantity}</td>
                                         <td class="slds-text-body_small">{item.Sede}</td>
-                                        <td style="text-align: center;" class="text-red">{item.DescuentoDisplay}</td>
-                                        <td style="text-align: center;">16%</td>
-                                        <td style="text-align: right;">
-                                            <strong><lightning-formatted-number value={item.TotalPrice} format-style="currency"></lightning-formatted-number></strong>
-                                        </td>
+                                        <td style="text-align: right;"><strong><lightning-formatted-number value={item.TotalPrice} format-style="currency"></lightning-formatted-number></strong></td>
                                         <td style="text-align: center;">
-                                            <lightning-button-icon icon-name="utility:edit" variant="bare" size="small" data-index={index} onclick={handleEditItem} title="Editar detalle de esta fila" class="slds-m-right_x-small"></lightning-button-icon>
-                                            <lightning-button-icon icon-name="utility:delete" variant="bare-error" size="small" data-index={index} onclick={handleRemoveItem} title="Remover de este contrato"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:edit" variant="bare" size="small" data-index={index} onclick={handleEditItem} class="slds-m-right_x-small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" variant="bare-error" size="small" data-index={index} onclick={handleRemoveItem}></lightning-button-icon>
                                         </td>
                                     </tr>
                                 </template>
@@ -56,105 +48,165 @@
                         </table>
                     </div>
 
-                    <div class="slds-grid slds-grid_align-spread slds-m-top_small">
-                        <lightning-button label="Agregar Servicio Extra" icon-name="utility:add" variant="brand-outline" class="btn-add" onclick={handleOpenAddModal}></lightning-button>
-                        
-                        <!-- RESUMEN FINANCIERO PROFESIONAL -->
-                        <div class="totals-container">
-                            <div class="totals-card">
-                                <div class="total-row">
-                                    <span>Subtotal Bruto:</span>
-                                    <span><lightning-formatted-number value={totals.subtotal} format-style="currency"></lightning-formatted-number></span>
-                                </div>
-                                <div class="total-row text-red">
-                                    <span>Descuento Aplicado:</span>
-                                    <span>- <lightning-formatted-number value={totals.descuento} format-style="currency"></lightning-formatted-number></span>
-                                </div>
-                                <div class="total-row">
-                                    <span>I.V.A. Trasladado (16%):</span>
-                                    <span><lightning-formatted-number value={totals.iva} format-style="currency"></lightning-formatted-number></span>
-                                </div>
-                                <div class="total-row final">
-                                    <span>TOTAL DEL CONTRATO:</span>
-                                    <span><lightning-formatted-number value={totals.total} format-style="currency"></lightning-formatted-number></span>
-                                </div>
+                    <!-- TOTALES -->
+                    <div class="slds-grid slds-grid_align-end">
+                        <div class="totals-card">
+                            <div class="total-row final">
+                                <span>TOTAL CONTRATO:</span>
+                                <span><lightning-formatted-number value={totals.total} format-style="currency"></lightning-formatted-number></span>
                             </div>
                         </div>
                     </div>
                 </template>
             </div>
 
-            <!-- SECCIÓN 2: MÓDULOS DE MATERIALIDAD -->
-            <div class="slds-box bg-light-blue slds-m-top_large">
-                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
-                    <lightning-icon icon-name="standard:answer" size="small" class="slds-m-right_x-small"></lightning-icon>
-                    <h3 class="slds-text-heading_small slds-text-title_bold">2. Configurar módulos de materialidad y anexos</h3>
+            <!-- SECCIÓN 2: CONFIGURACIÓN DE VISUALIZACIÓN Y RESPONSABLES -->
+            <div class="slds-grid slds-wrap slds-gutters slds-m-top_large">
+                <!-- Columna Izquierda: Visualización -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                    <div class="slds-box slds-theme_shade">
+                        <p class="slds-text-title_bold slds-m-bottom_small">Opciones de Visualización</p>
+                        <lightning-input type="checkbox" label="Mostrar el importe total del contrato" checked={selections.show_total} onchange={handleToggle} data-id="show_total" class="slds-m-bottom_xx-small"></lightning-input>
+                        <lightning-input type="checkbox" label="Mostrar el importe en las líneas" checked={selections.show_line_prices} onchange={handleToggle} data-id="show_line_prices"></lightning-input>
+                    </div>
                 </div>
 
-                <div class="slds-grid slds-wrap slds-gutters">
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <div class="slds-box slds-theme_shade">
-                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Módulo Legal</p>
-                            <lightning-input type="checkbox" label="Cláusulas Generales Pyatz" checked onchange={handleToggle} data-id="legal_clauses"></lightning-input>
-                            <lightning-input type="checkbox" label="Anexo Confidencialidad" onchange={handleToggle} data-id="confidentiality"></lightning-input>
-                        </div>
-                    </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <div class="slds-box slds-theme_shade">
-                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Módulo Técnico</p>
-                            <lightning-input type="checkbox" label="Memoria Descriptiva" checked onchange={handleToggle} data-id="technical_summary"></lightning-input>
-                            <lightning-input type="checkbox" label="Galería de Fotos" onchange={handleToggle} data-id="photo_gallery"></lightning-input>
-                        </div>
-                    </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <div class="slds-box slds-theme_shade">
-                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Módulo Operativo</p>
-                            <lightning-input type="checkbox" label="Calendario de Visitas" onchange={handleToggle} data-id="annual_calendar"></lightning-input>
-                            <template lwc:if={showCalendarOptions}>
-                                <lightning-combobox value={frecuencia} options={frecuenciaOptions} onchange={handleFrecuenciaChange} variant="label-hidden" class="slds-m-top_xx-small"></lightning-combobox>
+                <!-- Columna Derecha: Responsables -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <div class="slds-box bg-light-blue">
+                        <p class="slds-text-title_bold slds-m-bottom_small">Responsables del Contrato</p>
+                        
+                        <!-- Creado por -->
+                        <div class="slds-m-bottom_small" style="position: relative;">
+                            <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr> Creado por</label>
+                            <template if:true={selectedCreator.name}>
+                                <lightning-pill label={selectedCreator.name} onremove={handleRemoveCreator} icon-name="standard:user" class="slds-size_1-of-1"></lightning-pill>
+                            </template>
+                            <template if:false={selectedCreator.name}>
+                                <lightning-input type="search" variant="label-hidden" placeholder="Buscar empleado..." onchange={handleUserSearch} data-type="creator" value={userSearchTermCreator}></lightning-input>
+                                <template if:true={userResultsCreator.length}>
+                                    <div class="custom-dropdown">
+                                        <ul class="slds-listbox slds-listbox_vertical">
+                                            <template for:each={userResultsCreator} for:item="u">
+                                                <li key={u.id} class="slds-listbox__item" onclick={handleUserSelect} data-id={u.id} data-name={u.name} data-type="creator">
+                                                    <div class="slds-media slds-listbox__option_entity">
+                                                        <span><strong>{u.name}</strong> - {u.title}</span>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </template>
                             </template>
                         </div>
-                    </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <div class="slds-box slds-theme_shade">
-                            <p class="slds-text-title_bold slds-m-bottom_xx-small">Financiero</p>
-                            <lightning-input type="checkbox" label="Tabla de Retenciones" onchange={handleToggle} data-id="tax_retentions"></lightning-input>
-                            <lightning-input type="checkbox" label="Sello de la Empresa" checked onchange={handleToggle} data-id="company_seal"></lightning-input>
+
+                        <!-- Gestionado por -->
+                        <div class="slds-m-bottom_small" style="position: relative;">
+                            <label class="slds-form-element__label">Gestionado por</label>
+                            <template if:true={selectedManager.name}>
+                                <lightning-pill label={selectedManager.name} onremove={handleRemoveManager} icon-name="standard:user" class="slds-size_1-of-1"></lightning-pill>
+                            </template>
+                            <template if:false={selectedManager.name}>
+                                <lightning-input type="search" variant="label-hidden" placeholder="Buscar empleado..." onchange={handleUserSearch} data-type="manager" value={userSearchTermManager}></lightning-input>
+                                <template if:true={userResultsManager.length}>
+                                    <div class="custom-dropdown">
+                                        <ul class="slds-listbox slds-listbox_vertical">
+                                            <template for:each={userResultsManager} for:item="u">
+                                                <li key={u.id} class="slds-listbox__item" onclick={handleUserSelect} data-id={u.id} data-name={u.name} data-type="manager">
+                                                    <div class="slds-media slds-listbox__option_entity">
+                                                        <span><strong>{u.name}</strong> - {u.title}</span>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+
+                        <!-- Firmante del Cliente -->
+                        <div>
+                            <lightning-combobox 
+                                label="¿Quién, del cliente, firma el contrato?" 
+                                placeholder="Seleccione un contacto..."
+                                value={selectedClientSigner}
+                                options={clientSignerOptions}
+                                onchange={handleClientSignerChange}>
+                            </lightning-combobox>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- FOOTER PRINCIPAL -->
+            <!-- SECCIÓN 3: CONFIGURACIÓN DE FIRMA -->
+            <div class="slds-box slds-m-top_medium bg-white border-dashed">
+                <p class="slds-text-title_bold slds-m-bottom_small">Firma que aparecerá en el PDF del contrato</p>
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col">
+                        <lightning-input type="checkbox" label="Empleado que crea el contrato" checked={isSignatureCreator} onchange={handleSignatureToggle} data-id="creator"></lightning-input>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-input type="checkbox" label="Empleado que gestiona el contrato" checked={isSignatureManager} onchange={handleSignatureToggle} data-id="manager"></lightning-input>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 4: DATOS DEL CONTACTO -->
+            <div class="slds-box slds-m-top_medium bg-white">
+                <p class="slds-text-title_bold slds-m-bottom_medium">Datos del contacto</p>
+                
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <!-- Columna 1: Contrato y Nombre -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-border_right">
+                        <div class="slds-m-bottom_small">
+                            <lightning-input type="checkbox" label="Asignar número de contrato manualmente" onchange={handleManualContractToggle} checked={isManualContract}></lightning-input>
+                        </div>
+                        <div class="slds-p-around_x-small slds-theme_shade slds-border_around" style="border-radius: 4px;">
+                            <p class="slds-text-color_weak slds-text-body_small">Firmante Seleccionado:</p>
+                            <p class="slds-text-heading_small"><strong>{selectedClientSignerDisplay}</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: Fechas Especiales -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <p class="slds-text-title_bold slds-m-bottom_x-small slds-text-color_weak" style="font-size: 0.75rem; text-transform: uppercase;">
+                            Las fechas de los servicios son diferentes a las fechas del contrato
+                        </p>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input type="date" label="F.Primer servicio:" onchange={handleDateChange} data-id="primerServicio" value={fechaPrimerServicio}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input type="date" label="F.Límite servicio:" onchange={handleDateChange} data-id="limiteServicio" value={fechaLimiteServicio}></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER ACCIONES -->
             <div class="slds-m-top_large slds-border_top slds-p-top_medium slds-text-align_right">
-                <lightning-button label="Limpiar Cambios" variant="neutral" onclick={handleReset} class="slds-m-right_small"></lightning-button>
+                <lightning-button label="Limpiar" variant="neutral" onclick={handleReset} class="slds-m-right_small"></lightning-button>
                 <lightning-button label="Finalizar y Descargar Contrato" variant="brand" icon-name="utility:print" onclick={handleGenerateContract}></lightning-button>
             </div>
         </div>
     </lightning-card>
 
-    <!-- MODAL DE EDICIÓN DE FILA -->
+    <!-- MODAL DE EDICIÓN (SIN CAMBIOS) -->
     <template if:true={showEditModal}>
         <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container">
-                <header class="slds-modal__header">
-                    <h2 class="slds-text-heading_medium">Editar Detalle de Servicio</h2>
-                </header>
+                <header class="slds-modal__header"><h2 class="slds-text-heading_medium">Editar Detalle</h2></header>
                 <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-input label="Producto" value={editingItem.ProductName} readonly class="slds-m-bottom_small"></lightning-input>
-                    <lightning-textarea label="Descripción Técnica (Visible en el contrato)" value={editingItem.Description} onchange={handleEditInputChange} data-field="Description" class="slds-m-bottom_small"></lightning-textarea>
+                    <lightning-textarea label="Descripción" value={editingItem.Description} onchange={handleEditInputChange} data-field="Description" class="slds-m-bottom_small"></lightning-textarea>
                     <div class="slds-grid slds-gutters">
-                        <div class="slds-col slds-size_1-of-2">
-                            <lightning-input type="number" label="Cantidad" value={editingItem.Quantity} onchange={handleEditInputChange} data-field="Quantity"></lightning-input>
-                        </div>
-                        <div class="slds-col slds-size_1-of-2">
-                            <lightning-input type="number" formatter="currency" label="P. Unitario" value={editingItem.UnitPrice} onchange={handleEditInputChange} data-field="UnitPrice"></lightning-input>
-                        </div>
+                        <div class="slds-col slds-size_1-of-2"><lightning-input type="number" label="Cantidad" value={editingItem.Quantity} onchange={handleEditInputChange} data-field="Quantity"></lightning-input></div>
+                        <div class="slds-col slds-size_1-of-2"><lightning-input type="number" formatter="currency" label="P. Unitario" value={editingItem.UnitPrice} onchange={handleEditInputChange} data-field="UnitPrice"></lightning-input></div>
                     </div>
                 </div>
                 <footer class="slds-modal__footer">
                     <lightning-button label="Cancelar" onclick={handleCloseEditModal} class="slds-m-right_x-small"></lightning-button>
-                    <lightning-button label="Guardar Cambios" variant="brand" onclick={handleSaveItemChanges}></lightning-button>
+                    <lightning-button label="Guardar" variant="brand" onclick={handleSaveItemChanges}></lightning-button>
                 </footer>
             </div>
         </section>
