@@ -3,6 +3,7 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getQuoteLineItems from '@salesforce/apex/QuoteContractPDFController.getQuoteLineItems';
 import searchUsers from '@salesforce/apex/QuoteTechnicalController.searchUsers';
+import getInitialData from '@salesforce/apex/QuoteTechnicalController.getInitialData';
 
 export default class TechContractManager extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -49,6 +50,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     // Plantillas
     @track plantillaSeleccionada = '';
     @track contenidoLegal = '';
+    @track introduccionPresupuesto = '';
 
     get plantillaOptions() {
         return [
@@ -74,12 +76,27 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     getStateParameters(currentPageReference) {
         if (currentPageReference && currentPageReference.state.c__recordId) {
             this.recordId = currentPageReference.state.c__recordId;
-            this.fetchLineItems();
+            this.loadInitialData();
         }
     }
 
     connectedCallback() {
-        if (this.recordId) this.fetchLineItems();
+        if (this.recordId) this.loadInitialData();
+    }
+
+    loadInitialData() {
+        this.fetchLineItems();
+        this.fetchQuoteData();
+    }
+
+    fetchQuoteData() {
+        getInitialData({ recordId: this.recordId })
+            .then(result => {
+                if (result && result.quote) {
+                    this.introduccionPresupuesto = result.quote.Introduction_Text__c || '';
+                }
+            })
+            .catch(error => console.error('Error al cargar datos del presupuesto:', error));
     }
 
     fetchLineItems() {
@@ -188,6 +205,10 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
 
     handleContenidoChange(event) {
         this.contenidoLegal = event.target.value;
+    }
+
+    handleIntroChange(event) {
+        this.introduccionPresupuesto = event.target.value;
     }
 
     // GESTIÓN DE PARTIDAS
