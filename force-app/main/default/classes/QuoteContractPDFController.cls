@@ -18,7 +18,7 @@ public with sharing class QuoteContractPDFController {
         this.quoteRecord = [SELECT Id, Name, QuoteNumber, Account.Name, Account.BillingStreet, Account.BillingCity, 
                                    Contact.Name, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                    TotalPrice, Business_Lines_Selected__c, Technical_Sedes__c,
-                                   Introduction_Text__c, Warranty_Text__c, Description, Subtotal
+                                   Introduction_Text__c, Warranty_Text__c, Description, Subtotal, Tax, Discount
                             FROM Quote WHERE Id = :quoteId];
 
         Map<String, String> params = ApexPages.currentPage().getParameters();
