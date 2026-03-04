@@ -42,46 +42,56 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track necesidadSeleccionada = '';
     @track necesidadesResults = [];
 
-    // --- SEDES (ALTO RENDIMIENTO) ---
+    // --- SEDES ---
     @track sedesData = [];
     @track selectedSedesIds = [];
-    @track selectedSedesObjects = []; // "Carrito" de sedes (Objetos con Nombre)
+    @track selectedSedesObjects = [];
     @track sedeSearchTerm = '';
     @track isGlobalSedeSearch = false;
-    @track parentSearchTerm = '';
-    @track parentSearchResults = [];
-    @track selectedParentId = '';
-    @track selectedParentName = '';
 
     // --- SERVICIOS Y ARTÍCULOS ---
     @track serviciosData = [];
+    @track totalesData = [];
     @track selectedLines = [];
     @track lineaNegocioOptions = [];
     @track allowOtherLines = false;
+    
+    // --- MODAL BUSCADOR PRO ---
+    @track searchResults = [];
+    @track selectedProductId = '';
+    @track selectedProductName = '';
+    @track selectedProductPrice = 0;
+    @track productPriceOptions = [];
+    @track modalTableData = []; 
+    @track modalDescription = '';
+    @track modalAreas = ''; // NUEVO: Campo de áreas
+    @track isUnitario = true;
+    @track isTotal = false;
+    @track showDiscountColumn = false; // NUEVO: Control de descuento
+    
+    // --- CONFIGURACIÓN PDF ---
+    @track showTotal = true;
+    @track showTaxes = true;
+    @track showDescription = true;
 
     // --- MODALES ---
     @track showModal = false;
     @track showSeparatorModal = false;
     @track showPLModal = false;
-    @track showPasswordModal = false;
-    @track isPLAuthenticated = false;
-    @track passwordInput = '';
-
-    // --- CONFIGURACIÓN PDF ---
-    @track showTotal = true;
-    @track showTaxes = true;
-    @track showLineItems = true;
-    @track showDescription = true;
-
-    // --- P&L ---
-    @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
-    @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+    @track separatorText = '';
 
     sedesColumns = [
         { label: 'Sede', fieldName: 'Name', type: 'text' },
         { label: 'Cuenta Padre', fieldName: 'ParentName', type: 'text' },
         { label: 'Dirección', fieldName: 'BillingStreet', type: 'text' },
         { label: 'Ciudad', fieldName: 'BillingCity', type: 'text' }
+    ];
+
+    totalesColumns = [
+        { label: 'Concepto', fieldName: 'concepto', type: 'text' },
+        { label: 'Base', fieldName: 'base', type: 'currency' },
+        { label: 'IVA (16%)', fieldName: 'iva', type: 'currency' },
+        { label: 'Total', fieldName: 'total', type: 'currency', cellAttributes: { class: 'slds-text-title_bold' } }
     ];
 
     connectedCallback() {
@@ -102,11 +112,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.introduccion = q.Introduction_Text__c;
                     this.warranty = q.Warranty_Text__c;
                     this.accountId = q.AccountId;
-                    if (q.Account) {
-                        this.clienteNombre = q.Account.Name;
-                        this.selectedParentId = q.AccountId;
-                        this.selectedParentName = q.Account.Name;
-                    }
+                    if (q.Account) this.clienteNombre = q.Account.Name;
 
                     if (q.Markers_Data__c) {
                         try {
@@ -120,30 +126,24 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                                 this.necesidadNombre = decoded.necesidadNombre;
                                 this.necesidadSeleccionada = decoded.necesidadNombre;
                             }
+                            this.calculateTotals();
                         } catch (e) { console.error('Error parse markers:', e); }
                     }
                 } else if (result.opportunity) {
                     this.accountId = result.opportunity.AccountId;
-                    this.selectedParentId = result.opportunity.AccountId;
-                    this.selectedParentName = result.opportunity.Account.Name;
                 }
-                
-                // CARGA PROACTIVA: Traer sedes del cliente en cuanto se tiene el AccountId
-                if (this.selectedParentId) this.fetchSedes();
-                
+                if (this.accountId) this.fetchSedes();
                 this.isLoading = false;
             })
             .catch(error => { console.error(error); this.isLoading = false; });
     }
 
-    loadBusinessLines() {
-        getBusinessLineOptions().then(res => { this.lineaNegocioOptions = res; });
-    }
-
+    loadBusinessLines() { getBusinessLineOptions().then(res => { this.lineaNegocioOptions = res; }); }
     loadTemplates() {
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Introducciones' }).then(res => this.introTemplates = res);
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Clausulas y Anexos' }).then(res => this.warrantyTemplates = res);
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Observaciones de Pago' }).then(res => this.pagoTemplates = res);
+        getEmailTemplatesByFolder({ folderName: 'Pyatz - Servicios' }).then(res => this.serviceTemplates = res);
     }
 
     // --- NAVEGACIÓN ---
@@ -157,45 +157,17 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione una Estrategia.', variant: 'warning' }));
             return;
         }
-
-        if (this.currentStep !== '4') {
-            this.isLoading = true;
-            const markers = {
-                serviciosData: this.serviciosData,
-                selectedSedesIds: this.selectedSedesIds,
-                selectedSedesObjects: this.selectedSedesObjects,
-                estrategiaVenta: this.estrategiaVenta,
-                necesidadId: this.necesidadId,
-                necesidadNombre: this.necesidadNombre
-            };
-            const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
-            
-            const data = {
-                quoteId: this.recordId, name: this.asunto, status: 'Borrador',
-                intro: this.introduccion, warranty: this.warranty, markersData: encoded,
-                technicalSedes: this.technicalSedesString // ACTUALIZACIÓN AUTOMÁTICA DEL CAMPO PARA EL PDF
-            };
-
-            saveTechnicalData({ data: data })
-                .then(newId => {
-                    if (newId) this.recordId = newId;
-                    this.loadInitialData();
-                    this.currentStep = (parseInt(this.currentStep) + 1).toString();
-                    this.isLoading = false;
-                })
-                .catch(() => { this.isLoading = false; });
-        }
+        if (this.currentStep !== '4') { this.handleSave('Borrador'); this.currentStep = (parseInt(this.currentStep) + 1).toString(); }
     }
     handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
 
-    // --- LÓGICA ESTRATEGIA Y NECESIDAD ---
+    // --- LÓGICA PASO 1 ---
     get estrategiaOptions() {
         return [
             { label: 'E1 - Póliza Anual', value: 'E1' }, { label: 'E2 - Extraordinario', value: 'E2' },
             { label: 'E3 - Cliente Nuevo', value: 'E3' }, { label: 'E4 - Retardantes', value: 'E4' }, { label: 'E5 - Cedis', value: 'E5' }
         ];
     }
-
     handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
     handleNecesidadChange(event) {
         const term = event.target.value; this.necesidadSeleccionada = term;
@@ -211,115 +183,237 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.asunto = `${est} @ ${this.necesidadNombre || 'Servicio Técnico'}`;
     }
 
-    // --- LÓGICA SEDES (ALTO RENDIMIENTO) ---
+    // --- LÓGICA PASO 2 ---
     get sedeScopeLabel() { return this.isGlobalSedeSearch ? 'Búsqueda Global' : 'Solo este Cliente'; }
     get sedeSearchPlaceholder() { return this.isGlobalSedeSearch ? 'Buscar en todo Salesforce...' : 'Filtrar sedes de este cliente...'; }
+    get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
     get technicalSedesString() { return this.selectedSedesObjects.map(s => s.Name).join(', '); }
 
-    handleSedeScopeChange(event) {
-        this.isGlobalSedeSearch = event.target.checked;
-        this.fetchSedes();
-    }
-
-    handleSedeSearch(event) {
-        this.sedeSearchTerm = event.target.value;
-        this.fetchSedes();
-    }
-
+    handleSedeScopeChange(event) { this.isGlobalSedeSearch = event.target.checked; this.fetchSedes(); }
+    handleSedeSearch(event) { this.sedeSearchTerm = event.target.value; this.fetchSedes(); }
     fetchSedes() {
-        getFilteredSedes({ 
-            searchTerm: this.sedeSearchTerm, 
-            parentAccountId: this.accountId, 
-            isGlobal: this.isGlobalSedeSearch 
-        })
-        .then(res => {
-            this.sedesData = res.map(s => ({ ...s, ParentName: s.Parent ? s.Parent.Name : this.clienteNombre }));
-        })
+        getFilteredSedes({ searchTerm: this.sedeSearchTerm, parentAccountId: this.accountId, isGlobal: this.isGlobalSedeSearch })
+        .then(res => { this.sedesData = res.map(s => ({ ...s, ParentName: s.Parent ? s.Parent.Name : this.clienteNombre })); })
         .catch(err => console.error(err));
     }
-
     handleSedeSelection(event) {
         const newSelectedRows = event.detail.selectedRows;
-        
-        // LÓGICA DE MEMORIA (Merge): Combinar lo nuevo con lo que ya estaba "en el carrito"
         let currentObjects = [...this.selectedSedesObjects];
-        
-        // Añadir nuevos
-        newSelectedRows.forEach(row => {
-            if (!currentObjects.some(obj => obj.Id === row.Id)) currentObjects.push(row);
-        });
-
-        // REGLA DE NEGOCIO: Si no es E5, solo permitimos 1
-        if (this.estrategiaVenta !== 'E5' && currentObjects.length > 1) {
-            currentObjects = [currentObjects[currentObjects.length - 1]];
-        }
-
+        newSelectedRows.forEach(row => { if (!currentObjects.some(obj => obj.Id === row.Id)) currentObjects.push(row); });
+        if (this.estrategiaVenta !== 'E5' && currentObjects.length > 1) currentObjects = [currentObjects[currentObjects.length - 1]];
         this.selectedSedesObjects = currentObjects;
         this.selectedSedesIds = currentObjects.map(s => s.Id);
     }
-
     handleRemoveSedePill(event) {
-        const idToRemove = event.target.name;
-        this.selectedSedesObjects = this.selectedSedesObjects.filter(s => s.Id !== idToRemove);
+        this.selectedSedesObjects = this.selectedSedesObjects.filter(s => s.Id !== event.target.name);
         this.selectedSedesIds = this.selectedSedesObjects.map(s => s.Id);
     }
-
-    get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
-
-    // --- LÓGICA LÍNEAS DE NEGOCIO ---
     handleLineChange(event) {
         const line = event.target.dataset.value;
         this.lineaNegocioOptions = this.lineaNegocioOptions.map(opt => (opt.value === line ? { ...opt, checked: event.target.checked } : opt));
         this.selectedLines = this.lineaNegocioOptions.filter(opt => opt.checked).map(opt => opt.value);
     }
 
-    // --- MÉTODOS REQUERIDOS (STUBS) ---
-    handleAsuntoChange(event) { this.asunto = event.target.value; }
-    handleIntroChange(event) { this.introduccion = event.target.value; }
-    handleApplyTemplate(event) {
-        const tid = event.detail.value;
-        const field = event.currentTarget.dataset.field;
+    // --- LÓGICA PASO 3 (SERVICIOS) ---
+    handleAllowOtherLinesChange(event) { this.allowOtherLines = event.target.checked; }
+    handleProductSearch(event) {
+        const term = event.target.value;
+        this.selectedProductName = term;
+        if (term.length >= 3) {
+            searchProducts({ searchTerm: term, quoteId: this.recordId, businessLines: this.selectedLines, allowOtherLines: this.allowOtherLines })
+                .then(res => { this.searchResults = res; })
+                .catch(err => console.error(err));
+        } else this.searchResults = [];
+    }
 
-        if (!this.recordId) {
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Atención',
-                message: 'Por favor, avance al siguiente paso para asegurar el registro antes de aplicar plantillas.',
-                variant: 'info'
-            }));
+    handleProductSelect(event) {
+        const selectedId = event.currentTarget.dataset.id;
+        // CORRECCIÓN: Buscar por el atributo 'id' que devuelve el Apex (que es el PricebookEntryId)
+        const res = this.searchResults.find(x => x.id === selectedId);
+        
+        if (res) {
+            this.selectedProductId = res.productId; // Guardamos el Id del Producto para buscar pricebooks
+            this.selectedProductName = res.name;
+            this.selectedProductPrice = res.unitPrice;
+            this.modalDescription = res.description; // Carga automática de descripción
+            this.searchResults = [];
+            
+            this.loadProductPrices();
+            this.initModalTable();
+        }
+    }
+
+    loadProductPrices() {
+        getProductPrices({ product2Id: this.selectedProductId }).then(res => { 
+            this.productPriceOptions = res.map(opt => ({
+                ...opt,
+                className: opt.unitPrice === this.selectedProductPrice ? 'price-option-card selected' : 'price-option-card'
+            })); 
+        });
+    }
+
+    initModalTable() {
+        this.modalTableData = this.selectedSedesObjects.map(s => ({
+            id: s.Id, sede: s.Name, isSelected: true, cantidad: 1, importeTotal: this.selectedProductPrice, descuento: 0, impuestos: 16, totalSinImpuestos: this.selectedProductPrice
+        }));
+    }
+
+    handlePriceOptionSelect(event) {
+        const pbeId = event.currentTarget.dataset.id;
+        const opt = this.productPriceOptions.find(o => o.pbeId === pbeId);
+        if (opt) {
+            this.selectedProductPrice = opt.unitPrice;
+            this.productPriceOptions = this.productPriceOptions.map(o => ({ ...o, className: o.pbeId === pbeId ? 'price-option-card selected' : 'price-option-card' }));
+            this.modalTableData = this.modalTableData.map(row => {
+                const updated = { ...row, importeTotal: opt.unitPrice };
+                updated.totalSinImpuestos = this.isUnitario ? (updated.cantidad * updated.importeTotal) : updated.importeTotal;
+                return updated;
+            });
+        }
+    }
+
+    handlePriceType(event) {
+        const label = event.target.label;
+        this.isUnitario = label === 'UNITARIO';
+        this.isTotal = !this.isUnitario;
+        this.modalTableData = this.modalTableData.map(row => {
+            const updated = { ...row };
+            updated.totalSinImpuestos = this.isUnitario ? (updated.cantidad * updated.importeTotal) : updated.importeTotal;
+            return updated;
+        });
+    }
+
+    handleToggleDiscountColumn() { this.showDiscountColumn = !this.showDiscountColumn; }
+
+    handleSedeRowToggle(event) {
+        const id = event.target.dataset.id;
+        this.modalTableData = this.modalTableData.map(row => (row.id === id ? { ...row, isSelected: event.target.checked } : row));
+    }
+
+    handleModalInputChange(event) {
+        const id = event.target.dataset.id;
+        const field = event.target.dataset.field;
+        const val = parseFloat(event.target.value) || 0;
+        this.modalTableData = this.modalTableData.map(row => {
+            if (row.id === id) {
+                const updated = { ...row };
+                updated[field] = val;
+                // Lógica de Descuento
+                let base = this.isUnitario ? (updated.cantidad * updated.importeTotal) : updated.importeTotal;
+                let desc = updated.descuento || 0;
+                updated.totalSinImpuestos = base - desc;
+                return updated;
+            }
+            return row;
+        });
+    }
+
+    handleModalDescriptionChange(event) { this.modalDescription = event.target.value; }
+    handleModalAreasChange(event) { this.modalAreas = event.target.value; }
+
+    handleSaveServiceLine() {
+        const selectedRows = this.modalTableData.filter(r => r.isSelected);
+        if (selectedRows.length === 0) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'Seleccione al menos una sede.', variant: 'error' }));
             return;
         }
 
+        selectedRows.forEach(row => {
+            const newItem = {
+                id: Date.now().toString() + Math.random(),
+                descripcion: this.selectedProductName,
+                cantidad: row.cantidad,
+                totalSinImpuestos: row.totalSinImpuestos,
+                sedes: row.sede,
+                detalleTecnico: this.modalDescription,
+                areas: this.modalAreas
+            };
+            this.serviciosData = [...this.serviciosData, newItem];
+        });
+
+        this.calculateTotals();
+        this.showModal = false;
+        this.resetModal();
+    }
+
+    resetModal() {
+        this.selectedProductId = ''; this.selectedProductName = ''; this.modalTableData = []; this.modalDescription = ''; this.modalAreas = ''; this.productPriceOptions = []; this.showDiscountColumn = false;
+    }
+
+    calculateTotals() {
+        let subtotal = 0;
+        this.serviciosData.forEach(item => { if (!item.isSeparator) subtotal += (item.totalSinImpuestos || 0); });
+        const iva = subtotal * 0.16;
+        this.totalesData = [{ id: 'total-1', concepto: 'Servicios Técnicos Industriales', base: subtotal, iva: iva, total: subtotal + iva }];
+    }
+
+    handleRowAction(event) {
+        const action = event.target.dataset.action;
+        const id = event.target.dataset.id;
+        if (action === 'delete') {
+            this.serviciosData = this.serviciosData.filter(item => item.id !== id);
+            this.calculateTotals();
+        }
+    }
+
+    handleDragStart(event) { event.dataTransfer.setData('index', event.currentTarget.dataset.index); }
+    handleDragOver(event) { event.preventDefault(); }
+    handleDrop(event) {
+        const fromIndex = event.dataTransfer.getData('index');
+        const toIndex = event.target.closest('tr').dataset.index;
+        if (fromIndex === toIndex) return;
+        const data = [...this.serviciosData];
+        const item = data.splice(fromIndex, 1)[0];
+        data.splice(toIndex, 0, item);
+        this.serviciosData = data;
+    }
+
+    handleOpenModal() { this.showModal = true; }
+    handleCloseModal() { this.showModal = false; this.resetModal(); }
+    handleOpenSeparatorModal() { this.showSeparatorModal = true; }
+    handleCloseSeparatorModal() { this.showSeparatorModal = false; }
+    handleSeparatorTextChange(event) { this.separatorText = event.target.value; }
+    handleAddSeparator() {
+        const newSep = { id: Date.now().toString(), isSeparator: true, descripcion: this.separatorText || 'SECCIÓN' };
+        this.serviciosData = [...this.serviciosData, newSep];
+        this.showSeparatorModal = false;
+        this.separatorText = '';
+    }
+
+    handleShowTotalChange(event) { this.showTotal = event.target.checked; }
+    handleShowTaxesChange(event) { this.showTaxes = event.target.checked; }
+    handleShowDescriptionChange(event) { this.showDescription = event.target.checked; }
+    handleWarrantyChange(event) { this.warranty = event.target.value; }
+    handleObservacionesPagoChange(event) { this.observacionesPago = event.target.value; }
+    handleAsuntoChange(event) { this.asunto = event.target.value; }
+    handleIntroChange(event) { this.introduccion = event.target.value; }
+
+    handleApplyTemplate(event) {
+        if (!this.recordId) return;
         this.isLoading = true;
-        renderTemplate({ templateId: tid, quoteId: this.recordId })
+        renderTemplate({ templateId: event.detail.value, quoteId: this.recordId })
             .then(res => {
+                const field = event.currentTarget.dataset.field;
                 if (field === 'introduccion') this.introduccion = res;
                 if (field === 'warranty') this.warranty = res;
+                if (field === 'observacionesPago') this.observacionesPago = res;
+                if (field === 'modalDescription') this.modalDescription = res;
                 this.isLoading = false;
-            })
-            .catch(error => {
-                this.isLoading = false;
-                console.error('Error renderTemplate:', error);
-                this.dispatchEvent(new ShowToastEvent({
-                    title: 'Error',
-                    message: 'No se pudo cargar la plantilla. Inténtelo de nuevo.',
-                    variant: 'error'
-                }));
-            });
+            }).catch(() => { this.isLoading = false; });
     }
-    handleSaveDraft() { this.handleSave('Borrador'); }
-    handleFinalize() { this.handleSave('Approved'); }
+
     handleSave(status) {
         this.isLoading = true;
         const markers = { serviciosData: this.serviciosData, selectedSedesIds: this.selectedSedesIds, selectedSedesObjects: this.selectedSedesObjects, estrategiaVenta: this.estrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre };
         const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         saveTechnicalData({ data: { quoteId: this.recordId, name: this.asunto, status: status, intro: this.introduccion, warranty: this.warranty, markersData: encoded, technicalSedes: this.technicalSedesString } })
-            .then(newId => { this.isLoading = false; if (newId) this.recordId = newId; this.loadInitialData(); })
+            .then(newId => { if (newId) this.recordId = newId; this.loadInitialData(); this.isLoading = false; })
             .catch(() => { this.isLoading = false; });
     }
+
+    handleFinalize() { this.handleSave('Approved'); }
     handleCancel() { this.dispatchEvent(new CustomEvent('cancel')); }
     handleCloneQuote() { cloneQuote({ quoteId: this.recordId }).then(newId => { this.dispatchEvent(new CustomEvent('editquote', { detail: newId })); }); }
-    handleOpenModal() { this.showModal = true; }
-    handleCloseModal() { this.showModal = false; }
     handleOpenPLModal() { this.showPLModal = true; }
     handleClosePLModal() { this.showPLModal = false; }
 }

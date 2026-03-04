@@ -73,7 +73,6 @@
             <!-- PASO 2: DATOS TÉCNICOS Y SEDES -->
             <template if:true={isStep2}>
                 <div class="slds-grid slds-wrap slds-gutters">
-                    <!-- TODAS LAS SECCIONES A ANCHO COMPLETO -->
                     <div class="slds-col slds-size_1-of-1">
                         <div class="section-card slds-m-bottom_large">
                             <div class="section-header">
@@ -148,9 +147,6 @@
                                     <template for:each={selectedSedesObjects} for:item="s">
                                         <lightning-pill key={s.Id} label={s.Name} name={s.Id} onremove={handleRemoveSedePill} class="slds-m-around_xx-small"></lightning-pill>
                                     </template>
-                                    <template if:false={selectedSedesObjects.length}>
-                                        <span class="slds-text-color_weak italic">No hay sedes seleccionadas aún.</span>
-                                    </template>
                                 </div>
                             </div>
 
@@ -161,45 +157,106 @@
                             </div>
 
                             <div class="datatable-container" style="height: 400px;">
-                                <lightning-datatable 
-                                    key-field="Id" 
-                                    data={sedesData} 
-                                    columns={sedesColumns} 
-                                    selected-rows={selectedSedesIds} 
-                                    onrowselection={handleSedeSelection} 
-                                    max-row-selection={maxRowSelection}>
-                                </lightning-datatable>
+                                <lightning-datatable key-field="Id" data={sedesData} columns={sedesColumns} selected-rows={selectedSedesIds} onrowselection={handleSedeSelection} max-row-selection={maxRowSelection}></lightning-datatable>
                             </div>
                         </div>
                     </div>
                 </div>
             </template>
 
-            <!-- PASO 3: DETALLES (MANTENIDO) -->
+            <!-- PASO 3: DETALLES -->
             <template if:true={isStep3}>
-                <!-- Se mantiene la lógica de partidas y modales que ya tenías -->
                 <div class="section-card slds-m-bottom_large">
-                    <div class="section-header"><h2 class="slds-text-heading_small">Servicios y Artículos</h2></div>
-                    <div class="slds-p-around_medium">
-                        <div class="slds-text-align_center slds-p-around_large border-all radius-8 dashed bg-light-gray">
-                            <p class="slds-text-heading_small">Configuración de Partidas en Proceso</p>
-                            <lightning-button label="+ Añadir servicios" variant="success" class="slds-m-top_medium" onclick={handleOpenModal}></lightning-button>
+                    <div class="section-header"><h2 class="slds-text-heading_small">Servicios/Artículos (Arrastre para reordenar)</h2></div>
+                    <div class="slds-p-around_none datatable-container">
+                        <table class="custom-drag-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th>Descripción</th>
+                                    <th>Sedes</th>
+                                    <th style="width: 80px; text-align: center;">Cant.</th>
+                                    <th style="width: 120px; text-align: right;">Total (Sin IVA)</th>
+                                    <th style="width: 100px; text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody ondragover={handleDragOver} ondrop={handleDrop}>
+                                <template for:each={serviciosData} for:item="item" for:index="index">
+                                    <template if:true={item.isSeparator}>
+                                        <tr key={item.id} class="row-separator" draggable="true" ondragstart={handleDragStart} data-index={index}>
+                                            <td class="drag-handle"><lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon></td>
+                                            <td colspan="4" class="separator-text-cell"><div class="separator-bar"><span>{item.descripcion}</span></div></td>
+                                            <td class="slds-text-align_center"><lightning-button-icon icon-name="utility:delete" variant="error" size="small" onclick={handleRowAction} data-id={item.id} data-action="delete"></lightning-button-icon></td>
+                                        </tr>
+                                    </template>
+                                    <template if:false={item.isSeparator}>
+                                        <tr key={item.id} class="row-service" draggable="true" ondragstart={handleDragStart} data-index={index}>
+                                            <td class="drag-handle"><lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon></td>
+                                            <td class="font-bold">{item.descripcion}</td>
+                                            <td><div class="slds-truncate" title={item.sedes}>{item.sedes}</div></td>
+                                            <td class="slds-text-align_center">{item.cantidad}</td>
+                                            <td class="slds-text-align_right"><lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number></td>
+                                            <td class="slds-text-align_center"><lightning-button-icon icon-name="utility:delete" variant="border-filled" size="small" onclick={handleRowAction} data-id={item.id} data-action="delete"></lightning-button-icon></td>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </tbody>
+                        </table>
+                        <div class="slds-p-around_medium slds-grid slds-grid_align-spread bg-white border-bottom">
+                            <div class="slds-grid">
+                                <lightning-button label="+ Añadir servicios" variant="success" class="btn-verde slds-m-right_small" onclick={handleOpenModal}></lightning-button>
+                                <lightning-button label="+ Añadir Separador" variant="success" onclick={handleOpenSeparatorModal}></lightning-button>
+                            </div>
+                            <lightning-button label="P&L" icon-name="utility:calculator" onclick={handleOpenPLModal}></lightning-button>
                         </div>
                     </div>
+
+                    <div class="slds-p-around_medium bg-white">
+                        <div class="slds-grid slds-grid_vertical-align-center"><div class="blue-square slds-m-right_small"></div><h3 class="slds-text-title_bold">Resumen de Totales</h3></div>
+                    </div>
+                    <div class="datatable-container">
+                        <lightning-datatable key-field="id" data={totalesData} columns={totalesColumns} hide-checkbox-column></lightning-datatable>
+                    </div>
+                    
+                    <div class="slds-p-around_large bg-white border-top">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-3"><lightning-input type="checkbox" label="Mostrar total" checked={showTotal} onchange={handleShowTotalChange}></lightning-input></div>
+                            <div class="slds-col slds-size_1-of-3"><lightning-input type="checkbox" label="Mostrar impuestos" checked={showTaxes} onchange={handleShowTaxesChange}></lightning-input></div>
+                            <div class="slds-col slds-size_1-of-3"><lightning-input type="checkbox" label="Añadir explicación" checked={showDescription} onchange={handleShowDescriptionChange}></lightning-input></div>
+                        </div>
+                    </div>
+                </div>
+
+                <template if:true={showDescription}>
+                    <div class="section-card slds-m-bottom_large">
+                        <div class="section-header slds-grid slds-grid_align-spread">
+                            <h2 class="slds-text-heading_small">Condiciones / Anexos</h2>
+                            <lightning-button-menu label="Usar Plantilla" onselect={handleApplyTemplate} data-field="warranty">
+                                <template for:each={warrantyTemplates} for:item="tpl"><lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item></template>
+                            </lightning-button-menu>
+                        </div>
+                        <div class="slds-p-around_large"><lightning-input-rich-text value={warranty} onchange={handleWarrantyChange}></lightning-input-rich-text></div>
+                    </div>
+                </template>
+
+                <div class="section-card slds-m-bottom_large">
+                    <div class="section-header slds-grid slds-grid_align-spread">
+                        <h2 class="slds-text-heading_small">Observaciones de Pago</h2>
+                        <lightning-button-menu label="Plantilla Pago" onselect={handleApplyTemplate} data-field="observacionesPago">
+                            <template for:each={pagoTemplates} for:item="tpl"><lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item></template>
+                        </lightning-button-menu>
+                    </div>
+                    <div class="slds-p-around_large"><lightning-input-rich-text value={observacionesPago} onchange={handleObservacionesPagoChange}></lightning-input-rich-text></div>
                 </div>
             </template>
 
             <!-- PASO 4: FINALIZAR -->
             <template if:true={isStep4}>
-                <div class="section-card">
-                    <div class="section-header">
-                        <lightning-icon icon-name="utility:send" size="small" class="slds-m-right_small"></lightning-icon>
-                        <h2 class="slds-text-heading_small">Finalizar Presupuesto</h2>
-                    </div>
-                    <div class="slds-p-around_large slds-text-align_center">
-                        <p class="slds-m-bottom_large">El presupuesto está listo para ser generado.</p>
-                        <lightning-button label="Guardar y Finalizar" variant="brand" size="large" onclick={handleFinalize}></lightning-button>
-                    </div>
+                <div class="section-card slds-text-align_center slds-p-around_xx-large">
+                    <lightning-icon icon-name="utility:send" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                    <h2 class="slds-text-heading_large">¡Todo listo!</h2>
+                    <p class="slds-text-heading_small slds-m-vertical_medium">El presupuesto ha sido configurado correctamente.</p>
+                    <lightning-button label="Guardar y Finalizar" variant="brand" size="large" onclick={handleFinalize}></lightning-button>
                 </div>
             </template>
         </div>
@@ -207,28 +264,181 @@
         <!-- FOOTER STICKY -->
         <div class="sticky-footer slds-p-around_medium bg-white border-top">
             <div class="slds-grid slds-grid_align-spread">
-                <lightning-button label="Regresar" icon-name="utility:back" onclick={handleCancel} disabled={isLoading}></lightning-button>
+                <lightning-button label="Cancelar" variant="neutral" onclick={handleCancel}></lightning-button>
                 <div class="slds-grid">
-                    <template if:false={isStep1}>
-                        <lightning-button label="Anterior" icon-name="utility:left" onclick={handleBack} class="slds-m-right_small" disabled={isLoading}></lightning-button>
-                    </template>
-                    <template if:false={isStep4}>
-                        <lightning-button label="Siguiente" variant="brand" icon-name="utility:forward" icon-position="right" onclick={handleNext} disabled={isLoading}></lightning-button>
-                    </template>
+                    <template if:false={isStep1}><lightning-button label="Anterior" onclick={handleBack} class="slds-m-right_small"></lightning-button></template>
+                    <template if:false={isStep4}><lightning-button label="Siguiente" variant="brand" onclick={handleNext}></lightning-button></template>
                 </div>
             </div>
         </div>
 
-        <!-- MODALES (MANTENIDOS) -->
-        <template if:true={showModal}>
-            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <!-- MODAL SEPARADOR -->
+        <template if:true={showSeparatorModal}>
+            <section class="slds-modal slds-fade-in-open slds-modal_x-small">
                 <div class="slds-modal__container">
-                    <header class="slds-modal__header"><h2>Añadir Línea</h2></header>
+                    <header class="slds-modal__header"><h2>Añadir Separador</h2></header>
                     <div class="slds-modal__content slds-p-around_medium">
-                        <p>Buscador de productos en desarrollo...</p>
+                        <lightning-input label="Texto del Separador" value={separatorText} onchange={handleSeparatorTextChange}></lightning-input>
                     </div>
                     <footer class="slds-modal__footer">
-                        <lightning-button label="Cerrar" onclick={handleCloseModal}></lightning-button>
+                        <lightning-button label="Cancelar" onclick={handleCloseSeparatorModal} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Añadir" variant="brand" onclick={handleAddSeparator}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- MODAL SERVICIO PRO (RESTAURACIÓN TOTAL) -->
+        <template if:true={showModal}>
+            <section role="dialog" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header"><h2>Nueva línea del presupuesto</h2></header>
+                    <div class="slds-modal__content slds-p-around_medium bg-light-gray">
+                        <!-- FILTRO DINÁMICO POR LÍNEA -->
+                        <div class="custom-checkbox-card slds-m-bottom_medium bg-white slds-p-around_small border-all radius-8">
+                            <lightning-input type="checkbox" label="Permitir productos de otras lineas de negocio" checked={allowOtherLines} onchange={handleAllowOtherLinesChange}></lightning-input>
+                        </div>
+
+                        <div class="section-card slds-p-around_medium slds-m-bottom_medium">
+                            <p class="slds-text-title_bold slds-m-bottom_x-small">1. Buscar artículo o servicio</p>
+                            <lightning-input type="search" variant="label-hidden" placeholder="Escriba aquí para buscar..." onchange={handleProductSearch} value={selectedProductName}></lightning-input>
+                            <template if:true={searchResults.length}>
+                                <div class="product-search-results">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <template for:each={searchResults} for:item="res">
+                                            <li key={res.id} class="slds-listbox__item" onclick={handleProductSelect} data-id={res.id}>
+                                                <div class="slds-media slds-listbox__option_entity">
+                                                    <span><strong>{res.name}</strong> - {res.description}</span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- OPCIONES DE PRECIO -->
+                            <template if:true={productPriceOptions.length}>
+                                <div class="slds-m-top_medium">
+                                    <p class="slds-text-title_bold slds-m-bottom_x-small">Listas de Precio Disponibles:</p>
+                                    <div class="slds-grid slds-wrap">
+                                        <template for:each={productPriceOptions} for:item="opt">
+                                            <div key={opt.pbeId} class="slds-col slds-size_1-of-3 slds-p-around_xx-small">
+                                                <div class="price-option-card" onclick={handlePriceOptionSelect} data-id={opt.pbeId}>
+                                                    <span>{opt.pricebookName}</span>
+                                                    <strong><lightning-formatted-number value={opt.unitPrice} format-style="currency"></lightning-formatted-number></strong>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="section-card slds-p-around_medium slds-m-bottom_medium">
+                            <div class="slds-grid slds-grid_align-spread">
+                                <span class="slds-text-title_bold">¿Introducir precio unitario o el precio total?</span>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-input type="checkbox" label="UNITARIO" checked={isUnitario} onchange={handlePriceType} class="slds-m-right_large"></lightning-input>
+                                    <lightning-input type="checkbox" label="TOTAL" checked={isTotal} onchange={handlePriceType} class="slds-m-right_large"></lightning-input>
+                                    <lightning-button label="Aplicar Descuento" icon-name="utility:discount" variant="brand-outline" size="small" onclick={handleToggleDiscountColumn}></lightning-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABLA DE DESGLOSE POR SEDE -->
+                        <div class="section-card slds-m-bottom_medium">
+                            <table class="slds-table slds-table_bordered slds-no-row-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 3rem;">Inc.</th>
+                                        <th>Sede</th>
+                                        <th style="width: 100px;">Cant.</th>
+                                        <th style="width: 150px;">Importe</th>
+                                        <template if:true={showDiscountColumn}>
+                                            <th style="width: 120px;">Desc. ($)</th>
+                                        </template>
+                                        <th style="width: 100px;">IVA (%)</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={modalTableData} for:item="row">
+                                        <tr key={row.id}>
+                                            <td><lightning-input type="checkbox" checked={row.isSelected} data-id={row.id} onchange={handleSedeRowToggle} variant="label-hidden"></lightning-input></td>
+                                            <td><strong>{row.sede}</strong></td>
+                                            <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            <td><lightning-input type="number" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            <template if:true={showDiscountColumn}>
+                                                <td><lightning-input type="number" value={row.descuento} data-id={row.id} data-field="descuento" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            </template>
+                                            <td><lightning-input type="number" value={row.impuestos} data-id={row.id} data-field="impuestos" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            <td><strong><lightning-formatted-number value={row.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- DESCRIPCIÓN TÉCNICA E INDICACIONES -->
+                        <div class="section-card slds-p-around_medium">
+                            <div class="slds-grid slds-grid_vertical-align-start slds-gutters">
+                                <div class="slds-col slds-size_2-of-3">
+                                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                                        <p class="slds-text-title_bold">Descripción técnica (Visible en PDF):</p>
+                                        <lightning-button-menu label="Plantilla Técnica" variant="bare" onselect={handleApplyTemplate} data-field="modalDescription">
+                                            <template for:each={serviceTemplates} for:item="tpl"><lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item></template>
+                                        </lightning-button-menu>
+                                    </div>
+                                    <lightning-input-rich-text value={modalDescription} onchange={handleModalDescriptionChange} variant="bottom-toolbar"></lightning-input-rich-text>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3">
+                                    <p class="slds-text-title_bold slds-m-bottom_small">Zonas / Áreas Afectadas:</p>
+                                    <lightning-textarea label="Zonas" variant="label-hidden" value={modalAreas} onchange={handleModalAreasChange} placeholder="Ej: Planta Alta, Cocina, Comedor..."></lightning-textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer bg-white">
+                        <lightning-button label="Cancelar" onclick={handleCloseModal} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Añadir al presupuesto" variant="brand" onclick={handleSaveServiceLine}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- MODAL P&L -->
+        <template if:true={showPLModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">Análisis de Rentabilidad (P&L)</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="slds-box slds-theme_shade">
+                                    <p class="slds-text-title_bold">Margen Bruto Gral.</p>
+                                    <h3 class="slds-text-heading_large">25%</h3>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="slds-box slds-theme_shade">
+                                    <p class="slds-text-title_bold">Costo Total Est.</p>
+                                    <h3 class="slds-text-heading_large">$0.00</h3>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="slds-box slds-theme_shade">
+                                    <p class="slds-text-title_bold">Utilidad Bruta</p>
+                                    <h3 class="slds-text-heading_large">$0.00</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cerrar" onclick={handleClosePLModal}></lightning-button>
                     </footer>
                 </div>
             </section>

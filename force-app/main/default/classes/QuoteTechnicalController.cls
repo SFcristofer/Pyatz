@@ -102,15 +102,20 @@ public with sharing class QuoteTechnicalController {
             else if (sType == 'Opportunity') pbId = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :quoteId].Pricebook2Id;
         }
         if (pbId == null) {
-            try { pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1].Id; } catch(Exception e) {}
+            try { pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id; } catch(Exception e) {}
         }
         String query = '%' + searchTerm + '%';
+        // MEJORA: Incluir Product2.Description y filtrar por líneas de negocio reales (Family)
         String soql = 'SELECT Id, Product2Id, Product2.Name, Product2.Description, UnitPrice FROM PricebookEntry WHERE Pricebook2Id = :pbId AND (Product2.Name LIKE :query OR Product2.ProductCode LIKE :query) AND IsActive = true ';
         if (!allowOtherLines && businessLines != null && !businessLines.isEmpty()) soql += 'AND Product2.Family IN :businessLines ';
         soql += 'LIMIT 15';
         for (PricebookEntry pbe : Database.query(soql)) {
             results.add(new Map<String, Object>{
-                'id' => pbe.Id, 'productId' => pbe.Product2Id, 'name' => pbe.Product2.Name, 'description' => pbe.Product2.Description, 'unitPrice' => pbe.UnitPrice
+                'id' => pbe.Id, 
+                'productId' => pbe.Product2Id, 
+                'name' => pbe.Product2.Name, 
+                'description' => pbe.Product2.Description != null ? pbe.Product2.Description : '', 
+                'unitPrice' => pbe.UnitPrice
             });
         }
         return results;
@@ -119,8 +124,13 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getProductPrices(Id product2Id) {
         List<Map<String, Object>> results = new List<Map<String, Object>>();
+        // MEJORA: Traer todas las listas ACTIVAS donde el producto esté presente
         for (PricebookEntry pbe : [SELECT Id, Pricebook2.Name, UnitPrice FROM PricebookEntry WHERE Product2Id = :product2Id AND IsActive = true AND Pricebook2.IsActive = true ORDER BY Pricebook2.Name ASC]) {
-            results.add(new Map<String, Object>{'pbeId' => pbe.Id, 'pricebookName' => pbe.Pricebook2.Name, 'unitPrice' => pbe.UnitPrice});
+            results.add(new Map<String, Object>{
+                'pbeId' => pbe.Id, 
+                'pricebookName' => pbe.Pricebook2.Name, 
+                'unitPrice' => pbe.UnitPrice
+            });
         }
         return results;
     }
@@ -146,26 +156,18 @@ public with sharing class QuoteTechnicalController {
 
     @AuraEnabled
     public static String renderTemplate(Id templateId, Id quoteId) {
-        if (templateId == null || quoteId == null) {
-            return 'Error: No se puede cargar la plantilla sin un registro guardado.';
-        }
+        if (templateId == null || quoteId == null) { return 'Error: No se puede cargar la plantilla sin un registro guardado.'; }
         try {
-            // 1. Obtener datos críticos del presupuesto
             List<Quote> quotes = [SELECT ContactId, AccountId, Account.Name, Technical_Sedes__c FROM Quote WHERE Id = :quoteId LIMIT 1];
             if (quotes.isEmpty()) return 'Error: Presupuesto no encontrado.';
             Quote q = quotes[0];
-
             Id conId = q.ContactId;
             if (conId == null) {
                 List<Contact> cs = [SELECT Id FROM Contact WHERE AccountId = :q.AccountId LIMIT 1];
                 if (!cs.isEmpty()) conId = cs[0].Id;
             }
-
-            // 2. Renderizar la plantilla
             String finalBody = '';
             try {
-                // Si no hay contacto, no podemos usar el motor estándar de SF para renderizar campos {!...}
-                // pero intentaremos obtener el cuerpo base de la plantilla
                 if (conId != null) {
                     Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, conId, quoteId);
                     finalBody = rendered.getHtmlBody();
@@ -174,44 +176,29 @@ public with sharing class QuoteTechnicalController {
                     finalBody = [SELECT HtmlValue, Body FROM EmailTemplate WHERE Id = :templateId LIMIT 1].HtmlValue;
                     if (finalBody == null) finalBody = [SELECT Body FROM EmailTemplate WHERE Id = :templateId LIMIT 1].Body;
                 }
-            } catch (Exception e) {
-                // Fallback: Si falla el renderizado, traer el texto plano de la plantilla
-                finalBody = [SELECT HtmlValue FROM EmailTemplate WHERE Id = :templateId LIMIT 1].HtmlValue;
-            }
-            
-            // Limpieza de etiquetas body
+            } catch (Exception e) { finalBody = [SELECT HtmlValue FROM EmailTemplate WHERE Id = :templateId LIMIT 1].HtmlValue; }
             if (finalBody != null && finalBody.contains('<body')) {
                 finalBody = finalBody.substringAfter('>');
                 if (finalBody.contains('</body>')) finalBody = finalBody.substringBeforeLast('</body>');
             }
-            
             if (finalBody == null) return '';
             finalBody = finalBody.trim();
-
-            // 3. REEMPLAZO MANUAL DE ETIQUETAS (Capa de seguridad extra)
             if (String.isNotBlank(finalBody)) {
                 String accName = q.Account.Name != null ? q.Account.Name : 'Cliente';
                 finalBody = finalBody.replace('[[CUENTA]]', accName).replace('[[CLIENTE]]', accName);
-                
                 String sedes = String.isNotBlank(q.Technical_Sedes__c) ? q.Technical_Sedes__c : accName;
                 finalBody = finalBody.replace('[[SEDES]]', sedes).replace('[[SEDE]]', sedes);
-
                 if (conId != null) {
                     List<Contact> con = [SELECT Name FROM Contact WHERE Id = :conId LIMIT 1];
                     if (!con.isEmpty()) finalBody = finalBody.replace('[[CONTACTO]]', con[0].Name);
-                } else {
-                    finalBody = finalBody.replace('[[CONTACTO]]', 'cliente');
-                }
+                } else { finalBody = finalBody.replace('[[CONTACTO]]', 'cliente'); }
             }
-
             return finalBody;
         } catch (Exception e) { throw new AuraHandledException('Error al procesar plantilla: ' + e.getMessage()); }
     }
 
     @AuraEnabled
-    public static Boolean validatePLPassword(String passwordAttempt) {
-        return passwordAttempt == System.Label.PL_Access_Password;
-    }
+    public static Boolean validatePLPassword(String passwordAttempt) { return passwordAttempt == System.Label.PL_Access_Password; }
 
     @AuraEnabled
     public static Id saveTechnicalData(Map<String, Object> data) {
@@ -223,7 +210,6 @@ public with sharing class QuoteTechnicalController {
             Id cid = (Id)p.get('contactId');
             String status = (String)p.get('status');
             String itemsJson = (String)p.get('lineItems');
-            
             Quote q;
             if (rid != null && rid.getSObjectType().getDescribe().getName() == 'Quote') {
                 q = [SELECT Id, OpportunityId, ExpirationDate FROM Quote WHERE Id = :rid LIMIT 1];
@@ -251,7 +237,6 @@ public with sharing class QuoteTechnicalController {
                     Opportunity o = new Opportunity(Name = 'Op. Técnica - ' + (String)p.get('name'), AccountId = aid, StageName = 'Prospecting', CloseDate = Date.today().addDays(30), Pricebook2Id = pbId);
                     insert o; oppId = o.Id;
                 }
-                
                 q = new Quote();
                 q.Name = (String)p.get('name');
                 q.Status = status;
@@ -269,41 +254,26 @@ public with sharing class QuoteTechnicalController {
                 if (cid != null && String.valueOf(cid).startsWith('003')) q.ContactId = cid;
                 insert q; rid = q.Id;
             }
-
             if (String.isNotBlank(itemsJson)) {
                 List<Object> items = (List<Object>)JSON.deserializeUntyped(itemsJson);
                 delete [SELECT Id FROM QuoteLineItem WHERE QuoteId = :rid];
-                
                 List<QuoteLineItem> qlis = new List<QuoteLineItem>();
                 Id firstPbId = null;
-                
                 for (Object obj : items) {
                     Map<String, Object> it = (Map<String, Object>)obj;
                     if (it.get('isSeparator') == true) continue;
-                    Object pIdObj = it.get('productId');
+                    Object pIdObj = it.get('id'); // Nota: Usamos 'id' que es el pbeId
                     if (pIdObj == null || String.valueOf(pIdObj) == '' || String.valueOf(pIdObj) == 'null') continue;
-                    
                     Id pbeId = (Id)pIdObj;
-                    // Detectar lista de precios del primer item
-                    if (firstPbId == null) {
-                        firstPbId = [SELECT Pricebook2Id FROM PricebookEntry WHERE Id = :pbeId LIMIT 1].Pricebook2Id;
-                    }
-
+                    if (firstPbId == null) { firstPbId = [SELECT Pricebook2Id FROM PricebookEntry WHERE Id = :pbeId LIMIT 1].Pricebook2Id; }
                     String sCan = String.valueOf(it.get('cantidad'));
-                    String sUp = String.valueOf(it.get('importeUnitario'));
-                    String sDesc = String.valueOf(it.get('descuento'));
+                    String sUp = String.valueOf(it.get('totalSinImpuestos')); // Para el PDF usamos el unitario recalculado
                     Decimal canVal = (String.isNotBlank(sCan) && sCan != 'null') ? Decimal.valueOf(sCan) : 0;
                     Decimal upVal = (String.isNotBlank(sUp) && sUp != 'null') ? Decimal.valueOf(sUp) : 0;
-                    Decimal descuentoVal = (String.isNotBlank(sDesc) && sDesc != 'null') ? Decimal.valueOf(sDesc) : 0;
-                    
-                    qlis.add(new QuoteLineItem(QuoteId = rid, PricebookEntryId = pbeId, Quantity = canVal, UnitPrice = upVal, Description = (String)it.get('detalleTecnico'), Discount = descuentoVal));
+                    if (canVal > 0) upVal = upVal / canVal; // Recalcular unitario real
+                    qlis.add(new QuoteLineItem(QuoteId = rid, PricebookEntryId = pbeId, Quantity = canVal, UnitPrice = upVal, Description = (String)it.get('detalleTecnico'), Discount = 0));
                 }
-                
-                // Sincronizar lista de precios de la Quote con los items
-                if (firstPbId != null) {
-                    update new Quote(Id = rid, Pricebook2Id = firstPbId);
-                }
-                
+                if (firstPbId != null) { update new Quote(Id = rid, Pricebook2Id = firstPbId); }
                 if (!qlis.isEmpty()) insert qlis;
             }
             return rid;
@@ -323,11 +293,7 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled(cacheable=true)
     public static List<Account> getFilteredSedes(String searchTerm, Id parentAccountId, Boolean isGlobal) {
         String key = '%' + searchTerm + '%';
-        if (isGlobal) {
-            // Búsqueda global: Cualquier cuenta que coincida con el nombre
-            return [SELECT Id, Name, BillingStreet, BillingCity, Phone, Parent.Name FROM Account WHERE Name LIKE :key LIMIT 100];
-        }
-        // Búsqueda prioritaria: Solo cuentas relacionadas al cliente actual
+        if (isGlobal) { return [SELECT Id, Name, BillingStreet, BillingCity, Phone, Parent.Name FROM Account WHERE Name LIKE :key LIMIT 100]; }
         if (parentAccountId == null) return new List<Account>();
         return [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE ParentId = :parentAccountId AND (Name LIKE :key OR BillingCity LIKE :key) LIMIT 200];
     }
@@ -353,7 +319,7 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled
-    public static Id cloneQuote(Id quoteId, Map<String, Boolean> options, Id targetSedeId, Id targetProspectoId) {
+    public static Id cloneQuote(Id quoteId) {
         try {
             Quote orig = [SELECT Id, Name, AccountId, OpportunityId, Pricebook2Id, Introduction_Text__c, Warranty_Text__c, Business_Lines_Selected__c, Technical_Sedes__c, Show_Introduction__c, Show_Warranty__c, Description, (SELECT Id, PricebookEntryId, Quantity, UnitPrice, Discount, Description FROM QuoteLineItems) FROM Quote WHERE Id = :quoteId];
             Quote cl = orig.clone(false, true, false, false);

@@ -1,24 +1,24 @@
 /* UI ARQUITECTURA SLATE - PYATZ INDUSTRIAL */
 :host {
-    --slate-900: #0f172a;
-    --slate-700: #334155;
-    --slate-200: #e2e8f0;
-    --pyatz-blue: #0070d2;
-    --bg-light: #f8fafc;
+    --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-600: #475569; --slate-700: #334155; --slate-900: #0f172a;
+    --indigo-600: #4f46e5; --indigo-700: #4338ca; --brand-pyatz: #1e293b; --green-soft: #dcfce7; --orange-soft: #ffedd5; --red-soft: #fee2e2;
 }
 
-/* CONTENEDORES - CARDS SOBRIAS */
+.main-container { background: white; border: 1px solid var(--slate-200); border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+
+/* CARDS PROFESIONALES */
 .section-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .section-header {
     background: var(--slate-900);
-    padding: 0.6rem 1rem;
+    padding: 0.75rem 1.25rem;
     display: flex;
     align-items: center;
 }
@@ -26,117 +26,63 @@
 .section-header h2 {
     color: #ffffff !important;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-/* PASO 1 - DATOS TÉCNICOS (LIMPIEZA) */
-.bg-blue-soft { background-color: #f1f5f9; }
-.bg-light-gray { background-color: #ffffff; }
-.radius-8 { border-radius: 4px; }
-.border-all { border: 1px solid var(--slate-200); }
-
-/* TABLA DE SERVICIOS (PASO 3) */
-.custom-drag-table {
+/* BUSCADOR DE PRODUCTOS ESTILO GOOGLE */
+.product-search-results {
+    position: absolute;
+    z-index: 10000;
     width: 100%;
-    border-collapse: collapse;
-}
-.custom-drag-table th {
-    background: var(--bg-light);
-    color: var(--slate-700);
-    font-size: 0.75rem;
-    padding: 10px;
-    text-align: center;
-    border-bottom: 2px solid var(--slate-200);
-}
-.custom-drag-table td {
-    padding: 8px;
-    border-bottom: 1px solid var(--slate-200);
-    vertical-align: middle;
-}
-
-/* VISOR DE PDF PROFESIONAL */
-.pdf-preview-container {
-    background: #e2e8f0;
-    padding: 3rem 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.pdf-page {
     background: white;
-    width: 100%;
-    max-width: 750px; /* Formato más pequeño y centrado */
-    min-height: 1000px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    margin-bottom: 2rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 2px;
 }
 
-.pdf-content-wrapper {
-    padding: 2rem;
+.product-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--slate-100);
+    transition: background 0.2s;
 }
 
-/* BOTONES INTEGRADOS */
-.btn-verde { background-color: #15803d !important; color: white !important; }
-.btn-azul-pastel { background-color: #eff6ff !important; color: #1d4ed8 !important; border: 1px solid #dbeafe !important; }
+.product-result-item:hover { background: var(--slate-50); }
+.product-name { font-weight: 700; color: var(--slate-900); display: block; }
+.product-desc { font-size: 0.75rem; color: var(--slate-600); display: block; margin-top: 2px; }
 
-/* ==========================================================
-   TABLAS DE LEVANTAMIENTO (ESTILO EXCEL DE ALTA PRECISIÓN)
-   ========================================================== */
-.survey-table {
-    border-collapse: collapse !important;
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
-    width: 100% !important;
+/* LISTAS DE PRECIO CARDS */
+.price-option-card {
+    padding: 1rem;
+    border: 2px solid var(--slate-200);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    background: white;
 }
-.survey-table th {
-    background-color: #f1f5f9 !important;
-    color: #475569 !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    border: 1px solid #cbd5e1 !important;
-    padding: 6px !important;
-    text-align: center !important;
-}
-.survey-table td {
-    border: 1px solid #cbd5e1 !important;
-    padding: 0 !important;
-    height: 30px !important;
-    vertical-align: middle !important;
-    text-align: center !important;
-}
-.cell-input {
-    width: 100% !important;
-    height: 30px !important;
-    border: none !important;
-    background: transparent !important;
-    text-align: center !important;
-    font-size: 12px !important;
-    color: #1e293b !important;
-    display: block !important;
-}
-.cell-input:focus {
-    background-color: #ffffff !important;
-    outline: 2px solid #0070d2 !important;
-    outline-offset: -2px !important;
-}
-.cell-select {
-    width: 100% !important;
-    height: 30px !important;
-    border: none !important;
-    background: transparent !important;
-    text-align: center !important;
-    text-align-last: center !important;
-    font-size: 11px !important;
-    cursor: pointer !important;
-}
-.table-scroll-container {
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    overflow: auto;
-    width: 100%;
-}
+
+.price-option-card:hover { border-color: var(--indigo-600); background: var(--slate-50); }
+.price-option-card.selected { border-color: var(--indigo-600); background: #eef2ff; }
+.price-option-card strong { display: block; font-size: 1.1rem; color: var(--indigo-700); margin-top: 4px; }
+
+/* TABLA DE SEDES EN MODAL */
+.custom-table { width: 100%; border-collapse: collapse; }
+.custom-table th { background: var(--slate-50); color: var(--slate-700); font-size: 0.75rem; padding: 12px; border-bottom: 2px solid var(--slate-200); }
+.custom-table td { padding: 10px; border-bottom: 1px solid var(--slate-100); vertical-align: middle; }
+
+/* PILLS / BURBUJAS */
+.pills-container { padding: 0.5rem; display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* FOOTER NAVEGACION */
+.sticky-footer { position: sticky; bottom: 0; z-index: 100; border-radius: 0 0 8px 8px; }
+
+.bg-blue-soft { background-color: #f0f7ff; }
+.bg-light-gray { background-color: #f8fafc; }
+.border-all { border: 1px solid var(--slate-200); }
+.radius-8 { border-radius: 8px; }
