@@ -146,21 +146,66 @@ public with sharing class QuoteTechnicalController {
 
     @AuraEnabled
     public static String renderTemplate(Id templateId, Id quoteId) {
+        if (templateId == null || quoteId == null) {
+            return 'Error: No se puede cargar la plantilla sin un registro guardado.';
+        }
         try {
-            Quote q = [SELECT ContactId, AccountId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            // 1. Obtener datos críticos del presupuesto
+            List<Quote> quotes = [SELECT ContactId, AccountId, Account.Name, Technical_Sedes__c FROM Quote WHERE Id = :quoteId LIMIT 1];
+            if (quotes.isEmpty()) return 'Error: Presupuesto no encontrado.';
+            Quote q = quotes[0];
+
             Id conId = q.ContactId;
             if (conId == null) {
                 List<Contact> cs = [SELECT Id FROM Contact WHERE AccountId = :q.AccountId LIMIT 1];
                 if (!cs.isEmpty()) conId = cs[0].Id;
             }
-            Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, conId, quoteId);
-            String body = rendered.getHtmlBody();
-            if (body != null && body.contains('<body')) {
-                body = body.substringAfter('>');
-                if (body.contains('</body>')) body = body.substringBeforeLast('</body>');
+
+            // 2. Renderizar la plantilla
+            String finalBody = '';
+            try {
+                // Si no hay contacto, no podemos usar el motor estándar de SF para renderizar campos {!...}
+                // pero intentaremos obtener el cuerpo base de la plantilla
+                if (conId != null) {
+                    Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, conId, quoteId);
+                    finalBody = rendered.getHtmlBody();
+                    if (finalBody == null) finalBody = rendered.getPlainTextBody();
+                } else {
+                    finalBody = [SELECT HtmlValue, Body FROM EmailTemplate WHERE Id = :templateId LIMIT 1].HtmlValue;
+                    if (finalBody == null) finalBody = [SELECT Body FROM EmailTemplate WHERE Id = :templateId LIMIT 1].Body;
+                }
+            } catch (Exception e) {
+                // Fallback: Si falla el renderizado, traer el texto plano de la plantilla
+                finalBody = [SELECT HtmlValue FROM EmailTemplate WHERE Id = :templateId LIMIT 1].HtmlValue;
             }
-            return body != null ? body.trim() : rendered.getPlainTextBody();
-        } catch (Exception e) { throw new AuraHandledException('Error render: ' + e.getMessage()); }
+            
+            // Limpieza de etiquetas body
+            if (finalBody != null && finalBody.contains('<body')) {
+                finalBody = finalBody.substringAfter('>');
+                if (finalBody.contains('</body>')) finalBody = finalBody.substringBeforeLast('</body>');
+            }
+            
+            if (finalBody == null) return '';
+            finalBody = finalBody.trim();
+
+            // 3. REEMPLAZO MANUAL DE ETIQUETAS (Capa de seguridad extra)
+            if (String.isNotBlank(finalBody)) {
+                String accName = q.Account.Name != null ? q.Account.Name : 'Cliente';
+                finalBody = finalBody.replace('[[CUENTA]]', accName).replace('[[CLIENTE]]', accName);
+                
+                String sedes = String.isNotBlank(q.Technical_Sedes__c) ? q.Technical_Sedes__c : accName;
+                finalBody = finalBody.replace('[[SEDES]]', sedes).replace('[[SEDE]]', sedes);
+
+                if (conId != null) {
+                    List<Contact> con = [SELECT Name FROM Contact WHERE Id = :conId LIMIT 1];
+                    if (!con.isEmpty()) finalBody = finalBody.replace('[[CONTACTO]]', con[0].Name);
+                } else {
+                    finalBody = finalBody.replace('[[CONTACTO]]', 'cliente');
+                }
+            }
+
+            return finalBody;
+        } catch (Exception e) { throw new AuraHandledException('Error al procesar plantilla: ' + e.getMessage()); }
     }
 
     @AuraEnabled

@@ -138,8 +138,44 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     get isStep4() { return this.currentStep === '4'; }
 
     handleNext() { 
+        // VALIDACIÓN: No permitir avanzar si no hay estrategia elegida en el paso 1
+        if (this.currentStep === '1' && !this.estrategiaVenta) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Atención',
+                message: 'Por favor, seleccione una Estrategia de Venta antes de continuar.',
+                variant: 'warning'
+            }));
+            return;
+        }
+
         if (this.currentStep !== '4') {
-            this.currentStep = (parseInt(this.currentStep) + 1).toString(); 
+            this.isLoading = true;
+            // AUTO-GUARDADO: Esperar a que el guardado sea exitoso para tener el ID real
+            const markers = {
+                serviciosData: this.serviciosData,
+                selectedSedesIds: this.selectedSedesIds,
+                estrategiaVenta: this.estrategiaVenta,
+                necesidadId: this.necesidadId,
+                necesidadNombre: this.necesidadNombre
+            };
+            const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+            
+            const data = {
+                quoteId: this.recordId, name: this.asunto, status: 'Borrador',
+                intro: this.introduccion, warranty: this.warranty, markersData: encoded
+            };
+
+            saveTechnicalData({ data: data })
+                .then(newId => {
+                    if (newId) this.recordId = newId;
+                    this.loadInitialData(); // Refrescar para tener QuoteNumber
+                    this.currentStep = (parseInt(this.currentStep) + 1).toString();
+                    this.isLoading = false;
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo guardar el avance', variant: 'error' }));
+                });
         }
     }
     handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
@@ -200,6 +236,11 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleSaveDraft() { this.handleSave('Borrador'); }
     handleFinalize() { this.handleSave('Approved'); }
 
+    get maxRowSelection() {
+        // REGLA DE NEGOCIO: Solo Cedis (E5) permite selección múltiple de sedes
+        return this.estrategiaVenta === 'E5' ? 200 : 1;
+    }
+
     handleSave(status) {
         this.isLoading = true;
         const markers = {
@@ -217,9 +258,14 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         };
 
         saveTechnicalData({ data: data })
-            .then(() => {
+            .then(newId => {
                 this.isLoading = false;
-                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Presupuesto guardado', variant: 'success' }));
+                if (newId) {
+                    this.recordId = newId; 
+                    // REFRESCAR: Volver a consultar Salesforce para traer el QuoteNumber real
+                    this.loadInitialData();
+                }
+                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Avance guardado correctamente', variant: 'success' }));
             })
             .catch(error => { console.error(error); this.isLoading = false; });
     }
