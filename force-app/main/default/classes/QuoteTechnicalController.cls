@@ -323,8 +323,13 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled(cacheable=true)
     public static List<Account> getFilteredSedes(String searchTerm, Id parentAccountId, Boolean isGlobal) {
         String key = '%' + searchTerm + '%';
-        if (isGlobal) return [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE Name LIKE :key LIMIT 200];
-        return [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE ParentId = :parentAccountId AND Name LIKE :key LIMIT 200];
+        if (isGlobal) {
+            // Búsqueda global: Cualquier cuenta que coincida con el nombre
+            return [SELECT Id, Name, BillingStreet, BillingCity, Phone, Parent.Name FROM Account WHERE Name LIKE :key LIMIT 100];
+        }
+        // Búsqueda prioritaria: Solo cuentas relacionadas al cliente actual
+        if (parentAccountId == null) return new List<Account>();
+        return [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE ParentId = :parentAccountId AND (Name LIKE :key OR BillingCity LIKE :key) LIMIT 200];
     }
 
     @AuraEnabled(cacheable=true)

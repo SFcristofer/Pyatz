@@ -42,9 +42,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track necesidadSeleccionada = '';
     @track necesidadesResults = [];
 
-    // --- SEDES ---
+    // --- SEDES (ALTO RENDIMIENTO) ---
     @track sedesData = [];
     @track selectedSedesIds = [];
+    @track selectedSedesObjects = []; // "Carrito" de sedes (Objetos con Nombre)
     @track sedeSearchTerm = '';
     @track isGlobalSedeSearch = false;
     @track parentSearchTerm = '';
@@ -78,6 +79,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     sedesColumns = [
         { label: 'Sede', fieldName: 'Name', type: 'text' },
+        { label: 'Cuenta Padre', fieldName: 'ParentName', type: 'text' },
         { label: 'Dirección', fieldName: 'BillingStreet', type: 'text' },
         { label: 'Ciudad', fieldName: 'BillingCity', type: 'text' }
     ];
@@ -100,13 +102,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.introduccion = q.Introduction_Text__c;
                     this.warranty = q.Warranty_Text__c;
                     this.accountId = q.AccountId;
-                    if (q.Account) this.clienteNombre = q.Account.Name;
+                    if (q.Account) {
+                        this.clienteNombre = q.Account.Name;
+                        this.selectedParentId = q.AccountId;
+                        this.selectedParentName = q.Account.Name;
+                    }
 
                     if (q.Markers_Data__c) {
                         try {
                             const decoded = JSON.parse(decodeURIComponent(escape(window.atob(q.Markers_Data__c))));
                             if (decoded.serviciosData) this.serviciosData = decoded.serviciosData;
                             if (decoded.selectedSedesIds) this.selectedSedesIds = decoded.selectedSedesIds;
+                            if (decoded.selectedSedesObjects) this.selectedSedesObjects = decoded.selectedSedesObjects;
                             if (decoded.estrategiaVenta) this.estrategiaVenta = decoded.estrategiaVenta;
                             if (decoded.necesidadId) {
                                 this.necesidadId = decoded.necesidadId;
@@ -115,7 +122,15 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                             }
                         } catch (e) { console.error('Error parse markers:', e); }
                     }
+                } else if (result.opportunity) {
+                    this.accountId = result.opportunity.AccountId;
+                    this.selectedParentId = result.opportunity.AccountId;
+                    this.selectedParentName = result.opportunity.Account.Name;
                 }
+                
+                // CARGA PROACTIVA: Traer sedes del cliente en cuanto se tiene el AccountId
+                if (this.selectedParentId) this.fetchSedes();
+                
                 this.isLoading = false;
             })
             .catch(error => { console.error(error); this.isLoading = false; });
@@ -138,22 +153,17 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     get isStep4() { return this.currentStep === '4'; }
 
     handleNext() { 
-        // VALIDACIÓN: No permitir avanzar si no hay estrategia elegida en el paso 1
         if (this.currentStep === '1' && !this.estrategiaVenta) {
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Atención',
-                message: 'Por favor, seleccione una Estrategia de Venta antes de continuar.',
-                variant: 'warning'
-            }));
+            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione una Estrategia.', variant: 'warning' }));
             return;
         }
 
         if (this.currentStep !== '4') {
             this.isLoading = true;
-            // AUTO-GUARDADO: Esperar a que el guardado sea exitoso para tener el ID real
             const markers = {
                 serviciosData: this.serviciosData,
                 selectedSedesIds: this.selectedSedesIds,
+                selectedSedesObjects: this.selectedSedesObjects,
                 estrategiaVenta: this.estrategiaVenta,
                 necesidadId: this.necesidadId,
                 necesidadNombre: this.necesidadNombre
@@ -162,20 +172,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             
             const data = {
                 quoteId: this.recordId, name: this.asunto, status: 'Borrador',
-                intro: this.introduccion, warranty: this.warranty, markersData: encoded
+                intro: this.introduccion, warranty: this.warranty, markersData: encoded,
+                technicalSedes: this.technicalSedesString // ACTUALIZACIÓN AUTOMÁTICA DEL CAMPO PARA EL PDF
             };
 
             saveTechnicalData({ data: data })
                 .then(newId => {
                     if (newId) this.recordId = newId;
-                    this.loadInitialData(); // Refrescar para tener QuoteNumber
+                    this.loadInitialData();
                     this.currentStep = (parseInt(this.currentStep) + 1).toString();
                     this.isLoading = false;
                 })
-                .catch(error => {
-                    this.isLoading = false;
-                    this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo guardar el avance', variant: 'error' }));
-                });
+                .catch(() => { this.isLoading = false; });
         }
     }
     handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
@@ -183,107 +191,133 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     // --- LÓGICA ESTRATEGIA Y NECESIDAD ---
     get estrategiaOptions() {
         return [
-            { label: 'E1 - Póliza Anual', value: 'E1' },
-            { label: 'E2 - Extraordinario', value: 'E2' },
-            { label: 'E3 - Cliente Nuevo', value: 'E3' },
-            { label: 'E4 - Retardantes', value: 'E4' },
-            { label: 'E5 - Cedis', value: 'E5' }
+            { label: 'E1 - Póliza Anual', value: 'E1' }, { label: 'E2 - Extraordinario', value: 'E2' },
+            { label: 'E3 - Cliente Nuevo', value: 'E3' }, { label: 'E4 - Retardantes', value: 'E4' }, { label: 'E5 - Cedis', value: 'E5' }
         ];
     }
 
-    handleEstrategiaChange(event) {
-        this.estrategiaVenta = event.target.value;
-        this.autoFillAsunto();
-    }
-
+    handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
     handleNecesidadChange(event) {
-        const term = event.target.value;
-        this.necesidadSeleccionada = term;
-        if (term.length >= 3) {
-            searchNecesidades({ searchTerm: term }).then(res => this.necesidadesResults = res);
-        } else this.necesidadesResults = [];
+        const term = event.target.value; this.necesidadSeleccionada = term;
+        if (term.length >= 3) searchNecesidades({ searchTerm: term }).then(res => this.necesidadesResults = res);
+        else this.necesidadesResults = [];
     }
-
     handleNecesidadSelect(event) {
-        const nid = event.currentTarget.dataset.id;
-        const n = this.necesidadesResults.find(x => x.id === nid);
-        if (n) {
-            this.necesidadId = nid;
-            this.necesidadNombre = n.name;
-            this.necesidadSeleccionada = n.name;
-            this.necesidadesResults = [];
-            this.autoFillAsunto();
-        }
+        const n = this.necesidadesResults.find(x => x.id === event.currentTarget.dataset.id);
+        if (n) { this.necesidadId = n.id; this.necesidadNombre = n.name; this.necesidadSeleccionada = n.name; this.necesidadesResults = []; this.autoFillAsunto(); }
     }
-
     autoFillAsunto() {
         const est = this.estrategiaOptions.find(o => o.value === this.estrategiaVenta)?.label || '';
         this.asunto = `${est} @ ${this.necesidadNombre || 'Servicio Técnico'}`;
     }
 
-    // --- MÉTODOS REQUERIDOS (STUBS PARA FUNCIONALIDAD) ---
+    // --- LÓGICA SEDES (ALTO RENDIMIENTO) ---
+    get sedeScopeLabel() { return this.isGlobalSedeSearch ? 'Búsqueda Global' : 'Solo este Cliente'; }
+    get sedeSearchPlaceholder() { return this.isGlobalSedeSearch ? 'Buscar en todo Salesforce...' : 'Filtrar sedes de este cliente...'; }
+    get technicalSedesString() { return this.selectedSedesObjects.map(s => s.Name).join(', '); }
+
+    handleSedeScopeChange(event) {
+        this.isGlobalSedeSearch = event.target.checked;
+        this.fetchSedes();
+    }
+
+    handleSedeSearch(event) {
+        this.sedeSearchTerm = event.target.value;
+        this.fetchSedes();
+    }
+
+    fetchSedes() {
+        getFilteredSedes({ 
+            searchTerm: this.sedeSearchTerm, 
+            parentAccountId: this.accountId, 
+            isGlobal: this.isGlobalSedeSearch 
+        })
+        .then(res => {
+            this.sedesData = res.map(s => ({ ...s, ParentName: s.Parent ? s.Parent.Name : this.clienteNombre }));
+        })
+        .catch(err => console.error(err));
+    }
+
+    handleSedeSelection(event) {
+        const newSelectedRows = event.detail.selectedRows;
+        
+        // LÓGICA DE MEMORIA (Merge): Combinar lo nuevo con lo que ya estaba "en el carrito"
+        let currentObjects = [...this.selectedSedesObjects];
+        
+        // Añadir nuevos
+        newSelectedRows.forEach(row => {
+            if (!currentObjects.some(obj => obj.Id === row.Id)) currentObjects.push(row);
+        });
+
+        // REGLA DE NEGOCIO: Si no es E5, solo permitimos 1
+        if (this.estrategiaVenta !== 'E5' && currentObjects.length > 1) {
+            currentObjects = [currentObjects[currentObjects.length - 1]];
+        }
+
+        this.selectedSedesObjects = currentObjects;
+        this.selectedSedesIds = currentObjects.map(s => s.Id);
+    }
+
+    handleRemoveSedePill(event) {
+        const idToRemove = event.target.name;
+        this.selectedSedesObjects = this.selectedSedesObjects.filter(s => s.Id !== idToRemove);
+        this.selectedSedesIds = this.selectedSedesObjects.map(s => s.Id);
+    }
+
+    get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
+
+    // --- LÓGICA LÍNEAS DE NEGOCIO ---
+    handleLineChange(event) {
+        const line = event.target.dataset.value;
+        this.lineaNegocioOptions = this.lineaNegocioOptions.map(opt => (opt.value === line ? { ...opt, checked: event.target.checked } : opt));
+        this.selectedLines = this.lineaNegocioOptions.filter(opt => opt.checked).map(opt => opt.value);
+    }
+
+    // --- MÉTODOS REQUERIDOS (STUBS) ---
     handleAsuntoChange(event) { this.asunto = event.target.value; }
     handleIntroChange(event) { this.introduccion = event.target.value; }
     handleApplyTemplate(event) {
         const tid = event.detail.value;
         const field = event.currentTarget.dataset.field;
-        renderTemplate({ templateId: tid, quoteId: this.recordId }).then(res => {
-            if (field === 'introduccion') this.introduccion = res;
-            if (field === 'warranty') this.warranty = res;
-        });
-    }
 
+        if (!this.recordId) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Atención',
+                message: 'Por favor, avance al siguiente paso para asegurar el registro antes de aplicar plantillas.',
+                variant: 'info'
+            }));
+            return;
+        }
+
+        this.isLoading = true;
+        renderTemplate({ templateId: tid, quoteId: this.recordId })
+            .then(res => {
+                if (field === 'introduccion') this.introduccion = res;
+                if (field === 'warranty') this.warranty = res;
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error renderTemplate:', error);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error',
+                    message: 'No se pudo cargar la plantilla. Inténtelo de nuevo.',
+                    variant: 'error'
+                }));
+            });
+    }
     handleSaveDraft() { this.handleSave('Borrador'); }
     handleFinalize() { this.handleSave('Approved'); }
-
-    get maxRowSelection() {
-        // REGLA DE NEGOCIO: Solo Cedis (E5) permite selección múltiple de sedes
-        return this.estrategiaVenta === 'E5' ? 200 : 1;
-    }
-
     handleSave(status) {
         this.isLoading = true;
-        const markers = {
-            serviciosData: this.serviciosData,
-            selectedSedesIds: this.selectedSedesIds,
-            estrategiaVenta: this.estrategiaVenta,
-            necesidadId: this.necesidadId,
-            necesidadNombre: this.necesidadNombre
-        };
+        const markers = { serviciosData: this.serviciosData, selectedSedesIds: this.selectedSedesIds, selectedSedesObjects: this.selectedSedesObjects, estrategiaVenta: this.estrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre };
         const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
-        
-        const data = {
-            quoteId: this.recordId, name: this.asunto, status: status,
-            intro: this.introduccion, warranty: this.warranty, markersData: encoded
-        };
-
-        saveTechnicalData({ data: data })
-            .then(newId => {
-                this.isLoading = false;
-                if (newId) {
-                    this.recordId = newId; 
-                    // REFRESCAR: Volver a consultar Salesforce para traer el QuoteNumber real
-                    this.loadInitialData();
-                }
-                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Avance guardado correctamente', variant: 'success' }));
-            })
-            .catch(error => { console.error(error); this.isLoading = false; });
+        saveTechnicalData({ data: { quoteId: this.recordId, name: this.asunto, status: status, intro: this.introduccion, warranty: this.warranty, markersData: encoded, technicalSedes: this.technicalSedesString } })
+            .then(newId => { this.isLoading = false; if (newId) this.recordId = newId; this.loadInitialData(); })
+            .catch(() => { this.isLoading = false; });
     }
-
     handleCancel() { this.dispatchEvent(new CustomEvent('cancel')); }
-
-    handleCloneQuote() {
-        this.isLoading = true;
-        cloneQuote({ quoteId: this.recordId })
-            .then(newId => {
-                this.isLoading = false;
-                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Cotización clonada', variant: 'success' }));
-                this.dispatchEvent(new CustomEvent('editquote', { detail: newId }));
-            })
-            .catch(error => { console.error(error); this.isLoading = false; });
-    }
-
-    // --- EVENTOS PESTAÑA 3 (STUBS) ---
+    handleCloneQuote() { cloneQuote({ quoteId: this.recordId }).then(newId => { this.dispatchEvent(new CustomEvent('editquote', { detail: newId })); }); }
     handleOpenModal() { this.showModal = true; }
     handleCloseModal() { this.showModal = false; }
     handleOpenPLModal() { this.showPLModal = true; }
