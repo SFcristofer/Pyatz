@@ -56,7 +56,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track lineaNegocioOptions = [];
     @track allowOtherLines = false;
     
-    // --- MODAL BUSCADOR PRO ---
+    // --- MODAL BUSCADOR PRO (LÓGICA V1) ---
     @track searchResults = [];
     @track selectedProductId = '';
     @track selectedProductName = '';
@@ -64,10 +64,13 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track productPriceOptions = [];
     @track modalTableData = []; 
     @track modalDescription = '';
-    @track modalAreas = ''; // NUEVO: Campo de áreas
     @track isUnitario = true;
     @track isTotal = false;
-    @track showDiscountColumn = false; // NUEVO: Control de descuento
+    @track showDiscountColumn = false;
+    @track zonaInput = '';
+    @track zonasAfectadas = [];
+    @track showIndicaciones = false;
+    @track modalSedeSearchTerm = '';
     
     // --- CONFIGURACIÓN PDF ---
     @track showTotal = true;
@@ -88,9 +91,9 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     ];
 
     totalesColumns = [
-        { label: 'Concepto', fieldName: 'concepto', type: 'text' },
-        { label: 'Base', fieldName: 'base', type: 'currency' },
-        { label: 'IVA (16%)', fieldName: 'iva', type: 'currency' },
+        { label: 'Impuestos', fieldName: 'impuestosNom', type: 'text' },
+        { label: 'Base gravable', fieldName: 'base', type: 'currency' },
+        { label: 'Impuesto', fieldName: 'valorImpuesto', type: 'currency' },
         { label: 'Total', fieldName: 'total', type: 'currency', cellAttributes: { class: 'slds-text-title_bold' } }
     ];
 
@@ -214,8 +217,13 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.selectedLines = this.lineaNegocioOptions.filter(opt => opt.checked).map(opt => opt.value);
     }
 
-    // --- LÓGICA PASO 3 (SERVICIOS) ---
+    // --- LÓGICA PASO 3 (MODAL V1) ---
+    get isUnitarioVariant() { return this.isUnitario ? 'brand' : 'neutral'; }
+    get isTotalVariant() { return this.isTotal ? 'brand' : 'neutral'; }
+    get dropdownIcon() { return this.showIndicaciones ? 'utility:chevrondown' : 'utility:chevronright'; }
+
     handleAllowOtherLinesChange(event) { this.allowOtherLines = event.target.checked; }
+    
     handleProductSearch(event) {
         const term = event.target.value;
         this.selectedProductName = term;
@@ -228,16 +236,13 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     handleProductSelect(event) {
         const selectedId = event.currentTarget.dataset.id;
-        // CORRECCIÓN: Buscar por el atributo 'id' que devuelve el Apex (que es el PricebookEntryId)
         const res = this.searchResults.find(x => x.id === selectedId);
-        
         if (res) {
-            this.selectedProductId = res.productId; // Guardamos el Id del Producto para buscar pricebooks
+            this.selectedProductId = res.productId;
             this.selectedProductName = res.name;
             this.selectedProductPrice = res.unitPrice;
-            this.modalDescription = res.description; // Carga automática de descripción
+            this.modalDescription = res.description;
             this.searchResults = [];
-            
             this.loadProductPrices();
             this.initModalTable();
         }
@@ -254,7 +259,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     initModalTable() {
         this.modalTableData = this.selectedSedesObjects.map(s => ({
-            id: s.Id, sede: s.Name, isSelected: true, cantidad: 1, importeTotal: this.selectedProductPrice, descuento: 0, impuestos: 16, totalSinImpuestos: this.selectedProductPrice
+            id: s.Id, sede: s.Name, isSelected: true, cantidad: 1, importeTotal: this.selectedProductPrice, descuento: 0, tipoDescuento: 'monto', totalSinImpuestos: this.selectedProductPrice, impuestos: 16
         }));
     }
 
@@ -264,59 +269,68 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         if (opt) {
             this.selectedProductPrice = opt.unitPrice;
             this.productPriceOptions = this.productPriceOptions.map(o => ({ ...o, className: o.pbeId === pbeId ? 'price-option-card selected' : 'price-option-card' }));
-            this.modalTableData = this.modalTableData.map(row => {
-                const updated = { ...row, importeTotal: opt.unitPrice };
-                updated.totalSinImpuestos = this.isUnitario ? (updated.cantidad * updated.importeTotal) : updated.importeTotal;
-                return updated;
-            });
+            this.recalculateModalData();
         }
     }
 
     handlePriceType(event) {
-        const label = event.target.label;
-        this.isUnitario = label === 'UNITARIO';
+        const type = event.target.value;
+        this.isUnitario = (type === 'UNITARIO');
         this.isTotal = !this.isUnitario;
-        this.modalTableData = this.modalTableData.map(row => {
-            const updated = { ...row };
-            updated.totalSinImpuestos = this.isUnitario ? (updated.cantidad * updated.importeTotal) : updated.importeTotal;
-            return updated;
-        });
+        this.recalculateModalData();
     }
 
     handleToggleDiscountColumn() { this.showDiscountColumn = !this.showDiscountColumn; }
 
     handleSedeRowToggle(event) {
         const id = event.target.dataset.id;
-        this.modalTableData = this.modalTableData.map(row => (row.id === id ? { ...row, isSelected: event.target.checked } : row));
+        this.modalTableData = this.modalTableData.map(row => (row.id === id ? { ...row, isSelected: event.target.checked, isDisabled: !event.target.checked } : row));
     }
 
     handleModalInputChange(event) {
         const id = event.target.dataset.id;
         const field = event.target.dataset.field;
-        const val = parseFloat(event.target.value) || 0;
+        const val = field === 'tipoDescuento' ? event.target.value : (parseFloat(event.target.value) || 0);
         this.modalTableData = this.modalTableData.map(row => {
             if (row.id === id) {
-                const updated = { ...row };
-                updated[field] = val;
-                // Lógica de Descuento
-                let base = this.isUnitario ? (updated.cantidad * updated.importeTotal) : updated.importeTotal;
-                let desc = updated.descuento || 0;
-                updated.totalSinImpuestos = base - desc;
-                return updated;
+                let newRow = { ...row, [field]: val };
+                return newRow;
             }
             return row;
         });
+        this.recalculateModalData();
     }
 
+    recalculateModalData() {
+        this.modalTableData = this.modalTableData.map(row => {
+            let newRow = { ...row, importeTotal: this.selectedProductPrice };
+            let base = this.isUnitario ? (newRow.importeTotal * newRow.cantidad) : newRow.importeTotal;
+            newRow.totalSinImpuestos = base - (newRow.descuento || 0);
+            return newRow;
+        });
+    }
+
+    toggleIndicaciones() { this.showIndicaciones = !this.showIndicaciones; }
+    handleZonaInput(event) {
+        const value = event.target.value;
+        if (value.endsWith(',')) {
+            const newZona = value.slice(0, -1).trim();
+            if (newZona && !this.zonasAfectadas.includes(newZona)) this.zonasAfectadas = [...this.zonasAfectadas, newZona];
+            this.zonaInput = '';
+        } else this.zonaInput = value;
+    }
+    removeZona(event) { this.zonasAfectadas = this.zonasAfectadas.filter(z => z !== event.target.dataset.name); }
+
     handleModalDescriptionChange(event) { this.modalDescription = event.target.value; }
-    handleModalAreasChange(event) { this.modalAreas = event.target.value; }
 
     handleSaveServiceLine() {
         const selectedRows = this.modalTableData.filter(r => r.isSelected);
         if (selectedRows.length === 0) {
-            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'Seleccione al menos una sede.', variant: 'error' }));
+            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione al menos una sede.', variant: 'warning' }));
             return;
         }
+
+        const zonasStr = this.zonasAfectadas.join(', ');
 
         selectedRows.forEach(row => {
             const newItem = {
@@ -325,8 +339,9 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 cantidad: row.cantidad,
                 totalSinImpuestos: row.totalSinImpuestos,
                 sedes: row.sede,
+                areas: zonasStr,
                 detalleTecnico: this.modalDescription,
-                areas: this.modalAreas
+                rowClass: 'row-service'
             };
             this.serviciosData = [...this.serviciosData, newItem];
         });
@@ -337,14 +352,15 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
 
     resetModal() {
-        this.selectedProductId = ''; this.selectedProductName = ''; this.modalTableData = []; this.modalDescription = ''; this.modalAreas = ''; this.productPriceOptions = []; this.showDiscountColumn = false;
+        this.selectedProductId = ''; this.selectedProductName = ''; this.modalTableData = []; 
+        this.modalDescription = ''; this.zonasAfectadas = []; this.productPriceOptions = []; this.showDiscountColumn = false;
     }
 
     calculateTotals() {
         let subtotal = 0;
         this.serviciosData.forEach(item => { if (!item.isSeparator) subtotal += (item.totalSinImpuestos || 0); });
         const iva = subtotal * 0.16;
-        this.totalesData = [{ id: 'total-1', concepto: 'Servicios Técnicos Industriales', base: subtotal, iva: iva, total: subtotal + iva }];
+        this.totalesData = [{ id: 'total-1', impuestosNom: 'IVA (16%)', base: subtotal, valorImpuesto: iva, total: subtotal + iva }];
     }
 
     handleRowAction(event) {
@@ -374,7 +390,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleCloseSeparatorModal() { this.showSeparatorModal = false; }
     handleSeparatorTextChange(event) { this.separatorText = event.target.value; }
     handleAddSeparator() {
-        const newSep = { id: Date.now().toString(), isSeparator: true, descripcion: this.separatorText || 'SECCIÓN' };
+        const newSep = { id: Date.now().toString(), isSeparator: true, descripcion: this.separatorText || 'SECCIÓN', rowClass: 'row-separator' };
         this.serviciosData = [...this.serviciosData, newSep];
         this.showSeparatorModal = false;
         this.separatorText = '';

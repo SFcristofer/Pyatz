@@ -86,3 +86,6 @@
 .bg-light-gray { background-color: #f8fafc; }
 .border-all { border: 1px solid var(--slate-200); }
 .radius-8 { border-radius: 8px; }
+
+.overflow-visible { overflow: visible !important; }
+.description-card { border-top: 1px solid var(--slate-200); padding-top: 1rem; }
