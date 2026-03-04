@@ -1,0 +1,410 @@
+<template>
+    <div class="main-container">
+        <!-- HEADER DE CONTROL -->
+        <div class="header-section">
+            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
+                <lightning-icon icon-name="standard:survey" size="medium" class="slds-m-right_small"></lightning-icon>
+                <h1 class="header-title">LEVANTAMIENTO TÉCNICO PYATZ</h1>
+            </div>
+            
+            <div class="type-selector">
+                <lightning-combobox 
+                    label="Seleccione el Tipo de Servicio a Levantar" 
+                    value={surveyType} 
+                    options={surveyTypeOptions} 
+                    onchange={handleSurveyTypeChange}
+                    variant="label-stacked">
+                </lightning-combobox>
+            </div>
+        </div>
+
+        <div class="survey-wrapper">
+            <!-- 1. TABLA BIOENZIMÁTICO -->
+            <template if:true={isBio}>
+                <div class="table-scroll-container">
+                    <table class="survey-table" style="width: 2600px;">
+                        <thead>
+                            <tr class="survey-header-group">
+                                <th colspan="4">DATOS BASE</th>
+                                <th colspan="2">EQUIPO</th>
+                                <th colspan="3">TAMAÑO BIDÓN</th>
+                                <th colspan="3">UBICACIÓN</th>
+                                <th colspan="1">REGISTRO</th>
+                                <th colspan="5">PRÁCTICAS OPERATIVAS</th>
+                                <th colspan="8">INSTALACIONES</th>
+                                <th colspan="1"></th>
+                            </tr>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 45px;">#</th>
+                                <th style="width: 110px;">NIVEL</th>
+                                <th style="width: 180px;">ÁREA</th>
+                                <th style="width: 160px;">ZONA</th>
+                                <th style="width: 80px;"># VE</th>
+                                <th style="width: 80px;"># VP</th>
+                                <th style="width: 80px;">#10L</th>
+                                <th style="width: 80px;">#20L</th>
+                                <th style="width: 80px;">#25L</th>
+                                <th style="width: 80px;">PISO</th>
+                                <th style="width: 80px;">MUEB.</th>
+                                <th style="width: 80px;">PARED</th>
+                                <th style="width: 110px;">FOTO</th>
+                                <th style="width: 150px;">RESIDUOS</th>
+                                <th style="width: 150px;">ESCAMOCHE</th>
+                                <th style="width: 150px;">ESTADO INST.</th>
+                                <th style="width: 130px;">AZOLVES</th>
+                                <th style="width: 220px;">OBSERVACIÓN</th>
+                                <th style="width: 90px;">COLAD.</th>
+                                <th style="width: 90px;">TAPÓN</th>
+                                <th style="width: 80px;">TARJA</th>
+                                <th style="width: 90px;">TINAS</th>
+                                <th style="width: 90px;">T. GRASA</th>
+                                <th style="width: 130px;">MODELO TG</th>
+                                <th style="width: 80px;">ST-1</th>
+                                <th style="width: 100px;">OVALINES</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={surveyData} for:item="row" for:index="index">
+                                <tr key={row.id}>
+                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="ve" value={row.ve} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="vp" value={row.vp} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="c10l" value={row.c10l} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="c20l" value={row.c20l} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="c25l" value={row.c25l} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="piso" value={row.piso} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="mueble" value={row.mueble} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="pared" value={row.pared} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="foto" value={row.foto} onchange={handleSurveyChange}></td>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="residuos" onchange={handleSurveyChange}>
+                                            <option value="">-</option>
+                                            <option value="Sin residuos (Correcto)">No</option>
+                                            <option value="Presencia de residuos sólidos">Sí</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class={row.escamocheClass} data-index={index} data-field="escamoche" onchange={handleSurveyChange}>
+                                            <option value="">-</option>
+                                            <option value="Correcto, separan orgánico e inorgánico">Correcto</option>
+                                            <option value="Lo hacen a medias, basura en suelo, botes con basura revuelta">A medias</option>
+                                            <option value="Pésimo, tarjas, pisos y coladeras con basura; no hay cuidado">Pésimo</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="instala" onchange={handleSurveyChange}>
+                                            <option value="">-</option>
+                                            <option value="Bien">Bien</option>
+                                            <option value="Regular">Regular</option>
+                                            <option value="Mal">Mal</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="azolves" onchange={handleSurveyChange}>
+                                            <option value="NA">NA</option>
+                                            <option value="1 año">1 año</option>
+                                            <option value="1 mes">1 mes</option>
+                                            <option value="2 quin">2 quin</option>
+                                            <option value="1 sem">1 sem</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="obs" value={row.obs} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="coladeras" value={row.coladeras} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tapon" value={row.tapon} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tarja" value={row.tarja} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tinas" value={row.tinas} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tgrasa" value={row.tgrasa} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="modelo" value={row.modelo} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="st1" value={row.st1} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="ovalines" value={row.ovalines} onchange={handleSurveyChange}></td>
+                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                </tr>
+                            </template>
+                            <tr class="survey-row-totals">
+                                <td colspan="4" class="total-label-cell">TOTALES ACUMULADOS</td>
+                                <td>{surveyTotals.ve}</td><td>{surveyTotals.vp}</td>
+                                <td>{surveyTotals.c10l}</td><td>{surveyTotals.c20l}</td><td>{surveyTotals.c25l}</td>
+                                <td>{surveyTotals.piso}</td><td>{surveyTotals.mueble}</td><td>{surveyTotals.pared}</td>
+                                <td colspan="6"></td>
+                                <td>{surveyTotals.coladeras}</td><td>{surveyTotals.tapon}</td><td>{surveyTotals.tarja}</td><td>{surveyTotals.tinas}</td><td>{surveyTotals.tgrasa}</td>
+                                <td></td><td>{surveyTotals.st1}</td><td>{surveyTotals.ovalines}</td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- 2. TABLA GRASAS -->
+            <template if:true={isGrasas}>
+                <div class="table-scroll-container">
+                    <table class="survey-table" style="width: 1800px;">
+                        <thead>
+                            <tr class="survey-header-group">
+                                <th colspan="4">IDENTIFICACIÓN</th>
+                                <th colspan="5">EQUIPOS TG</th>
+                                <th colspan="5">REFACCIONES / ESTADO</th>
+                                <th colspan="1">REGISTRO</th>
+                                <th colspan="1"></th>
+                            </tr>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 40px;">#</th>
+                                <th style="width: 100px;">NIVEL</th>
+                                <th style="width: 160px;">ÁREA</th>
+                                <th style="width: 140px;">ZONA</th>
+                                <th style="width: 70px;">SP</th>
+                                <th style="width: 70px;">ENT</th>
+                                <th style="width: 140px;">MODELO</th>
+                                <th style="width: 140px;">FRECUENCIA</th>
+                                <th style="width: 140px;">ESTADO</th>
+                                <th style="width: 80px;">TORNILLO</th>
+                                <th style="width: 80px;">SELLO</th>
+                                <th style="width: 80px;">MAMPARA</th>
+                                <th style="width: 80px;">CANAST.</th>
+                                <th style="width: 80px;">RET. SAL.</th>
+                                <th style="width: 100px;">FOTO</th>
+                                <th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={surveyData} for:item="row" for:index="index">
+                                <tr key={row.id}>
+                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="sp" value={row.sp} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="ent" value={row.ent} onchange={handleSurveyChange}></td>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="modelo" onchange={handleSurveyChange}>
+                                            <option value="">-</option><option value="IG-20">IG-20</option><option value="IG-40">IG-40</option><option value="CORIAT">CORIAT</option><option value="INTERNATIONAL">INTERNATIONAL</option><option value="OTRO">OTRO</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="frecuencia" onchange={handleSurveyChange}>
+                                            <option value="">-</option><option value="1 VEZ A LA SEMANA">1 VEZ A LA SEMANA</option><option value="1 VEZ A LA QUINCENA">1 VEZ A LA QUINCENA</option><option value="1 VEZ AL MES">1 VEZ AL MES</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class={row.estadoClass} data-index={index} data-field="estado" onchange={handleSurveyChange}>
+                                            <option value="">-</option><option value="EN BUEN ESTADO">EN BUEN ESTADO</option><option value="EN MAL ESTADO">EN MAL ESTADO</option><option value="EN PESIMO ESTADO">EN PESIMO ESTADO</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tornillo" value={row.tornillo} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="sello" value={row.sello} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="mampara" value={row.mampara} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="canastilla" value={row.canastilla} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="retSalida" value={row.retSalida} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="foto" value={row.foto} onchange={handleSurveyChange}></td>
+                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                </tr>
+                            </template>
+                            <tr class="survey-row-totals">
+                                <td colspan="4" class="total-label-cell">TOTALES ACUMULADOS</td>
+                                <td>{surveyTotals.sp}</td><td>{surveyTotals.ent}</td>
+                                <td colspan="3"></td>
+                                <td>{surveyTotals.tornillo}</td><td>{surveyTotals.sello}</td><td>{surveyTotals.mampara}</td><td>{surveyTotals.canastilla}</td><td>{surveyTotals.retSalida}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- 3. GESTIÓN MENSTRUAL (ÍNTIMA) -->
+            <template if:true={isIntima}>
+                <!-- DIAGNÓSTICO -->
+                <div class="diag-card">
+                    <div class="diag-header">
+                        <lightning-icon icon-name="utility:answer" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                        <h3 class="slds-text-heading_small">Diagnóstico Situacional</h3>
+                    </div>
+                    <table class="diag-table">
+                        <tr><td class="diag-label"># Usuarias Internas</td><td><input type="number" class="cell-input" data-field="gmUsuariasInt" value={gmUsuariasInt} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Frecuencia de Uso</td><td>
+                            <select class="cell-select" data-field="gmFreqUso" onchange={handleGmChange}>
+                                <option value="">-</option><option value="Lunes a viernes" selected={isGmFreqLV}>Lunes a viernes</option><option value="Días alternados" selected={isGmFreqAlt}>Días alternados</option>
+                            </select>
+                        </td></tr>
+                        <tr><td class="diag-label"># Sanitarios Totales</td><td><input type="number" class="cell-input" data-field="gmSanitarios" value={gmSanitarios} onchange={handleGmChange}></td></tr>
+                    </table>
+                </div>
+
+                <!-- CENSO -->
+                <div class="table-scroll-container">
+                    <table class="survey-table">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 40px;">#</th>
+                                <th style="width: 120px;">NIVEL</th>
+                                <th>ÁREA</th>
+                                <th>ZONA</th>
+                                <th style="width: 100px;"># WC</th>
+                                <th style="width: 150px;">FRECUENCIA</th>
+                                <th style="width: 150px;">DÍAS</th>
+                                <th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={surveyData} for:item="row" for:index="index">
+                                <tr key={row.id}>
+                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="wc" value={row.wc} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="frecuencia" value={row.frecuencia} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="dias" value={row.dias} onchange={handleSurveyChange}></td>
+                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                </tr>
+                            </template>
+                            <tr class="survey-row-totals">
+                                <td colspan="4" class="total-label-cell">TOTAL WC CENSADOS</td>
+                                <td>{surveyTotals.wc}</td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- 4. DESAZOLVE MECÁNICO -->
+            <template if:true={isDesazolveMec}>
+                <div class="table-scroll-container">
+                    <table class="survey-table" style="width: 1600px;">
+                        <thead>
+                            <tr class="survey-header-group">
+                                <th colspan="4">UBICACIÓN</th>
+                                <th colspan="5">PUNTOS DE DESAZOLVE</th>
+                                <th colspan="3">MEDIDAS / OTROS</th>
+                                <th colspan="1"></th>
+                            </tr>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 40px;">#</th><th style="width: 100px;">NIVEL</th><th style="width: 160px;">ÁREA</th><th style="width: 140px;">ZONA</th>
+                                <th style="width: 90px;">OVALINES</th><th style="width: 90px;">COLAD.</th><th style="width: 90px;">TAPÓN</th><th style="width: 90px;">MINGIT.</th><th style="width: 90px;">WC</th>
+                                <th style="width: 110px;">MT LÍNEAL</th><th style="width: 110px;">TARJAS</th><th style="width: 130px;">CTO. HÚMEDO</th><th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={surveyData} for:item="row" for:index="index">
+                                <tr key={row.id}>
+                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="ovalines" value={row.ovalines} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="coladeras" value={row.coladeras} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tapon" value={row.tapon} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="mingitorios" value={row.mingitorios} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="wc" value={row.wc} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="mtLineal" value={row.mtLineal} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="tarjas" value={row.tarjas} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="cuartoHumado" value={row.cuartoHumado} onchange={handleSurveyChange}></td>
+                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                </tr>
+                            </template>
+                            <tr class="survey-row-totals">
+                                <td colspan="4" class="total-label-cell">TOTALES ACUMULADOS</td>
+                                <td>{surveyTotals.ovalines}</td><td>{surveyTotals.coladeras}</td><td>{surveyTotals.tapon}</td><td>{surveyTotals.mingitorios}</td><td>{surveyTotals.wc}</td>
+                                <td>{surveyTotals.mtLineal}</td><td>{surveyTotals.tarjas}</td><td>{surveyTotals.cuartoHumado}</td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- 5. AROMATIZANTES -->
+            <template if:true={isAromatizantes}>
+                <div class="table-scroll-container">
+                    <table class="survey-table">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 40px;">#</th><th style="width: 120px;">NIVEL</th><th>ÁREA</th><th>ZONA</th><th style="width: 150px;"># EQUIPOS ARM</th><th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={surveyData} for:item="row" for:index="index">
+                                <tr key={row.id}>
+                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="arm" value={row.arm} onchange={handleSurveyChange}></td>
+                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                </tr>
+                            </template>
+                            <tr class="survey-row-totals">
+                                <td colspan="4" class="total-label-cell">TOTAL EQUIPOS</td>
+                                <td>{surveyTotals.arm}</td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- 6. VACTOR -->
+            <template if:true={isVactor}>
+                <div class="table-scroll-container">
+                    <table class="survey-table" style="width: 2400px;">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th style="width: 150px;">DESCRIPCIÓN</th><th style="width: 80px;">MEDIDA</th><th style="width: 120px;">MATERIAL</th><th style="width: 120px;">SERVICIO</th>
+                                <th style="width: 80px;">LARGO</th><th style="width: 80px;">ANCHO</th><th style="width: 80px;">PROF.</th><th style="width: 100px;">MT LÍNEA</th>
+                                <th style="width: 180px;">DISTANCIA</th><th style="width: 120px;">PERM. DELEG.</th><th style="width: 120px;">PERM. PLAZA</th>
+                                <th style="width: 120px;">DIFICULTAD</th><th style="width: 200px;">ALCANCE</th><th style="width: 200px;">OBS</th><th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={surveyData} for:item="row" for:index="index">
+                                <tr key={row.id}>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="desc" onchange={handleSurveyChange}>
+                                            <option value="">-</option><option value="Cárcamo">Cárcamo</option><option value="Registro">Registro</option><option value="Tub. elevada Horizontal">Tub. elevada Horiz.</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="cell-select" data-index={index} data-field="medida" onchange={handleSurveyChange}>
+                                            <option value="">-</option><option value='1"'>1"</option><option value='4"'>4"</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="material" value={row.material} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="servicio" value={row.servicio} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="largo" value={row.largo} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="ancho" value={row.ancho} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="prof" value={row.prof} onchange={handleSurveyChange}></td>
+                                    <td><input type="number" class="cell-input" data-index={index} data-field="mtLineal" value={row.mtLineal} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="distancia" value={row.distancia} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="permDelegacion" value={row.permDelegacion} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="permPlaza" value={row.permPlaza} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="dificultad" value={row.dificultad} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="alcance" value={row.alcance} onchange={handleSurveyChange}></td>
+                                    <td><input type="text" class="cell-input" data-index={index} data-field="obs" value={row.obs} onchange={handleSurveyChange}></td>
+                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                </tr>
+                            </template>
+                            <tr class="survey-row-totals">
+                                <td colspan="4" class="total-label-cell">TOTALES ACUMULADOS</td>
+                                <td>{surveyTotals.largo}</td><td>{surveyTotals.ancho}</td><td>{surveyTotals.prof}</td><td>{surveyTotals.mtLinealVactor}</td>
+                                <td colspan="7"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- BOTÓN AÑADIR FILA -->
+            <div class="slds-text-align_right">
+                <lightning-button 
+                    label="Añadir Nueva Fila" 
+                    variant="brand" 
+                    icon-name="utility:add" 
+                    onclick={handleAddSurveyRow}
+                    class="btn-add">
+                </lightning-button>
+            </div>
+        </div>
+    </div>
+</template>

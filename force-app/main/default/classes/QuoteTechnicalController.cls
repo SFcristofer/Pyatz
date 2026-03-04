@@ -172,7 +172,8 @@ public with sharing class QuoteTechnicalController {
     public static Id saveTechnicalData(Map<String, Object> data) {
         try {
             Map<String, Object> p = data.containsKey('data') ? (Map<String, Object>)data.get('data') : data;
-            Id rid = (Id)p.get('quoteId');
+            String ridStr = (String)p.get('quoteId');
+            Id rid = String.isNotBlank(ridStr) ? (Id)ridStr : null;
             Id aid = (Id)p.get('accountId');
             Id cid = (Id)p.get('contactId');
             String status = (String)p.get('status');
@@ -180,7 +181,17 @@ public with sharing class QuoteTechnicalController {
             
             Quote q;
             if (rid != null && rid.getSObjectType().getDescribe().getName() == 'Quote') {
-                q = new Quote(Id = rid, Name = (String)p.get('name'), Status = status, Introduction_Text__c = (String)p.get('intro'), Warranty_Text__c = (String)p.get('warranty'), Business_Lines_Selected__c = (String)p.get('businessLines'), Technical_Sedes__c = (String)p.get('technicalSedes'), Show_Introduction__c = (Boolean)p.get('showIntro'), Show_Warranty__c = (Boolean)p.get('showWarranty'), Description = (String)p.get('observacionesPago'), Markers_Data__c = (String)p.get('markersData'));
+                q = [SELECT Id, OpportunityId, ExpirationDate FROM Quote WHERE Id = :rid LIMIT 1];
+                q.Name = (String)p.get('name');
+                q.Status = status;
+                q.Introduction_Text__c = (String)p.get('intro');
+                q.Warranty_Text__c = (String)p.get('warranty');
+                q.Markers_Data__c = (String)p.get('markersData');
+                if (p.containsKey('businessLines')) q.Business_Lines_Selected__c = (String)p.get('businessLines');
+                if (p.containsKey('technicalSedes')) q.Technical_Sedes__c = (String)p.get('technicalSedes');
+                if (p.containsKey('showIntro')) q.Show_Introduction__c = (Boolean)p.get('showIntro');
+                if (p.containsKey('showWarranty')) q.Show_Warranty__c = (Boolean)p.get('showWarranty');
+                if (p.containsKey('observacionesPago')) q.Description = (String)p.get('observacionesPago');
                 if (cid != null && String.valueOf(cid).startsWith('003')) q.ContactId = cid;
                 update q;
             } else {
@@ -195,7 +206,21 @@ public with sharing class QuoteTechnicalController {
                     Opportunity o = new Opportunity(Name = 'Op. Técnica - ' + (String)p.get('name'), AccountId = aid, StageName = 'Prospecting', CloseDate = Date.today().addDays(30), Pricebook2Id = pbId);
                     insert o; oppId = o.Id;
                 }
-                q = new Quote(Name = (String)p.get('name'), Status = status, Introduction_Text__c = (String)p.get('intro'), Warranty_Text__c = (String)p.get('warranty'), Business_Lines_Selected__c = (String)p.get('businessLines'), Technical_Sedes__c = (String)p.get('technicalSedes'), Show_Introduction__c = (Boolean)p.get('showIntro'), Show_Warranty__c = (Boolean)p.get('showWarranty'), Description = (String)p.get('observacionesPago'), Pricebook2Id = pbId, Markers_Data__c = (String)p.get('markersData'), ExpirationDate = Date.today().addDays(30), OpportunityId = oppId);
+                
+                q = new Quote();
+                q.Name = (String)p.get('name');
+                q.Status = status;
+                q.OpportunityId = oppId;
+                q.Pricebook2Id = pbId;
+                q.Introduction_Text__c = (String)p.get('intro');
+                q.Warranty_Text__c = (String)p.get('warranty');
+                q.Markers_Data__c = (String)p.get('markersData');
+                if (p.containsKey('businessLines')) q.Business_Lines_Selected__c = (String)p.get('businessLines');
+                if (p.containsKey('technicalSedes')) q.Technical_Sedes__c = (String)p.get('technicalSedes');
+                q.Show_Introduction__c = p.containsKey('showIntro') ? (Boolean)p.get('showIntro') : true;
+                q.Show_Warranty__c = p.containsKey('showWarranty') ? (Boolean)p.get('showWarranty') : true;
+                if (p.containsKey('observacionesPago')) q.Description = (String)p.get('observacionesPago');
+                q.ExpirationDate = Date.today().addDays(30);
                 if (cid != null && String.valueOf(cid).startsWith('003')) q.ContactId = cid;
                 insert q; rid = q.Id;
             }

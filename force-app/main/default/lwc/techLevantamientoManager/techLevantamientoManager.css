@@ -1,0 +1,58 @@
+:host {
+    --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-600: #475569; --slate-700: #334155; --slate-900: #0f172a;
+    --indigo-600: #4f46e5; --indigo-700: #4338ca; --brand-pyatz: #1e293b; --green-soft: #dcfce7; --orange-soft: #ffedd5; --red-soft: #fee2e2;
+}
+
+.main-container { background: white; border: 1px solid var(--slate-200); border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); overflow: hidden; }
+.header-section { padding: 1.25rem; border-bottom: 1px solid var(--slate-200); background: var(--slate-50); }
+.header-title { font-size: 1.1rem; font-weight: 700; color: var(--slate-900); display: flex; align-items: center; }
+.type-selector { max-width: 400px; margin-bottom: 1rem; }
+
+/* TABLAS EXCEL PREMIUM */
+.survey-wrapper { padding: 1rem; }
+.table-scroll-container { border: 1px solid var(--slate-200); border-radius: 8px; overflow: auto; max-height: 500px; background: white; position: relative; }
+
+.survey-table { border-collapse: separate; border-spacing: 0; width: 100%; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+/* Sticky Headers */
+.survey-table thead tr { position: sticky; top: 0; z-index: 10; background: var(--slate-900); }
+.survey-table thead tr.survey-header-group { position: sticky; top: 0; z-index: 11; }
+.survey-table thead tr.slds-line-height_reset { position: sticky; top: 32px; z-index: 10; }
+
+.survey-table th { background: var(--slate-900); color: white; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 8px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; }
+.survey-header-group th { background: #334155; border-bottom: 1px solid rgba(255,255,255,0.2); }
+
+.survey-table td { border-bottom: 1px solid var(--slate-200); border-right: 1px solid var(--slate-100); padding: 0; vertical-align: middle; transition: background 0.2s; }
+.survey-table tr:hover td { background-color: var(--slate-50); }
+
+/* Inputs Estilo Excel */
+.cell-input { width: 100%; border: none; padding: 10px 8px; font-size: 0.85rem; background: transparent; color: var(--slate-700); text-align: center; }
+.cell-input:focus { outline: 2px solid var(--indigo-600); outline-offset: -2px; background: white; z-index: 2; position: relative; }
+.cell-select { width: 100%; border: none; padding: 8px; font-size: 0.8rem; background: transparent; cursor: pointer; text-align: center; appearance: none; }
+.cell-select:focus { outline: 2px solid var(--indigo-600); }
+
+/* Totales Dash */
+.survey-row-totals { background: var(--slate-100); font-weight: 800; color: var(--slate-900); }
+.survey-row-totals td { border-top: 2px solid var(--slate-200); padding: 12px 8px; text-align: center; }
+.total-label-cell { text-align: left !important; padding-left: 1rem !important; background: var(--slate-200); color: var(--slate-700); font-weight: bold; }
+
+/* Estados Colores Profesionales */
+.bg-green-soft { background-color: var(--green-soft) !important; color: #166534 !important; }
+.bg-orange-soft { background-color: var(--orange-soft) !important; color: #9a3412 !important; }
+.bg-red-soft { background-color: var(--red-soft) !important; color: #991b1b !important; }
+
+/* Botón Añadir */
+.btn-add { margin-top: 1rem; --slds-c-button-brand-color-background: var(--indigo-600); border-radius: 6px; }
+
+/* DIAGNÓSTICO SITUACIONAL (INTIMA) */
+.diag-card { background: white; border: 1px solid var(--slate-200); border-radius: 12px; margin-bottom: 1.5rem; overflow: hidden; }
+.diag-header { background: var(--slate-900); color: white; padding: 1rem; display: flex; align-items: center; }
+.diag-table { width: 100%; }
+.diag-table td { padding: 12px 16px; border-bottom: 1px solid var(--slate-100); }
+.diag-label { font-weight: 600; color: var(--slate-600); font-size: 0.85rem; background: var(--slate-50); width: 35%; }
+
+/* Scroll Customizado */
+.table-scroll-container::-webkit-scrollbar { height: 10px; width: 8px; }
+.table-scroll-container::-webkit-scrollbar-track { background: var(--slate-100); }
+.table-scroll-container::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 10px; }
+.table-scroll-container::-webkit-scrollbar-thumb:hover { background: var(--slate-600); }
