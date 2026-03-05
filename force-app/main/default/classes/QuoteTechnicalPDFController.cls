@@ -9,11 +9,11 @@ public with sharing class QuoteTechnicalPDFController {
         
         // 1. Cargamos datos
         this.technicalQuote = [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Opportunity.Name, 
-                                     Show_Introduction__c, Introduction_Text__c, 
+                                     Show_Introduction__c, Introduction_Text__c, Phone, Email, Discount,
                                      Show_Warranty__c, Warranty_Text__c, Markers_Data__c,
                                      Business_Lines_Selected__c, Technical_Sedes__c, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                      Subtotal, Tax, TotalPrice, Description,
-                                     (SELECT Id, Product2.Name, Description, Quantity, ListPrice, UnitPrice, Discount, TotalPrice 
+                                     (SELECT Id, Product2.Name, Description, Pyatz_Technical_Description__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice 
                                       FROM QuoteLineItems)
                               FROM Quote 
                               WHERE Id = :quoteId];
@@ -29,7 +29,7 @@ public with sharing class QuoteTechnicalPDFController {
                     for (Object obj : servicios) {
                         Map<String, Object> s = (Map<String, Object>)obj;
                         String html = (String)s.get('detalleTecnicoHtml');
-                        String key = (String)s.get('descripcion'); // "Producto - Sede"
+                        String key = (String)s.get('descripcion'); // \"Producto - Sede\"
                         
                         for (QuoteLineItem qli : this.technicalQuote.QuoteLineItems) {
                             String qliKey = qli.Product2.Name + ' - ' + (qli.Description != null ? qli.Description.substringBefore('\n') : '');
@@ -42,7 +42,7 @@ public with sharing class QuoteTechnicalPDFController {
             } catch (Exception e) { System.debug('Error recuperando HTML: ' + e.getMessage()); }
         }
         
-        // 3. Buscar documentos... (resto igual)
+        // 3. Buscar documentos
         List<ContentDocumentLink> links = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :quoteId];
         if(!links.isEmpty()) {
             Set<Id> docIds = new Set<Id>();

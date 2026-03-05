@@ -268,13 +268,35 @@
                 </div>
                 </template>
 
-            <!-- PASO 4: FINALIZAR -->
+            <!-- PASO 4: FINALIZAR Y REVISIÓN DE PRECISIÓN -->
             <template if:true={isStep4}>
-                <div class="section-card slds-text-align_center slds-p-around_xx-large">
-                    <lightning-icon icon-name="utility:send" size="large" class="slds-m-bottom_medium" variant="success"></lightning-icon>
-                    <h2 class="slds-text-heading_large">¡Configuración Completa!</h2>
-                    <p class="slds-text-heading_small slds-m-vertical_medium">El presupuesto técnico está listo para su generación final.</p>
-                    <lightning-button label="Guardar y Finalizar" variant="brand" size="large" onclick={handleFinalize}></lightning-button>
+                <div class="section-card no-border bg-dark-workspace">
+                    <div class="slds-p-around_medium slds-grid slds-grid_align-spread bg-slate-header">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name="doctype:pdf" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                            <h2 class="slds-text-heading_small text-white">Revisión Final del Documento (Vista de Impresión)</h2>
+                        </div>
+                        <div class="slds-text-color_inverse-low slds-text-body_small">
+                            ID: {recordId} | Folio: {folio}
+                        </div>
+                    </div>
+                    
+                    <!-- WORKSPACE DE PDF ESTILO HERRAMIENTA PROFESIONAL -->
+                    <div class="pdf-workspace-container">
+                        <template if:true={pdfUrl}>
+                            <iframe src={pdfUrl} width="100%" height="100%" class="pdf-workspace-frame"></iframe>
+                        </template>
+                        <template if:false={pdfUrl}>
+                            <div class="slds-align_absolute-center slds-p-around_xx-large">
+                                <lightning-spinner alternative-text="Generando previsualización..." size="medium" variant="brand"></lightning-spinner>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="slds-p-around_medium slds-text-align_center bg-white border-top">
+                        <p class="slds-text-color_weak slds-m-bottom_small">Revise que toda la información técnica y los montos sean correctos antes de finalizar.</p>
+                        <lightning-button label="Confirmar, Guardar y Finalizar Presupuesto" variant="brand" icon-name="utility:save" size="large" onclick={handleFinalize}></lightning-button>
+                    </div>
                 </div>
             </template>
         </div>
@@ -282,13 +304,34 @@
         <!-- FOOTER STICKY -->
         <div class="sticky-footer slds-p-around_medium bg-white border-top">
             <div class="slds-grid slds-grid_align-spread">
-                <lightning-button label="Regresar" icon-name="utility:back" onclick={handleCancel}></lightning-button>
+                <lightning-button label="Regresar al Inicio" icon-name="utility:back" onclick={handleCancel}></lightning-button>
                 <div class="slds-grid">
                     <template if:false={isStep1}><lightning-button label="Anterior" onclick={handleBack} class="slds-m-right_small"></lightning-button></template>
                     <template if:false={isStep4}><lightning-button label="Siguiente" variant="brand" onclick={handleNext}></lightning-button></template>
                 </div>
             </div>
         </div>
+
+        <!-- MODAL DE PREVISUALIZACIÓN DE PRECISIÓN -->
+        <template if:true={showPdfModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleClosePdfModal}>
+                            <lightning-icon icon-name="utility:close" variant="inverse" size="small"></lightning-icon>
+                        </button>
+                        <h2 class="slds-text-heading_medium">Previsualización de Precisión (PDF Real)</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium pdf-viewer-container" style="height: 75vh; background: #525659;">
+                        <iframe src={pdfUrl} width="100%" height="100%" style="border: none; border-radius: 4px;"></iframe>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cerrar Vista Previa" variant="neutral" onclick={handleClosePdfModal}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
 
         <!-- MODAL SEPARADOR -->
         <template if:true={showSeparatorModal}>

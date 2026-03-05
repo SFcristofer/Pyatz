@@ -66,6 +66,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     // --- MODAL BUSCADOR PRO (LÓGICA V1) ---
     @track searchResults = [];
     @track selectedProductId = '';
+    @track selectedPbeId = ''; // Nuevo: Almacena el ID de la lista de precios
     @track selectedProductName = '';
     @track selectedProductPrice = 0;
     @track productPriceOptions = [];
@@ -88,6 +89,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track showModal = false;
     @track showSeparatorModal = false;
     @track showPLModal = false;
+    @track showPdfModal = false;
+    @track pdfUrl = '';
     @track separatorText = '';
 
     sedesColumns = [
@@ -167,7 +170,62 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione una Estrategia.', variant: 'warning' }));
             return;
         }
-        if (this.currentStep !== '4') { this.handleSave('Borrador'); this.currentStep = (parseInt(this.currentStep) + 1).toString(); }
+
+        if (this.currentStep !== '4') {
+            this.isLoading = true;
+            
+            // 1. Preparar Payload Maestro
+            const markers = { 
+                serviciosData: this.serviciosData, 
+                selectedSedesIds: this.selectedSedesIds, 
+                selectedSedesObjects: this.selectedSedesObjects, 
+                estrategiaVenta: this.estrategiaVenta, 
+                necesidadId: this.necesidadId, 
+                necesidadNombre: this.necesidadNombre, 
+                pagoTransferencia: this.pagoTransferencia, 
+                pagoTarjeta: this.pagoTarjeta, 
+                trabajoPuntual: this.trabajoPuntual, 
+                ventaProducto: this.ventaProducto, 
+                trabajoMantenimiento: this.trabajoMantenimiento, 
+                observacionesPago: this.observacionesPago 
+            };
+            const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+            
+            const payload = {
+                quoteId: this.recordId,
+                name: this.asunto,
+                status: 'Borrador',
+                intro: this.introduccion,
+                warranty: this.warranty,
+                observacionesPago: this.observacionesPago,
+                markersData: encoded,
+                technicalSedes: this.technicalSedesString,
+                lineItems: JSON.stringify(this.serviciosData),
+                showIntro: true,
+                showWarranty: true
+            };
+
+            // 2. Guardar y esperar respuesta antes de avanzar
+            saveTechnicalData({ data: payload })
+                .then(newId => {
+                    if (newId) this.recordId = newId;
+                    this.loadInitialData(); // Refrescar para tener el Folio real
+                    
+                    // Si el siguiente paso es el 4, generamos la URL del PDF profesional
+                    const nextStepInt = parseInt(this.currentStep) + 1;
+                    if (nextStepInt === 4) {
+                        this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
+                    }
+                    
+                    this.currentStep = nextStepInt.toString();
+                    this.isLoading = false;
+                })
+                .catch(error => {
+                    this.isLoading = false;
+                    console.error('Error al avanzar:', error);
+                    this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo guardar el registro. Verifique su conexión.', variant: 'error' }));
+                });
+        }
     }
     handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
 
@@ -252,6 +310,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         const selectedId = event.currentTarget.dataset.id;
         const res = this.searchResults.find(x => x.id === selectedId);
         if (res) {
+            this.selectedPbeId = selectedId; // Capturar el ID de Salesforce (PricebookEntry)
             this.selectedProductId = res.productId;
             this.selectedProductName = res.name;
             this.selectedProductPrice = res.unitPrice;
@@ -266,7 +325,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         getProductPrices({ product2Id: this.selectedProductId }).then(res => { 
             this.productPriceOptions = res.map(opt => ({
                 ...opt,
-                className: opt.unitPrice === this.selectedProductPrice ? 'price-option-card selected' : 'price-option-card'
+                className: opt.pbeId === this.selectedPbeId ? 'price-option-card selected' : 'price-option-card'
             })); 
         });
     }
@@ -281,6 +340,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         const pbeId = event.currentTarget.dataset.id;
         const opt = this.productPriceOptions.find(o => o.pbeId === pbeId);
         if (opt) {
+            this.selectedPbeId = pbeId; // Actualizar con el nuevo ID de precio seleccionado
             this.selectedProductPrice = opt.unitPrice;
             this.productPriceOptions = this.productPriceOptions.map(o => ({ ...o, className: o.pbeId === pbeId ? 'price-option-card selected' : 'price-option-card' }));
             this.recalculateModalData();
@@ -348,7 +408,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
         selectedRows.forEach(row => {
             const newItem = {
-                id: Date.now().toString() + Math.random(),
+                id: Date.now().toString() + Math.random(), // ID visual para la tabla
+                pbeId: this.selectedPbeId, // ID real para Salesforce
                 descripcion: this.selectedProductName,
                 cantidad: row.cantidad,
                 totalSinImpuestos: row.totalSinImpuestos,
@@ -420,7 +481,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     handleApplyTemplate(event) {
         const templateId = event.detail.value;
-        const targetField = event.target.dataset.field; // El campo viene del botón menú
+        // Lógica robusta para detectar el campo de destino en cualquier menú del componente
+        const targetField = event.currentTarget.getAttribute('data-field') || event.target.dataset.field;
 
         if (!this.recordId) {
             this.dispatchEvent(new ShowToastEvent({
@@ -501,4 +563,56 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleCloneQuote() { cloneQuote({ quoteId: this.recordId }).then(newId => { this.dispatchEvent(new CustomEvent('editquote', { detail: newId })); }); }
     handleOpenPLModal() { this.showPLModal = true; }
     handleClosePLModal() { this.showPLModal = false; }
+
+    handlePreviewPdf() {
+        this.isLoading = true;
+        
+        const markers = { 
+            serviciosData: this.serviciosData, 
+            selectedSedesIds: this.selectedSedesIds, 
+            selectedSedesObjects: this.selectedSedesObjects, 
+            estrategiaVenta: this.estrategiaVenta, 
+            necesidadId: this.necesidadId, 
+            necesidadNombre: this.necesidadNombre, 
+            pagoTransferencia: this.pagoTransferencia, 
+            pagoTarjeta: this.pagoTarjeta, 
+            trabajoPuntual: this.trabajoPuntual, 
+            ventaProducto: this.ventaProducto, 
+            trabajoMantenimiento: this.trabajoMantenimiento, 
+            observacionesPago: this.observacionesPago 
+        };
+        const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+        
+        const payload = {
+            quoteId: this.recordId,
+            name: this.asunto,
+            status: 'Borrador',
+            intro: this.introduccion,
+            warranty: this.warranty,
+            observacionesPago: this.observacionesPago,
+            markersData: encoded,
+            technicalSedes: this.technicalSedesString,
+            lineItems: JSON.stringify(this.serviciosData),
+            showIntro: true,
+            showWarranty: true
+        };
+
+        saveTechnicalData({ data: payload })
+            .then(newId => {
+                if (newId) this.recordId = newId;
+                this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
+                this.showPdfModal = true;
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error vista previa:', error);
+                this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo generar la vista previa.', variant: 'error' }));
+            });
+    }
+
+    handleClosePdfModal() {
+        this.showPdfModal = false;
+        this.pdfUrl = '';
+    }
 }

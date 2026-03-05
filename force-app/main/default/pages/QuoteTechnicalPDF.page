@@ -87,7 +87,7 @@
                             <th width="15%">P. UNITARIO</th>
                             <apex:variable var="anyDiscount" value="0" />
                             <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="check">
-                                <apex:variable var="anyDiscount" value="1" rendered="{!check.Discount > 0 || (check.ListPrice - check.UnitPrice) > 0}" />
+                                <apex:variable var="anyDiscount" value="1" rendered="{!BLANKVALUE(check.Discount, 0) > 0 || (BLANKVALUE(check.ListPrice, 0) - BLANKVALUE(check.UnitPrice, 0)) > 0}" />
                             </apex:repeat>
                             <apex:outputPanel rendered="{!anyDiscount == '1'}" layout="none">
                                 <th width="10%">DESC.</th>
@@ -98,7 +98,7 @@
                     <tbody>
                         <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
                             <!-- LÓGICA DE SEPARADOR / SALTO DE PÁGINA -->
-                            <apex:outputPanel rendered="{!item.Quantity == 0}" layout="none">
+                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
                                 <tr class="page-break separator-row">
                                     <td colspan="{!IF(anyDiscount == '1', 5, 4)}" style="padding: 10pt; background-color: #f1f5f9; border-top: 1pt solid #0070d2;">
                                         <strong>{!item.Product2.Name}</strong>
@@ -107,33 +107,33 @@
                             </apex:outputPanel>
 
                             <!-- LÓGICA DE PARTIDA ESTÁNDAR -->
-                            <apex:outputPanel rendered="{!item.Quantity > 0}" layout="none">
+                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
                                 <tr>
                                     <td><strong>{!item.Product2.Name}</strong></td>
                                     <td align="center">{!item.Quantity}</td>
                                     <td align="right">
                                         <apex:outputText value="{0, number, currency}">
-                                            <apex:param value="{!item.ListPrice}" />
+                                            <apex:param value="{!BLANKVALUE(item.ListPrice, 0)}" />
                                         </apex:outputText>
                                     </td>
                                     <apex:outputPanel rendered="{!anyDiscount == '1'}" layout="none">
                                         <td align="center" style="color: #d8000c; font-weight: bold;">
-                                            <apex:outputPanel rendered="{!item.Discount != null && item.Discount > 0}">
+                                            <apex:outputPanel rendered="{!NOT(ISNULL(item.Discount)) && item.Discount > 0}">
                                                 {!item.Discount}%
                                             </apex:outputPanel>
-                                            <apex:outputPanel rendered="{!(item.Discount == null || item.Discount == 0) && (item.ListPrice > item.UnitPrice)}">
+                                            <apex:outputPanel rendered="{!(ISNULL(item.Discount) || item.Discount == 0) && (BLANKVALUE(item.ListPrice, 0) > BLANKVALUE(item.UnitPrice, 0))}">
                                                 <apex:outputText value="{0, number, currency}">
-                                                    <apex:param value="{!item.ListPrice - item.UnitPrice}" />
+                                                    <apex:param value="{!BLANKVALUE(item.ListPrice, 0) - BLANKVALUE(item.UnitPrice, 0)}" />
                                                 </apex:outputText>
                                             </apex:outputPanel>
-                                            <apex:outputPanel rendered="{!item.ListPrice == item.UnitPrice && (item.Discount == null || item.Discount == 0)}">
+                                            <apex:outputPanel rendered="{!BLANKVALUE(item.ListPrice, 0) == BLANKVALUE(item.UnitPrice, 0) && (ISNULL(item.Discount) || item.Discount == 0)}">
                                                 -
                                             </apex:outputPanel>
                                         </td>
                                     </apex:outputPanel>
                                     <td align="right">
                                         <apex:outputText value="{0, number, currency}">
-                                            <apex:param value="{!item.TotalPrice}" />
+                                            <apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}" />
                                         </apex:outputText>
                                     </td>
                                 </tr>
@@ -145,11 +145,11 @@
                 <!-- 2.1 DETALLE TÉCNICO DE SERVICIOS (FUERA DE TABLA) -->
                 <div style="margin-top: 10pt;">
                     <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                        <apex:outputPanel rendered="{!NOT(ISBLANK(item.Description))}">
+                        <apex:outputPanel rendered="{!NOT(ISBLANK(item.Pyatz_Technical_Description__c)) || NOT(ISBLANK(item.Description))}">
                             <div style="margin-bottom: 8pt; border-bottom: 0.5pt solid #eee; padding-bottom: 4pt;">
                                 <div style="font-weight: bold; color: #0070d2; font-size: 9pt;">Detalle: {!item.Product2.Name}</div>
                                 <div style="font-size: 9pt; color: #333; margin-top: 2pt; text-align: justify;">
-                                    <apex:outputText escape="false" value="{!item.Description}" />
+                                    <apex:outputText escape="false" value="{!IF(NOT(ISBLANK(item.Pyatz_Technical_Description__c)), item.Pyatz_Technical_Description__c, item.Description)}" />
                                 </div>
                             </div>
                         </apex:outputPanel>
@@ -163,7 +163,7 @@
                             <td style="padding: 3pt 0; text-align: left; color: #666; font-size: 9pt;">SUBTOTAL</td>
                             <td style="padding: 3pt 0; text-align: right; font-weight: bold; width: 80pt;">
                                 <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!technicalQuote.Subtotal}" />
+                                    <apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}" />
                                 </apex:outputText>
                             </td>
                         </tr>
@@ -171,7 +171,7 @@
                             <td style="padding: 3pt 0; text-align: left; color: #d8000c; font-size: 9pt;">DESCUENTO</td>
                             <td style="padding: 3pt 0; text-align: right; font-weight: bold; color: #d8000c;">
                                 - <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!IF(ISNULL(technicalQuote.Discount), 0, technicalQuote.Discount)}" />
+                                    <apex:param value="{!BLANKVALUE(technicalQuote.Discount, 0)}" />
                                 </apex:outputText>
                             </td>
                         </tr>
@@ -179,7 +179,7 @@
                             <td style="padding: 3pt 0; text-align: left; color: #666; font-size: 9pt;">I.V.A. (16%)</td>
                             <td style="padding: 3pt 0; text-align: right; font-weight: bold;">
                                 <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!technicalQuote.Tax}" />
+                                    <apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}" />
                                 </apex:outputText>
                             </td>
                         </tr>
@@ -187,7 +187,7 @@
                             <td style="padding: 8pt 0; text-align: left; font-size: 12pt; font-weight: bold; color: #0070d2;">TOTAL</td>
                             <td style="padding: 8pt 0; text-align: right; font-size: 12pt; font-weight: bold; color: #0070d2; border-bottom: 2pt solid #0070d2;">
                                 <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!technicalQuote.TotalPrice}" />
+                                    <apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}" />
                                 </apex:outputText>
                             </td>
                         </tr>

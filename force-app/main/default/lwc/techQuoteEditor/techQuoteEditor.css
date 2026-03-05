@@ -89,3 +89,26 @@
 
 .overflow-visible { overflow: visible !important; }
 .description-card { border-top: 1px solid var(--slate-200); padding-top: 1rem; }
+
+/* ETAPA 4: PDF WORKSPACE PROFESIONAL */
+.bg-dark-workspace { background-color: #1e293b !important; }
+.bg-slate-header { background-color: #0f172a; border-bottom: 1px solid #334155; }
+.text-white { color: #ffffff !important; }
+.no-border { border: none !important; }
+
+.pdf-workspace-container {
+    height: 700px;
+    background-color: #334155;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.pdf-workspace-frame {
+    border: none;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    max-width: 900px;
+}
