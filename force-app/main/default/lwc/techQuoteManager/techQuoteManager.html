@@ -3,16 +3,33 @@
     <template if:true={isListView}>
         <c-tech-quote-list 
             oncreatenew={handleCreateNew}
-            oneditquote={handleEditQuote}>
+            oneditquote={handleEditQuote}
+            onviewcontract={handleViewContract}>
         </c-tech-quote-list>
     </template>
 
-    <!-- Muestra el Editor si estamos en modo edit -->
     <template if:true={isEditView}>
         <c-tech-quote-editor 
             record-id={selectedRecordId}
             oncancel={handleShowList}
-            onsave={handleShowList}>
+            onsave={handleShowList}
+            onviewcontract={handleViewContract}>
         </c-tech-quote-editor>
+    </template>
+
+    <template if:true={isContractView}>
+        <c-tech-contract-manager 
+            record-id={selectedRecordId}
+            oncancel={handleShowList}
+            onsave={handleShowList}
+            onworkorders={handleGenerateWorkOrders}>
+        </c-tech-contract-manager>
+    </template>
+
+    <template if:true={isWorkOrderView}>
+        <c-tech-work-order-console 
+            record-id={selectedRecordId}
+            onback={handleViewContract}>
+        </c-tech-work-order-console>
     </template>
 </template>

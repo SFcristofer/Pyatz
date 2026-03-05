@@ -295,7 +295,10 @@
 
                     <div class="slds-p-around_medium slds-text-align_center bg-white border-top">
                         <p class="slds-text-color_weak slds-m-bottom_small">Revise que toda la información técnica y los montos sean correctos antes de finalizar.</p>
-                        <lightning-button label="Confirmar, Guardar y Finalizar Presupuesto" variant="brand" icon-name="utility:save" size="large" onclick={handleFinalize}></lightning-button>
+                        <div class="slds-grid slds-grid_align-center">
+                            <lightning-button label="Confirmar, Guardar y Finalizar Presupuesto" variant="brand" icon-name="utility:save" size="large" onclick={handleFinalize} class="slds-m-right_medium"></lightning-button>
+                            <lightning-button label="Generar Contrato Legal" variant="success" icon-name="standard:contract" size="large" onclick={handleGoToContract} if:true={recordId}></lightning-button>
+                        </div>
                     </div>
                 </div>
             </template>

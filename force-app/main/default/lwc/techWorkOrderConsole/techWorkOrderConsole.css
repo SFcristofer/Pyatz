@@ -1,0 +1,142 @@
+:host {
+    --pyatz-purple: #6b46c1;
+    --pyatz-blue: #0070d2;
+    --pyatz-blue-soft: #f0f8ff;
+    --pyatz-gray-bg: #f3f3f3;
+    --pyatz-border: #dddbda;
+}
+
+.main-container {
+    background-color: white;
+    min-height: 100vh;
+}
+
+/* HEADER */
+.custom-header {
+    background-color: white;
+    border-bottom: 1px solid var(--pyatz-border);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn-purple {
+    background-color: var(--pyatz-purple) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.title-folio {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a202c;
+}
+
+/* SECCIÓN AZUL: DATOS CONTRATO */
+.contract-data-box {
+    background-color: var(--pyatz-blue-soft);
+    border: 1px solid #b0d7fb;
+    border-radius: 4px;
+    margin: 1rem 1.5rem;
+}
+
+.data-column {
+    padding: 1rem;
+}
+
+.label-title {
+    font-size: 0.75rem;
+    color: #4a5568;
+    text-transform: uppercase;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.value-text {
+    font-size: 0.95rem;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+/* CONFIGURACIÓN GENERAL */
+.general-config-area {
+    padding: 0 1.5rem;
+}
+
+.textarea-container {
+    position: relative;
+}
+
+.char-counter {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 11px;
+    color: #718096;
+}
+
+/* CARD DE SEDE */
+.sede-card {
+    border: 1px solid var(--pyatz-border);
+    border-radius: 8px;
+    margin: 1.5rem;
+    overflow: hidden;
+}
+
+.sede-header {
+    background-color: #0070d2;
+    color: white;
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.horario-box {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e0;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+/* ACORDEÓN DE TRATAMIENTO */
+.treatment-accordion {
+    background-color: #e2e8f0;
+    border: 1px solid #cbd5e0;
+    margin: 1rem;
+    border-radius: 4px;
+}
+
+.treatment-header {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.treatment-body {
+    background-color: white;
+    padding: 1rem;
+    border-top: 1px solid #cbd5e0;
+}
+
+.resource-config {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.input-small {
+    width: 80px;
+}
+
+.footer-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid var(--pyatz-border);
+    padding: 1rem 1.5rem;
+    z-index: 10;
+}

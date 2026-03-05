@@ -299,4 +299,12 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
 
         window.open(url, '_blank');
     }
+
+    handleGoToWorkOrders() {
+        this.dispatchEvent(new CustomEvent('workorders', { detail: this.recordId }));
+    }
+
+    handleCancel() {
+        this.dispatchEvent(new CustomEvent('cancel'));
+    }
 }

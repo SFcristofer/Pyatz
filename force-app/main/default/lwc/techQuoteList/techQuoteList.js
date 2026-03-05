@@ -52,8 +52,9 @@ export default class TechQuoteList extends LightningElement {
             type: 'action',
             typeAttributes: { rowActions: [
                 { label: 'Editar', name: 'edit', iconName: 'utility:edit' },
+                { label: 'Configurar Contrato', name: 'contract', iconName: 'standard:contract' },
                 { label: 'Clonar', name: 'clone', iconName: 'utility:copy' },
-                { label: 'Descargar PDF', name: 'pdf', iconName: 'utility:file_spec' }
+                { label: 'Descargar PDF Presupuesto', name: 'pdf', iconName: 'utility:file_spec' }
             ]}
         }
     ];
@@ -94,6 +95,8 @@ export default class TechQuoteList extends LightningElement {
         const row = event.detail.row;
         if (actionName === 'edit') {
             this.dispatchEvent(new CustomEvent('editquote', { detail: row.id }));
+        } else if (actionName === 'contract') {
+            this.dispatchEvent(new CustomEvent('viewcontract', { detail: row.id }));
         } else if (actionName === 'clone') {
             this.selectedQuoteId = row.id;
             this.showCloneModal = true;

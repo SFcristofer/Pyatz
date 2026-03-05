@@ -202,6 +202,8 @@ public with sharing class QuoteTechnicalController {
                 q.Markers_Data__c = (String)p.get('markersData');
                 q.Technical_Sedes__c = (String)p.get('technicalSedes');
                 q.Description = (String)p.get('observacionesPago');
+                q.Show_Introduction__c = true;
+                q.Show_Warranty__c = true;
                 q.ExpirationDate = Date.today().addDays(30);
                 insert q;
                 rid = q.Id;

@@ -559,6 +559,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
 
     handleFinalize() { this.handleSave('Approved'); }
+    handleGoToContract() { this.dispatchEvent(new CustomEvent('viewcontract', { detail: this.recordId })); }
     handleCancel() { this.dispatchEvent(new CustomEvent('cancel')); }
     handleCloneQuote() { cloneQuote({ quoteId: this.recordId }).then(newId => { this.dispatchEvent(new CustomEvent('editquote', { detail: newId })); }); }
     handleOpenPLModal() { this.showPLModal = true; }

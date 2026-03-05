@@ -1,0 +1,189 @@
+<template>
+    <div class="main-container">
+        
+        <!-- 1. BARRA DE NAVEGACIÓN SUPERIOR -->
+        <div class="custom-header">
+            <lightning-button label="VOLVER AL CONTRATO" 
+                icon-name="utility:back" 
+                class="btn-purple" 
+                variant="brand"
+                onclick={handleBackToContract}>
+            </lightning-button>
+            
+            <h1 class="title-folio">Generar órdenes de trabajo para el Contrato Nº: {contractFolio}</h1>
+            
+            <div style="width: 150px;"></div> <!-- Spacer para balancear -->
+        </div>
+
+        <!-- 2. DATOS DEL CONTRATO (CONTENEDOR AZUL) -->
+        <div class="contract-data-box slds-grid slds-wrap slds-p-around_medium">
+            <!-- Columna 1 -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 data-column">
+                <span class="label-title">Cliente:</span>
+                <p class="value-text">{contractData.cliente}</p>
+                
+                <span class="label-title slds-m-top_small">Línea de Negocio:</span>
+                <p class="value-text">{contractData.lineaNegocio}</p>
+                
+                <span class="label-title slds-m-top_small">Sedes:</span>
+                <p class="value-text">{contractData.sedes}</p>
+            </div>
+            
+            <!-- Columna 2 -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 data-column">
+                <span class="label-title">Fecha Inicio:</span>
+                <p class="value-text">{contractData.fechaInicio}</p>
+                
+                <span class="label-title slds-m-top_small">Fecha primer tratamiento:</span>
+                <p class="value-text">{contractData.fechaPrimerTratamiento}</p>
+                
+                <span class="label-title slds-m-top_small">Tratamientos:</span>
+                <p class="value-text">{contractData.tratamientos}</p>
+            </div>
+            
+            <!-- Columna 3 -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 data-column">
+                <span class="label-title">Fecha Fin:</span>
+                <p class="value-text">{contractData.fechaFin}</p>
+                
+                <span class="label-title slds-m-top_small">Fecha límite servicios:</span>
+                <p class="value-text">{contractData.fechaLimiteServicios}</p>
+                
+                <div class="slds-m-top_medium">
+                    <lightning-button label="Consultar el Presupuesto" 
+                        icon-name="utility:preview" 
+                        variant="brand-outline"
+                        onclick={handleViewQuote}>
+                    </lightning-button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. DATOS GENERALES PARA LAS OT PROPUESTAS -->
+        <div class="general-config-area">
+            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                <h2 class="slds-text-heading_small slds-m-bottom_small">Datos Generales para las Órdenes de Trabajo propuestas</h2>
+                
+                <div class="textarea-container">
+                    <lightning-textarea label="Notas para las Órdenes de Trabajo" 
+                        value={woNotes} 
+                        onchange={handleNoteChange}
+                        placeholder="Escriba aquí indicaciones generales para todas las OT..."
+                        max-length="2048">
+                    </lightning-textarea>
+                    <span class="char-counter">{remainingChars} caracteres restantes</span>
+                </div>
+
+                <div class="slds-grid slds-gutters slds-m-top_medium">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input type="date" label="Fecha del primer tratamiento" value={startDate}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input type="date" label="Fecha límite servicio" value={endDate}></lightning-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SECCIÓN DE SEDE: DECORACIONES POLANCO -->
+        <template for:each={sedesList} for:item="sede">
+            <div key={sede.id} class="sede-card">
+                <div class="sede-header slds-grid slds-grid_align-spread">
+                    <span>SEDE: {sede.name}</span>
+                    <lightning-input type="checkbox" label="Servicio Subcontratado" 
+                        variant="label-hidden" class="white-checkbox">
+                    </lightning-input>
+                </div>
+                
+                <div class="slds-p-around_medium">
+                    <!-- Horario -->
+                    <h3 class="slds-text-title_bold slds-m-bottom_small">Horario Permitido por el Cliente</h3>
+                    <div class="horario-box slds-grid slds-grid_vertical-align-center">
+                        <span>El servicio se ha de realizar entre las</span>
+                        <lightning-input type="time" class="slds-m-horizontal_small" value="01:04:00.000"></lightning-input>
+                        <span>y las</span>
+                        <lightning-input type="time" class="slds-m-horizontal_small" value="19:00:00.000"></lightning-input>
+                    </div>
+
+                    <!-- Días de la Semana -->
+                    <h3 class="slds-text-title_bold slds-m-top_large slds-m-bottom_small">Días de la Semana Permitidos por el Cliente</h3>
+                    <div class="slds-grid slds-wrap">
+                        <template for:each={daysOfWeek} for:item="day">
+                            <lightning-input key={day.label} type="checkbox" label={day.label} class="slds-m-right_medium"></lightning-input>
+                        </template>
+                    </div>
+                    
+                    <lightning-input type="checkbox" label="Actualizar esta información en la sede" 
+                        class="slds-m-top_medium slds-text-color_weak">
+                    </lightning-input>
+
+                    <!-- 5. DETALLE DEL TRATAMIENTO (ACORDEÓN GRIS) -->
+                    <template for:each={sede.tratamientos} for:item="tra">
+                        <div key={tra.id} class="treatment-accordion">
+                            <div class="treatment-header" onclick={toggleAccordion}>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:setup" size="x-small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-title_bold">Tratamiento: {tra.name}</span>
+                                </div>
+                                <lightning-icon icon-name="utility:chevrondown" size="x-small"></lightning-icon>
+                            </div>
+                            
+                            <div class="treatment-body">
+                                <p class="slds-text-color_weak slds-m-bottom_small">
+                                    <strong>Zonas a tratar:</strong> {tra.zonas}
+                                </p>
+
+                                <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                                    <lightning-input type="checkbox" label="Las fechas de los servicios son diferentes a las fechas del contrato"></lightning-input>
+                                    <lightning-input type="checkbox" label="Programar el Servicio de forma Periódica" checked></lightning-input>
+                                </div>
+
+                                <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium">
+                                    <span class="slds-text-title_bold">Indicaciones Generales de Ejecución</span>
+                                    <lightning-button-icon icon-name="utility:edit" variant="bare" alternative-text="Editar"></lightning-button-icon>
+                                </div>
+
+                                <div class="resource-config">
+                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                        <span class="slds-m-right_small">NÚMERO DE TÉCNICOS REQUERIDOS:</span>
+                                        <lightning-input type="number" variant="label-hidden" value="1" class="input-small"></lightning-input>
+                                    </div>
+                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                        <span class="slds-m-right_small">DURACIÓN:</span>
+                                        <lightning-input type="number" variant="label-hidden" value="30" class="input-small"></lightning-input>
+                                        <span class="slds-m-left_xx-small">min.</span>
+                                    </div>
+                                </div>
+
+                                <div class="slds-m-top_medium">
+                                    <lightning-combobox name="tecnicos" label="SELECCIÓN DE PERSONAL: TÉCNICOS: 0"
+                                        placeholder="Seleccione uno o más técnicos..."
+                                        options={tecnicosOptions}>
+                                    </lightning-combobox>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                        Puedes seleccionar más de uno usando CONTROL+click
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- FOOTER ACCIONES -->
+        <div class="footer-actions slds-grid slds-grid_align-center">
+            <lightning-button label="Previsualizar Calendario de Órdenes" 
+                variant="brand-outline" 
+                icon-name="utility:event" 
+                class="slds-m-right_medium">
+            </lightning-button>
+            <lightning-button label="GENERAR ÓRDENES DE TRABAJO" 
+                variant="brand" 
+                icon-name="utility:record_create"
+                size="large">
+            </lightning-button>
+        </div>
+
+    </div>
+</template>

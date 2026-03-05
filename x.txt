@@ -1,2 +1,79 @@
-Error Salesforce
-Error Apex: Insert failed. First exception on row 0; first error: FIELD_INTEGRITY_EXCEPTION, La entrada de la lista de precios está en una lista de precios diferente a la asignada a Presupuesto o Presupuesto no tiene una lista de precios asignada.: Id. de Entrada de lista de precios: [PricebookEntryId] | Línea: 200
+Estructura de la Interfaz: Generar Órdenes de Trabajo
+1. Barra de Navegación Superior
+Botón: "VOLVER AL CONTRATO" (Color morado, alineado a la izquierda).
+
+Título Principal: "Generar órdenes de trabajo para el Contrato Nº: 1731-2026".
+
+2. Sección: Datos del Contrato (Contenedor Colapsable Azul)
+Organizado en tres columnas de información de solo lectura:
+
+Columna 1:
+
+Cliente: ROBERTO DEPRUEBA
+
+Línea de Negocio: Ambiental
+
+Sedes: DECORACIONES POLANCO
+
+Columna 2:
+
+Fecha Inicio: 13-feb-2026
+
+Fecha primer tratamiento: 13-feb-2026
+
+Tratamientos: AQS-INTIMA17, AQS-SENSE
+
+Columna 3:
+
+Fecha Fin: 12-feb-2027
+
+Fecha límite servicios: 12-feb-2027
+
+Acción: Botón "Consultar el Presupuesto" (Icono de ojo, color azul).
+
+3. Sección: Datos Generales para las Órdenes de Trabajo propuestas
+Campo de Texto (Textarea): "Notas para las Órdenes de Trabajo" (Con contador de caracteres restantes: 2.048).
+
+Sub-sección: Período de servicios:
+
+Fecha del primer tratamiento: Input de fecha (Valor: 13/02/2026).
+
+Fecha límite servicio: Input de fecha (Valor: 12/02/2027).
+
+4. Sección de Sede: DECORACIONES POLANCO (Card Principal)
+Checkbox: "Servicio Subcontratado".
+
+Horario Permitido por el Cliente:
+
+Selector de rango horario: "El servicio se ha de realizar entre las [01:04 a.m.] y las [07:00 p.m.]". (Incluye campos adicionales vacíos para segundos turnos).
+
+Días de la Semana Permitidos por el Cliente:
+
+Fila de Checkboxes: Lunes, Martes, Miércoles, Jueves, Viernes, Sábado, Domingo.
+
+Checkbox adicional: "Actualizar esta información en la sede".
+
+5. Detalle del Tratamiento: AQS-INTIMA17 (Acordeón Gris) (Estas seran de las partidas agregadas que tenga el Contrato)
+Texto de ubicación: "Zonas a tratar: Zona de prueba".
+
+Opciones de Programación (Checkboxes):
+
+"Las fechas de los servicios son diferentes a las fechas del contrato".
+
+"Programar el Servicio de forma Periódica".
+
+Indicaciones Generales de Ejecución:
+
+Botón "Editar" (Icono de lápiz).
+
+Configuración de Recursos:
+
+NÚMERO DE TÉCNICOS REQUERIDOS: Input numérico (Valor: 1).
+
+DURACIÓN: Input numérico (Valor: 30) + etiqueta "min.".
+
+Selección de Personal:
+
+Selector/Dropdown: "TÉCNICOS: 0".
+
+Nota al pie: "Puedes seleccionar más de uno usando CONTROL+click".

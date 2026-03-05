@@ -240,14 +240,18 @@
             </div>
 
             <!-- FOOTER ACCIONES -->
-            <div class="slds-m-top_large slds-border_top slds-p-top_medium slds-text-align_right">
-                <lightning-button label="Limpiar" variant="neutral" onclick={handleReset} class="slds-m-right_small"></lightning-button>
-                <lightning-button label="Finalizar y Descargar Contrato" variant="brand" icon-name="utility:print" onclick={handleGenerateContract}></lightning-button>
+            <div slot="footer" class="slds-grid slds-grid_align-spread">
+                <lightning-button label="Cancelar y Volver" variant="neutral" onclick={handleCancel}></lightning-button>
+                <div class="slds-grid">
+                    <lightning-button label="Reiniciar" variant="neutral" onclick={handleReset} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Finalizar y Descargar Contrato" variant="brand" icon-name="utility:print" onclick={handleGenerateContract} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Programar Órdenes de Trabajo" variant="success" icon-name="standard:work_order" onclick={handleGoToWorkOrders}></lightning-button>
+                </div>
             </div>
         </div>
     </lightning-card>
 
-    <!-- MODAL DE EDICIÓN (SIN CAMBIOS) -->
+    <!-- MODAL DE EDICIÓN -->
     <template if:true={showEditModal}>
         <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container">
