@@ -29,6 +29,13 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track clienteNombre = 'SIN CLIENTE';
     @track accountId;
 
+    // --- VARIABLES DE PAGO ---
+    @track pagoTransferencia = false;
+    @track pagoTarjeta = false;
+    @track trabajoPuntual = false;
+    @track ventaProducto = false;
+    @track trabajoMantenimiento = false;
+
     // --- TEMPLATES ---
     @track introTemplates = [];
     @track warrantyTemplates = [];
@@ -216,6 +223,13 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.lineaNegocioOptions = this.lineaNegocioOptions.map(opt => (opt.value === line ? { ...opt, checked: event.target.checked } : opt));
         this.selectedLines = this.lineaNegocioOptions.filter(opt => opt.checked).map(opt => opt.value);
     }
+
+    // --- LÓGICA PAGO ---
+    handlePagoTransferenciaChange(event) { this.pagoTransferencia = event.target.checked; }
+    handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
+    handleTrabajoPuntualChange(event) { this.trabajoPuntual = event.target.checked; }
+    handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
+    handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
 
     // --- LÓGICA PASO 3 (MODAL V1) ---
     get isUnitarioVariant() { return this.isUnitario ? 'brand' : 'neutral'; }
@@ -405,17 +419,31 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleIntroChange(event) { this.introduccion = event.target.value; }
 
     handleApplyTemplate(event) {
-        if (!this.recordId) return;
+        const templateId = event.detail.value;
+        const targetField = event.target.dataset.field; // El campo viene del botón menú
+
+        if (!this.recordId) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Atención',
+                message: 'Guarde el presupuesto antes de aplicar plantillas.',
+                variant: 'warning'
+            }));
+            return;
+        }
+
         this.isLoading = true;
-        renderTemplate({ templateId: event.detail.value, quoteId: this.recordId })
-            .then(res => {
-                const field = event.currentTarget.dataset.field;
-                if (field === 'introduccion') this.introduccion = res;
-                if (field === 'warranty') this.warranty = res;
-                if (field === 'observacionesPago') this.observacionesPago = res;
-                if (field === 'modalDescription') this.modalDescription = res;
+        renderTemplate({ templateId: templateId, quoteId: this.recordId })
+            .then(result => {
+                if (targetField === 'introduccion') this.introduccion = result;
+                else if (targetField === 'warranty') this.warranty = result;
+                else if (targetField === 'observacionesPago') this.observacionesPago = result;
+                else if (targetField === 'modalDescription') this.modalDescription = result;
                 this.isLoading = false;
-            }).catch(() => { this.isLoading = false; });
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error aplicando plantilla:', error);
+            });
     }
 
     handleSave(status) {

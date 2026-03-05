@@ -236,15 +236,37 @@
                 </template>
 
                 <div class="section-card slds-m-bottom_large">
-                    <div class="section-header slds-grid slds-grid_align-spread">
-                        <h2 class="slds-text-heading_small">Observaciones de Pago</h2>
-                        <lightning-button-menu label="Plantilla Pago" onselect={handleApplyTemplate} data-field="observacionesPago">
-                            <template for:each={pagoTemplates} for:item="tpl"><lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item></template>
-                        </lightning-button-menu>
+                    <div class="section-header">
+                        <lightning-icon icon-name="utility:moneybag" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                        <h2>Método de Pago</h2>
                     </div>
-                    <div class="slds-p-around_large"><lightning-input-rich-text value={observacionesPago} onchange={handleObservacionesPagoChange} variant="bottom-toolbar"></lightning-input-rich-text></div>
+                    <div class="slds-p-around_large">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <p class="slds-text-title_bold">Opciones de Pago</p>
+                                <lightning-input type="checkbox" label="Transferencia" checked={pagoTransferencia} onchange={handlePagoTransferenciaChange}></lightning-input>
+                                <lightning-input type="checkbox" label="Tarjeta" checked={pagoTarjeta} onchange={handlePagoTarjetaChange}></lightning-input>
+
+                                <p class="slds-text-title_bold slds-m-top_medium">TIPO DE TRABAJO:</p>
+                                <lightning-input type="checkbox" label="Trabajo único/puntual" checked={trabajoPuntual} onchange={handleTrabajoPuntualChange}></lightning-input>
+                                <lightning-input type="checkbox" label="Venta producto" checked={ventaProducto} onchange={handleVentaProductoChange}></lightning-input>
+                                <lightning-input type="checkbox" label="Contrato de mantenimiento" checked={trabajoMantenimiento} onchange={handleTrabajoMantenimientoChange}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                                    <p class="slds-text-title_bold">Observaciones sobre pago:</p>
+                                    <lightning-button-menu label="Plantilla Pago" variant="bare" onselect={handleApplyTemplate} data-field="observacionesPago">
+                                        <template for:each={pagoTemplates} for:item="tpl">
+                                            <lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item>
+                                        </template>
+                                    </lightning-button-menu>
+                                </div>
+                                <lightning-input-rich-text value={observacionesPago} onchange={handleObservacionesPagoChange} variant="bottom-toolbar"></lightning-input-rich-text>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </template>
+                </template>
 
             <!-- PASO 4: FINALIZAR -->
             <template if:true={isStep4}>
