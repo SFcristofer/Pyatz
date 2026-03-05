@@ -448,11 +448,52 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     handleSave(status) {
         this.isLoading = true;
-        const markers = { serviciosData: this.serviciosData, selectedSedesIds: this.selectedSedesIds, selectedSedesObjects: this.selectedSedesObjects, estrategiaVenta: this.estrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre };
+        
+        // 1. Preparar la memoria técnica (Markers)
+        const markers = { 
+            serviciosData: this.serviciosData, 
+            selectedSedesIds: this.selectedSedesIds, 
+            selectedSedesObjects: this.selectedSedesObjects, 
+            estrategiaVenta: this.estrategiaVenta, 
+            necesidadId: this.necesidadId, 
+            necesidadNombre: this.necesidadNombre, 
+            pagoTransferencia: this.pagoTransferencia, 
+            pagoTarjeta: this.pagoTarjeta, 
+            trabajoPuntual: this.trabajoPuntual, 
+            ventaProducto: this.ventaProducto, 
+            trabajoMantenimiento: this.trabajoMantenimiento, 
+            observacionesPago: this.observacionesPago 
+        };
         const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
-        saveTechnicalData({ data: { quoteId: this.recordId, name: this.asunto, status: status, intro: this.introduccion, warranty: this.warranty, markersData: encoded, technicalSedes: this.technicalSedesString } })
-            .then(newId => { if (newId) this.recordId = newId; this.loadInitialData(); this.isLoading = false; })
-            .catch(() => { this.isLoading = false; });
+        
+        // 2. Preparar el Payload Maestro alineado a campos reales de Pyatz
+        const payload = {
+            quoteId: this.recordId,
+            name: this.asunto,
+            status: status,
+            intro: this.introduccion,
+            warranty: this.warranty,
+            observacionesPago: this.observacionesPago,
+            markersData: encoded,
+            technicalSedes: this.technicalSedesString,
+            lineItems: JSON.stringify(this.serviciosData), // Enviar servicios para crear QuoteLineItems
+            showIntro: true,
+            showWarranty: true
+        };
+
+        saveTechnicalData({ data: payload })
+            .then(newId => {
+                if (newId) this.recordId = newId;
+                this.loadInitialData();
+                this.isLoading = false;
+                if (status === 'Approved') {
+                    this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Presupuesto finalizado y sincronizado', variant: 'success' }));
+                }
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error sincronización:', error);
+            });
     }
 
     handleFinalize() { this.handleSave('Approved'); }
