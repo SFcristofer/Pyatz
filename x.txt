@@ -1,26 +1,19 @@
-Instrucciones para corregir la interfaz
-"La versión anterior es demasiado simplista. Necesito que repliques exactamente estos dos componentes de la interfaz de iGeoApp:
-
-1. Tabla de Programación de Fechas:
-
-No uses una lista vertical. Crea una tabla de edición donde cada fila contenga:
-
-Un label (ej: 1º FECHA).
-
-Un input de fecha y hora.
-
-Un checkbox 'BLOQUEAR FECHA' con iconos de candado y calendario.
-
-Un campo numérico editable para 'DURACIÓN'.
-
-Un grupo de checkboxes a la derecha: 'GENERAR COMO YA EJECUTADA Y VERIFICADA' e 'Indicaciones Específicas De Ejecución'.
-
-2. Gráfico de Línea de Tiempo Horizontal (Timeline Chart):
-
-Debajo de la tabla, crea un eje horizontal que represente los meses del año (de febrero a febrero).
-
-Los tratamientos deben aparecer como etiquetas flotantes (tags) sobre el eje, posicionadas según su fecha exacta.
-
-Debe haber un botón naranja destacado que diga 'Obtener fechas candidatas' y un checkbox inferior para 'Fusionar en una única orden...'.
-
-Estilo Visual: Usa un diseño compacto, fuentes pequeñas y botones de acción con iconos, evitando el estilo de tarjetas grandes de Salesforce."
+	Definición: 
+        Levantamiento
+        Memoria
+	Costeo:
+        Def. solución
+        Presupuesto
+    Negociación:
+        Envío cotización
+        Seguimiento
+	Cierre:
+        Autorización
+    Altas:
+        "- Alta cliente (Clientes nuevos)"
+        "- Alta pyatz (Clientes nuevos)"
+	Organización:
+        Calendario
+        Contrato
+        Creación ODT's
+        Enhorabuena

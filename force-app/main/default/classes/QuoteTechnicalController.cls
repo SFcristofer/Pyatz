@@ -29,6 +29,24 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getOpportunitiesList() {
+        List<Map<String, Object>> result = new List<Map<String, Object>>();
+        for(Opportunity o : [SELECT Id, Name, Account.Name, StageName, Amount, CloseDate, Owner.Name 
+                       FROM Opportunity ORDER BY CreatedDate DESC LIMIT 50]) {
+            Map<String, Object> row = new Map<String, Object>();
+            row.put('id', o.Id);
+            row.put('name', o.Name);
+            row.put('account', o.Account.Name);
+            row.put('owner', o.Owner.Name);
+            row.put('closeDate', o.CloseDate);
+            row.put('amount', o.Amount);
+            row.put('stageName', o.StageName);
+            result.add(row);
+        }
+        return result;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getQuotesList() {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         for(Quote q : [SELECT Id, QuoteNumber, Name, Account.Name, Status, GrandTotal, CreatedDate, CreatedBy.Name 
