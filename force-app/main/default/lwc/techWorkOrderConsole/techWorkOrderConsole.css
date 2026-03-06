@@ -22,9 +22,8 @@
 }
 
 .btn-purple {
-    background-color: var(--pyatz-purple) !important;
-    color: white !important;
-    border: none !important;
+    --slds-c-button-brand-color-background: var(--pyatz-purple);
+    --slds-c-button-brand-color-border: var(--pyatz-purple);
 }
 
 .title-folio {
@@ -60,24 +59,20 @@
     font-weight: 600;
 }
 
-/* CONFIGURACIÓN GENERAL */
-.general-config-area {
-    padding: 0 1.5rem;
+.custom-blue-button {
+    background-color: #0070d2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 }
 
-.textarea-container {
-    position: relative;
-}
-
-.char-counter {
-    position: absolute;
-    bottom: 5px;
-    right: 10px;
-    font-size: 11px;
-    color: #718096;
-}
-
-/* CARD DE SEDE */
+/* CARDS SEDE */
 .sede-card {
     border: 1px solid var(--pyatz-border);
     border-radius: 8px;
@@ -90,7 +85,6 @@
     color: white;
     padding: 0.75rem 1rem;
     font-weight: bold;
-    font-size: 1rem;
 }
 
 .horario-box {
@@ -100,11 +94,11 @@
     border-radius: 4px;
 }
 
-/* ACORDEÓN DE TRATAMIENTO */
+/* ACORDEÓN TRATAMIENTO */
 .treatment-accordion {
-    background-color: #e2e8f0;
+    background-color: #f3f3f3;
     border: 1px solid #cbd5e0;
-    margin: 1rem;
+    margin: 1rem 0;
     border-radius: 4px;
 }
 
@@ -122,14 +116,83 @@
     border-top: 1px solid #cbd5e0;
 }
 
-.resource-config {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
+.input-tiny {
+    width: 60px;
+    margin: 0 5px;
 }
 
-.input-small {
-    width: 80px;
+.custom-multi-select {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+}
+
+/* PROGRAMACIÓN IGEOPAPP */
+.scheduling-container {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background-color: #f7fafc;
+}
+
+.scheduling-row {
+    padding: 0.5rem;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 11px;
+}
+
+.compact-checkbox {
+    --slds-c-checkbox-label-font-size: 10px;
+}
+
+/* GANTT CHART TÉCNICO */
+.gantt-wrapper {
+    background-color: #f9fafb;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.gantt-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: #1a365d;
+    margin-bottom: 30px;
+}
+
+.gantt-container {
+    height: 60px;
+    position: relative;
+    margin: 0 10px;
+}
+
+.x-axis {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #718096;
+}
+
+.time-tag {
+    position: absolute;
+    background-color: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 9px;
+    color: #4a5568;
+    white-space: nowrap;
+}
+
+.gantt-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 9px;
+    color: #a0aec0;
+    padding: 0 10px;
 }
 
 .footer-actions {

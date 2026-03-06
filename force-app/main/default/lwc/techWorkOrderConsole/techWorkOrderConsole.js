@@ -1,14 +1,13 @@
 import { LightningElement, track, api } from 'lwc';
 
 export default class TechWorkOrderConsole extends LightningElement {
-    @api recordId; // ID del Contrato (Quote/Contract)
-    
+    @api recordId;
     @track contractFolio = '1731-2026';
     @track woNotes = '';
     @track startDate = '2026-02-13';
     @track endDate = '2027-02-12';
+    @track showSchedulingSection = false;
 
-    // Mock Data para el diseño
     @track contractData = {
         cliente: 'ROBERTO DEPRUEBA',
         lineaNegocio: 'Ambiental',
@@ -25,9 +24,17 @@ export default class TechWorkOrderConsole extends LightningElement {
             id: 'sede1',
             name: 'DECORACIONES POLANCO',
             tratamientos: [
-                { id: 'tra1', name: 'AQS-INTIMA17', zonas: 'Zona de prueba' }
+                { id: 'tra1', name: 'AQS-INTIMA17', zonas: 'Tipo Reporte: Trampa Grasa' }
             ]
         }
+    ];
+
+    // TODO: Esta lista debe generarse dinámicamente durante el mapeo.
+    // LÓGICA: El número de filas debe ser igual a la 'Cantidad' (Quantity) definida en el QuoteLineItem (Tratamiento).
+    @track schedulingRows = [
+        { label: '1º Fecha', date: '2026-02-13' },
+        { label: '2º Fecha', date: '2026-03-13' },
+        { label: '3º Fecha', date: '2026-04-13' }
     ];
 
     daysOfWeek = [
@@ -40,6 +47,15 @@ export default class TechWorkOrderConsole extends LightningElement {
         { label: 'Técnico 2 - María López', value: 't2' }
     ];
 
+    get timelineTags() {
+        return [
+            { id: 1, label: '1º Fecha: 13/02', style: 'left: 5%; bottom: 15px;' },
+            { id: 2, label: '2º Fecha: 13/03', style: 'left: 25%; bottom: 35px;' }, // Apilado
+            { id: 3, label: '3º Fecha: 13/04', style: 'left: 45%; bottom: 15px;' },
+            { id: 4, label: '4º Fecha: 13/05', style: 'left: 65%; bottom: 35px;' }  // Apilado
+        ];
+    }
+
     get remainingChars() {
         return 2048 - (this.woNotes ? this.woNotes.length : 0);
     }
@@ -49,7 +65,6 @@ export default class TechWorkOrderConsole extends LightningElement {
     }
 
     handleBackToContract() {
-        console.log('Navegando de vuelta al contrato...');
         this.dispatchEvent(new CustomEvent('back'));
     }
 
@@ -57,16 +72,12 @@ export default class TechWorkOrderConsole extends LightningElement {
         console.log('Abriendo presupuesto...');
     }
 
+    handleAddCandidateDates() {
+        this.showSchedulingSection = !this.showSchedulingSection;
+    }
+
     toggleAccordion(event) {
         const accordionBody = event.currentTarget.nextElementSibling;
-        const icon = event.currentTarget.querySelector('lightning-icon[icon-name="utility:chevrondown"], lightning-icon[icon-name="utility:chevronright"]');
-        
-        if (accordionBody.style.display === 'none') {
-            accordionBody.style.display = 'block';
-            if (icon) icon.iconName = 'utility:chevrondown';
-        } else {
-            accordionBody.style.display = 'none';
-            if (icon) icon.iconName = 'utility:chevronright';
-        }
+        accordionBody.style.display = accordionBody.style.display === 'none' ? 'block' : 'none';
     }
 }
