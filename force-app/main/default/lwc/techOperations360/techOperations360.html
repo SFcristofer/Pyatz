@@ -90,19 +90,41 @@
                 </lightning-progress-indicator>
             </div>
 
-            <!-- INDICADOR DE SUB-ETAPAS (DINÁMICO) -->
-            <div class="slds-p-vertical_small slds-border_bottom slds-m-bottom_medium">
-                <div class="slds-grid slds-grid_align-center">
-                    <template for:each={currentSubStages} for:item="sub">
-                        <button 
-                            key={sub.value}
-                            data-id={sub.value}
-                            class={sub.buttonClass}
-                            onclick={handleSubStepClick}
-                            style="margin: 0 5px; border-radius: 15px; padding: 2px 15px; font-size: 11px; border: 1px solid #dddbda;">
-                            {sub.label}
-                        </button>
-                    </template>
+            <!-- INDICADOR DE SUB-ETAPAS Y ESTADO (LADO A LADO) -->
+            <div class="slds-p-vertical_x-small slds-border_bottom slds-m-bottom_medium substage-indicator-container">
+                <div class="slds-grid slds-grid_vertical-align-end">
+                    <!-- Barra de Progreso (75%) -->
+                    <div class="slds-col slds-size_9-of-12">
+                        <lightning-progress-indicator 
+                            current-step={currentSubStep} 
+                            type="path" 
+                            variant="base"
+                            style="--slds-c-progress-indicator-path-completed-color-background: #4bca81; 
+                                   --slds-c-progress-indicator-path-active-color-background: #00a1e0; 
+                                   --slds-c-progress-indicator-path-incomplete-color-background: #f3f3f2;
+                                   display: block; transform: scale(0.9); transform-origin: left center;">
+                            <template for:each={currentSubStages} for:item="sub">
+                                <lightning-progress-step 
+                                    key={sub.value} 
+                                    label={sub.label} 
+                                    value={sub.value} 
+                                    onclick={handleSubStepClick}>
+                                </lightning-progress-step>
+                            </template>
+                        </lightning-progress-indicator>
+                    </div>
+                    <!-- Dropdown de Estado (25%) -->
+                    <div class="slds-col slds-size_3-of-12 slds-p-left_medium">
+                        <lightning-combobox
+                            label="Estado del paso"
+                            placeholder="Seleccione estado..."
+                            value={currentStatus}
+                            options={statusOptions}
+                            onchange={handleStatusChange}
+                            variant="label-hidden"
+                            class="status-dropdown">
+                        </lightning-combobox>
+                    </div>
                 </div>
             </div>
 

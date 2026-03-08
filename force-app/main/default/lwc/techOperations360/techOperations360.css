@@ -1,0 +1,20 @@
+:host {
+    --slds-c-progress-indicator-path-item-font-size: 0.7rem;
+}
+
+/* Contenedor específico para las subetapas */
+.substage-indicator-container {
+    padding: 0 !important;
+    margin-top: -10px; /* Pegamos un poco más la barra a la de arriba */
+}
+
+/* Forzamos el tamaño pequeño del texto en las subetapas */
+.substage-indicator-container lightning-progress-step {
+    font-size: 0.7rem !important;
+}
+
+/* Estilo para el link de la oportunidad en la tabla */
+.opportunity-link {
+    font-weight: bold;
+    text-decoration: none;
+}

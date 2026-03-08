@@ -32,6 +32,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track stages = [];
     @track currentStep = '';
     @track currentSubStep = '1';
+    @track currentStatus = ''; 
+    @track allStatusOptions = [];
     @track quoteViewMode = 'list';
     @track selectedQuoteId = null;
 
@@ -63,6 +65,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     })
     wiredPicklists({ error, data }) {
         if (data) {
+            this.allStatusOptions = data.picklistFieldValues.Estado_Subetapa__c.values;
             this.buildHybridStages(data.picklistFieldValues);
         } else if (error) {
             console.error('Error metadatos:', error);
@@ -94,6 +97,27 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (!this.currentStep && this.stages.length > 0) this.currentStep = this.stages[0].value;
     }
 
+    // --- LÓGICA DE ESTADOS (DROPDOWN) ---
+    get statusOptions() {
+        if (!this.allStatusOptions.length || !this.subPhase) return [];
+        return this.allStatusOptions.filter(opt => {
+            const label = this.subPhase;
+            if (label === 'Levantamiento' || label === 'Memoria') 
+                return ['Pendiente confirmación cliente', 'Pendiente confirmación Pyatz', 'En proceso', 'Realizado'].includes(opt.label);
+            if (label === 'Def. solución') return ['Falta información', 'Realizado'].includes(opt.label);
+            if (label === 'Presupuesto') return ['En proceso - en tiempo', 'Falta información', 'Realizado'].includes(opt.label);
+            if (label === 'Envío cotización') return ['Pendiente definición', 'Pendiente de envío a cliente', 'Recepción no confirmada con cliente.', 'Recepción confirmada con cliente'].includes(opt.label);
+            if (label === 'Seguimiento') return ['Sin seguimiento', 'Sin respuesta del cliente', 'Seguimiento activo', 'Pendiente definición'].includes(opt.label);
+            if (label === 'Autorización') return ['Rechazado', 'En proceso de autorización', 'Ajuste de presupuesto', 'Aceptado'].includes(opt.label);
+            return true;
+        });
+    }
+
+    handleStatusChange(event) {
+        this.currentStatus = event.detail.value;
+        this.syncOpportunityStatus();
+    }
+
     // --- SINCRONIZACIÓN CON SALESFORCE ---
     async syncOpportunityStatus() {
         if (!this.recordId || !this.currentStep) return;
@@ -102,16 +126,13 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         fields[ID_FIELD.fieldApiName] = this.recordId;
         fields[STAGE_FIELD.fieldApiName] = this.currentStep;
         fields[SUBSTAGE_FIELD.fieldApiName] = this.subPhase;
-        fields[STATUS_FIELD.fieldApiName] = 'En proceso';
+        if (this.currentStatus) fields[STATUS_FIELD.fieldApiName] = this.currentStatus;
 
         const recordInput = { fields };
-
         try {
             await updateRecord(recordInput);
-            console.log('Sincronización Exitosa: ' + this.currentStep + ' > ' + this.subPhase);
-        } catch (error) {
-            console.error('Error al sincronizar campos:', error);
-        }
+            console.log('Sincronización Exitosa: ' + this.currentStep + ' > ' + this.subPhase + ' (' + this.currentStatus + ')');
+        } catch (error) { console.error('Error sync:', error); }
     }
 
     connectedCallback() {
@@ -132,15 +153,11 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             this.recordId = event.detail.row.id;
             this.currentStep = 'Definición';
             this.currentSubStep = '1';
+            // Intentar cargar estado actual si viene en el row
+            this.currentStatus = event.detail.row.stageName === 'Definición' ? 'En proceso' : ''; 
             this.quoteViewMode = 'list';
             this.syncOpportunityStatus();
         }
-    }
-
-    handleNewOpportunity() {
-        this[NavigationMixin.Navigate]({
-            type: 'standard__objectPage', attributes: { objectApiName: 'Opportunity', actionName: 'new' }
-        });
     }
 
     handleBackToDashboard() { this.recordId = null; this.loadOpportunities(); }
@@ -165,17 +182,12 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     get isDefinicion() { return this.currentStep === 'Definición'; }
     get isCosteo() { return this.currentStep === 'Costeo'; }
-    get isNegociacion() { return this.currentStep === 'Negociación'; }
-    get isCierre() { return this.currentStep === 'Cierre'; }
-    get isAltas() { return this.currentStep === 'Altas'; }
-    get isOrganizacion() { return this.currentStep === 'Organización'; }
-
     get isLevantamientoPhase() { return this.isDefinicion && this.currentSubStep === '1'; }
     get isMemoriaPhase() { return this.isDefinicion && this.currentSubStep === '2'; }
     get isDefSolucionPhase() { return this.isCosteo && this.currentSubStep === '1'; }
     get isPresupuestoPhase() { return this.isCosteo && this.currentSubStep === '2'; }
-    get isContratoPhase() { return this.isOrganizacion && this.currentSubStep === '2'; }
-    get isWorkOrderPhase() { return this.isOrganizacion && this.currentSubStep === '3'; }
+    get isContratoPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '2'; }
+    get isWorkOrderPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '3'; }
 
     get showQuoteList() { return this.isPresupuestoPhase && this.quoteViewMode === 'list'; }
     get showQuoteEditor() { return this.isPresupuestoPhase && this.quoteViewMode === 'edit'; }
@@ -194,12 +206,14 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleStepClick(event) {
         this.currentStep = event.target.value;
         this.currentSubStep = '1';
+        this.currentStatus = ''; // Reset estado al cambiar macro-etapa
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
     }
 
     handleSubStepClick(event) {
-        this.currentSubStep = event.target.dataset.id;
+        this.currentSubStep = event.target.value;
+        this.currentStatus = ''; // Reset estado al cambiar sub-etapa
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
     }
@@ -225,6 +239,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
                 this.currentSubStep = '1';
             }
         }
+        this.currentStatus = '';
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
     }
@@ -241,6 +256,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
                 this.currentSubStep = prevStage.subStages.length.toString();
             }
         }
+        this.currentStatus = '';
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
     }
