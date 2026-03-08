@@ -398,7 +398,7 @@ public with sharing class QuoteTechnicalController {
         } catch (Exception e) { throw new AuraHandledException('Error al guardar levantamiento: ' + e.getMessage()); }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Solucion_Tecnica__c> getSoluciones(Id levantamientoId) {
         return [SELECT Id, Name, Descripcion_Detallada__c FROM Solucion_Tecnica__c WHERE Levantamiento_Tecnico__c = :levantamientoId ORDER BY CreatedDate ASC];
     }
@@ -438,7 +438,7 @@ public with sharing class QuoteTechnicalController {
         } catch (Exception e) { throw new AuraHandledException('Error al guardar memoria: ' + e.getMessage()); }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Levantamiento_Tecnico__c> getLevantamientoDetails(Id recordId) {
         try {
             if (recordId == null) return new List<Levantamiento_Tecnico__c>();

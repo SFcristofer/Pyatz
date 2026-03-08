@@ -116,9 +116,25 @@ export default class TechMemoriaManager extends LightningElement {
             nombre: this.newSolName, 
             descripcion: '' 
         })
-        .then(() => {
+        .then((newId) => {
+            this.selectedSolucionId = newId;
+            this.selectedSolucionName = this.newSolName;
+            this.memoriaText = '';
             this.showSolModal = false;
             this.loadSoluciones();
+            
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Éxito',
+                message: 'Nueva solución creada y seleccionada.',
+                variant: 'success'
+            }));
+        })
+        .catch(error => {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error',
+                message: error.body.message,
+                variant: 'error'
+            }));
         })
         .finally(() => this.isSaving = false);
     }
