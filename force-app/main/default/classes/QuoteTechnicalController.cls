@@ -348,38 +348,50 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled
-    public static void saveSurveyData(Id oppId, String type, String surveyDataJson) {
+    public static void saveSurveyData(Id oppId, String type, String surveyDataJson, String diagDataJson) {
         try {
             if (String.isBlank(surveyDataJson) || oppId == null) return;
             List<Object> rows = (List<Object>)JSON.deserializeUntyped(surveyDataJson);
+            Map<String, Object> diag = String.isNotBlank(diagDataJson) ? (Map<String, Object>)JSON.deserializeUntyped(diagDataJson) : new Map<String, Object>();
             
-            // Limpiar datos previos de la Oportunidad
-            delete [SELECT Id FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId AND Tipo_Servicio__c = :type.toUpperCase()];
+            // Limpiar datos previos de la Oportunidad (Búsqueda más robusta)
+            String typeUpper = type.toUpperCase();
+            delete [SELECT Id FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId AND Tipo_Servicio__c = :typeUpper];
 
             List<Levantamiento_Tecnico__c> toInsert = new List<Levantamiento_Tecnico__c>();
             for (Object obj : rows) {
                 Map<String, Object> row = (Map<String, Object>)obj;
                 Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(
                     Oportunidad__c = oppId,
-                    Tipo_Servicio__c = type.toUpperCase(),
+                    Tipo_Servicio__c = typeUpper,
                     Nivel__c = (String)row.get('nivel'),
                     Area_Cocina_Banos__c = (String)row.get('area'),
                     Zona_Genero__c = (String)row.get('zona'),
                     Observaciones_Tecnicas__c = (String)row.get('obs')
                 );
 
-                // Mapeo inteligente (igual que en processLevantamientos)
-                if (type.equalsIgnoreCase('Bioenzimatico')) {
+                // Mapeo de Diagnóstico (Solo si es Gestión Menstrual)
+                if (typeUpper == 'INTIMA') {
+                    lev.GM_Usuarias_Internas__c = diag.get('gmUsuariasInt') != null ? Decimal.valueOf(String.valueOf(diag.get('gmUsuariasInt'))) : 0;
+                    lev.GM_Sanitarios_Totales__c = diag.get('gmSanitarios') != null ? Decimal.valueOf(String.valueOf(diag.get('gmSanitarios'))) : 0;
+                    lev.GM_Frecuencia_Uso__c = (String)diag.get('gmFreqUso');
+                }
+
+                // Mapeo inteligente de líneas
+                if (typeUpper == 'BIOENZIMÁTICO') {
                     lev.Cantidad_Principal__c = (row.get('ve') != null) ? Decimal.valueOf(String.valueOf(row.get('ve'))) : 0;
                     lev.Estado_Instalacion__c = (String)row.get('instala');
-                } else if (type.equalsIgnoreCase('Grasas')) {
+                } else if (typeUpper == 'GRASAS') {
                     lev.Estado_Instalacion__c = (String)row.get('estado');
                     lev.Frecuencia__c = (String)row.get('frecuencia');
-                } else if (type.equalsIgnoreCase('Intima')) {
+                } else if (typeUpper == 'INTIMA') {
                     lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0;
-                } else if (type.equalsIgnoreCase('Vactor')) {
+                } else if (typeUpper == 'VACTOR') {
                     lev.Metros_Lineales__c = (row.get('mtLineal') != null) ? Decimal.valueOf(String.valueOf(row.get('mtLineal'))) : 0;
+                } else if (typeUpper == 'DESAZOLVE MECANICO') {
+                    lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0;
                 }
+                
                 toInsert.add(lev);
             }
             if (!toInsert.isEmpty()) insert toInsert;
@@ -397,6 +409,23 @@ public with sharing class QuoteTechnicalController {
                 update new Opportunity(Id = recordId, Memoria_Descriptiva__c = text);
             }
         } catch (Exception e) { throw new AuraHandledException('Error al guardar memoria: ' + e.getMessage()); }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Levantamiento_Tecnico__c> getLevantamientoDetails(Id recordId) {
+        try {
+            if (recordId == null) return new List<Levantamiento_Tecnico__c>();
+            Id oppId = recordId;
+            if (recordId.getSObjectType().getDescribe().getName() == 'Quote') {
+                oppId = [SELECT OpportunityId FROM Quote WHERE Id = :recordId].OpportunityId;
+            }
+            return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, 
+                           Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, 
+                           Metros_Lineales__c, Observaciones_Tecnicas__c, CreatedDate
+                    FROM Levantamiento_Tecnico__c 
+                    WHERE Oportunidad__c = :oppId 
+                    ORDER BY Tipo_Servicio__c, CreatedDate ASC];
+        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 
     @AuraEnabled(cacheable=true)

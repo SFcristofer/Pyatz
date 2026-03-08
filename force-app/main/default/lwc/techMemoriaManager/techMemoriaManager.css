@@ -9,7 +9,13 @@
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     height: 100%;
-    min-height: 500px;
+    min-height: 600px;
+}
+
+.details-scroll {
+    height: 500px;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
 .title {
@@ -18,39 +24,60 @@
     color: #1b2733;
 }
 
-.summary-list {
-    margin-top: 1rem;
+/* Tarjetas de Registro */
+.record-detail-card {
+    background: #fdfdfd;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 10px;
+    border-left: 4px solid #0070d2;
 }
 
-.summary-item {
-    padding: 0.75rem;
-    border-bottom: 1px solid #f3f3f2;
-    transition: background 0.2s;
+.record-name {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #706e6b;
+    margin-bottom: 5px;
+    display: block;
 }
 
-.summary-item:hover {
-    background: #f9f9f8;
+.field-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+    border-bottom: 1px dashed #eee;
 }
 
-.item-label {
-    font-weight: 600;
+.f-label {
     color: #3e3e3c;
+    font-weight: 600;
 }
 
-.item-value {
-    font-weight: 700;
+.f-value {
     color: #0070d2;
+    font-weight: 700;
 }
 
-.item-detail {
+.f-obs {
     font-size: 0.8rem;
     color: #706e6b;
-    margin-top: 0.25rem;
+    margin-top: 5px;
+    font-style: italic;
+    background: #f3f3f2;
+    padding: 5px;
+    border-radius: 3px;
+    width: 100%;
+}
+
+.obs-row {
+    flex-direction: column;
+    border-bottom: none;
 }
 
 .rich-editor {
     --slds-c-textarea-shadow: none;
-    height: 400px;
+    height: 450px;
 }
 
 .empty-state p {

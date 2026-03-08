@@ -26,15 +26,35 @@ export default class TechLevantamientoManager extends LightningElement {
         
         this.isSaving = true;
         try {
+            // Recopilar datos de diagnóstico para Gestión Menstrual
+            const diagData = {
+                gmUsuariasInt: this.gmUsuariasInt,
+                gmUsuariasExt: this.gmUsuariasExt,
+                gmFreqUso: this.gmFreqUso,
+                gmSanitarios: this.gmSanitarios,
+                gmCubiculos: this.gmCubiculos,
+                gmContenedores: this.gmContenedores,
+                gmFreqRecoleccion: this.gmFreqRecoleccion,
+                gmDiasServicio: this.gmDiasServicio,
+                gmHorario: this.gmHorario,
+                gmPermisos: this.gmPermisos,
+                gmConsideraciones: this.gmConsideraciones,
+                gmCapacitacion: this.gmCapacitacion,
+                gmPresupuesto: this.gmPresupuesto,
+                gmMotivo: this.gmMotivo,
+                gmPermiteLev: this.gmPermiteLev
+            };
+
             await saveSurveyData({
                 oppId: this.recordId,
                 type: this.surveyType,
-                surveyDataJson: JSON.stringify(this.surveyData)
+                surveyDataJson: JSON.stringify(this.surveyData),
+                diagDataJson: JSON.stringify(diagData) // Nuevo parámetro
             });
             
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Éxito',
-                message: 'Levantamiento guardado correctamente.',
+                message: 'Levantamiento ' + this.surveyType + ' guardado correctamente.',
                 variant: 'success'
             }));
             return true;
@@ -59,22 +79,22 @@ export default class TechLevantamientoManager extends LightningElement {
 
     get surveyTypeOptions() {
         return [
-            { label: 'Bioenzimático', value: 'Bioenzimatico' },
-            { label: 'Grasas / Trampas', value: 'Grasas' },
-            { label: 'Gestión Menstrual (Íntima)', value: 'Intima' },
-            { label: 'Desazolve Mecánico', value: 'DesazolveMec' },
-            { label: 'Aromatizantes', value: 'Aromatizantes' },
-            { label: 'Desazolve con Vactor', value: 'Vactor' }
+            { label: 'Bioenzimático', value: 'BIOENZIMÁTICO' },
+            { label: 'Grasas / Trampas', value: 'GRASAS' },
+            { label: 'Gestión Menstrual (Íntima)', value: 'INTIMA' },
+            { label: 'Desazolve Mecánico', value: 'DESAZOLVE MECANICO' },
+            { label: 'Aromatizantes', value: 'AROMATIZANTES' },
+            { label: 'Desazolve con Vactor', value: 'VACTOR' }
         ];
     }
 
     // Getters de visibilidad
-    get isBio() { return this.surveyType === 'Bioenzimatico'; }
-    get isGrasas() { return this.surveyType === 'Grasas'; }
-    get isIntima() { return this.surveyType === 'Intima'; }
-    get isDesazolveMec() { return this.surveyType === 'DesazolveMec'; }
-    get isAromatizantes() { return this.surveyType === 'Aromatizantes'; }
-    get isVactor() { return this.surveyType === 'Vactor'; }
+    get isBio() { return this.surveyType === 'BIOENZIMÁTICO'; }
+    get isGrasas() { return this.surveyType === 'GRASAS'; }
+    get isIntima() { return this.surveyType === 'INTIMA'; }
+    get isDesazolveMec() { return this.surveyType === 'DESAZOLVE MECANICO'; }
+    get isAromatizantes() { return this.surveyType === 'AROMATIZANTES'; }
+    get isVactor() { return this.surveyType === 'VACTOR'; }
 
     handleSurveyTypeChange(event) {
         this.surveyType = event.detail.value;
