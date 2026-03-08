@@ -90,19 +90,16 @@
                 </lightning-progress-indicator>
             </div>
 
-            <!-- INDICADOR DE SUB-ETAPAS Y ESTADO (LADO A LADO) -->
-            <div class="slds-p-vertical_x-small slds-border_bottom slds-m-bottom_medium substage-indicator-container">
-                <div class="slds-grid slds-grid_vertical-align-end">
-                    <!-- Barra de Progreso (75%) -->
-                    <div class="slds-col slds-size_9-of-12">
+            <!-- BARRA DE CONTROL DE SUB-PROCESO (INTEGRADA) -->
+            <div class="substage-toolbar slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <!-- Barra de Progreso (Flexible) -->
+                    <div class="slds-col slds-grow">
                         <lightning-progress-indicator 
                             current-step={currentSubStep} 
                             type="path" 
                             variant="base"
-                            style="--slds-c-progress-indicator-path-completed-color-background: #4bca81; 
-                                   --slds-c-progress-indicator-path-active-color-background: #00a1e0; 
-                                   --slds-c-progress-indicator-path-incomplete-color-background: #f3f3f2;
-                                   display: block; transform: scale(0.9); transform-origin: left center;">
+                            class="substage-path">
                             <template for:each={currentSubStages} for:item="sub">
                                 <lightning-progress-step 
                                     key={sub.value} 
@@ -113,11 +110,11 @@
                             </template>
                         </lightning-progress-indicator>
                     </div>
-                    <!-- Dropdown de Estado (25%) -->
-                    <div class="slds-col slds-size_3-of-12 slds-p-left_medium">
+                    <!-- Selector de Estado (Compacto) -->
+                    <div class="slds-col slds-no-flex slds-p-horizontal_medium status-container">
                         <lightning-combobox
-                            label="Estado del paso"
-                            placeholder="Seleccione estado..."
+                            label="Estado"
+                            placeholder="Estado..."
                             value={currentStatus}
                             options={statusOptions}
                             onchange={handleStatusChange}

@@ -1,20 +1,54 @@
 :host {
-    --slds-c-progress-indicator-path-item-font-size: 0.7rem;
+    /* Variables globales para la consistencia visual */
+    --slds-c-progress-indicator-path-item-font-size: 0.75rem;
+    --slds-c-progress-indicator-path-completed-color-background: #4bca81;
+    --slds-c-progress-indicator-path-active-color-background: #00a1e0;
+    --slds-c-progress-indicator-path-incomplete-color-background: #f3f3f2;
 }
 
-/* Contenedor específico para las subetapas */
-.substage-indicator-container {
-    padding: 0 !important;
-    margin-top: -10px; /* Pegamos un poco más la barra a la de arriba */
+/* Contenedor principal de la barra de sub-proceso */
+.substage-toolbar {
+    background: #fdfdfd;
+    border: 1px solid #e0e5ee;
+    border-radius: 30px; /* Forma de cápsula */
+    padding: 4px 4px 4px 15px; /* Menos padding lateral para el dropdown */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+    margin-top: -5px;
 }
 
-/* Forzamos el tamaño pequeño del texto en las subetapas */
-.substage-indicator-container lightning-progress-step {
-    font-size: 0.7rem !important;
+/* Ajuste fino de la barra de progreso interna */
+.substage-path {
+    margin-top: 2px;
 }
 
-/* Estilo para el link de la oportunidad en la tabla */
+/* Contenedor del Dropdown de Estado */
+.status-container {
+    border-left: 1px solid #e0e5ee;
+    min-width: 220px;
+}
+
+/* Personalización del Combobox de Estado */
+.status-dropdown {
+    --slds-c-input-color-border: transparent; /* Quitamos borde para integrarlo */
+    --slds-c-input-spacing-padding-left: 10px;
+    --slds-c-input-radius-border: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Hover amigable para el dropdown */
+.status-dropdown:hover {
+    background: #f4f6f9;
+    border-radius: 20px;
+}
+
+/* Estilo para el link de la oportunidad en la tabla dashboard */
 .opportunity-link {
     font-weight: bold;
     text-decoration: none;
+    color: #0070d2;
+}
+
+.opportunity-link:hover {
+    text-decoration: underline;
 }
