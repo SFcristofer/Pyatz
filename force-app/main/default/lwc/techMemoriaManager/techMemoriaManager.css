@@ -1,0 +1,58 @@
+.memoria-container {
+    background: transparent;
+    height: 100%;
+}
+
+.summary-card, .editor-card {
+    background: white;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    height: 100%;
+    min-height: 500px;
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1b2733;
+}
+
+.summary-list {
+    margin-top: 1rem;
+}
+
+.summary-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f3f3f2;
+    transition: background 0.2s;
+}
+
+.summary-item:hover {
+    background: #f9f9f8;
+}
+
+.item-label {
+    font-weight: 600;
+    color: #3e3e3c;
+}
+
+.item-value {
+    font-weight: 700;
+    color: #0070d2;
+}
+
+.item-detail {
+    font-size: 0.8rem;
+    color: #706e6b;
+    margin-top: 0.25rem;
+}
+
+.rich-editor {
+    --slds-c-textarea-shadow: none;
+    height: 400px;
+}
+
+.empty-state p {
+    color: #706e6b;
+}

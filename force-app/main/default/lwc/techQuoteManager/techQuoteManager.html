@@ -1,35 +1,20 @@
 <template>
-    <!-- Muestra la Lista si estamos en modo list -->
-    <template if:true={isListView}>
-        <c-tech-quote-list 
-            oncreatenew={handleCreateNew}
-            oneditquote={handleEditQuote}
-            onviewcontract={handleViewContract}>
-        </c-tech-quote-list>
-    </template>
+    <div class="premium-cotizador-container" style="background: #fdfdfd; min-height: 90vh;">
+        
+        <!-- VISTA LISTADO PREMIUM (OPORTUNIDADES) -->
+        <template if:true={isListView}>
+            <!-- Aquí aprovechamos techOperations360 en su modo 'dashboard' 
+                 o techQuoteList con esteroides de oportunidad -->
+            <c-tech-operations-360 onrowaction={handleSelectOpportunity}></c-tech-operations-360>
+        </template>
 
-    <template if:true={isEditView}>
-        <c-tech-quote-editor 
-            record-id={selectedRecordId}
-            oncancel={handleShowList}
-            onsave={handleShowList}
-            onviewcontract={handleViewContract}>
-        </c-tech-quote-editor>
-    </template>
+        <!-- VISTA EXPEDIENTE 360 (INMERSIÓN OPERATIVA) -->
+        <template if:true={is360View}>
+            <c-tech-operations-360 
+                record-id={selectedRecordId} 
+                onback={handleShowList}>
+            </c-tech-operations-360>
+        </template>
 
-    <template if:true={isContractView}>
-        <c-tech-contract-manager 
-            record-id={selectedRecordId}
-            oncancel={handleShowList}
-            onsave={handleShowList}
-            onworkorders={handleGenerateWorkOrders}>
-        </c-tech-contract-manager>
-    </template>
-
-    <template if:true={isWorkOrderView}>
-        <c-tech-work-order-console 
-            record-id={selectedRecordId}
-            onback={handleViewContract}>
-        </c-tech-work-order-console>
-    </template>
+    </div>
 </template>

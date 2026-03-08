@@ -3,8 +3,20 @@
         <!-- HEADER DE CONTROL -->
         <div class="header-section">
             <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
-                <lightning-icon icon-name="standard:survey" size="medium" class="slds-m-right_small"></lightning-icon>
-                <h1 class="header-title">LEVANTAMIENTO TÉCNICO PYATZ</h1>
+                <div class="slds-col slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name="standard:survey" size="medium" class="slds-m-right_small"></lightning-icon>
+                    <h1 class="header-title">LEVANTAMIENTO TÉCNICO PYATZ</h1>
+                </div>
+                <div class="slds-col slds-no-flex">
+                    <lightning-button 
+                        label="Guardar Hallazgos" 
+                        variant="brand" 
+                        icon-name="utility:save" 
+                        onclick={handleSave}
+                        class="slds-m-right_small"
+                        disabled={isSaving}>
+                    </lightning-button>
+                </div>
             </div>
             
             <div class="type-selector">
@@ -22,7 +34,7 @@
             <!-- 1. TABLA BIOENZIMÁTICO -->
             <template if:true={isBio}>
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 2600px;">
+                    <table class="survey-table" style="width: 3200px;">
                         <thead>
                             <tr class="survey-header-group">
                                 <th colspan="4">DATOS BASE</th>
@@ -37,30 +49,30 @@
                             <tr class="slds-line-height_reset">
                                 <th style="width: 45px;">#</th>
                                 <th style="width: 110px;">NIVEL</th>
-                                <th style="width: 180px;">ÁREA</th>
-                                <th style="width: 160px;">ZONA</th>
+                                <th style="width: 220px;">ÁREA COCINA O BAÑOS</th>
+                                <th style="width: 180px;">ZONA / GÉNERO</th>
                                 <th style="width: 80px;"># VE</th>
                                 <th style="width: 80px;"># VP</th>
                                 <th style="width: 80px;">#10L</th>
                                 <th style="width: 80px;">#20L</th>
                                 <th style="width: 80px;">#25L</th>
-                                <th style="width: 80px;">PISO</th>
-                                <th style="width: 80px;">MUEB.</th>
-                                <th style="width: 80px;">PARED</th>
-                                <th style="width: 110px;">FOTO</th>
-                                <th style="width: 150px;">RESIDUOS</th>
-                                <th style="width: 150px;">ESCAMOCHE</th>
-                                <th style="width: 150px;">ESTADO INST.</th>
+                                <th style="width: 90px;"># PISO</th>
+                                <th style="width: 100px;"># MUEBLE</th>
+                                <th style="width: 100px;"># PARED</th>
+                                <th style="width: 160px;">FOTOGRAFÍA</th>
+                                <th style="width: 180px;">RESIDUOS TARJA</th>
+                                <th style="width: 160px;">ESCAMOCHE</th>
+                                <th style="width: 160px;">INSTALACIONES</th>
                                 <th style="width: 130px;">AZOLVES</th>
-                                <th style="width: 220px;">OBSERVACIÓN</th>
-                                <th style="width: 90px;">COLAD.</th>
-                                <th style="width: 90px;">TAPÓN</th>
-                                <th style="width: 80px;">TARJA</th>
-                                <th style="width: 90px;">TINAS</th>
-                                <th style="width: 90px;">T. GRASA</th>
-                                <th style="width: 130px;">MODELO TG</th>
-                                <th style="width: 80px;">ST-1</th>
-                                <th style="width: 100px;">OVALINES</th>
+                                <th style="width: 250px;">OBSERVACIÓN</th>
+                                <th style="width: 120px;">COLADERAS</th>
+                                <th style="width: 180px;">TAPÓN REGISTRO</th>
+                                <th style="width: 90px;">TARJA</th>
+                                <th style="width: 180px;"># TINAS X TARJA</th>
+                                <th style="width: 120px;">T. GRASA</th>
+                                <th style="width: 160px;">MODELO TG</th>
+                                <th style="width: 100px;">ST-1</th>
+                                <th style="width: 180px;">OVALINES / LAVABO</th>
                                 <th style="width: 50px;"></th>
                             </tr>
                         </thead>
@@ -141,7 +153,7 @@
             <!-- 2. TABLA GRASAS -->
             <template if:true={isGrasas}>
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 1800px;">
+                    <table class="survey-table" style="width: 2100px;">
                         <thead>
                             <tr class="survey-header-group">
                                 <th colspan="4">IDENTIFICACIÓN</th>
@@ -153,19 +165,19 @@
                             <tr class="slds-line-height_reset">
                                 <th style="width: 40px;">#</th>
                                 <th style="width: 100px;">NIVEL</th>
-                                <th style="width: 160px;">ÁREA</th>
-                                <th style="width: 140px;">ZONA</th>
+                                <th style="width: 220px;">ÁREA COCINA O BAÑOS</th>
+                                <th style="width: 180px;">ZONA / GÉNERO</th>
                                 <th style="width: 70px;">SP</th>
                                 <th style="width: 70px;">ENT</th>
                                 <th style="width: 140px;">MODELO</th>
-                                <th style="width: 140px;">FRECUENCIA</th>
-                                <th style="width: 140px;">ESTADO</th>
-                                <th style="width: 80px;">TORNILLO</th>
-                                <th style="width: 80px;">SELLO</th>
-                                <th style="width: 80px;">MAMPARA</th>
-                                <th style="width: 80px;">CANAST.</th>
-                                <th style="width: 80px;">RET. SAL.</th>
-                                <th style="width: 100px;">FOTO</th>
+                                <th style="width: 200px;">FRECUENCIA DE LIMPIEZA</th>
+                                <th style="width: 160px;">ESTADO DE TRAMPA</th>
+                                <th style="width: 100px;">TORNILLO</th>
+                                <th style="width: 100px;">SELLO</th>
+                                <th style="width: 110px;">MAMPARA</th>
+                                <th style="width: 120px;">CANASTILLA</th>
+                                <th style="width: 120px;">RET. SALIDA</th>
+                                <th style="width: 160px;">FOTOGRAFÍA</th>
                                 <th style="width: 45px;"></th>
                             </tr>
                         </thead>
@@ -220,31 +232,78 @@
                 <div class="diag-card">
                     <div class="diag-header">
                         <lightning-icon icon-name="utility:answer" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
-                        <h3 class="slds-text-heading_small">Diagnóstico Situacional</h3>
+                        <h3 class="slds-text-heading_small">Diagnóstico Situacional - Gestión Menstrual</h3>
                     </div>
                     <table class="diag-table">
                         <tr><td class="diag-label"># Usuarias Internas</td><td><input type="number" class="cell-input" data-field="gmUsuariasInt" value={gmUsuariasInt} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label"># Usuarias Externas</td><td><input type="number" class="cell-input" data-field="gmUsuariasExt" value={gmUsuariasExt} onchange={handleGmChange}></td></tr>
                         <tr><td class="diag-label">Frecuencia de Uso</td><td>
                             <select class="cell-select" data-field="gmFreqUso" onchange={handleGmChange}>
-                                <option value="">-</option><option value="Lunes a viernes" selected={isGmFreqLV}>Lunes a viernes</option><option value="Días alternados" selected={isGmFreqAlt}>Días alternados</option>
+                                <option value="">-</option>
+                                <option value="Lunes a viernes" selected={isGmFreqLV}>Lunes a viernes</option>
+                                <option value="Días alternados (ej. home office)" selected={isGmFreqAlt}>Días alternados (ej. home office)</option>
                             </select>
                         </td></tr>
                         <tr><td class="diag-label"># Sanitarios Totales</td><td><input type="number" class="cell-input" data-field="gmSanitarios" value={gmSanitarios} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label"># Cubículos Totales</td><td><input type="number" class="cell-input" data-field="gmCubiculos" value={gmCubiculos} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label"># Contenedores Sugeridos</td><td><input type="number" class="cell-input" data-field="gmContenedores" value={gmContenedores} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Frecuencia de Recolección</td><td>
+                            <select class="cell-select" data-field="gmFreqRecoleccion" onchange={handleGmChange}>
+                                <option value="">-</option>
+                                <option value="7 días" selected={isGmRec7}>7 días</option>
+                                <option value="14 días" selected={isGmRec14}>14 días</option>
+                                <option value="21 días" selected={isGmRec21}>21 días</option>
+                                <option value="28 días" selected={isGmRec28}>28 días</option>
+                                <option value="Otro:" selected={isGmRecOtro}>Otro:</option>
+                            </select>
+                        </td></tr>
+                        <tr><td class="diag-label">Días de Servicio</td><td>
+                            <select class="cell-select" data-field="gmDiasServicio" onchange={handleGmChange}>
+                                <option value="">-</option>
+                                <option value="Lunes a Viernes" selected={isGmDiasLV}>Lunes a Viernes</option>
+                                <option value="Sábado o domingo" selected={isGmDiasFin}>Sábado o domingo</option>
+                            </select>
+                        </td></tr>
+                        <tr><td class="diag-label">Horario de Servicio</td><td><input type="text" class="cell-input" data-field="gmHorario" value={gmHorario} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Permisos de Acceso</td><td>
+                            <select class="cell-select" data-field="gmPermisos" onchange={handleGmChange}>
+                                <option value="">-</option>
+                                <option value="Si" selected={isGmPermSi}>Si</option>
+                                <option value="No" selected={isGmPermNo}>No</option>
+                            </select>
+                        </td></tr>
+                        <tr><td class="diag-label">Consideraciones Especiales</td><td><input type="text" class="cell-input" data-field="gmConsideraciones" value={gmConsideraciones} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Requiere Capacitación</td><td>
+                            <select class="cell-select" data-field="gmCapacitacion" onchange={handleGmChange}>
+                                <option value="">-</option>
+                                <option value="Si" selected={isGmCapSi}>Si</option>
+                                <option value="No" selected={isGmCapNo}>No</option>
+                            </select>
+                        </td></tr>
+                        <tr><td class="diag-label">Presupuesto Asignado</td><td><input type="text" class="cell-input" data-field="gmPresupuesto" value={gmPresupuesto} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Motivo de la Necesidad</td><td><input type="text" class="cell-input" data-field="gmMotivo" value={gmMotivo} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Permite Levantamiento Fotográfico</td><td>
+                            <select class="cell-select" data-field="gmPermiteLev" onchange={handleGmChange}>
+                                <option value="">-</option>
+                                <option value="Si" selected={isGmLevSi}>Si</option>
+                                <option value="No" selected={isGmLevNo}>No</option>
+                            </select>
+                        </td></tr>
                     </table>
                 </div>
 
                 <!-- CENSO -->
                 <div class="table-scroll-container">
-                    <table class="survey-table">
+                    <table class="survey-table" style="width: 1400px;">
                         <thead>
                             <tr class="slds-line-height_reset">
                                 <th style="width: 40px;">#</th>
                                 <th style="width: 120px;">NIVEL</th>
-                                <th>ÁREA</th>
-                                <th>ZONA</th>
-                                <th style="width: 100px;"># WC</th>
-                                <th style="width: 150px;">FRECUENCIA</th>
-                                <th style="width: 150px;">DÍAS</th>
+                                <th style="width: 220px;">ÁREA COCINA O BAÑOS</th>
+                                <th style="width: 180px;">ZONA / GÉNERO</th>
+                                <th style="width: 100px;">WC</th>
+                                <th style="width: 180px;">FRECUENCIA</th>
+                                <th style="width: 180px;">DIAS DE SERVICIOS</th>
                                 <th style="width: 45px;"></th>
                             </tr>
                         </thead>
@@ -283,9 +342,9 @@
                                 <th colspan="1"></th>
                             </tr>
                             <tr class="slds-line-height_reset">
-                                <th style="width: 40px;">#</th><th style="width: 100px;">NIVEL</th><th style="width: 160px;">ÁREA</th><th style="width: 140px;">ZONA</th>
-                                <th style="width: 90px;">OVALINES</th><th style="width: 90px;">COLAD.</th><th style="width: 90px;">TAPÓN</th><th style="width: 90px;">MINGIT.</th><th style="width: 90px;">WC</th>
-                                <th style="width: 110px;">MT LÍNEAL</th><th style="width: 110px;">TARJAS</th><th style="width: 130px;">CTO. HÚMEDO</th><th style="width: 45px;"></th>
+                                <th style="width: 40px;">#</th><th style="width: 100px;">NIVEL</th><th style="width: 160px;">ÁREA, COCINA O BAÑOS</th><th style="width: 140px;">ZONA/GENERO</th>
+                                <th style="width: 90px;">OVALINES/LAVABO</th><th style="width: 90px;">COLADERAS</th><th style="width: 90px;">TAPÓN REGISTRO</th><th style="width: 90px;">MINGITORIOS</th><th style="width: 90px;">WC</th>
+                                <th style="width: 110px;">MT LÍNEAL</th><th style="width: 110px;">TARJAS SERVICIOS</th><th style="width: 130px;">CUARTO HÚMEDO</th><th style="width: 45px;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -322,7 +381,7 @@
                     <table class="survey-table">
                         <thead>
                             <tr class="slds-line-height_reset">
-                                <th style="width: 40px;">#</th><th style="width: 120px;">NIVEL</th><th>ÁREA</th><th>ZONA</th><th style="width: 150px;"># EQUIPOS ARM</th><th style="width: 45px;"></th>
+                                <th style="width: 40px;">#</th><th style="width: 120px;">NIVEL</th><th>ÁREA COCINA O BAÑOS</th><th>ZONA/GENERO</th><th style="width: 150px;"># ARM</th><th style="width: 45px;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -351,10 +410,10 @@
                     <table class="survey-table" style="width: 2400px;">
                         <thead>
                             <tr class="slds-line-height_reset">
-                                <th style="width: 150px;">DESCRIPCIÓN</th><th style="width: 80px;">MEDIDA</th><th style="width: 120px;">MATERIAL</th><th style="width: 120px;">SERVICIO</th>
-                                <th style="width: 80px;">LARGO</th><th style="width: 80px;">ANCHO</th><th style="width: 80px;">PROF.</th><th style="width: 100px;">MT LÍNEA</th>
-                                <th style="width: 180px;">DISTANCIA</th><th style="width: 120px;">PERM. DELEG.</th><th style="width: 120px;">PERM. PLAZA</th>
-                                <th style="width: 120px;">DIFICULTAD</th><th style="width: 200px;">ALCANCE</th><th style="width: 200px;">OBS</th><th style="width: 45px;"></th>
+                                <th style="width: 150px;">DESCRIPCIÓN</th><th style="width: 80px;">MEDIDA</th><th style="width: 120px;">MATERIAL</th><th style="width: 120px;">SERVICIO REQUERIDO</th>
+                                <th style="width: 80px;">LARGO</th><th style="width: 80px;">ANCHO</th><th style="width: 80px;">PROFUNDIDAD</th><th style="width: 100px;">METROS LÍNEALES</th>
+                                <th style="width: 180px;">DISTANCIA DE PUNTO DE SERVICIO AL LUGAR DONDE SE PERMITE ESTACIONAR EL CAMION </th><th style="width: 120px;">REQUIERE PERMISO DE DELEGACION GESTIONADO POR UN TERCERO</th><th style="width: 120px;">REQUIERE PERMISO DE PLAZA U OTRA AREA QUE EL CLIENTE GESTIONA</th>
+                                <th style="width: 120px;">DIFICULTAD</th><th style="width: 200px;">ALCANCE PYATZ</th><th style="width: 200px;">OBSERVACIONES</th><th style="width: 45px;"></th>
                             </tr>
                         </thead>
                         <tbody>

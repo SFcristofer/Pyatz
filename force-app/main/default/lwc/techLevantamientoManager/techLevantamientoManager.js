@@ -1,9 +1,12 @@
 import { LightningElement, track, api } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import saveSurveyData from '@salesforce/apex/QuoteTechnicalController.saveSurveyData';
 
 export default class TechLevantamientoManager extends LightningElement {
     @api recordId;
     @track surveyType = 'Bioenzimatico';
     @track surveyData = [];
+    @track isSaving = false;
 
     // --- VARIABLES GESTIÓN MENSTRUAL ---
     @track gmUsuariasInt = 0; @track gmUsuariasExt = 0; @track gmFreqUso = '';
@@ -11,6 +14,42 @@ export default class TechLevantamientoManager extends LightningElement {
     @track gmFreqRecoleccion = ''; @track gmDiasServicio = ''; @track gmHorario = '';
     @track gmPermisos = ''; @track gmConsideraciones = ''; @track gmCapacitacion = '';
     @track gmPresupuesto = ''; @track gmMotivo = ''; @track gmPermiteLev = '';
+
+    // API pública para que el orquestador pueda ordenar el guardado
+    @api 
+    async save() {
+        return this.handleSave();
+    }
+
+    async handleSave() {
+        if (!this.recordId) return false;
+        
+        this.isSaving = true;
+        try {
+            await saveSurveyData({
+                oppId: this.recordId,
+                type: this.surveyType,
+                surveyDataJson: JSON.stringify(this.surveyData)
+            });
+            
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Éxito',
+                message: 'Levantamiento guardado correctamente.',
+                variant: 'success'
+            }));
+            return true;
+        } catch (error) {
+            console.error('Error saving survey:', error);
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error al guardar',
+                message: error.body ? error.body.message : error.message,
+                variant: 'error'
+            }));
+            return false;
+        } finally {
+            this.isSaving = false;
+        }
+    }
 
     connectedCallback() {
         if (this.surveyData.length === 0) {

@@ -108,20 +108,71 @@
 
             <!-- CONTENIDO DE ETAPA ACTIVA -->
             <div class="module-container slds-p-around_medium" style="background: white; border: 1px solid #dddbda; border-radius: 4px; min-height: 400px;">
-                <div class="slds-text-align_center slds-p-around_large">
-                    <h2 class="slds-text-heading_small slds-text-color_weak slds-m-bottom_small">
-                        {currentStage.label} > {subPhase}
-                    </h2>
-                    
-                    <!-- PLACEHOLDERS PARA CONTENIDO TÉCNICO -->
-                    <div class="slds-box slds-theme_shade">
-                        <p>Espacio de trabajo para la sub-etapa: <strong>{subPhase}</strong></p>
-                        <p class="slds-m-top_x-small slds-text-color_weak">Record ID Activo: {recordId}</p>
-                        <div class="slds-m-top_large">
-                            <lightning-icon icon-name="standard:task" size="large"></lightning-icon>
+                
+                <!-- MÓDULO: LEVANTAMIENTO -->
+                <template if:true={isLevantamientoPhase}>
+                    <c-tech-levantamiento-manager record-id={recordId}></c-tech-levantamiento-manager>
+                </template>
+
+                <!-- MÓDULO: MEMORIA TÉCNICA -->
+                <template if:true={isMemoriaPhase}>
+                    <c-tech-memoria-manager record-id={recordId}></c-tech-memoria-manager>
+                </template>
+
+                <!-- MÓDULO: PRESUPUESTO (COMPUESTO: LISTA + EDITOR) -->
+                <template if:true={isPresupuestoPhase}>
+                    <!-- Sub-vista 1: Listado de Presupuestos -->
+                    <template if:true={showQuoteList}>
+                        <c-tech-quote-list 
+                            opportunity-id={recordId} 
+                            oneditquote={handleEditQuote} 
+                            oncreatenew={handleCreateNewQuote}>
+                        </c-tech-quote-list>
+                    </template>
+                    <!-- Sub-vista 2: Editor de Presupuesto -->
+                    <template if:true={showQuoteEditor}>
+                        <div class="slds-m-bottom_small">
+                            <lightning-button label="Volver al Listado" icon-name="utility:back" onclick={handleBackToQuoteList}></lightning-button>
                         </div>
-                    </div>
-                </div>
+                        <c-tech-quote-editor 
+                            record-id={selectedQuoteId} 
+                            opportunity-id={recordId}>
+                        </c-tech-quote-editor>
+                    </template>
+                </template>
+
+                <!-- MÓDULO: CONTRATO -->
+                <template if:true={isContratoPhase}>
+                    <c-tech-contract-manager record-id={recordId}></c-tech-contract-manager>
+                </template>
+
+                <!-- MÓDULO: CREACIÓN ODT'S -->
+                <template if:true={isWorkOrderPhase}>
+                    <c-tech-work-order-console record-id={recordId}></c-tech-work-order-console>
+                </template>
+
+                <!-- OTROS MÓDULOS (PLACEHOLDER) -->
+                <template if:false={isLevantamientoPhase}>
+                    <template if:false={isPresupuestoPhase}>
+                        <template if:false={isContratoPhase}>
+                            <template if:false={isWorkOrderPhase}>
+                                <div class="slds-text-align_center slds-p-around_large">
+                                    <h2 class="slds-text-heading_small slds-text-color_weak slds-m-bottom_small">
+                                        {currentStage.label} > {subPhase}
+                                    </h2>
+                                    
+                                    <div class="slds-box slds-theme_shade">
+                                        <p>Espacio de trabajo para la sub-etapa: <strong>{subPhase}</strong></p>
+                                        <p class="slds-m-top_x-small slds-text-color_weak">Record ID Activo: {recordId}</p>
+                                        <div class="slds-m-top_large">
+                                            <lightning-icon icon-name="standard:task" size="large"></lightning-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </template>
+                </template>
             </div>
 
             <!-- ACCIONES DE NAVEGACIÓN -->

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Memoria_Descriptiva__c</fullName>
+    <description>Espacio para la redacción de la memoria técnica descriptiva del servicio.</description>
+    <inlineHelpText>Redacte aquí la descripción detallada de los hallazgos y la solución propuesta.</inlineHelpText>
+    <label>Memoria Descriptiva</label>
+    <length>32768</length>
+    <type>Html</type>
+    <visibleLines>25</visibleLines>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cantidad_Principal__c</fullName>
+    <description>Se usa para #WC, #VE, #Equipos ARM o #Sedes según el tipo de servicio.</description>
+    <label>Cantidad Principal</label>
+    <precision>18</precision>
+    <scale>2</scale>
+    <type>Number</type>
+</CustomField>

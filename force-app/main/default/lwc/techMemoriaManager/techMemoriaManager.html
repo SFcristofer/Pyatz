@@ -1,0 +1,64 @@
+<template>
+    <div class="memoria-container">
+        <lightning-layout multiple-rows="true" vertical-align="stretch">
+            <!-- COLUMNA IZQUIERDA: RESUMEN DEL LEVANTAMIENTO -->
+            <lightning-layout-item size="12" large-device-size="5" padding="around-small">
+                <div class="summary-card slds-p-around_medium">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                        <lightning-icon icon-name="standard:report" size="small" class="slds-m-right_small"></lightning-icon>
+                        <h2 class="title">Resumen del Levantamiento</h2>
+                    </div>
+                    
+                    <template lwc:if={surveySummary.length}>
+                        <div class="summary-list">
+                            <template for:each={surveySummary} for:item="item">
+                                <div key={item.id} class="summary-item">
+                                    <div class="slds-grid slds-grid_align-spread">
+                                        <span class="item-label">{item.label}</span>
+                                        <span class="item-value">{item.value}</span>
+                                    </div>
+                                    <p class="item-detail">{item.detail}</p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state slds-text-align_center slds-p-around_large">
+                            <lightning-icon icon-name="utility:info" size="medium" variant="warning"></lightning-icon>
+                            <p class="slds-m-top_small">No se encontraron datos de levantamiento para este presupuesto.</p>
+                        </div>
+                    </template>
+                </div>
+            </lightning-layout-item>
+
+            <!-- COLUMNA DERECHA: EDITOR DE MEMORIA DESCRIPTIVA -->
+            <lightning-layout-item size="12" large-device-size="7" padding="around-small">
+                <div class="editor-card slds-p-around_medium">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                        <lightning-icon icon-name="standard:post" size="small" class="slds-m-right_small"></lightning-icon>
+                        <h2 class="title">Memoria Descriptiva del Servicio</h2>
+                    </div>
+                    
+                    <lightning-input-rich-text
+                        label="Descripción de la Solución"
+                        placeholder="Redacte aquí la descripción técnica detallada..."
+                        value={memoriaText}
+                        onchange={handleTextChange}
+                        class="rich-editor"
+                        variant="bottom-toolbar">
+                    </lightning-input-rich-text>
+
+                    <div class="slds-m-top_medium slds-text-align_right">
+                        <lightning-button 
+                            variant="brand" 
+                            label="Guardar Memoria" 
+                            icon-name="utility:save"
+                            onclick={handleSave}
+                            disabled={isSaving}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
+    </div>
+</template>
