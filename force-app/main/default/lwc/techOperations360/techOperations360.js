@@ -213,9 +213,35 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     handleSubStepClick(event) {
         this.currentSubStep = event.target.value;
-        this.currentStatus = ''; // Reset estado al cambiar sub-etapa
+        this.currentStatus = ''; 
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
+    }
+
+    // --- CÁLCULO DE PROGRESO GLOBAL ---
+    get overallProgress() {
+        if (!this.stages.length || !this.currentStep) return 0;
+        
+        let totalSubStages = 0;
+        let completedSubStages = 0;
+        let foundCurrent = false;
+
+        this.stages.forEach(stage => {
+            stage.subStages.forEach(sub => {
+                totalSubStages++;
+                if (!foundCurrent) {
+                    if (stage.value === this.currentStep && sub.value === this.currentSubStep) {
+                        foundCurrent = true;
+                        completedSubStages++;
+                    } else {
+                        completedSubStages++;
+                    }
+                }
+            });
+        });
+
+        if (totalSubStages === 0) return 0;
+        return Math.round((completedSubStages / totalSubStages) * 100);
     }
 
     async handleNext() {

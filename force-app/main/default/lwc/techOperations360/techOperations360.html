@@ -69,8 +69,19 @@
                             <lightning-output-field field-name="CloseDate"></lightning-output-field>
                             <lightning-output-field field-name="StageName"></lightning-output-field>
                             <lightning-output-field field-name="Subetapa__c"></lightning-output-field>
-                            <lightning-output-field field-name="Estado_Subetapa__c"></lightning-output-field>
-                            <lightning-output-field field-name="Probability"></lightning-output-field>
+                            
+                            <!-- BARRA DE PROGRESO DE EXPEDIENTE (REEMPLAZA PROBABILIDAD) -->
+                            <div class="slds-p-around_x-small slds-m-top_x-small" style="background: white; border-radius: 4px; border: 1px solid #e0e5ee;">
+                                <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
+                                    <span class="slds-text-title_bold" style="color: #0070d2;">Avance del Expediente</span>
+                                    <span class="slds-text-title_bold">{overallProgress}%</span>
+                                </div>
+                                <lightning-progress-bar 
+                                    value={overallProgress} 
+                                    size="medium" 
+                                    variant="circular">
+                                </lightning-progress-bar>
+                            </div>
                         </div>
                     </div>
                 </lightning-record-view-form>
