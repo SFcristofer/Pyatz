@@ -178,6 +178,10 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         return this.currentStep === '1' && this.currentSubStep === '2';
     }
 
+    get isDefSolucionPhase() {
+        return this.currentStep === '2' && this.currentSubStep === '1';
+    }
+
     get isPresupuestoPhase() { return this.currentStep === '2' && this.currentSubStep === '2'; }
     get isContratoPhase() { return this.currentStep === '6' && this.currentSubStep === '2'; }
     get isWorkOrderPhase() { return this.currentStep === '6' && this.currentSubStep === '3'; }

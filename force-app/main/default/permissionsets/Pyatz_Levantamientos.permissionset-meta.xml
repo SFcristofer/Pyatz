@@ -79,6 +79,11 @@
         <field>Solucion_Tecnica__c.Descripcion_Detallada__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Solucion_Tecnica__c.Observaciones_Comerciales__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 
     <objectPermissions>
         <allowCreate>true</allowCreate>

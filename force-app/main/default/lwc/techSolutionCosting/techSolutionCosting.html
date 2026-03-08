@@ -1,0 +1,87 @@
+<template>
+    <div class="costing-container">
+        <lightning-layout multiple-rows="true" vertical-align="stretch">
+            
+            <!-- PANEL IZQUIERDO: BANDEJA DE SOLUCIONES -->
+            <lightning-layout-item size="12" large-device-size="4" padding="around-small">
+                <div class="side-panel">
+                    <div class="panel-header slds-p-around_small">
+                        <h2 class="slds-text-heading_small slds-font-weight_bold">Bandeja de Soluciones</h2>
+                        <p class="slds-text-color_weak slds-text-body_small">Seleccione para configurar costeo</p>
+                    </div>
+                    
+                    <div class="scroll-area">
+                        <template for:each={groupedSolutions} for:item="group">
+                            <div key={group.id} class="group-section slds-m-bottom_small">
+                                <div class="group-label">{group.label}</div>
+                                <template for:each={group.solutions} for:item="sol">
+                                    <div key={sol.id} 
+                                         class={sol.className} 
+                                         data-id={sol.id} 
+                                         onclick={handleSolSelect}>
+                                        <div class="slds-grid slds-grid_align-spread">
+                                            <span class="sol-name">{sol.name}</span>
+                                            <lightning-icon if:true={sol.commObs} icon-name="utility:check" size="xx-small" variant="success"></lightning-icon>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <div if:false={groupedSolutions.length} class="slds-text-align_center slds-p-around_large">
+                            <p class="slds-text-color_weak">No hay soluciones técnicas redactadas aún.</p>
+                        </div>
+                    </div>
+                </div>
+            </lightning-layout-item>
+
+            <!-- PANEL DERECHO: CONFIGURACIÓN DE COSTEO -->
+            <lightning-layout-item size="12" large-device-size="8" padding="around-small">
+                <div class="work-panel">
+                    <div class="panel-header slds-p-around_small">
+                        <h2 class="slds-text-heading_small slds-font-weight_bold">{panelTitle}</h2>
+                    </div>
+
+                    <div class="work-content">
+                        <template if:true={selectedSolId}>
+                            <!-- Referencia Técnica (Solo lectura) -->
+                            <div class="tech-reference slds-p-around_medium">
+                                <h3 class="section-title">Base Técnica (Memoria)</h3>
+                                <div class="tech-box">
+                                    <lightning-formatted-rich-text value={techDesc}></lightning-formatted-rich-text>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones de Costeo (Editable) -->
+                            <div class="costing-input slds-p-around_medium">
+                                <h3 class="section-title">Observaciones Comerciales / Costeo</h3>
+                                <lightning-input-rich-text
+                                    value={commObs}
+                                    onchange={handleObsChange}
+                                    placeholder="Redacte aquí notas sobre precios, descuentos o condiciones especiales..."
+                                    class="cost-editor">
+                                </lightning-input-rich-text>
+                            </div>
+                        </template>
+
+                        <template if:false={selectedSolId}>
+                            <div class="empty-state">
+                                <lightning-icon icon-name="standard:product" size="large"></lightning-icon>
+                                <p class="slds-m-top_medium">Seleccione una solución de la bandeja izquierda para definir sus parámetros de costeo.</p>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="panel-footer slds-p-around_medium slds-text-align_right">
+                        <lightning-button 
+                            variant="brand" 
+                            label="Guardar Configuración" 
+                            icon-name="utility:save"
+                            onclick={handleSave}
+                            disabled={isEditorDisabled}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
+    </div>
+</template>

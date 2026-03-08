@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Observaciones_Comerciales__c</fullName>
+    <description>Notas y observaciones específicas para el proceso de costeo y presupuesto.</description>
+    <label>Observaciones de Costeo</label>
+    <length>32768</length>
+    <type>Html</type>
+    <visibleLines>15</visibleLines>
+</CustomField>

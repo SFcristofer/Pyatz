@@ -119,6 +119,11 @@
                     <c-tech-memoria-manager record-id={recordId}></c-tech-memoria-manager>
                 </template>
 
+                <!-- MÓDULO: DEF. SOLUCIÓN -->
+                <template if:true={isDefSolucionPhase}>
+                    <c-tech-solution-costing record-id={recordId}></c-tech-solution-costing>
+                </template>
+
                 <!-- MÓDULO: PRESUPUESTO (COMPUESTO: LISTA + EDITOR) -->
                 <template if:true={isPresupuestoPhase}>
                     <!-- Sub-vista 1: Listado de Presupuestos -->

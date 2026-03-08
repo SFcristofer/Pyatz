@@ -183,7 +183,6 @@ public with sharing class QuoteTechnicalController {
             String status = (String)p.get('status');
             
             Quote q;
-            // ESCENARIO A: ACTUALIZACIÓN
             if (rid != null && rid.getSObjectType().getDescribe().getName() == 'Quote') {
                 q = [SELECT Id FROM Quote WHERE Id = :rid LIMIT 1];
                 q.Name = (String)p.get('name');
@@ -195,93 +194,39 @@ public with sharing class QuoteTechnicalController {
                 q.Description = (String)p.get('observacionesPago');
                 q.Show_Introduction__c = true; q.Show_Warranty__c = true;
                 update q;
-            } 
-            // ESCENARIO B: CREACIÓN
-            else {
+            } else {
                 Id oppId = (rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') ? rid : null;
                 Id pbId;
-                
-                if (oppId != null) {
-                    Opportunity opp = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1];
-                    pbId = opp.Pricebook2Id;
-                }
-                
-                if (pbId == null) {
-                    try { pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id; } catch(Exception e) {}
-                }
-                
+                if (oppId != null) pbId = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1].Pricebook2Id;
+                if (pbId == null) try { pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id; } catch(Exception e) {}
                 q = new Quote();
-                q.Name = (String)p.get('name');
-                q.OpportunityId = oppId;
-                q.Pricebook2Id = pbId;
-                q.Status = status;
-                q.Introduction_Text__c = (String)p.get('intro');
-                q.Warranty_Text__c = (String)p.get('warranty');
-                q.Markers_Data__c = (String)p.get('markersData');
-                q.Technical_Sedes__c = (String)p.get('technicalSedes');
-                q.Description = (String)p.get('observacionesPago');
-                q.Show_Introduction__c = true;
-                q.Show_Warranty__c = true;
+                q.Name = (String)p.get('name'); q.OpportunityId = oppId; q.Pricebook2Id = pbId; q.Status = status;
+                q.Introduction_Text__c = (String)p.get('intro'); q.Warranty_Text__c = (String)p.get('warranty');
+                q.Markers_Data__c = (String)p.get('markersData'); q.Technical_Sedes__c = (String)p.get('technicalSedes');
+                q.Description = (String)p.get('observacionesPago'); q.Show_Introduction__c = true; q.Show_Warranty__c = true;
                 q.ExpirationDate = Date.today().addDays(30);
                 insert q;
                 rid = q.Id;
             }
-
-            // --- REPORTEABILIDAD DE LEVANTAMIENTOS ---
             try {
                 String markersBase64 = (String)p.get('markersData');
-                if (String.isNotBlank(markersBase64) && rid != null) {
-                    processLevantamientos(rid, markersBase64);
-                }
-            } catch (Exception e) {
-                System.debug('Error en reportabilidad de levantamientos: ' + e.getMessage());
-            }
+                if (String.isNotBlank(markersBase64) && rid != null) processLevantamientos(rid, markersBase64);
+            } catch (Exception e) {}
             
-            // PROCESAMIENTO DE PARTIDAS
             if (String.isNotBlank(itemsJson) && rid != null) {
                 List<Object> items = (List<Object>)JSON.deserializeUntyped(itemsJson);
                 delete [SELECT Id FROM QuoteLineItem WHERE QuoteId = :rid];
                 List<QuoteLineItem> qlis = new List<QuoteLineItem>();
                 for (Object obj : items) {
                     Map<String, Object> it = (Map<String, Object>)obj;
-                    if (it.get('isSeparator') == true) continue;
-                    
-                    // Priorizar pbeId enviado desde el frontend moderno
                     String pbeIdStr = (String)it.get('pbeId');
-                    if (String.isBlank(pbeIdStr) || pbeIdStr == 'null') {
-                        // Fallback al campo id si pbeId no existe (compatibilidad)
-                        pbeIdStr = (String)it.get('id');
-                    }
-                    
-                    // Validación robusta de ID de Salesforce
+                    if (String.isBlank(pbeIdStr) || pbeIdStr == 'null') pbeIdStr = (String)it.get('id');
                     if (String.isBlank(pbeIdStr) || pbeIdStr.length() < 15) continue;
-                    
                     try {
-                        Id validPbeId = (Id)pbeIdStr;
                         Decimal can = Decimal.valueOf(String.valueOf(it.get('cantidad') != null ? it.get('cantidad') : 1));
                         Decimal tot = Decimal.valueOf(String.valueOf(it.get('totalSinImpuestos') != null ? it.get('totalSinImpuestos') : 0));
-                        
-                        // Evitar división por cero
-                        Decimal unitPrice = (can > 0) ? (tot/can) : tot;
-
-                        // Capturar descripción técnica completa
-                        String fullDesc = (String)it.get('detalleTecnico');
-                        // Truncar para el campo estándar por seguridad (255 caracteres)
-                        String truncatedDesc = (String.isNotBlank(fullDesc) && fullDesc.length() > 255) ? fullDesc.substring(0, 252) + '...' : fullDesc;
-
-                        QuoteLineItem qli = new QuoteLineItem(
-                            QuoteId = rid, 
-                            PricebookEntryId = validPbeId, 
-                            Quantity = (can > 0 ? can : 1), 
-                            UnitPrice = unitPrice,
-                            Description = truncatedDesc,
-                            Pyatz_Technical_Description__c = fullDesc // Campo nuevo para texto largo
-                        );
-                        qlis.add(qli);
-                    } catch (Exception e) {
-                        System.debug('Error procesando partida individual: ' + e.getMessage());
-                        continue; // Saltar partidas corruptas sin romper el proceso
-                    }
+                        qlis.add(new QuoteLineItem(QuoteId = rid, PricebookEntryId = (Id)pbeIdStr, Quantity = (can > 0 ? can : 1), UnitPrice = (can > 0 ? (tot/can) : tot), Description = (String)it.get('detalleTecnico')));
+                    } catch (Exception e) {}
                 }
                 if (!qlis.isEmpty()) insert qlis;
             }
@@ -297,105 +242,47 @@ public with sharing class QuoteTechnicalController {
         return [SELECT Id, Name, BillingStreet, BillingCity, Phone FROM Account WHERE ParentId = :parentAccountId AND (Name LIKE :key OR BillingCity LIKE :key) LIMIT 200];
     }
 
-    @AuraEnabled(cacheable=true)
-    public static List<Map<String, String>> searchParentAccounts(String searchTerm) {
-        List<Map<String, String>> results = new List<Map<String, String>>();
-        String query = '%' + searchTerm + '%';
-        for (Account acc : [SELECT Id, Name FROM Account WHERE Name LIKE :query LIMIT 10]) {
-            results.add(new Map<String, String>{'id' => acc.Id, 'name' => acc.Name});
-        }
-        return results;
-    }
-
-    @AuraEnabled
-    public static Boolean validatePLPassword(String passwordAttempt) { 
-        // Usar etiqueta personalizada para mayor seguridad y flexibilidad
-        String correctPassword = System.Label.PL_Access_Password;
-        return passwordAttempt == correctPassword; 
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<Map<String, String>> searchSedes(String searchTerm) {
-        List<Map<String, String>> results = new List<Map<String, String>>();
-        String query = '%' + searchTerm + '%';
-        for (Account acc : [SELECT Id, Name FROM Account WHERE Name LIKE :query LIMIT 10]) {
-            results.add(new Map<String, String>{'id' => acc.Id, 'name' => acc.Name});
-        }
-        return results;
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<Map<String, String>> searchProspectos(String searchTerm) {
-        List<Map<String, String>> results = new List<Map<String, String>>();
-        String query = '%' + searchTerm + '%';
-        for (Lead l : [SELECT Id, Name, Company FROM Lead WHERE (Name LIKE :query OR Company LIKE :query) AND IsConverted = false LIMIT 10]) {
-            results.add(new Map<String, String>{'id' => l.Id, 'name' => l.Name + ' (' + l.Company + ')'});
-        }
-        return results;
-    }
-
-    @AuraEnabled
-    public static Id cloneQuote(Id quoteId) {
-        try {
-            Quote orig = [SELECT Id, Name, AccountId, OpportunityId, Pricebook2Id, Introduction_Text__c, Warranty_Text__c, Technical_Sedes__c, Markers_Data__c, Description, (SELECT Id, PricebookEntryId, Quantity, UnitPrice, Discount, Description FROM QuoteLineItems) FROM Quote WHERE Id = :quoteId];
-            Quote cl = orig.clone(false, true, false, false);
-            cl.Name = 'CLON: ' + orig.Name; cl.Status = 'Draft'; insert cl;
-            List<QuoteLineItem> items = new List<QuoteLineItem>();
-            for(QuoteLineItem i : orig.QuoteLineItems) items.add(new QuoteLineItem(QuoteId = cl.Id, PricebookEntryId = i.PricebookEntryId, Quantity = i.Quantity, UnitPrice = i.UnitPrice, Description = i.Description));
-            insert items;
-            return cl.Id;
-        } catch (Exception e) { throw new AuraHandledException('Clonación: ' + e.getMessage()); }
-    }
-
     @AuraEnabled
     public static void saveSurveyData(Id oppId, String type, String surveyDataJson, String diagDataJson) {
         try {
             if (String.isBlank(surveyDataJson) || oppId == null) return;
             List<Object> rows = (List<Object>)JSON.deserializeUntyped(surveyDataJson);
             Map<String, Object> diag = String.isNotBlank(diagDataJson) ? (Map<String, Object>)JSON.deserializeUntyped(diagDataJson) : new Map<String, Object>();
-            
-            // Limpiar datos previos de la Oportunidad (Búsqueda más robusta)
             String typeUpper = type.toUpperCase();
             delete [SELECT Id FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId AND Tipo_Servicio__c = :typeUpper];
-
             List<Levantamiento_Tecnico__c> toInsert = new List<Levantamiento_Tecnico__c>();
             for (Object obj : rows) {
                 Map<String, Object> row = (Map<String, Object>)obj;
-                Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(
-                    Oportunidad__c = oppId,
-                    Tipo_Servicio__c = typeUpper,
-                    Nivel__c = (String)row.get('nivel'),
-                    Area_Cocina_Banos__c = (String)row.get('area'),
-                    Zona_Genero__c = (String)row.get('zona'),
-                    Observaciones_Tecnicas__c = (String)row.get('obs')
-                );
-
-                // Mapeo de Diagnóstico (Solo si es Gestión Menstrual)
+                Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(Oportunidad__c = oppId, Tipo_Servicio__c = typeUpper, Nivel__c = (String)row.get('nivel'), Area_Cocina_Banos__c = (String)row.get('area'), Zona_Genero__c = (String)row.get('zona'), Observaciones_Tecnicas__c = (String)row.get('obs'));
                 if (typeUpper == 'INTIMA') {
                     lev.GM_Usuarias_Internas__c = diag.get('gmUsuariasInt') != null ? Decimal.valueOf(String.valueOf(diag.get('gmUsuariasInt'))) : 0;
                     lev.GM_Sanitarios_Totales__c = diag.get('gmSanitarios') != null ? Decimal.valueOf(String.valueOf(diag.get('gmSanitarios'))) : 0;
                     lev.GM_Frecuencia_Uso__c = (String)diag.get('gmFreqUso');
                 }
-
-                // Mapeo inteligente de líneas
-                if (typeUpper == 'BIOENZIMÁTICO') {
-                    lev.Cantidad_Principal__c = (row.get('ve') != null) ? Decimal.valueOf(String.valueOf(row.get('ve'))) : 0;
-                    lev.Estado_Instalacion__c = (String)row.get('instala');
-                } else if (typeUpper == 'GRASAS') {
-                    lev.Estado_Instalacion__c = (String)row.get('estado');
-                    lev.Frecuencia__c = (String)row.get('frecuencia');
-                } else if (typeUpper == 'INTIMA') {
-                    lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0;
-                } else if (typeUpper == 'VACTOR') {
-                    lev.Metros_Lineales__c = (row.get('mtLineal') != null) ? Decimal.valueOf(String.valueOf(row.get('mtLineal'))) : 0;
-                } else if (typeUpper == 'DESAZOLVE MECANICO') {
-                    lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0;
-                }
-                
+                if (typeUpper == 'BIOENZIMÁTICO') { lev.Cantidad_Principal__c = (row.get('ve') != null) ? Decimal.valueOf(String.valueOf(row.get('ve'))) : 0; lev.Estado_Instalacion__c = (String)row.get('instala'); }
+                else if (typeUpper == 'GRASAS') { lev.Estado_Instalacion__c = (String)row.get('estado'); lev.Frecuencia__c = (String)row.get('frecuencia'); }
+                else if (typeUpper == 'INTIMA') { lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0; }
+                else if (typeUpper == 'VACTOR') { lev.Metros_Lineales__c = (row.get('mtLineal') != null) ? Decimal.valueOf(String.valueOf(row.get('mtLineal'))) : 0; }
+                else if (typeUpper == 'DESAZOLVE MECANICO') { lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0; }
                 toInsert.add(lev);
             }
             if (!toInsert.isEmpty()) insert toInsert;
-        } catch (Exception e) { throw new AuraHandledException('Error al guardar levantamiento: ' + e.getMessage()); }
+        } catch (Exception e) { throw new AuraHandledException('Error levantamiento: ' + e.getMessage()); }
+    }
+
+    @AuraEnabled
+    public static List<Map<String, Object>> getOpportunitySolutions(Id oppId) {
+        List<Map<String, Object>> result = new List<Map<String, Object>>();
+        try {
+            for (Levantamiento_Tecnico__c l : [SELECT Id, Name, Tipo_Servicio__c, Area_Cocina_Banos__c, Nivel__c, (SELECT Id, Name, Descripcion_Detallada__c, Observaciones_Comerciales__c FROM Soluciones_Tecnicas__r ORDER BY CreatedDate ASC) FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId ORDER BY Tipo_Servicio__c, CreatedDate ASC]) {
+                if (l.Soluciones_Tecnicas__r.isEmpty()) continue;
+                Map<String, Object> levMap = new Map<String, Object>{'id' => l.Id, 'name' => l.Name, 'label' => l.Tipo_Servicio__c + ' - ' + (l.Area_Cocina_Banos__c != null ? l.Area_Cocina_Banos__c : l.Nivel__c)};
+                List<Map<String, Object>> solList = new List<Map<String, Object>>();
+                for (Solucion_Tecnica__c s : l.Soluciones_Tecnicas__r) solList.add(new Map<String, Object>{'id' => s.Id, 'name' => s.Name, 'techDesc' => s.Descripcion_Detallada__c, 'commObs' => s.Observaciones_Comerciales__c});
+                levMap.put('solutions', solList); result.add(levMap);
+            }
+        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+        return result;
     }
 
     @AuraEnabled
@@ -404,23 +291,16 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled
-    public static Id saveSolucion(Id levantamientoId, Id solucionId, String nombre, String descripcion) {
+    public static Id saveSolucion(Id levantamientoId, Id solucionId, String nombre, String descripcion, String observaciones) {
         try {
-            Solucion_Tecnica__c sol = new Solucion_Tecnica__c(
-                Id = solucionId,
-                Levantamiento_Tecnico__c = (solucionId == null ? levantamientoId : null),
-                Name = nombre,
-                Descripcion_Detallada__c = descripcion
-            );
-            upsert sol;
-            return sol.Id;
+            Solucion_Tecnica__c sol = new Solucion_Tecnica__c(Id = solucionId, Levantamiento_Tecnico__c = (solucionId == null ? levantamientoId : null), Name = nombre, Descripcion_Detallada__c = descripcion, Observaciones_Comerciales__c = observaciones);
+            upsert sol; return sol.Id;
         } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 
     @AuraEnabled
     public static void deleteSolucion(Id solucionId) {
-        try { delete [SELECT Id FROM Solucion_Tecnica__c WHERE Id = :solucionId]; }
-        catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+        try { delete [SELECT Id FROM Solucion_Tecnica__c WHERE Id = :solucionId]; } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 
     @AuraEnabled
@@ -428,136 +308,40 @@ public with sharing class QuoteTechnicalController {
         try {
             if (recordId == null) return;
             String sType = recordId.getSObjectType().getDescribe().getName();
-            if (sType == 'Quote') {
-                update new Quote(Id = recordId, Memoria_Descriptiva__c = text);
-            } else if (sType == 'Opportunity') {
-                update new Opportunity(Id = recordId, Memoria_Descriptiva__c = text);
-            } else if (sType == 'Levantamiento_Tecnico__c') {
-                update new Levantamiento_Tecnico__c(Id = recordId, Memoria_Descriptiva__c = text);
-            }
-        } catch (Exception e) { throw new AuraHandledException('Error al guardar memoria: ' + e.getMessage()); }
+            if (sType == 'Quote') update new Quote(Id = recordId, Memoria_Descriptiva__c = text);
+            else if (sType == 'Opportunity') update new Opportunity(Id = recordId, Memoria_Descriptiva__c = text);
+            else if (sType == 'Levantamiento_Tecnico__c') update new Levantamiento_Tecnico__c(Id = recordId, Memoria_Descriptiva__c = text);
+        } catch (Exception e) { throw new AuraHandledException('Error memoria: ' + e.getMessage()); }
     }
 
     @AuraEnabled
     public static List<Levantamiento_Tecnico__c> getLevantamientoDetails(Id recordId) {
         try {
-            if (recordId == null) return new List<Levantamiento_Tecnico__c>();
             Id oppId = recordId;
-            if (recordId.getSObjectType().getDescribe().getName() == 'Quote') {
-                oppId = [SELECT OpportunityId FROM Quote WHERE Id = :recordId].OpportunityId;
-            }
-            return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, 
-                           Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, 
-                           Metros_Lineales__c, Observaciones_Tecnicas__c, Memoria_Descriptiva__c, CreatedDate
-                    FROM Levantamiento_Tecnico__c 
-                    WHERE Oportunidad__c = :oppId 
-                    ORDER BY Tipo_Servicio__c, CreatedDate ASC];
+            if (recordId != null && recordId.getSObjectType().getDescribe().getName() == 'Quote') oppId = [SELECT OpportunityId FROM Quote WHERE Id = :recordId].OpportunityId;
+            return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, Metros_Lineales__c, Observaciones_Tecnicas__c, Memoria_Descriptiva__c, CreatedDate FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId ORDER BY Tipo_Servicio__c, CreatedDate ASC];
         } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 
-    @AuraEnabled(cacheable=true)
-    public static List<Map<String, String>> getLevantamientoSummary(Id recordId) {
-        List<Map<String, String>> summary = new List<Map<String, String>>();
-        try {
-            if (recordId == null) return summary;
-            
-            // Determinar si es Opp o Quote para buscar el vínculo correcto
-            Id oppId = recordId;
-            if (recordId.getSObjectType().getDescribe().getName() == 'Quote') {
-                oppId = [SELECT OpportunityId FROM Quote WHERE Id = :recordId].OpportunityId;
-            }
-
-            List<AggregateResult> results = [
-                SELECT Tipo_Servicio__c, SUM(Cantidad_Principal__c) totalCant, SUM(Metros_Lineales__c) totalMetros, COUNT(Id) totalFilas
-                FROM Levantamiento_Tecnico__c 
-                WHERE Oportunidad__c = :oppId 
-                GROUP BY Tipo_Servicio__c
-            ];
-
-            for (AggregateResult ar : results) {
-                String tipo = (String)ar.get('Tipo_Servicio__c');
-                Decimal cant = (Decimal)ar.get('totalCant');
-                Decimal metros = (Decimal)ar.get('totalMetros');
-                Integer filas = (Integer)ar.get('totalFilas');
-
-                String label = tipo;
-                String value = (cant > 0 ? String.valueOf(cant.setScale(0)) : (metros > 0 ? String.valueOf(metros.setScale(0)) + 'm' : String.valueOf(filas)));
-                String detail = 'Resumen consolidado de ' + filas + ' áreas inspeccionadas.';
-
-                if (tipo == 'GRASAS') detail = 'Se detectaron ' + filas + ' trampas de grasa en total.';
-                else if (tipo == 'INTIMA') detail = 'Censo de ' + cant + ' unidades de sanitarios.';
-                else if (tipo == 'VACTOR') detail = 'Longitud total de ' + metros + ' metros lineales para desazolve.';
-
-                summary.add(new Map<String, String>{
-                    'id' => tipo,
-                    'label' => label,
-                    'value' => value,
-                    'detail' => detail
-                });
-            }
-        } catch (Exception e) { System.debug('Error summary: ' + e.getMessage()); }
-        return summary;
-    }
-
     private static void processLevantamientos(Id quoteId, String markersBase64) {
-        if (String.isBlank(markersBase64) || quoteId == null) return;
-        
         try {
-            // 0. Obtener ID de la Oportunidad para relación directa
-            Quote q = [SELECT OpportunityId FROM Quote WHERE Id = :quoteId LIMIT 1];
-            Id oppId = q.OpportunityId;
-
-            // 1. Decodificar Base64
+            Id oppId = [SELECT OpportunityId FROM Quote WHERE Id = :quoteId LIMIT 1].OpportunityId;
             String jsonStr = EncodingUtil.urlDecode(EncodingUtil.base64Decode(markersBase64).toString(), 'UTF-8');
             Map<String, Object> markers = (Map<String, Object>)JSON.deserializeUntyped(jsonStr);
-            
             if (!markers.containsKey('surveyData')) return;
-            List<Object> surveyRows = (List<Object>)markers.get('surveyData');
+            List<Object> rows = (List<Object>)markers.get('surveyData');
             String type = markers.containsKey('surveyType') ? (String)markers.get('surveyType') : '';
-
-            // 2. Limpiar datos previos
             delete [SELECT Id FROM Levantamiento_Tecnico__c WHERE Presupuesto__c = :quoteId];
-
-            if (surveyRows == null || surveyRows.isEmpty()) return;
-
-            // 3. Crear nuevos registros
-            List<Levantamiento_Tecnico__c> recordsToInsert = new List<Levantamiento_Tecnico__c>();
-            for (Object rowObj : surveyRows) {
-                Map<String, Object> row = (Map<String, Object>)rowObj;
-                
-                Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(
-                    Presupuesto__c = quoteId,
-                    Oportunidad__c = oppId, // Relación directa para reportes
-                    Tipo_Servicio__c = type.toUpperCase(),
-                    Nivel__c = (String)row.get('nivel'),
-                    Area_Cocina_Banos__c = (String)row.get('area'),
-                    Zona_Genero__c = (String)row.get('zona'),
-                    Observaciones_Tecnicas__c = (String)row.get('obs')
-                );
-
-                // Mapeo inteligente de cantidades y estados según el tipo
-                if (type.equalsIgnoreCase('Bioenzimatico')) {
-                    lev.Cantidad_Principal__c = (row.get('ve') != null) ? Decimal.valueOf(String.valueOf(row.get('ve'))) : 0;
-                    lev.Estado_Instalacion__c = (String)row.get('instala');
-                } else if (type.equalsIgnoreCase('Grasas')) {
-                    lev.Estado_Instalacion__c = (String)row.get('estado');
-                    lev.Frecuencia__c = (String)row.get('frecuencia');
-                } else if (type.equalsIgnoreCase('Intima')) {
-                    lev.Cantidad_Principal__c = (row.get('wc') != null) ? Decimal.valueOf(String.valueOf(row.get('wc'))) : 0;
-                    lev.Frecuencia__c = (String)row.get('frecuencia');
-                } else if (type.equalsIgnoreCase('Vactor')) {
-                    lev.Metros_Lineales__c = (row.get('mtLineal') != null) ? Decimal.valueOf(String.valueOf(row.get('mtLineal'))) : 0;
-                } else if (type.equalsIgnoreCase('Aromatizantes')) {
-                    lev.Cantidad_Principal__c = (row.get('arm') != null) ? Decimal.valueOf(String.valueOf(row.get('arm'))) : 0;
-                }
-
-                recordsToInsert.add(lev);
+            List<Levantamiento_Tecnico__c> records = new List<Levantamiento_Tecnico__c>();
+            for (Object obj : rows) {
+                Map<String, Object> r = (Map<String, Object>)obj;
+                Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(Presupuesto__c = quoteId, Oportunidad__c = oppId, Tipo_Servicio__c = type.toUpperCase(), Nivel__c = (String)r.get('nivel'), Area_Cocina_Banos__c = (String)r.get('area'), Zona_Genero__c = (String)r.get('zona'), Observaciones_Tecnicas__c = (String)r.get('obs'));
+                if (type.equalsIgnoreCase('Bioenzimatico')) { lev.Cantidad_Principal__c = (r.get('ve') != null) ? Decimal.valueOf(String.valueOf(r.get('ve'))) : 0; lev.Estado_Instalacion__c = (String)r.get('instala'); }
+                else if (type.equalsIgnoreCase('Grasas')) { lev.Estado_Instalacion__c = (String)r.get('estado'); lev.Frecuencia__c = (String)r.get('frecuencia'); }
+                else if (type.equalsIgnoreCase('Intima')) { lev.Cantidad_Principal__c = (r.get('wc') != null) ? Decimal.valueOf(String.valueOf(r.get('wc'))) : 0; }
+                records.add(lev);
             }
-
-            if (!recordsToInsert.isEmpty()) insert recordsToInsert;
-
-        } catch (Exception e) {
-            System.debug('Error procesando levantamientos técnicos: ' + e.getMessage());
-        }
+            if (!records.isEmpty()) insert records;
+        } catch (Exception e) {}
     }
 }
