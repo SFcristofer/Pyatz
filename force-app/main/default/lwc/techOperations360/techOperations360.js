@@ -1,88 +1,50 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { updateRecord } from 'lightning/uiRecordApi';
+import { getPicklistValuesByRecordType, getObjectInfo } from 'lightning/uiObjectInfoApi';
+import OPPORTUNITY_OBJECT from '@salesforce/schema/Opportunity';
+import ID_FIELD from '@salesforce/schema/Opportunity.Id';
+import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
+import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
+import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
 import getOpportunitiesList from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesList';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
     @api recordId;
     
-    // --- ESTADO DEL DASHBOARD INICIAL ---
+    // --- ESTADO DEL DASHBOARD ---
     @track opportunities = [];
     @track isLoading = false;
     
     columns = [
-        { 
-            label: 'Oportunidad', 
-            fieldName: 'name', 
-            type: 'button', 
-            initialWidth: 250,
-            typeAttributes: {
-                label: { fieldName: 'name' },
-                name: 'open_360',
-                variant: 'base',
-                class: 'opportunity-link'
-            }
+        { label: 'Oportunidad', fieldName: 'name', type: 'button', initialWidth: 250,
+            typeAttributes: { label: { fieldName: 'name' }, name: 'open_360', variant: 'base', class: 'opportunity-link' }
         },
         { label: 'Cliente', fieldName: 'account', type: 'text' },
         { label: 'Etapa', fieldName: 'stageName', type: 'text' },
         { label: 'Monto', fieldName: 'amount', type: 'currency', cellAttributes: { alignment: 'left' } },
         { label: 'Fecha de Cierre', fieldName: 'closeDate', type: 'date' },
         { label: 'Propietario', fieldName: 'owner', type: 'text' },
-        {
-            type: 'action',
-            typeAttributes: { rowActions: [{ label: 'Abrir Expediente 360', name: 'open_360', iconName: 'standard:omni_channel' }] }
-        }
+        { type: 'action', typeAttributes: { rowActions: [{ label: 'Abrir Expediente 360', name: 'open_360', iconName: 'standard:omni_channel' }] } }
     ];
 
-    // --- ESTADO DEL EXPEDIENTE 360 ---
-    @track currentStep = '1';
+    // --- MOTOR HÍBRIDO DE ETAPAS ---
+    @track stages = [];
+    @track currentStep = '';
     @track currentSubStep = '1';
-    @track quoteViewMode = 'list'; // 'list' o 'edit'
+    @track quoteViewMode = 'list';
     @track selectedQuoteId = null;
 
-    // Definición de la estructura completa basada en x.txt
-    @track stages = [
+    OPERATIONAL_STAGES = [
         {
-            value: '1',
-            label: 'Definición',
-            subStages: [
-                { value: '1', label: 'Levantamiento' },
-                { value: '2', label: 'Memoria' }
-            ]
-        },
-        {
-            value: '2',
-            label: 'Costeo',
-            subStages: [
-                { value: '1', label: 'Def. solución' },
-                { value: '2', label: 'Presupuesto' }
-            ]
-        },
-        {
-            value: '3',
-            label: 'Negociación',
-            subStages: [
-                { value: '1', label: 'Envío cotización' },
-                { value: '2', label: 'Seguimiento' }
-            ]
-        },
-        {
-            value: '4',
-            label: 'Cierre',
-            subStages: [
-                { value: '1', label: 'Autorización' }
-            ]
-        },
-        {
-            value: '5',
-            label: 'Altas',
+            value: 'Altas', label: 'Altas',
             subStages: [
                 { value: '1', label: 'Alta cliente (Clientes nuevos)' },
                 { value: '2', label: 'Alta pyatz (Clientes nuevos)' }
             ]
         },
         {
-            value: '6',
-            label: 'Organización',
+            value: 'Organización', label: 'Organización',
             subStages: [
                 { value: '1', label: 'Calendario' },
                 { value: '2', label: 'Contrato' },
@@ -92,58 +54,98 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         }
     ];
 
-    connectedCallback() {
-        if (!this.recordId) {
-            this.loadOpportunities();
+    @wire(getObjectInfo, { objectApiName: OPPORTUNITY_OBJECT })
+    objectInfo;
+
+    @wire(getPicklistValuesByRecordType, { 
+        objectApiName: OPPORTUNITY_OBJECT, 
+        recordTypeId: '$objectInfo.data.defaultRecordTypeId' 
+    })
+    wiredPicklists({ error, data }) {
+        if (data) {
+            this.buildHybridStages(data.picklistFieldValues);
+        } else if (error) {
+            console.error('Error metadatos:', error);
         }
     }
 
-    // --- LÓGICA DEL DASHBOARD ---
-    get showDashboard() {
-        return !this.recordId;
+    buildHybridStages(picklists) {
+        const stageNames = picklists.StageName.values;
+        const subEtapas = picklists.Subetapa__c;
+        const commercialStages = ['Definición', 'Costeo', 'Negociación', 'Cierre'];
+        
+        let dynamicStages = stageNames
+            .filter(s => commercialStages.includes(s.label))
+            .map(s => {
+                const validSubStages = subEtapas.values
+                    .filter(sub => {
+                        if (s.label === 'Definición') return ['Levantamiento', 'Memoria'].includes(sub.label);
+                        if (s.label === 'Costeo') return ['Def. solución', 'Presupuesto'].includes(sub.label);
+                        if (s.label === 'Negociación') return ['Envío cotización', 'Seguimiento'].includes(sub.label);
+                        if (s.label === 'Cierre') return ['Autorización'].includes(sub.label);
+                        return false;
+                    })
+                    .map((sub, index) => ({ value: (index + 1).toString(), label: sub.label }));
+
+                return { value: s.value, label: s.label, subStages: validSubStages };
+            });
+
+        this.stages = [...dynamicStages, ...this.OPERATIONAL_STAGES];
+        if (!this.currentStep && this.stages.length > 0) this.currentStep = this.stages[0].value;
     }
+
+    // --- SINCRONIZACIÓN CON SALESFORCE ---
+    async syncOpportunityStatus() {
+        if (!this.recordId || !this.currentStep) return;
+
+        const fields = {};
+        fields[ID_FIELD.fieldApiName] = this.recordId;
+        fields[STAGE_FIELD.fieldApiName] = this.currentStep;
+        fields[SUBSTAGE_FIELD.fieldApiName] = this.subPhase;
+        fields[STATUS_FIELD.fieldApiName] = 'En proceso';
+
+        const recordInput = { fields };
+
+        try {
+            await updateRecord(recordInput);
+            console.log('Sincronización Exitosa: ' + this.currentStep + ' > ' + this.subPhase);
+        } catch (error) {
+            console.error('Error al sincronizar campos:', error);
+        }
+    }
+
+    connectedCallback() {
+        if (!this.recordId) this.loadOpportunities();
+    }
+
+    get showDashboard() { return !this.recordId; }
 
     loadOpportunities() {
         this.isLoading = true;
         getOpportunitiesList()
-            .then(data => {
-                this.opportunities = data;
-                this.isLoading = false;
-            })
-            .catch(error => {
-                console.error('Error cargando oportunidades:', error);
-                this.isLoading = false;
-            });
+            .then(data => { this.opportunities = data; this.isLoading = false; })
+            .catch(error => { console.error('Error:', error); this.isLoading = false; });
     }
 
     handleRowAction(event) {
         if (event.detail.action.name === 'open_360') {
             this.recordId = event.detail.row.id;
-            this.currentStep = '1';
+            this.currentStep = 'Definición';
             this.currentSubStep = '1';
             this.quoteViewMode = 'list';
+            this.syncOpportunityStatus();
         }
     }
 
     handleNewOpportunity() {
         this[NavigationMixin.Navigate]({
-            type: 'standard__objectPage',
-            attributes: {
-                objectApiName: 'Opportunity',
-                actionName: 'new'
-            }
+            type: 'standard__objectPage', attributes: { objectApiName: 'Opportunity', actionName: 'new' }
         });
     }
 
-    handleBackToDashboard() {
-        this.recordId = null;
-        this.loadOpportunities();
-    }
+    handleBackToDashboard() { this.recordId = null; this.loadOpportunities(); }
 
-    // --- LÓGICA DEL EXPEDIENTE 360 ---
-    get currentStage() {
-        return this.stages.find(s => s.value === this.currentStep);
-    }
+    get currentStage() { return this.stages.find(s => s.value === this.currentStep); }
 
     get currentSubStages() {
         return (this.currentStage ? this.currentStage.subStages : []).map(sub => {
@@ -157,56 +159,34 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     get subPhase() {
-        const sub = this.currentSubStages.find(ss => ss.value === this.currentSubStep);
+        const sub = (this.currentSubStages || []).find(ss => ss.value === this.currentSubStep);
         return sub ? sub.label : '';
     }
 
-    // Getters de Etapas
-    get isDefinicion() { return this.currentStep === '1'; }
-    get isCosteo() { return this.currentStep === '2'; }
-    get isNegociacion() { return this.currentStep === '3'; }
-    get isCierre() { return this.currentStep === '4'; }
-    get isAltas() { return this.currentStep === '5'; }
-    get isOrganizacion() { return this.currentStep === '6'; }
+    get isDefinicion() { return this.currentStep === 'Definición'; }
+    get isCosteo() { return this.currentStep === 'Costeo'; }
+    get isNegociacion() { return this.currentStep === 'Negociación'; }
+    get isCierre() { return this.currentStep === 'Cierre'; }
+    get isAltas() { return this.currentStep === 'Altas'; }
+    get isOrganizacion() { return this.currentStep === 'Organización'; }
 
-    // Getters de Sub-Etapas Dinámicas
-    get isLevantamientoPhase() {
-        return this.currentStep === '1' && this.currentSubStep === '1';
-    }
+    get isLevantamientoPhase() { return this.isDefinicion && this.currentSubStep === '1'; }
+    get isMemoriaPhase() { return this.isDefinicion && this.currentSubStep === '2'; }
+    get isDefSolucionPhase() { return this.isCosteo && this.currentSubStep === '1'; }
+    get isPresupuestoPhase() { return this.isCosteo && this.currentSubStep === '2'; }
+    get isContratoPhase() { return this.isOrganizacion && this.currentSubStep === '2'; }
+    get isWorkOrderPhase() { return this.isOrganizacion && this.currentSubStep === '3'; }
 
-    get isMemoriaPhase() {
-        return this.currentStep === '1' && this.currentSubStep === '2';
-    }
-
-    get isDefSolucionPhase() {
-        return this.currentStep === '2' && this.currentSubStep === '1';
-    }
-
-    get isPresupuestoPhase() { return this.currentStep === '2' && this.currentSubStep === '2'; }
-    get isContratoPhase() { return this.currentStep === '6' && this.currentSubStep === '2'; }
-    get isWorkOrderPhase() { return this.currentStep === '6' && this.currentSubStep === '3'; }
-
-    // Lógica interna de Presupuesto (Lista vs Editor)
     get showQuoteList() { return this.isPresupuestoPhase && this.quoteViewMode === 'list'; }
     get showQuoteEditor() { return this.isPresupuestoPhase && this.quoteViewMode === 'edit'; }
 
-    handleEditQuote(event) {
-        this.selectedQuoteId = event.detail;
-        this.quoteViewMode = 'edit';
-    }
+    handleEditQuote(event) { this.selectedQuoteId = event.detail; this.quoteViewMode = 'edit'; }
+    handleCreateNewQuote() { this.selectedQuoteId = null; this.quoteViewMode = 'edit'; }
+    handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
 
-    handleCreateNewQuote() {
-        this.selectedQuoteId = null;
-        this.quoteViewMode = 'edit';
-    }
-
-    handleBackToQuoteList() {
-        this.quoteViewMode = 'list';
-        this.selectedQuoteId = null;
-    }
-
-    get isFirstStep() { return this.currentStep === '1' && this.currentSubStep === '1'; }
+    get isFirstStep() { return this.isDefinicion && this.currentSubStep === '1'; }
     get isLastStep() { 
+        if (!this.stages || this.stages.length === 0) return false;
         const lastStage = this.stages[this.stages.length - 1];
         return this.currentStep === lastStage.value && this.currentSubStep === lastStage.subStages.length.toString();
     }
@@ -214,21 +194,22 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleStepClick(event) {
         this.currentStep = event.target.value;
         this.currentSubStep = '1';
-        this.quoteViewMode = 'list'; // Reset al cambiar de etapa
+        this.quoteViewMode = 'list';
+        this.syncOpportunityStatus();
     }
 
     handleSubStepClick(event) {
         this.currentSubStep = event.target.dataset.id;
-        this.quoteViewMode = 'list'; // Reset al cambiar de sub-etapa
+        this.quoteViewMode = 'list';
+        this.syncOpportunityStatus();
     }
 
     async handleNext() {
-        // Lógica de guardado automático para levantamientos
         if (this.isLevantamientoPhase) {
             const surveyComp = this.template.querySelector('c-tech-levantamiento-manager');
             if (surveyComp) {
                 const saved = await surveyComp.save();
-                if (!saved) return; // No avanzar si hubo error al guardar
+                if (!saved) return;
             }
         }
 
@@ -237,31 +218,30 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
         if (nextSub <= maxSubSteps) {
             this.currentSubStep = nextSub.toString();
-            this.quoteViewMode = 'list';
         } else {
-            let nextStep = parseInt(this.currentStep) + 1;
-            if (nextStep <= 6) {
-                this.currentStep = nextStep.toString();
+            const currentIndex = this.stages.findIndex(s => s.value === this.currentStep);
+            if (currentIndex < this.stages.length - 1) {
+                this.currentStep = this.stages[currentIndex + 1].value;
                 this.currentSubStep = '1';
-                this.quoteViewMode = 'list';
             }
         }
+        this.quoteViewMode = 'list';
+        this.syncOpportunityStatus();
     }
 
     handlePrev() {
         let prevSub = parseInt(this.currentSubStep) - 1;
-
         if (prevSub >= 1) {
             this.currentSubStep = prevSub.toString();
-            this.quoteViewMode = 'list';
         } else {
-            let prevStep = parseInt(this.currentStep) - 1;
-            if (prevStep >= 1) {
-                this.currentStep = prevStep.toString();
-                const prevStage = this.stages.find(s => s.value === this.currentStep);
+            const currentIndex = this.stages.findIndex(s => s.value === this.currentStep);
+            if (currentIndex > 0) {
+                const prevStage = this.stages[currentIndex - 1];
+                this.currentStep = prevStage.value;
                 this.currentSubStep = prevStage.subStages.length.toString();
-                this.quoteViewMode = 'list';
             }
         }
+        this.quoteViewMode = 'list';
+        this.syncOpportunityStatus();
     }
 }
