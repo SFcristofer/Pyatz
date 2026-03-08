@@ -398,6 +398,31 @@ public with sharing class QuoteTechnicalController {
         } catch (Exception e) { throw new AuraHandledException('Error al guardar levantamiento: ' + e.getMessage()); }
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<Solucion_Tecnica__c> getSoluciones(Id levantamientoId) {
+        return [SELECT Id, Name, Descripcion_Detallada__c FROM Solucion_Tecnica__c WHERE Levantamiento_Tecnico__c = :levantamientoId ORDER BY CreatedDate ASC];
+    }
+
+    @AuraEnabled
+    public static Id saveSolucion(Id levantamientoId, Id solucionId, String nombre, String descripcion) {
+        try {
+            Solucion_Tecnica__c sol = new Solucion_Tecnica__c(
+                Id = solucionId,
+                Levantamiento_Tecnico__c = (solucionId == null ? levantamientoId : null),
+                Name = nombre,
+                Descripcion_Detallada__c = descripcion
+            );
+            upsert sol;
+            return sol.Id;
+        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+    }
+
+    @AuraEnabled
+    public static void deleteSolucion(Id solucionId) {
+        try { delete [SELECT Id FROM Solucion_Tecnica__c WHERE Id = :solucionId]; }
+        catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+    }
+
     @AuraEnabled
     public static void saveMemoria(Id recordId, String text) {
         try {
@@ -407,6 +432,8 @@ public with sharing class QuoteTechnicalController {
                 update new Quote(Id = recordId, Memoria_Descriptiva__c = text);
             } else if (sType == 'Opportunity') {
                 update new Opportunity(Id = recordId, Memoria_Descriptiva__c = text);
+            } else if (sType == 'Levantamiento_Tecnico__c') {
+                update new Levantamiento_Tecnico__c(Id = recordId, Memoria_Descriptiva__c = text);
             }
         } catch (Exception e) { throw new AuraHandledException('Error al guardar memoria: ' + e.getMessage()); }
     }
@@ -421,7 +448,7 @@ public with sharing class QuoteTechnicalController {
             }
             return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, 
                            Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, 
-                           Metros_Lineales__c, Observaciones_Tecnicas__c, CreatedDate
+                           Metros_Lineales__c, Observaciones_Tecnicas__c, Memoria_Descriptiva__c, CreatedDate
                     FROM Levantamiento_Tecnico__c 
                     WHERE Oportunidad__c = :oppId 
                     ORDER BY Tipo_Servicio__c, CreatedDate ASC];

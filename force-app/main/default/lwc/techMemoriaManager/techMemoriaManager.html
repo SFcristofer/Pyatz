@@ -1,82 +1,114 @@
 <template>
     <div class="memoria-container">
         <lightning-layout multiple-rows="true" vertical-align="stretch">
-            <!-- COLUMNA IZQUIERDA: EXPLORADOR DE DETALLES TÉCNICOS -->
-            <lightning-layout-item size="12" large-device-size="5" padding="around-small">
-                <div class="summary-card slds-p-around_medium">
-                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
-                        <lightning-icon icon-name="standard:report" size="small" class="slds-m-right_small"></lightning-icon>
-                        <h2 class="title">Detalle del Levantamiento</h2>
-                    </div>
-                    
-                    <template lwc:if={groupedDetails.length}>
-                        <div class="details-scroll">
-                            <lightning-accordion allow-multiple-sections-open>
-                                <template for:each={groupedDetails} for:item="group">
-                                    <lightning-accordion-section key={group.label} name={group.label} label={group.label}>
-                                        <div class="records-grid">
-                                            <template for:each={group.records} for:item="rec">
-                                                <div key={rec.id} class="record-detail-card slds-m-bottom_small">
-                                                    <div class="record-header slds-grid slds-grid_align-spread">
-                                                        <span class="record-name">{rec.name}</span>
-                                                    </div>
-                                                    <div class="record-body">
-                                                        <template for:each={rec.fields} for:item="f">
-                                                            <div key={f.label} class="field-row">
-                                                                <span class="f-label">{f.label}:</span>
-                                                                <span class="f-value">{f.value}</span>
-                                                            </div>
-                                                        </template>
-                                                        <div if:true={rec.obs} class="field-row obs-row">
-                                                            <span class="f-label">Notas:</span>
-                                                            <p class="f-obs">{rec.obs}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
+            
+            <!-- COLUMNA 1: HALLAZGOS (3/12) -->
+            <lightning-layout-item size="12" large-device-size="3" padding="around-small">
+                <div class="summary-card slds-p-around_small">
+                    <h2 class="title slds-m-bottom_small">1. Hallazgos</h2>
+                    <div class="details-scroll">
+                        <lightning-accordion allow-multiple-sections-open>
+                            <template for:each={groupedDetails} for:item="group">
+                                <lightning-accordion-section key={group.label} name={group.label} label={group.label}>
+                                    <template for:each={group.records} for:item="rec">
+                                        <div key={rec.id} class={rec.className} data-id={rec.id} onclick={handleRecordSelect}>
+                                            <span class="record-name">{rec.name}</span>
+                                            <div class="mini-fields">
+                                                <template for:each={rec.fields} for:item="f">
+                                                    <span key={f.label}>{f.value} | </span>
+                                                </template>
+                                            </div>
                                         </div>
-                                    </lightning-accordion-section>
-                                </template>
-                            </lightning-accordion>
-                        </div>
-                    </template>
-                    <template lwc:else>
-                        <div class="empty-state slds-text-align_center slds-p-around_large">
-                            <lightning-icon icon-name="utility:info" size="medium" variant="warning"></lightning-icon>
-                            <p class="slds-m-top_small">No se encontraron hallazgos técnicos registrados.</p>
-                        </div>
-                    </template>
+                                    </template>
+                                </lightning-accordion-section>
+                            </template>
+                        </lightning-accordion>
+                    </div>
                 </div>
             </lightning-layout-item>
 
-            <!-- COLUMNA DERECHA: EDITOR DE MEMORIA DESCRIPTIVA -->
-            <lightning-layout-item size="12" large-device-size="7" padding="around-small">
-                <div class="editor-card slds-p-around_medium">
-                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
-                        <lightning-icon icon-name="standard:post" size="small" class="slds-m-right_small"></lightning-icon>
-                        <h2 class="title">Memoria Descriptiva del Servicio</h2>
+            <!-- COLUMNA 2: SOLUCIONES (3/12) -->
+            <lightning-layout-item size="12" large-device-size="3" padding="around-small">
+                <div class="summary-card slds-p-around_small">
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                        <h2 class="title">2. Soluciones</h2>
+                        <lightning-button-icon icon-name="utility:add" variant="border-filled" onclick={handleAddSol} disabled={isAddButtonDisabled}></lightning-button-icon>
                     </div>
                     
-                    <lightning-input-rich-text
-                        label="Descripción de la Solución"
-                        placeholder="Redacte aquí la descripción técnica detallada del levantamiento y la solución propuesta..."
-                        value={memoriaText}
-                        onchange={handleTextChange}
-                        class="rich-editor"
-                        variant="bottom-toolbar">
-                    </lightning-input-rich-text>
+                    <template if:true={selectedRecordId}>
+                        <div class="sol-list">
+                            <template for:each={solutions} for:item="sol">
+                                <div key={sol.Id} class={sol.className} data-id={sol.Id} onclick={handleSolSelect}>
+                                    <div class="slds-grid slds-grid_align-spread">
+                                        <span>{sol.Name}</span>
+                                        <lightning-button-icon icon-name="utility:delete" size="xx-small" variant="bare" data-id={sol.Id} onclick={handleDeleteSol}></lightning-button-icon>
+                                    </div>
+                                </div>
+                            </template>
+                            <div if:false={solutions.length} class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                                No hay soluciones.
+                            </div>
+                        </div>
+                    </template>
+                    <div if:false={selectedRecordId} class="slds-text-align_center slds-p-around_medium">
+                        Seleccione un hallazgo.
+                    </div>
+                </div>
+            </lightning-layout-item>
 
-                    <div class="slds-m-top_medium slds-text-align_right">
+            <!-- COLUMNA 3: EDITOR (6/12) -->
+            <lightning-layout-item size="12" large-device-size="6" padding="around-small">
+                <div class="editor-card">
+                    <div class="editor-header slds-p-around_medium">
+                        <h2 class="title">{editorTitle}</h2>
+                    </div>
+                    
+                    <div class="editor-content-area">
+                        <template if:true={selectedSolucionId}>
+                            <lightning-input-rich-text
+                                value={memoriaText}
+                                onchange={handleTextChange}
+                                class="rich-editor">
+                            </lightning-input-rich-text>
+                        </template>
+                        <template if:false={selectedSolucionId}>
+                            <div class="empty-editor-state">
+                                <lightning-icon icon-name="utility:edit" size="large"></lightning-icon>
+                                <p>Seleccione o cree una solución para redactar.</p>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="editor-footer slds-p-around_medium slds-text-align_right">
                         <lightning-button 
                             variant="brand" 
-                            label="Guardar Memoria" 
+                            label="Guardar Solución" 
                             icon-name="utility:save"
-                            onclick={handleSave}
+                            onclick={handleSaveDescription}
                             disabled={isSaving}>
                         </lightning-button>
                     </div>
                 </div>
             </lightning-layout-item>
         </lightning-layout>
+
+        <!-- MODAL NUEVA SOLUCIÓN -->
+        <template if:true={showSolModal}>
+            <section role="dialog" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">Nueva Solución para {selectedRecordName}</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input label="Nombre de la Solución" value={newSolName} onchange={handleNewSolNameChange} placeholder="ej. Limpieza Profunda, Cambio de Sello..."></lightning-input>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancelar" onclick={handleCloseModal} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Crear" variant="brand" onclick={handleConfirmAddSol}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
     </div>
 </template>

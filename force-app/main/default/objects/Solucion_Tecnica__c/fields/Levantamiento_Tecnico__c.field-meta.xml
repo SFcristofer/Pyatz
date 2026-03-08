@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Levantamiento_Tecnico__c</fullName>
+    <description>Vínculo con el hallazgo técnico original.</description>
+    <label>Levantamiento Técnico</label>
+    <referenceTo>Levantamiento_Tecnico__c</referenceTo>
+    <relationshipLabel>Soluciones Técnicas Propuestas</relationshipLabel>
+    <relationshipName>Soluciones_Tecnicas</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <type>MasterDetail</type>
+</CustomField>

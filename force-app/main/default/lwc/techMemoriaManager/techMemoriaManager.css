@@ -9,77 +9,88 @@
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     height: 100%;
-    min-height: 600px;
+    min-height: 650px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.details-scroll {
-    height: 500px;
+.details-scroll, .sol-list {
+    flex-grow: 1;
     overflow-y: auto;
-    padding-right: 5px;
+    padding: 5px;
 }
 
 .title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #1b2733;
+    text-transform: uppercase;
 }
 
-/* Tarjetas de Registro */
+/* Hallazgos Mini Card */
 .record-detail-card {
     background: #fdfdfd;
     border: 1px solid #e5e5e5;
     border-radius: 4px;
-    padding: 10px;
-    border-left: 4px solid #0070d2;
-}
-
-.record-name {
-    font-size: 0.75rem;
-    font-weight: bold;
-    color: #706e6b;
+    padding: 8px;
+    border-left: 3px solid #0070d2;
+    cursor: pointer;
     margin-bottom: 5px;
-    display: block;
+    transition: all 0.2s;
 }
 
-.field-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    margin-bottom: 2px;
-    border-bottom: 1px dashed #eee;
-}
-
-.f-label {
-    color: #3e3e3c;
-    font-weight: 600;
-}
-
-.f-value {
-    color: #0070d2;
-    font-weight: 700;
-}
-
-.f-obs {
-    font-size: 0.8rem;
+.mini-fields {
+    font-size: 0.7rem;
     color: #706e6b;
-    margin-top: 5px;
-    font-style: italic;
-    background: #f3f3f2;
-    padding: 5px;
-    border-radius: 3px;
-    width: 100%;
 }
 
-.obs-row {
+.active-card {
+    background: #eff6ff !important;
+    border-color: #0070d2 !important;
+}
+
+/* Lista de Soluciones */
+.sol-item {
+    background: white;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.sol-item:hover {
+    background: #f3f3f2;
+}
+
+.active-sol {
+    background: #0070d2 !important;
+    color: white !important;
+    border-color: #00396b;
+}
+
+.editor-content-area {
+    flex-grow: 1;
+    display: flex;
     flex-direction: column;
-    border-bottom: none;
+    border-top: 1px solid #dddbda;
+    border-bottom: 1px solid #dddbda;
 }
 
 .rich-editor {
-    --slds-c-textarea-shadow: none;
-    height: 450px;
+    --slds-c-textarea-height: 480px; 
+    flex-grow: 1;
 }
 
-.empty-state p {
+.empty-editor-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     color: #706e6b;
+    padding: 2rem;
 }
