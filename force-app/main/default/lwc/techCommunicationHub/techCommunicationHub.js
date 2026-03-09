@@ -42,7 +42,14 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
         this.isLoadingEngagement = true;
         getEmailEngagementDetails({ oppId: this.recordId })
             .then(result => {
-                this.engagementDetails = result;
+                // Procesamos para añadir iconos dinámicos
+                this.engagementDetails = result.map(email => ({
+                    ...email,
+                    recipients: email.recipients.map(r => ({
+                        ...r,
+                        icon: r.type === 'Principal' ? 'standard:contact' : 'standard:groups'
+                    }))
+                }));
                 this.isLoadingEngagement = false;
             })
             .catch(error => {

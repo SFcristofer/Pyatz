@@ -160,7 +160,11 @@
                                                 <lightning-icon icon-name="standard:email" size="small" class="slds-m-right_small"></lightning-icon>
                                                 <div>
                                                     <div class="slds-text-title_bold">{email.subject}</div>
-                                                    <div class="slds-text-color_weak slds-text-body_small">Para: {email.to}</div>
+                                                    <div class="slds-m-top_xx-small">
+                                                        <template for:each={email.recipients} for:item="rec">
+                                                            <lightning-badge key={rec.email} label={rec.name} title={rec.email} icon-name={rec.icon} class="slds-m-right_xx-small"></lightning-badge>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <span class={email.statusClass}>{email.statusLabel}</span>

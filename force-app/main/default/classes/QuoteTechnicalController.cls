@@ -392,19 +392,27 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getEmailEngagementDetails(Id oppId) {
         List<Map<String, Object>> results = new List<Map<String, Object>>();
-        for (EmailMessage em : [SELECT Id, Subject, ToAddress, CcAddress, Status, MessageDate, IsOpened, FirstOpenedDate, LastOpenedDate 
+        for (EmailMessage em : [SELECT Id, Subject, ToAddress, CcAddress, Status, MessageDate, IsOpened, FirstOpenedDate, LastOpenedDate,
+                               (SELECT RelationId, RelationAddress, RelationType FROM EmailMessageRelations WHERE RelationType IN ('ToAddress', 'CcAddress'))
                                FROM EmailMessage WHERE RelatedToId = :oppId ORDER BY MessageDate DESC LIMIT 50]) {
             Map<String, Object> row = new Map<String, Object>();
             row.put('id', em.Id);
             row.put('subject', em.Subject);
-            row.put('to', em.ToAddress);
-            row.put('cc', em.CcAddress);
             row.put('sentDate', em.MessageDate);
             row.put('isOpened', em.IsOpened);
             row.put('firstOpen', em.FirstOpenedDate);
             row.put('lastOpen', em.LastOpenedDate);
             
-            // Calculamos un status visual
+            List<Map<String, String>> recipients = new List<Map<String, String>>();
+            for (EmailMessageRelation rel : em.EmailMessageRelations) {
+                recipients.add(new Map<String, String>{
+                    'name' => rel.RelationAddress, // Usamos la dirección como nombre si el Relation.Name no es accesible directamente
+                    'email' => rel.RelationAddress,
+                    'type' => rel.RelationType == 'ToAddress' ? 'Principal' : 'En Copia'
+                });
+            }
+            row.put('recipients', recipients);
+            
             String statusLabel = 'Enviado';
             String statusClass = 'slds-theme_shade';
             if (em.IsOpened) {
