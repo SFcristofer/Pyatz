@@ -176,6 +176,11 @@
                     </template>
                 </template>
 
+                <!-- MÓDULO: ENVÍO COTIZACIÓN (COMMUNICATION HUB) -->
+                <template if:true={isEnvioPhase}>
+                    <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
+                </template>
+
                 <!-- MÓDULO: CONTRATO -->
                 <template if:true={isContratoPhase}>
                     <c-tech-contract-manager record-id={recordId}></c-tech-contract-manager>

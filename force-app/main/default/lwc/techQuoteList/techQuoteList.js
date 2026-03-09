@@ -1,12 +1,15 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 import getQuotesList from '@salesforce/apex/QuoteTechnicalController.getQuotesList';
 import getQuoteStats from '@salesforce/apex/QuoteTechnicalController.getQuoteStats';
 import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
 import searchSedes from '@salesforce/apex/QuoteTechnicalController.searchSedes';
 import searchProspectos from '@salesforce/apex/QuoteTechnicalController.searchProspectos';
 
-export default class TechQuoteList extends LightningElement {
+export default class TechQuoteList extends NavigationMixin(LightningElement) {
+    @api opportunityId;
+    @api viewMode = 'list'; // 'list' o 'send'
     @track quotes = [];
     @track stats = { Total: 0, Aprobada: 0, Pendiente: 0, Rechazada: 0, Actualizada: 0 };
     @track isLoading = true;
@@ -27,37 +30,51 @@ export default class TechQuoteList extends LightningElement {
         { label: 'Cliente Potencial', value: 'new' }
     ];
 
-    columns = [
-        { label: 'Folio', fieldName: 'folio', type: 'text', initialWidth: 100 },
-        { label: 'Asunto', fieldName: 'asunto', type: 'text' },
-        { label: 'Cliente', fieldName: 'cliente', type: 'text' },
-        { label: 'Sede', fieldName: 'sede', type: 'text' },
-        { label: 'Generado por', fieldName: 'generadoPor', type: 'text' },
-        { label: 'Fecha', fieldName: 'fecha', type: 'date' },
-        { 
-            label: 'Monto', 
-            fieldName: 'monto', 
-            type: 'currency',
-            cellAttributes: { alignment: 'left' }
-        },
-        { 
-            label: 'Estado', 
-            fieldName: 'estado', 
-            type: 'text',
-            cellAttributes: { 
-                class: { fieldName: 'estadoClass' } 
+    get columns() {
+        let cols = [
+            { label: 'Folio', fieldName: 'folio', type: 'text', initialWidth: 100 },
+            { label: 'Asunto', fieldName: 'asunto', type: 'text' },
+            { label: 'Cliente', fieldName: 'cliente', type: 'text' },
+            { label: 'Sede', fieldName: 'sede', type: 'text' },
+            { label: 'Generado por', fieldName: 'generadoPor', type: 'text' },
+            { label: 'Fecha', fieldName: 'fecha', type: 'date' },
+            { 
+                label: 'Monto', 
+                fieldName: 'monto', 
+                type: 'currency',
+                cellAttributes: { alignment: 'left' }
+            },
+            { 
+                label: 'Estado', 
+                fieldName: 'estado', 
+                type: 'text',
+                cellAttributes: { 
+                    class: { fieldName: 'estadoClass' } 
+                }
             }
-        },
-        {
-            type: 'action',
-            typeAttributes: { rowActions: [
-                { label: 'Editar', name: 'edit', iconName: 'utility:edit' },
-                { label: 'Configurar Contrato', name: 'contract', iconName: 'standard:contract' },
-                { label: 'Clonar', name: 'clone', iconName: 'utility:copy' },
-                { label: 'Descargar PDF Presupuesto', name: 'pdf', iconName: 'utility:file_spec' }
-            ]}
+        ];
+
+        if (this.viewMode === 'send') {
+            cols.push({
+                type: 'action',
+                typeAttributes: { rowActions: [
+                    { label: 'Enviar por Correo (SF)', name: 'send_email', iconName: 'utility:send' },
+                    { label: 'Ver PDF', name: 'pdf', iconName: 'utility:file_spec' }
+                ]}
+            });
+        } else {
+            cols.push({
+                type: 'action',
+                typeAttributes: { rowActions: [
+                    { label: 'Editar', name: 'edit', iconName: 'utility:edit' },
+                    { label: 'Configurar Contrato', name: 'contract', iconName: 'standard:contract' },
+                    { label: 'Clonar', name: 'clone', iconName: 'utility:copy' },
+                    { label: 'Descargar PDF Presupuesto', name: 'pdf', iconName: 'utility:file_spec' }
+                ]}
+            });
         }
-    ];
+        return cols;
+    }
 
     @wire(getQuoteStats)
     wiredStats({ error, data }) {
@@ -100,7 +117,20 @@ export default class TechQuoteList extends LightningElement {
         } else if (actionName === 'clone') {
             this.selectedQuoteId = row.id;
             this.showCloneModal = true;
+        } else if (actionName === 'send_email') {
+            this.openEmailComposer(row.id);
         }
+    }
+
+    openEmailComposer(quoteId) {
+        // Navegación al compositor de correo nativo de Salesforce
+        // Usamos el formato de URL estándar para el compositor de email pre-llenado
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: `/lightning/o/EmailMessage/new?parentRecordId=${this.opportunityId}&sourceRecordId=${quoteId}`
+            }
+        });
     }
 
     // CLONING LOGIC (IGEOAPP STYLE)

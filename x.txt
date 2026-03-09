@@ -1,0 +1,22 @@
+Object
+body
+: 
+{message: 'Error Apex: Insert failed. First exception on row …usa desinflación. (max length=255): [Description]'}
+errorType
+: 
+"fetchResponse"
+headers
+: 
+{}
+ok
+: 
+false
+status
+: 
+500
+statusText
+: 
+"Server Error"
+[[Prototype]]
+: 
+Object

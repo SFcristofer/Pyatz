@@ -380,6 +380,90 @@ public with sharing class QuoteTechnicalController {
         return results;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getEmailTemplatesByFolders(List<String> folderNames) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (EmailTemplate et : [SELECT Id, Name, Folder.Name FROM EmailTemplate WHERE Folder.Name IN :folderNames AND IsActive = true ORDER BY Folder.Name, Name ASC]) {
+            results.add(new Map<String, String>{'id' => et.Id, 'name' => et.Name, 'folder' => et.Folder.Name});
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Map<String, List<Map<String, String>>> getAvailableAttachments(Id oppId) {
+        Map<String, List<Map<String, String>>> result = new Map<String, List<Map<String, String>>>();
+        
+        // 1. Presupuestos (Quotes)
+        List<Map<String, String>> quotes = new List<Map<String, String>>();
+        for (Quote q : [SELECT Id, Name, QuoteNumber FROM Quote WHERE OpportunityId = :oppId ORDER BY CreatedDate DESC]) {
+            quotes.add(new Map<String, String>{'id' => q.Id, 'name' => 'Presupuesto: ' + q.QuoteNumber + ' - ' + q.Name, 'type' => 'Quote'});
+        }
+        result.put('quotes', quotes);
+
+        // 2. Levantamientos Técnicos (Agrupados por Oportunidad)
+        List<Map<String, String>> surveys = new List<Map<String, String>>();
+        for (AggregateResult ar : [SELECT Tipo_Servicio__c FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId GROUP BY Tipo_Servicio__c]) {
+            String tipo = (String)ar.get('Tipo_Servicio__c');
+            surveys.add(new Map<String, String>{'id' => oppId, 'name' => 'Levantamiento: ' + tipo, 'type' => 'Survey', 'subType' => tipo});
+        }
+        result.put('surveys', surveys);
+
+        // 3. Archivos cargados (Files)
+        List<Map<String, String>> files = new List<Map<String, String>>();
+        for (ContentDocumentLink cdl : [SELECT ContentDocumentId, ContentDocument.Title, ContentDocument.FileExtension FROM ContentDocumentLink WHERE LinkedEntityId = :oppId AND ContentDocument.FileExtension = 'pdf']) {
+            files.add(new Map<String, String>{'id' => cdl.ContentDocumentId, 'name' => 'Archivo: ' + cdl.ContentDocument.Title, 'type' => 'File'});
+        }
+        result.put('files', files);
+
+        return result;
+    }
+
+    @AuraEnabled
+    public static void sendEmailWithAttachments(Id oppId, String toEmail, String ccEmail, String subject, String body, List<Map<String, String>> selectedAttachments) {
+        try {
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            mail.setToAddresses(new String[]{toEmail});
+            if (String.isNotBlank(ccEmail)) mail.setCcAddresses(ccEmail.split(','));
+            mail.setSubject(subject);
+            mail.setHtmlBody(body);
+            mail.setWhatId(oppId);
+            mail.setSaveAsActivity(true);
+
+            List<Messaging.EmailFileAttachment> attachments = new List<Messaging.EmailFileAttachment>();
+
+            for (Map<String, String> att : selectedAttachments) {
+                String type = att.get('type');
+                Id attId = (Id)att.get('id');
+                
+                Messaging.EmailFileAttachment efa = new Messaging.EmailFileAttachment();
+                
+                if (type == 'Quote') {
+                    PageReference pr = Page.QuoteTechnicalPDF;
+                    pr.getParameters().put('id', attId);
+                    efa.setFileName(att.get('name') + '.pdf');
+                    efa.setBody(!Test.isRunningTest() ? pr.getContentAsPDF() : Blob.valueOf('Test Content'));
+                    attachments.add(efa);
+                } else if (type == 'Survey') {
+                    // Similar a Quote pero con parámetros para el levantamiento
+                    PageReference pr = Page.QuoteTechnicalPDF;
+                    pr.getParameters().put('id', oppId);
+                    pr.getParameters().put('surveyOnly', 'true');
+                    efa.setFileName(att.get('name') + '.pdf');
+                    efa.setBody(!Test.isRunningTest() ? pr.getContentAsPDF() : Blob.valueOf('Test Content'));
+                    attachments.add(efa);
+                } else if (type == 'File') {
+                    ContentVersion cv = [SELECT VersionData, Title, FileExtension FROM ContentVersion WHERE ContentDocumentId = :attId AND IsLatest = true LIMIT 1];
+                    efa.setFileName(cv.Title + '.' + cv.FileExtension);
+                    efa.setBody(cv.VersionData);
+                    attachments.add(efa);
+                }
+            }
+            
+            mail.setFileAttachments(attachments);
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
+        } catch (Exception e) { throw new AuraHandledException('Error envío: ' + e.getMessage()); }
+    }
+
     @AuraEnabled
     public static Id cloneQuote(Id quoteId, Map<String, Object> options, Id targetSedeId, Id targetProspectoId) {
         try {
