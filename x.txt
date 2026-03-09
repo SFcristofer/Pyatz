@@ -1,7 +1,13 @@
-Object
+aura_prod.js:104 Error al avanzar: 
+{status: 500, body: {…}, headers: {…}, ok: false, statusText: 'Server Error', …}
 body
 : 
-{message: 'Error Apex: Insert failed. First exception on row …usa desinflación. (max length=255): [Description]'}
+message
+: 
+"Error Apex: Insert failed. First exception on row 0; first error: STRING_TOO_LONG, Descripción de partida: valor de datos demasiado grande: Bacteria líquida que acelera la degradación de grasas, carbohidratos, azúcares y proteínas disueltos en aguas grasas y/o aguas negras, reduciendo su capacidad de incrustación en tuberías y facilitando su remosión por medios físicos. Resistente a temperaturas de hasta 80 °C; cloro, cáusticos y sanitizantes disueltos en el agua. Es un auxiliar en la neutralización de olores. Leer ficha técnica y hoja de seguridad antes de su uso.  Presentación: Bidón 21 litros (max length=255): [Description]"
+[[Prototype]]
+: 
+Object
 errorType
 : 
 "fetchResponse"

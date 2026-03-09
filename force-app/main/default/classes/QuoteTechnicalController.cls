@@ -225,7 +225,16 @@ public with sharing class QuoteTechnicalController {
                     try {
                         Decimal can = Decimal.valueOf(String.valueOf(it.get('cantidad') != null ? it.get('cantidad') : 1));
                         Decimal tot = Decimal.valueOf(String.valueOf(it.get('totalSinImpuestos') != null ? it.get('totalSinImpuestos') : 0));
-                        qlis.add(new QuoteLineItem(QuoteId = rid, PricebookEntryId = (Id)pbeIdStr, Quantity = (can > 0 ? can : 1), UnitPrice = (can > 0 ? (tot/can) : tot), Description = (String)it.get('detalleTecnico')));
+                        String det = (String)it.get('detalleTecnico');
+                        QuoteLineItem qli = new QuoteLineItem(
+                            QuoteId = rid, 
+                            PricebookEntryId = (Id)pbeIdStr, 
+                            Quantity = (can > 0 ? can : 1), 
+                            UnitPrice = (can > 0 ? (tot/can) : tot),
+                            Descripcion_Detallada__c = det, // Toda la información aquí (32k chars)
+                            Description = null // Dejamos el estándar limpio para evitar errores
+                        );
+                        qlis.add(qli);
                     } catch (Exception e) {}
                 }
                 if (!qlis.isEmpty()) insert qlis;
