@@ -344,4 +344,65 @@ public with sharing class QuoteTechnicalController {
             if (!records.isEmpty()) insert records;
         } catch (Exception e) {}
     }
+
+    @AuraEnabled
+    public static Boolean validatePLPassword(String password) {
+        return password == System.Label.PL_Access_Password;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchParentAccounts(String searchTerm) {
+        String key = '%' + searchTerm + '%';
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (Account a : [SELECT Id, Name FROM Account WHERE Name LIKE :key AND ParentId = null LIMIT 10]) {
+            results.add(new Map<String, String>{'id' => a.Id, 'name' => a.Name});
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchSedes(String searchTerm) {
+        String key = '%' + searchTerm + '%';
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (Account a : [SELECT Id, Name FROM Account WHERE Name LIKE :key AND ParentId != null LIMIT 10]) {
+            results.add(new Map<String, String>{'id' => a.Id, 'name' => a.Name});
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchProspectos(String searchTerm) {
+        String key = '%' + searchTerm + '%';
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (Lead l : [SELECT Id, Name, Company FROM Lead WHERE (Name LIKE :key OR Company LIKE :key) AND IsConverted = false LIMIT 10]) {
+            results.add(new Map<String, String>{'id' => l.Id, 'name' => l.Name + ' (' + l.Company + ')'});
+        }
+        return results;
+    }
+
+    @AuraEnabled
+    public static Id cloneQuote(Id quoteId, Map<String, Object> options, Id targetSedeId, Id targetProspectoId) {
+        try {
+            Quote source = [SELECT Name, OpportunityId, Pricebook2Id, ExpirationDate, Introduction_Text__c, Warranty_Text__c, Markers_Data__c, Business_Lines_Selected__c, Technical_Sedes__c, Show_Introduction__c, Show_Warranty__c, Description FROM Quote WHERE Id = :quoteId];
+            Quote target = source.clone(false, true, false, false);
+            target.Name = 'CLON - ' + source.Name;
+            target.Status = 'Draft';
+            insert target;
+            
+            Boolean copyItems = options != null && options.containsKey('copyLineItems') ? (Boolean)options.get('copyLineItems') : true;
+            if (copyItems) {
+                List<QuoteLineItem> qlis = [SELECT PricebookEntryId, Quantity, UnitPrice, Description, Discount, ServiceDate FROM QuoteLineItem WHERE QuoteId = :quoteId];
+                if (!qlis.isEmpty()) {
+                    List<QuoteLineItem> newQlis = new List<QuoteLineItem>();
+                    for (QuoteLineItem qli : qlis) {
+                        QuoteLineItem newQli = qli.clone(false, true, false, false);
+                        newQli.QuoteId = target.Id;
+                        newQlis.add(newQli);
+                    }
+                    insert newQlis;
+                }
+            }
+            return target.Id;
+        } catch (Exception e) { throw new AuraHandledException('Error clonación: ' + e.getMessage()); }
+    }
 }
