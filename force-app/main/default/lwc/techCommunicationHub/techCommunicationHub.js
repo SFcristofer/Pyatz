@@ -1,14 +1,13 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 import getEmailTemplatesByFolders from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolders';
 import getAvailableAttachments from '@salesforce/apex/QuoteTechnicalController.getAvailableAttachments';
 import sendEmailWithAttachments from '@salesforce/apex/QuoteTechnicalController.sendEmailWithAttachments';
 import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
-import { getRecord } from 'lightning/uiRecordApi';
+import getEmailEngagementDetails from '@salesforce/apex/QuoteTechnicalController.getEmailEngagementDetails';
 
-const OPP_FIELDS = ['Opportunity.ContactId', 'Opportunity.Name'];
-
-export default class TechCommunicationHub extends LightningElement {
+export default class TechCommunicationHub extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
 
     @track selectedFolder = '';
@@ -24,6 +23,61 @@ export default class TechCommunicationHub extends LightningElement {
     
     @track isLoadingAttachments = false;
     @track isSending = false;
+
+    // --- ESTADO DE ENGAGEMENT ---
+    @track showEngagementModal = false;
+    @track isLoadingEngagement = false;
+    @track engagementDetails = [];
+
+    handleShowEngagement() {
+        this.showEngagementModal = true;
+        this.loadEngagementHistory();
+    }
+
+    handleCloseEngagement() {
+        this.showEngagementModal = false;
+    }
+
+    loadEngagementHistory() {
+        this.isLoadingEngagement = true;
+        getEmailEngagementDetails({ oppId: this.recordId })
+            .then(result => {
+                this.engagementDetails = result;
+                this.isLoadingEngagement = false;
+            })
+            .catch(error => {
+                console.error('Error loading engagement:', error);
+                this.isLoadingEngagement = false;
+            });
+    }
+
+    // --- MANEJADORES DE ACTIVIDAD NATIVA ---
+    handleLogCall() {
+        this.navigateToGlobalAction('LogACall');
+    }
+
+    handleNewTask() {
+        this.navigateToGlobalAction('NewTask');
+    }
+
+    handleNewEvent() {
+        this.navigateToGlobalAction('NewEvent');
+    }
+
+    navigateToGlobalAction(actionName) {
+        // Navegación nativa autorizada por Salesforce para evitar errores de CSP
+        this[NavigationMixin.Navigate]({
+            type: 'standard__quickAction',
+            attributes: {
+                apiName: `Global.${actionName}`
+            },
+            state: {
+                recordId: this.recordId,
+                contextId: this.recordId,
+                defaultFieldValues: `WhatId=${this.recordId}`
+            }
+        });
+    }
 
     folderOptions = [
         { label: 'Pyatz - CORREOS A CLIENTES', value: 'Pyatz-CORREOS A CLIENTES' },

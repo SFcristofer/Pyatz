@@ -390,6 +390,36 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getEmailEngagementDetails(Id oppId) {
+        List<Map<String, Object>> results = new List<Map<String, Object>>();
+        for (EmailMessage em : [SELECT Id, Subject, ToAddress, CcAddress, Status, MessageDate, IsOpened, FirstOpenedDate, LastOpenedDate 
+                               FROM EmailMessage WHERE RelatedToId = :oppId ORDER BY MessageDate DESC LIMIT 50]) {
+            Map<String, Object> row = new Map<String, Object>();
+            row.put('id', em.Id);
+            row.put('subject', em.Subject);
+            row.put('to', em.ToAddress);
+            row.put('cc', em.CcAddress);
+            row.put('sentDate', em.MessageDate);
+            row.put('isOpened', em.IsOpened);
+            row.put('firstOpen', em.FirstOpenedDate);
+            row.put('lastOpen', em.LastOpenedDate);
+            
+            // Calculamos un status visual
+            String statusLabel = 'Enviado';
+            String statusClass = 'slds-theme_shade';
+            if (em.IsOpened) {
+                statusLabel = 'Leído';
+                statusClass = 'slds-theme_success';
+            }
+            row.put('statusLabel', statusLabel);
+            row.put('statusClass', statusClass);
+            
+            results.add(row);
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> getEmailTemplatesByFolders(List<String> folderNames) {
         List<Map<String, String>> results = new List<Map<String, String>>();
         for (EmailTemplate et : [SELECT Id, Name, Folder.Name FROM EmailTemplate WHERE Folder.Name IN :folderNames AND IsActive = true ORDER BY Folder.Name, Name ASC]) {
@@ -427,6 +457,11 @@ public with sharing class QuoteTechnicalController {
         return result;
     }
 
+    /**
+     * PENDIENTE DE IMPLEMENTAR (Solicitud Usuario):
+     * 1. Selector de Remitente Dinámico (User vs Org-Wide Address).
+     * 2. Rastreo de Respuestas vía BCC (Email-to-Salesforce) para visibilidad en Timeline.
+     */
     @AuraEnabled
     public static void sendEmailWithAttachments(Id oppId, String toEmail, String ccEmail, String subject, String body, List<Map<String, String>> selectedAttachments) {
         try {

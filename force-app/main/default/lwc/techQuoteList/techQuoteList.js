@@ -123,12 +123,16 @@ export default class TechQuoteList extends NavigationMixin(LightningElement) {
     }
 
     openEmailComposer(quoteId) {
-        // Navegación al compositor de correo nativo de Salesforce
-        // Usamos el formato de URL estándar para el compositor de email pre-llenado
+        // Navegación nativa autorizada para evitar errores de CSP
         this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
+            type: 'standard__quickAction',
             attributes: {
-                url: `/lightning/o/EmailMessage/new?parentRecordId=${this.opportunityId}&sourceRecordId=${quoteId}`
+                apiName: 'Global.SendEmail'
+            },
+            state: {
+                recordId: this.opportunityId,
+                contextId: quoteId,
+                defaultFieldValues: `WhatId=${this.opportunityId}`
             }
         });
     }

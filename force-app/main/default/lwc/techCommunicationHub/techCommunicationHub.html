@@ -83,9 +83,19 @@
             <!-- PANEL DERECHO: EDITOR DE CORREO (Ancho 8 de 12) -->
             <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12">
                 <div class="editor-panel slds-box bg-white full-height">
-                    <div class="slds-text-heading_small slds-m-bottom_small border-bottom slds-p-bottom_x-small">
-                        <lightning-icon icon-name="utility:email" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                        Redacción del Correo
+                    
+                    <!-- HEADER UNIFICADO CON BOTONES DE ACTIVIDAD -->
+                    <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-m-bottom_small border-bottom slds-p-bottom_x-small">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name="utility:email" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <span class="slds-text-heading_small">Redacción del Correo</span>
+                        </div>
+                        <div class="slds-button-group" role="group">
+                            <lightning-button-icon icon-name="utility:preview" variant="border-filled" onclick={handleShowEngagement} title="Historial de aperturas" class="slds-m-right_x-small"></lightning-button-icon>
+                            <lightning-button label="Llamada" icon-name="standard:log_a_call" variant="neutral" onclick={handleLogCall} class="slds-m-left_xx-small compact-btn"></lightning-button>
+                            <lightning-button label="Tarea" icon-name="standard:task" variant="neutral" onclick={handleNewTask} class="slds-m-left_xx-small compact-btn"></lightning-button>
+                            <lightning-button label="Evento" icon-name="standard:event" variant="neutral" onclick={handleNewEvent} class="slds-m-left_xx-small compact-btn"></lightning-button>
+                        </div>
                     </div>
 
                     <div class="slds-grid slds-wrap slds-gutters_small">
@@ -124,4 +134,67 @@
 
         </div>
     </div>
+
+    <!-- MODAL DE HISTORIAL DE ENGAGEMENT -->
+    <template if:true={showEngagementModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleCloseEngagement}>
+                        <lightning-icon icon-name="utility:close" variant="inverse" size="small"></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium">Historial de Engagement de Propuestas</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium bg-light">
+                    <template if:true={isLoadingEngagement}>
+                        <lightning-spinner alternative-text="Cargando historial..." size="medium"></lightning-spinner>
+                    </template>
+                    
+                    <template if:false={isLoadingEngagement}>
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <template for:each={engagementDetails} for:item="email">
+                                <div key={email.id} class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                                    <div class="slds-box bg-white shadow-sm">
+                                        <div class="slds-grid slds-grid_align-spread">
+                                            <div class="slds-grid">
+                                                <lightning-icon icon-name="standard:email" size="small" class="slds-m-right_small"></lightning-icon>
+                                                <div>
+                                                    <div class="slds-text-title_bold">{email.subject}</div>
+                                                    <div class="slds-text-color_weak slds-text-body_small">Para: {email.to}</div>
+                                                </div>
+                                            </div>
+                                            <span class={email.statusClass}>{email.statusLabel}</span>
+                                        </div>
+                                        
+                                        <div class="slds-m-top_small border-top slds-p-top_small">
+                                            <div class="slds-grid slds-wrap">
+                                                <div class="slds-col slds-size_1-of-2">
+                                                    <div class="slds-text-title">Fecha de Envío:</div>
+                                                    <div><lightning-formatted-date-time value={email.sentDate} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
+                                                </div>
+                                                <template if:true={email.isOpened}>
+                                                    <div class="slds-col slds-size_1-of-2">
+                                                        <div class="slds-text-title">Primera Apertura:</div>
+                                                        <div class="slds-text-color_success"><lightning-formatted-date-time value={email.firstOpen} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
+                                                    </div>
+                                                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                                                        <div class="slds-text-title">Última Apertura:</div>
+                                                        <div class="slds-text-color_error"><lightning-formatted-date-time value={email.lastOpen} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cerrar" variant="neutral" onclick={handleCloseEngagement}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
 </template>
