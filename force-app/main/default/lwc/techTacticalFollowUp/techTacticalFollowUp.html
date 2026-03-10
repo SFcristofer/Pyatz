@@ -104,6 +104,13 @@
                             <div class="slds-m-top_x-small slds-text-body_small slds-text-color_weak italic">
                                 {item.desc}
                             </div>
+                            
+                            <!-- NUEVO: Previsualización de Imagen si aplica -->
+                            <template if:true={item.previewUrl}>
+                                <div class="slds-m-top_small" style="max-width: 250px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <img src={item.previewUrl} alt={item.subject} style="width: 100%; height: auto; display: block;"/>
+                                </div>
+                            </template>
                         </div>
                     </template>
                     <template if:false={historyItems.length}>

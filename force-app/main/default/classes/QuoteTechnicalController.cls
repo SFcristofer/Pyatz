@@ -22,24 +22,62 @@ public with sharing class QuoteTechnicalController {
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getTacticalHistory(Id oppId) {
         List<Map<String, Object>> history = new List<Map<String, Object>>();
+        if (oppId == null) return history;
+
+        // 1. Recolectar todos los IDs relacionados (Estrategia de Burbujeo)
+        Set<Id> allRelatedIds = new Set<Id>{oppId};
+        for (Levantamiento_Tecnico__c lev : [SELECT Id FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId]) {
+            allRelatedIds.add(lev.Id);
+        }
+        for (Solucion_Tecnica__c sol : [SELECT Id FROM Solucion_Tecnica__c WHERE Levantamiento_Tecnico__r.Oportunidad__c = :oppId]) {
+            allRelatedIds.add(sol.Id);
+        }
         
-        // 1. Tareas y Llamadas
-        for (Task t : [SELECT Id, Subject, Status, ActivityDate, Description, TaskSubtype, CreatedDate FROM Task WHERE WhatId = :oppId ORDER BY CreatedDate DESC LIMIT 20]) {
+        // 2. Tareas y Llamadas (Solo de la Oportunidad para no saturar)
+        for (Task t : [SELECT Id, Subject, Status, Description, TaskSubtype, CreatedDate FROM Task WHERE WhatId = :oppId ORDER BY CreatedDate DESC LIMIT 20]) {
             String icon = t.TaskSubtype == 'Call' ? 'standard:log_a_call' : 'standard:task';
             String color = t.TaskSubtype == 'Call' ? 'background: #e1f5fe;' : 'background: #fff3e0;';
             history.add(new Map<String, Object>{ 'id' => t.Id, 'type' => 'Actividad', 'label' => t.TaskSubtype == 'Call' ? 'Llamada' : 'Tarea', 'subject' => t.Subject, 'date' => t.CreatedDate, 'icon' => icon, 'color' => color, 'desc' => t.Description });
         }
 
-        // 2. Correos
+        // 3. Correos
         for (EmailMessage em : [SELECT Id, Subject, MessageDate, IsOpened, ToAddress FROM EmailMessage WHERE RelatedToId = :oppId ORDER BY MessageDate DESC LIMIT 20]) {
             history.add(new Map<String, Object>{ 'id' => em.Id, 'type' => 'Email', 'label' => 'Correo', 'subject' => em.Subject, 'date' => em.MessageDate, 'icon' => 'standard:email', 'color' => 'background: #e8f5e9;', 'desc' => 'Para: ' + em.ToAddress + (em.IsOpened ? ' (Abierto)' : ' (No leído)') });
         }
 
-        // 3. Notas Nativas (ContentNote vía ContentDocumentLink)
+        // 4. Notas y Archivos Agregados (Oportunidad + Levantamientos + Soluciones)
         Set<Id> docIds = new Set<Id>();
-        for (ContentDocumentLink cdl : [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :oppId]) docIds.add(cdl.ContentDocumentId);
-        for (ContentNote n : [SELECT Id, Title, Content, CreatedDate FROM ContentNote WHERE Id IN :docIds ORDER BY CreatedDate DESC LIMIT 20]) {
-            history.add(new Map<String, Object>{ 'id' => n.Id, 'type' => 'Nota', 'label' => 'Nota', 'subject' => n.Title, 'date' => n.CreatedDate, 'icon' => 'standard:note', 'color' => 'background: #fdfae5;', 'desc' => 'Nota enriquecida registrada en el seguimiento.' });
+        Map<Id, Id> docToEntityMap = new Map<Id, Id>();
+        for (ContentDocumentLink cdl : [SELECT ContentDocumentId, LinkedEntityId FROM ContentDocumentLink WHERE LinkedEntityId IN :allRelatedIds]) {
+            docIds.add(cdl.ContentDocumentId);
+            docToEntityMap.put(cdl.ContentDocumentId, cdl.LinkedEntityId);
+        }
+
+        if (!docIds.isEmpty()) {
+            // 4a. Notas (ContentNote)
+            for (ContentNote n : [SELECT Id, Title, Content, CreatedDate FROM ContentNote WHERE Id IN :docIds ORDER BY CreatedDate DESC LIMIT 20]) {
+                String origin = docToEntityMap.get(n.Id).getSObjectType().getDescribe().getLabel();
+                history.add(new Map<String, Object>{ 'id' => n.Id, 'type' => 'Nota', 'label' => 'Nota (' + origin + ')', 'subject' => n.Title, 'date' => n.CreatedDate, 'icon' => 'standard:note', 'color' => 'background: #fdfae5;', 'desc' => 'Nota registrada en el expediente técnico.' });
+            }
+
+            // 4b. Archivos e Imágenes (ContentVersion)
+            for (ContentVersion cv : [SELECT Id, Title, FileExtension, ContentDocumentId, CreatedDate FROM ContentVersion WHERE ContentDocumentId IN :docIds AND IsLatest = true ORDER BY CreatedDate DESC LIMIT 20]) {
+                String ext = cv.FileExtension != null ? cv.FileExtension.toLowerCase() : '';
+                Boolean isImg = new Set<String>{'png', 'jpg', 'jpeg', 'gif'}.contains(ext);
+                String origin = docToEntityMap.get(cv.ContentDocumentId).getSObjectType().getDescribe().getLabel();
+                
+                history.add(new Map<String, Object>{ 
+                    'id' => cv.Id, 
+                    'type' => isImg ? 'Imagen' : 'Archivo', 
+                    'label' => (isImg ? 'Imagen' : 'Archivo') + ' (' + origin + ')', 
+                    'subject' => cv.Title + '.' + cv.FileExtension, 
+                    'date' => cv.CreatedDate, 
+                    'icon' => isImg ? 'standard:image' : 'standard:file', 
+                    'color' => isImg ? 'background: #f3e5f5;' : 'background: #eceff1;',
+                    'previewUrl' => isImg ? '/sfc/servlet.shepherd/version/download/' + cv.Id : null,
+                    'desc' => 'Documento cargado desde ' + origin
+                });
+            }
         }
 
         return history;
