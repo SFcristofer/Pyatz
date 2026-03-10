@@ -1,5 +1,50 @@
 public with sharing class QuoteTechnicalController {
     
+    @AuraEnabled
+    public static Id saveNote(Id parentId, String title, String content) {
+        try {
+            ContentNote cn = new ContentNote();
+            cn.Title = title;
+            cn.Content = Blob.valueOf(content.escapeHtml4());
+            insert cn;
+            
+            ContentDocumentLink cdl = new ContentDocumentLink();
+            cdl.ContentDocumentId = cn.Id;
+            cdl.LinkedEntityId = parentId;
+            cdl.ShareType = 'V';
+            cdl.Visibility = 'AllUsers';
+            insert cdl;
+            
+            return cn.Id;
+        } catch (Exception e) { throw new AuraHandledException('Error al guardar nota: ' + e.getMessage()); }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getTacticalHistory(Id oppId) {
+        List<Map<String, Object>> history = new List<Map<String, Object>>();
+        
+        // 1. Tareas y Llamadas
+        for (Task t : [SELECT Id, Subject, Status, ActivityDate, Description, TaskSubtype, CreatedDate FROM Task WHERE WhatId = :oppId ORDER BY CreatedDate DESC LIMIT 20]) {
+            String icon = t.TaskSubtype == 'Call' ? 'standard:log_a_call' : 'standard:task';
+            String color = t.TaskSubtype == 'Call' ? 'background: #e1f5fe;' : 'background: #fff3e0;';
+            history.add(new Map<String, Object>{ 'id' => t.Id, 'type' => 'Actividad', 'label' => t.TaskSubtype == 'Call' ? 'Llamada' : 'Tarea', 'subject' => t.Subject, 'date' => t.CreatedDate, 'icon' => icon, 'color' => color, 'desc' => t.Description });
+        }
+
+        // 2. Correos
+        for (EmailMessage em : [SELECT Id, Subject, MessageDate, IsOpened, ToAddress FROM EmailMessage WHERE RelatedToId = :oppId ORDER BY MessageDate DESC LIMIT 20]) {
+            history.add(new Map<String, Object>{ 'id' => em.Id, 'type' => 'Email', 'label' => 'Correo', 'subject' => em.Subject, 'date' => em.MessageDate, 'icon' => 'standard:email', 'color' => 'background: #e8f5e9;', 'desc' => 'Para: ' + em.ToAddress + (em.IsOpened ? ' (Abierto)' : ' (No leído)') });
+        }
+
+        // 3. Notas Nativas (ContentNote vía ContentDocumentLink)
+        Set<Id> docIds = new Set<Id>();
+        for (ContentDocumentLink cdl : [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :oppId]) docIds.add(cdl.ContentDocumentId);
+        for (ContentNote n : [SELECT Id, Title, Content, CreatedDate FROM ContentNote WHERE Id IN :docIds ORDER BY CreatedDate DESC LIMIT 20]) {
+            history.add(new Map<String, Object>{ 'id' => n.Id, 'type' => 'Nota', 'label' => 'Nota', 'subject' => n.Title, 'date' => n.CreatedDate, 'icon' => 'standard:note', 'color' => 'background: #fdfae5;', 'desc' => 'Nota enriquecida registrada en el seguimiento.' });
+        }
+
+        return history;
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> searchUsers(String searchTerm) {
         String query = '%' + searchTerm + '%';

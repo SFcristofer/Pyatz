@@ -1,0 +1,61 @@
+.tactical-container {
+    background: transparent;
+}
+
+.custom-tabset {
+    border: 1px solid #e0e5ee;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.bg-white {
+    background: #ffffff;
+}
+
+.bg-timeline {
+    background: #fcfcfc;
+    border-radius: 8px;
+}
+
+.bg-info {
+    background: #f0f7ff;
+    border: 1px solid #c9e1fb;
+}
+
+.bg-light {
+    background: #f8f9fb;
+}
+
+.radius-8 {
+    border-radius: 8px;
+}
+
+.border-all {
+    border: 1px solid #dddbda;
+}
+
+.border-top {
+    border-top: 2px solid #0070d2;
+}
+
+.timeline-item {
+    transition: transform 0.2s ease-in-out;
+}
+
+.timeline-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.italic {
+    font-style: italic;
+}
+
+.shadow-card {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.custom-tabset lightning-tabset {
+    --sds-c-tabs-scoped-color-background-active: #ffffff;
+}

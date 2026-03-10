@@ -187,8 +187,19 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get isDefSolucionPhase() { return this.isCosteo && this.currentSubStep === '1'; }
     get isPresupuestoPhase() { return this.isCosteo && this.currentSubStep === '2'; }
     get isEnvioPhase() { return this.currentStep === 'Negociación' && this.currentSubStep === '1'; }
+    get isSeguimientoPhase() { return this.currentStep === 'Negociación' && this.currentSubStep === '2'; }
     get isContratoPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '2'; }
-    get isWorkOrderPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '3'; }
+
+    handleLogCall() { this.navigateToGlobalAction('LogACall'); }
+    handleNewTask() { this.navigateToGlobalAction('NewTask'); }
+
+    navigateToGlobalAction(actionName) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__quickAction',
+            attributes: { apiName: `Global.${actionName}` },
+            state: { recordId: this.recordId, contextId: this.recordId, defaultFieldValues: `WhatId=${this.recordId}` }
+        });
+    }
 
     get showQuoteList() { return this.isPresupuestoPhase && this.quoteViewMode === 'list'; }
     get showQuoteEditor() { return this.isPresupuestoPhase && this.quoteViewMode === 'edit'; }

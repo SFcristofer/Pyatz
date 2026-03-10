@@ -1,0 +1,127 @@
+<template>
+    <div class="tactical-container">
+        <!-- INTERRUPTOR DE HISTORIAL (FUERA DEL CUADRO) -->
+        <div class="slds-m-bottom_medium slds-p-horizontal_small slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <div class="slds-grid slds-grid_vertical-align-center">
+                <lightning-icon icon-name="standard:follow" size="small" class="slds-m-right_small"></lightning-icon>
+                <h2 class="slds-text-heading_small slds-font-weight_bold">Gestión Táctica de Seguimiento</h2>
+            </div>
+            <lightning-input 
+                type="toggle" 
+                label="Desplegar Historial de Auditoría" 
+                checked={showFullHistory} 
+                onchange={handleToggleHistory}
+                message-toggle-active="Historial Abierto" 
+                message-toggle-inactive="Historial Oculto">
+            </lightning-input>
+        </div>
+
+        <!-- EL CUADRO PROFESIONAL (TABSET SCOPED) -->
+        <div class="slds-box bg-white shadow-card slds-p-around_none custom-tabset">
+            <lightning-tabset variant="scoped" active-tab-value={activeTab}>
+                
+                <!-- PESTAÑA: ACTIVIDAD -->
+                <lightning-tab label="Actividad" value="activity">
+                    <div class="slds-p-around_large slds-text-align_center">
+                        <p class="slds-m-bottom_medium slds-text-color_weak">Utilice las acciones estándar para registrar avances inmediatos.</p>
+                        <lightning-button-group>
+                            <lightning-button label="Registrar Llamada" icon-name="standard:log_a_call" onclick={handleLogCall}></lightning-button>
+                            <lightning-button label="Nueva Tarea" icon-name="standard:task" onclick={handleNewTask}></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                </lightning-tab>
+
+                <!-- PESTAÑA: NOTAS (NATIVAS) -->
+                <lightning-tab label="Notas" value="notes">
+                    <div class="slds-p-around_medium">
+                        <div class="slds-grid slds-gutters slds-m-bottom_small">
+                            <div class="slds-col slds-size_1-of-1">
+                                <lightning-input label="Título de la Nota" value={noteTitle} onchange={handleNoteTitleChange} placeholder="Ej: Minuta de llamada técnica..."></lightning-input>
+                            </div>
+                        </div>
+                        <lightning-input-rich-text 
+                            value={noteContent} 
+                            onchange={handleNoteContentChange} 
+                            placeholder="Escriba los detalles técnicos aquí...">
+                        </lightning-input-rich-text>
+                        <div class="slds-m-top_small slds-text-align_right">
+                            <lightning-button label="Guardar Nota en Salesforce" variant="brand" icon-name="utility:save" onclick={handleSaveNote} disabled={isNoteEmpty}></lightning-button>
+                        </div>
+                    </div>
+                </lightning-tab>
+
+                <!-- PESTAÑA: CORREO ELECTRÓNICO -->
+                <lightning-tab label="Correo electrónico" value="email">
+                    <div class="slds-p-around_small">
+                        <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
+                    </div>
+                </lightning-tab>
+
+                <!-- PESTAÑA: ARCHIVOS -->
+                <lightning-tab label="Archivos" value="files">
+                    <div class="slds-p-around_large">
+                        <div class="slds-box slds-theme_shade slds-text-align_center">
+                            <lightning-file-upload
+                                label="Subir documentos al expediente"
+                                name="fileUploader"
+                                accept={acceptedFormats}
+                                record-id={recordId}
+                                onuploadfinished={handleUploadFinished}
+                                multiple>
+                            </lightning-file-upload>
+                            <p class="slds-m-top_small slds-text-body_small slds-text-color_weak">Formatos aceptados: PDF, Imágenes, Office.</p>
+                        </div>
+                    </div>
+                </lightning-tab>
+
+            </lightning-tabset>
+        </div>
+
+        <!-- SECCIÓN HISTORIAL (SOLO SI EL CHECK ESTÁ ACTIVO) -->
+        <template if:true={showFullHistory}>
+            <div class="timeline-container slds-m-top_medium slds-p-around_medium bg-timeline border-top">
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                    <h3 class="slds-text-title_bold" style="color: #0070d2;">Línea de Tiempo Consolidada (360°)</h3>
+                    <lightning-button-icon icon-name="utility:refresh" variant="bare" onclick={refreshHistory}></lightning-button-icon>
+                </div>
+
+                <template if:true={isLoadingHistory}>
+                    <lightning-spinner alternative-text="Cargando historial..." size="small"></lightning-spinner>
+                </template>
+
+                <template if:false={isLoadingHistory}>
+                    <template for:each={historyItems} for:item="item">
+                        <div key={item.id} class="timeline-item slds-m-bottom_small slds-p-around_small border-all radius-8" style={item.color}>
+                            <div class="slds-grid slds-grid_align-spread">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name={item.icon} size="small" class="slds-m-right_small"></lightning-icon>
+                                    <div>
+                                        <div class="slds-text-title_bold">{item.subject}</div>
+                                        <div class="slds-text-body_small">{item.label} • <lightning-formatted-date-time value={item.date} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-m-top_x-small slds-text-body_small slds-text-color_weak italic">
+                                {item.desc}
+                            </div>
+                        </div>
+                    </template>
+                    <template if:false={historyItems.length}>
+                        <div class="slds-text-align_center slds-p-around_large slds-text-color_weak">
+                            No hay actividad registrada aún.
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </template>
+
+        <!-- GUÍA DE CIERRE (PIE DE PÁGINA) -->
+        <div class="slds-m-top_medium slds-p-around_small bg-info border-all radius-8">
+            <div class="slds-grid">
+                <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
+                <span class="slds-text-title_bold" style="color: #00396b;">Consejo de Negociación:</span>
+            </div>
+            <p class="slds-text-body_small slds-p-left_large">Utilice las Notas para registrar acuerdos verbales y el Correo para formalizarlos. El historial le permite auditar cada paso antes de pasar a la fase de Cierre.</p>
+        </div>
+    </div>
+</template>

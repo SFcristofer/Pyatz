@@ -181,6 +181,11 @@
                     <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
                 </template>
 
+                <!-- MÓDULO: SEGUIMIENTO TÁCTICO (3.2) - CAJA TÁCTICA PROFESIONAL -->
+                <template if:true={isSeguimientoPhase}>
+                    <c-tech-tactical-follow-up record-id={recordId}></c-tech-tactical-follow-up>
+                </template>
+
                 <!-- MÓDULO: CONTRATO -->
                 <template if:true={isContratoPhase}>
                     <c-tech-contract-manager record-id={recordId}></c-tech-contract-manager>
