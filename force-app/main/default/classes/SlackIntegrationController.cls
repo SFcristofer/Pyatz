@@ -33,7 +33,7 @@ public with sharing class SlackIntegrationController {
     /**
      * Obtiene la lista dinámica de canales públicos del workspace.
      */
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Map<String, String>> getChannels() {
         try {
             String body = performCallout('conversations.list', 'GET', null);

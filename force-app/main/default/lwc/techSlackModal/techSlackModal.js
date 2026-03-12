@@ -42,6 +42,9 @@ export default class TechSlackModal extends LightningModal {
                 this._channels = result;
                 this.selectedChannelId = this._channels[0].id;
                 this.loadChatHistory();
+            } else {
+                this.showToast('Atención', 'No se encontraron canales públicos donde el Bot esté invitado.', 'warning');
+                this._channels = [];
             }
         } catch (error) {
             this.showToast('Error', 'No se pudieron cargar los canales', 'error');
