@@ -87,19 +87,20 @@ export default class TechSlackModal extends LightningModal {
         return (container.scrollHeight - container.scrollTop - container.clientHeight) < 20;
     }
 
-    async loadChannels() {
+    async loadUserMap() {
         try {
             this.userMap = await getUserMap();
         } catch (error) { console.error('Error cargando usuarios'); }
     }
 
     async loadChannels() {
+        this.isLoading = true;
         try {
             const result = await getChannels();
             if (result && result.length > 0) {
                 this._channels = result;
                 this.selectedChannelId = this._channels[0].id;
-                this.loadChatHistory();
+                await this.loadChatHistory();
             } else {
                 this.showToast('Atención', 'No se encontraron canales públicos donde el Bot esté invitado.', 'warning');
                 this._channels = [];

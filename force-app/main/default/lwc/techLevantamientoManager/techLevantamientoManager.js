@@ -1,6 +1,5 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import TechSlackModal from 'c/techSlackModal';
 import saveSurveyData from '@salesforce/apex/QuoteTechnicalController.saveSurveyData';
 
 export default class TechLevantamientoManager extends LightningElement {
@@ -196,12 +195,4 @@ export default class TechLevantamientoManager extends LightningElement {
     get isGmCapNo() { return this.gmCapacitacion === 'No'; }
     get isGmLevSi() { return this.gmPermiteLev === 'Si'; }
     get isGmLevNo() { return this.gmPermiteLev === 'No'; }
-
-    async openSlackModal() {
-        await TechSlackModal.open({
-            size: 'medium',
-            recordId: this.recordId,
-            currentPhase: 'Levantamiento Técnico'
-        });
-    }
 }

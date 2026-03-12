@@ -8,10 +8,22 @@ import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
 import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
 import getOpportunitiesList from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesList';
+import TechSlackModal from 'c/techSlackModal';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
     @api recordId;
     
+    // --- ACCIÓN GLOBAL: SLACK 360 ---
+    async handleOpenSlack() {
+        const result = await TechSlackModal.open({
+            size: 'large',
+            description: 'Modal de comunicación Slack 360',
+            recordId: this.recordId,
+            currentPhase: this.currentStage ? this.currentStage.label : 'General'
+        });
+        console.log('Modal cerrado:', result);
+    }
+
     // --- ESTADO DEL DASHBOARD ---
     @track opportunities = [];
     @track isLoading = false;

@@ -47,7 +47,19 @@
                         <p class="slds-text-color_weak slds-text-body_small">Proceso integral Pyatz: {subPhase}</p>
                     </div>
                 </div>
-                <lightning-button label="Volver al Pipeline" icon-name="utility:back" onclick={handleBackToDashboard}></lightning-button>
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <!-- Botón Global de Slack (Solo Icono con color oficial) -->
+                    <lightning-button-icon 
+                        icon-name="utility:slack" 
+                        variant="border-filled" 
+                        class="slds-m-right_small slack-icon-only" 
+                        style="--slds-c-icon-color-foreground: #4A154B; border-color: #4A154B;"
+                        onclick={handleOpenSlack} 
+                        tooltip="Abrir Slack 360">
+                    </lightning-button-icon>
+                    
+                    <lightning-button label="Volver al Pipeline" icon-name="utility:back" onclick={handleBackToDashboard}></lightning-button>
+                </div>
             </header>
 
             <!-- INFORMACIÓN DE LA OPORTUNIDAD (SECCIÓN OPPORTUNITY INFORMATION) -->
