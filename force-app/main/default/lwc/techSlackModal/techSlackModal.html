@@ -1,0 +1,122 @@
+<template>
+    <lightning-modal-header label="Comunicación Slack 360"></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slack-container">
+            <!-- Barra Lateral Dinámica -->
+            <div class="slack-sidebar">
+                <div class="workspace-name">
+                    <strong>PYATZ</strong>
+                    <lightning-button-icon 
+                        icon-name="utility:add" 
+                        variant="border-inverse" 
+                        size="xx-small" 
+                        onclick={handleCreateChannel}
+                        tooltip="Crear nuevo canal">
+                    </lightning-button-icon>
+                </div>
+                <div class="sidebar-section">
+                    <p class="section-title">Canales Públicos</p>
+                    <template if:true={isLoading}>
+                        <div class="slds-p-around_small">
+                            <lightning-spinner alternative-text="Cargando..." size="small" variant="inverse"></lightning-spinner>
+                        </div>
+                    </template>
+                    <template for:each={channels} for:item="ch">
+                        <div key={ch.id} 
+                             class={ch.class} 
+                             data-id={ch.id} 
+                             onclick={handleChannelSelect}>
+                            <span class="hashtag">#</span> {ch.name}
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Área de Mensajes Real -->
+            <div class="slack-main">
+                <div class="chat-header">
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <template if:true={selectedThreadTs}>
+                                <lightning-button-icon 
+                                    icon-name="utility:back" 
+                                    variant="bare" 
+                                    onclick={handleBackToChannel} 
+                                    class="slds-m-right_small">
+                                </lightning-button-icon>
+                                <strong>Hilo en # {activeChannelName}</strong>
+                            </template>
+                            <template if:false={selectedThreadTs}>
+                                <strong># {activeChannelName}</strong>
+                            </template>
+                        </div>
+                        <template if:true={isChatLoading}>
+                            <lightning-spinner alternative-text="Actualizando..." size="xx-small"></lightning-spinner>
+                        </template>
+                    </div>
+                    <div class="slds-grid slds-grid_align-spread">
+                        <span class="header-info">{currentPhase}</span>
+                        <template if:true={channelTopic}>
+                            <span class="channel-topic slds-text-color_weak slds-truncate" title={channelTopic}>{channelTopic}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="message-list">
+                    <template for:each={messages} for:item="msg">
+                        <div key={msg.id} class={msg.class} data-ts={msg.ts} onclick={handleMessageClick} style="cursor: pointer;">
+                            <div class="avatar"></div>
+                            <div class="message-body">
+                                <span class="user-name">{msg.user}</span> <span class="time">{msg.time}</span>
+                                <div class="text">
+                                    <lightning-formatted-rich-text value={msg.text}></lightning-formatted-rich-text>
+                                </div>
+                                <template if:true={msg.hasReplies}>
+                                    <div class="thread-indicator slds-m-top_xx-small">
+                                        <lightning-icon icon-name="utility:reply" size="xx-small" class="slds-m-right_xxx-small"></lightning-icon>
+                                        <span>{msg.replyCount} respuestas</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <template if:false={messages.length}>
+                        <div class="slds-align_absolute-center slds-p-top_large slds-text-color_weak">
+                            No hay mensajes recientes en este canal.
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Input Real -->
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <lightning-textarea
+                            variant="label-hidden"
+                            placeholder="Escribe un mensaje..."
+                            value={messageText}
+                            onchange={handleMessageChange}
+                            class="slack-textarea">
+                        </lightning-textarea>
+                        <div class="input-actions slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                            <div class="toolbar">
+                                <lightning-icon icon-name="utility:emoji" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
+                                <lightning-icon icon-name="utility:attach" size="xx-small"></lightning-icon>
+                            </div>
+                            <lightning-button 
+                                variant="brand" 
+                                label="Enviar" 
+                                onclick={handleSend} 
+                                loading={isSending}
+                                disabled={isSending}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cerrar" onclick={handleCancel}></lightning-button>
+    </lightning-modal-footer>
+</template>

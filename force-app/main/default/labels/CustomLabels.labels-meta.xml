@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
+        <fullName>Slack_Bot_Token</fullName>
+        <categories>Security</categories>
+        <language>es</language>
+        <protected>false</protected>
+        <shortDescription>Token de Bot de Slack para Pyatz 360</shortDescription>
+        <value>PON_TU_TOKEN_AQUI</value>
+    </labels>
+    <labels>
         <fullName>PL_Access_Password</fullName>
         <categories>Security</categories>
         <language>es</language>

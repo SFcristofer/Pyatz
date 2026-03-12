@@ -1,0 +1,135 @@
+Saltar a navegaciónSaltar a contenido principal
+Sandbox (dev)
+1 nuevas notificaciones
+Ventas
+Expediente Técnico 360
+Proceso integral Pyatz: Levantamiento
+
+Información de la Oportunidad
+Id. de la cuenta
+BODEGA TACUBAYA
+Nombre
+Limpieza de trampa de grasa sello
+Importe
+$2,500.00
+Auxiliar de oportunidad
+Fecha de cierre
+05/03/2026
+Etapa
+Definición
+Subetapa
+Levantamiento
+Avance del Expediente
+8%
+Progreso 8%
+Definición - Etapa actual
+Definición
+Costeo - Etapa no iniciada
+Costeo
+Negociación - Etapa no iniciada
+Negociación
+Cierre - Etapa no iniciada
+Cierre
+Altas - Etapa no iniciada
+Altas
+Organización - Etapa no iniciada
+Organización
+Levantamiento - Etapa actual
+Levantamiento
+Memoria - Etapa no iniciada
+Memoria
+Estado
+
+En proceso
+LEVANTAMIENTO TÉCNICO PYATZ
+Seleccione el Tipo de Servicio a Levantar
+
+Seleccione una opción
+
+Comunicación Slack 360
+PYATZ
+Canales Públicos
+
+# todo-pyatz
+# informal
+# nuevo-canal
+# ejemplo
+# accesospyatz
+# cliente-bodega-tacubaya
+# salesforce-integration
+# cliente-bodega-tacubaya
+Levantamiento Técnico
+g.​garciadealba11:38 AM
+@g.​garciadealba se unió al canal
+Carlos Tovar11:38 AM
+@Carlos Tovar se unió al canal
+Irving Reyes11:38 AM
+@Irving Reyes se unió al canal
+g.​garciadealba11:42 AM
+definió el tema del canal: Expediente Técnico 360 | Cliente: BODEGA TACUBAYA | Etapa: Definición | Subetapa: Levantamiento | Avance: 8%.
+g.​garciadealba11:43 AM
+:pushpin: Expediente Técnico 360 – BODEGA TACUBAYA
+
+Cuenta: BODEGA TACUBAYA
+Servicio: Limpieza de trampa de grasa sello
+Fecha de cierre: 05/03/2026
+
+Etapa actual: Definición
+Subetapa actual: Levantamiento
+Avance del expediente: 8%
+
+Objetivo del canal:
+Centralizar la comunicación del expediente, registrar hallazgos del levantamiento, validar temas técnicos y coordinar seguimiento comercial.
+
+Uso del canal:
+• Compartir actualizaciones del expediente
+• Registrar hallazgos del levantamiento
+• Validar decisiones técnicas
+• Coordinar seguimiento comercial
+• Documentar acuerdos y próximos pasos
+g.​garciadealba11:56 AM
+cambió el nombre del canal de "pyatz-bodega-tacubaya" a "cliente-bodega-tacubaya"
+Slackbot12:00 PM
+g.​garciadealba12:54 PM
+🔎 HALLAZGOS DEL LEVANTAMIENTO
+
+En este hilo registraremos los hallazgos detectados durante la subetapa de levantamiento del expediente BODEGA TACUBAYA.
+
+Cada hallazgo debe incluir:
+• descripción
+• impacto técnico
+• acción sugerida
+• responsable
+1 respuestas
+g.​garciadealba01:05 PM
+:hammer_and_wrench: VALIDACIÓN TÉCNICA
+
+En este hilo se registrarán las dudas técnicas, validaciones y decisiones relacionadas con el expediente BODEGA TACUBAYA.
+
+Ejemplos:
+• validación de alcance del servicio
+• confirmación de información técnica
+• definición de memoria técnica
+• revisión de condiciones del sitio
+1 respuestas
+g.​garciadealba01:07 PM
+:briefcase: SEGUIMIENTO COMERCIAL
+
+En este hilo se registrará el seguimiento comercial del expediente BODEGA TACUBAYA.
+
+Aquí se documentará:
+• revisión del presupuesto
+• análisis del costeo del servicio
+• negociaciones con el cliente
+• acuerdos comerciales
+• definición de cierre del expediente
+1 respuestas
+José de Jesús Romero Miranda11:59 AM
+@José de Jesús Romero Miranda se unió al canal
+Zoar Ailyn Cortes Alba12:01 PM
+@Zoar Ailyn Cortes Alba se unió al canal
+Soporte Technovalue06:11 PM
+@Soporte Technovalue se unió al canal
+Salesforce PYATZ12:37 AM
+@Salesforce PYATZ se unió al canal
+Escribe un mensaje...
