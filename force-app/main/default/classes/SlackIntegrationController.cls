@@ -89,9 +89,10 @@ public with sharing class SlackIntegrationController {
 
     /**
      * Envía un mensaje a Slack, con soporte opcional para hilos.
+     * Devuelve el timestamp del mensaje enviado.
      */
     @AuraEnabled
-    public static void sendMessage(String channelId, String message, String phase, String recordId, String threadTs) {
+    public static String sendMessage(String channelId, String message, String phase, String recordId, String threadTs) {
         try {
             performCallout('conversations.join', 'POST', JSON.serialize(new Map<String, String>{'channel' => channelId}));
 
@@ -113,7 +114,9 @@ public with sharing class SlackIntegrationController {
             String responseBody = performCallout('chat.postMessage', 'POST', JSON.serialize(payload));
             Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
             
-            if (!(Boolean)response.get('ok')) {
+            if ((Boolean)response.get('ok')) {
+                return (String)response.get('ts');
+            } else {
                 throw new AuraHandledException('Error de Slack: ' + response.get('error'));
             }
         } catch (Exception e) {
@@ -173,6 +176,66 @@ public with sharing class SlackIntegrationController {
             }
         } catch (Exception e) {
             throw new AuraHandledException('Error al crear canal: ' + e.getMessage());
+        }
+    }
+
+    /**
+     * Fija un mensaje importante en el canal (Requiere scope pins:write).
+     */
+    @AuraEnabled
+    public static void pinMessage(String channelId, String timestamp) {
+        try {
+            Map<String, String> payload = new Map<String, String>{
+                'channel' => channelId,
+                'timestamp' => timestamp
+            };
+            String responseBody = performCallout('pins.add', 'POST', JSON.serialize(payload));
+            Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+            
+            if (!(Boolean)response.get('ok') && (String)response.get('error') != 'already_pinned') {
+                throw new AuraHandledException('Error al fijar mensaje: ' + response.get('error'));
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    /**
+     * Sube un archivo a un canal de Slack (Requiere scope files:write).
+     */
+    @AuraEnabled
+    public static void uploadFile(String channelId, String fileName, String base64Data) {
+        try {
+            // 1. Obtener URL de subida
+            Map<String, Object> urlPayload = new Map<String, Object>{
+                'filename' => fileName,
+                'length' => EncodingUtil.base64Decode(base64Data).size()
+            };
+            String urlResponse = performCallout('files.getUploadExternalUrl', 'GET', null + '?filename=' + fileName + '&length=' + urlPayload.get('length'));
+            Map<String, Object> urlData = (Map<String, Object>) JSON.deserializeUntyped(urlResponse);
+            
+            if (!(Boolean)urlData.get('ok')) throw new AuraHandledException('Slack Upload URL Error: ' + urlData.get('error'));
+
+            String uploadUrl = (String)urlData.get('upload_url');
+            String fileId = (String)urlData.get('file_id');
+
+            // 2. Subir el archivo real (Binario)
+            Http h = new Http();
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint(uploadUrl);
+            req.setMethod('POST');
+            req.setBodyAsBlob(EncodingUtil.base64Decode(base64Data));
+            h.send(req);
+
+            // 3. Completar la subida y compartir en el canal
+            Map<String, Object> completePayload = new Map<String, Object>{
+                'files' => new List<Map<String, String>>{ new Map<String, String>{ 'id' => fileId } },
+                'channel_id' => channelId
+            };
+            performCallout('files.completeUploadExternal', 'POST', JSON.serialize(completePayload));
+
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al subir archivo: ' + e.getMessage());
         }
     }
 

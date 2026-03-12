@@ -101,7 +101,8 @@
                         <div class="input-actions slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
                             <div class="toolbar">
                                 <lightning-icon icon-name="utility:emoji" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
-                                <lightning-icon icon-name="utility:attach" size="xx-small"></lightning-icon>
+                                <input type="file" class="file-input" style="display:none" onchange={handleFileChange} />
+                                <lightning-button-icon icon-name="utility:attach" size="small" variant="bare" onclick={openFilePicker} tooltip="Adjuntar archivo"></lightning-button-icon>
                             </div>
                             <lightning-button 
                                 variant="brand" 

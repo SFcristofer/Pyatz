@@ -7,6 +7,8 @@ import getChannelMessages from '@salesforce/apex/SlackIntegrationController.getC
 import getThreadReplies from '@salesforce/apex/SlackIntegrationController.getThreadReplies';
 import createChannel from '@salesforce/apex/SlackIntegrationController.createChannel';
 import getUserMap from '@salesforce/apex/SlackIntegrationController.getUserMap';
+import pinMessage from '@salesforce/apex/SlackIntegrationController.pinMessage';
+import uploadFile from '@salesforce/apex/SlackIntegrationController.uploadFile';
 
 export default class TechSlackModal extends LightningModal {
     @api recordId;
@@ -23,13 +25,69 @@ export default class TechSlackModal extends LightningModal {
     @track selectedThreadTs = null;
     @track threadRootMsg = null;
     userMap = {};
+    _refreshInterval; // Variable para el temporizador
 
     async connectedCallback() {
         await this.loadUserMap();
-        this.loadChannels();
+        await this.loadChannels();
+        this.startAutoRefresh(); // Iniciamos el auto-refresco
     }
 
-    async loadUserMap() {
+    disconnectedCallback() {
+        this.stopAutoRefresh(); // Detenemos el temporizador al cerrar el modal
+    }
+
+    startAutoRefresh() {
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this._refreshInterval = setInterval(() => {
+            this.silentRefresh();
+        }, 5000); // Refresca cada 5 segundos
+    }
+
+    stopAutoRefresh() {
+        if (this._refreshInterval) {
+            clearInterval(this._refreshInterval);
+        }
+    }
+
+    /**
+     * TODO: Optimizar este mecanismo de Polling en la siguiente fase.
+     * Se recomienda migrar a una arquitectura basada en eventos (Platform Events + Webhooks de Slack)
+     * para reducir el consumo de límites de API de Salesforce y lograr un tiempo real genuino.
+     */
+    async silentRefresh() {
+        // Solo refrescamos si hay un canal seleccionado y no estamos enviando nada
+        if (!this.selectedChannelId || this.isSending || this.isChatLoading) return;
+
+        try {
+            let history;
+            if (this.selectedThreadTs) {
+                history = await getThreadReplies({ channelId: this.selectedChannelId, threadTs: this.selectedThreadTs });
+            } else {
+                history = await getChannelMessages({ channelId: this.selectedChannelId });
+            }
+
+            const newMessages = this.processSlackMessages(history);
+
+            // Solo actualizamos si el número de mensajes o el contenido del último cambió
+            if (JSON.stringify(newMessages) !== JSON.stringify(this.messages)) {
+                const wasAtBottom = this.isAtBottom();
+                this.messages = newMessages;
+                if (wasAtBottom) this.scrollToBottom();
+            }
+        } catch (error) {
+            console.warn('Error en refresco silencioso');
+        }
+    }
+
+    isAtBottom() {
+        const container = this.template.querySelector('.message-list');
+        if (!container) return false;
+        // Margen de error de 20px para detectar si el usuario está cerca del final
+        return (container.scrollHeight - container.scrollTop - container.clientHeight) < 20;
+    }
+
+    async loadChannels() {
         try {
             this.userMap = await getUserMap();
         } catch (error) { console.error('Error cargando usuarios'); }
@@ -62,6 +120,7 @@ export default class TechSlackModal extends LightningModal {
         try {
             const history = await getChannelMessages({ channelId: this.selectedChannelId });
             this.messages = this.processSlackMessages(history);
+            this.scrollToBottom();
         } catch (error) {
             console.error('Error cargando historial:', error);
             this.messages = [];
@@ -77,6 +136,7 @@ export default class TechSlackModal extends LightningModal {
             this.messages = this.processSlackMessages(replies);
             // El primer mensaje es el raíz del hilo
             this.threadRootMsg = this.messages[0];
+            this.scrollToBottom();
         } catch (error) {
             console.error('Error cargando hilo:', error);
         } finally {
@@ -86,15 +146,18 @@ export default class TechSlackModal extends LightningModal {
 
     processSlackMessages(history) {
         if (!history || !Array.isArray(history)) return [];
-        return history.map(m => {
+        
+        // Clonamos y ordenamos cronológicamente por timestamp (ts)
+        const sortedHistory = [...history].sort((a, b) => parseFloat(a.ts) - parseFloat(b.ts));
+
+        return sortedHistory.map(m => {
             let text = m.text || '';
             
-            // 1. Traducimos menciones directas <@U123> a nombres
+            // ... (resto de la lógica de procesamiento igual) ...
             text = text.replace(/<@([A-Z0-9]+)>/g, (match, id) => {
                 return this.userMap[id] ? `@${this.userMap[id]}` : match;
             });
 
-            // 2. Diccionario de Emojis extendido (basado en x.txt)
             const emojiMap = {
                 ':mag_right:': '🔎',
                 ':rocket:': '🚀',
@@ -112,18 +175,12 @@ export default class TechSlackModal extends LightningModal {
                 text = text.replace(new RegExp(key, 'g'), emojiMap[key]);
             });
 
-            // 3. Formateo de Texto (Negritas, Bullets, URLs)
             text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-            text = text.replace(/• /g, '&bull; '); // Bullets de Slack
-            
-            // URLs clicleables (formato Slack <http...|label> o <http...>)
+            text = text.replace(/• /g, '&bull; ');
             text = text.replace(/<(https?:\/\/[^|>]+)\|([^>]+)>/g, '<a href="$1" target="_blank">$2</a>');
             text = text.replace(/<(https?:\/\/[^>]+)>/g, '<a href="$1" target="_blank">$1</a>');
-
-            // 4. Traducimos Saltos de línea
             text = text.replace(/\n/g, '<br/>');
 
-            // 5. Identificación de Mensajes de Sistema (Join, Topic, etc)
             let isSystem = m.subtype === 'channel_join' || m.subtype === 'channel_topic' || m.user === 'USLACKBOT';
             if (m.subtype === 'channel_topic') {
                 text = `<em>definió el tema del canal: ${text}</em>`;
@@ -142,7 +199,17 @@ export default class TechSlackModal extends LightningModal {
                 hasReplies: (m.reply_count > 0 && !this.selectedThreadTs),
                 isThreadRoot: m.thread_ts === m.ts
             };
-        }).reverse();
+        }); // Eliminamos el .reverse() ya que usamos .sort()
+    }
+
+    scrollToBottom() {
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        setTimeout(() => {
+            const container = this.template.querySelector('.message-list');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 100);
     }
 
     get channelTopic() {
@@ -171,18 +238,63 @@ export default class TechSlackModal extends LightningModal {
         this.messageText = event.detail.value;
     }
 
+    openFilePicker() {
+        this.template.querySelector('.file-input').click();
+    }
+
+    async handleFileChange(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validar tamaño (máximo 4MB para evitar límites de heap en Apex)
+        if (file.size > 4000000) {
+            this.showToast('Archivo muy grande', 'El tamaño máximo permitido es de 4MB.', 'error');
+            return;
+        }
+
+        this.isChatLoading = true;
+        try {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const base64 = reader.result.split(',')[1];
+                await uploadFile({
+                    channelId: this.selectedChannelId,
+                    fileName: file.name,
+                    base64Data: base64
+                });
+                this.showToast('Éxito', 'Archivo subido correctamente a Slack', 'success');
+                this.loadChatHistory();
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            this.showToast('Error al subir', error.body ? error.body.message : error.message, 'error');
+        } finally {
+            this.isChatLoading = false;
+        }
+    }
+
     async handleSend() {
         if (!this.messageText || !this.selectedChannelId) return;
         
         this.isSending = true;
         try {
-            await sendMessage({
+            const timestamp = await sendMessage({
                 message: this.messageText,
                 phase: this.currentPhase,
                 recordId: this.recordId,
                 channelId: this.selectedChannelId,
                 threadTs: this.selectedThreadTs
             });
+
+            // Lógica de Pin Automático: Si el mensaje contiene "Expediente" y no es un hilo
+            if (this.messageText.toLowerCase().includes('expediente') && !this.selectedThreadTs) {
+                try {
+                    await pinMessage({ channelId: this.selectedChannelId, timestamp: timestamp });
+                    console.log('Mensaje fijado correctamente');
+                } catch (pinError) {
+                    console.error('Error al fijar mensaje:', pinError);
+                }
+            }
 
             this.messageText = '';
             if (this.selectedThreadTs) {
@@ -206,7 +318,14 @@ export default class TechSlackModal extends LightningModal {
         try {
             const newId = await createChannel({ channelName: name });
             this.showToast('Éxito', 'Canal creado correctamente', 'success');
-            this.loadChannels(); // Recargamos la lista
+            
+            // Refrescamos la lista de canales inmediatamente
+            await this.loadChannels();
+            
+            // Opcional: Seleccionamos automáticamente el nuevo canal creado
+            this.selectedChannelId = newId;
+            this.loadChatHistory();
+            
         } catch (error) {
             this.showToast('Error', error.body ? error.body.message : error.message, 'error');
         } finally {
