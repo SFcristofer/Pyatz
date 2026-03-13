@@ -219,6 +219,11 @@
                     <c-tech-document-manager record-id={recordId}></c-tech-document-manager>
                 </template>
 
+                <template if:true={isCalendarioPhase}>
+                    <!-- CALENDARIO DE RECURSOS (NATIVO FIELD SERVICE) -->
+                    <c-tech-resource-calendar record-id={recordId}></c-tech-resource-calendar>
+                </template>
+
                 <template if:false={isLevantamientoPhase}>
                     <template if:false={isMemoriaPhase}>
                         <template if:false={isPresupuestoPhase}>

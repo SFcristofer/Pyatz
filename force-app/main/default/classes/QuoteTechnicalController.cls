@@ -678,6 +678,46 @@ public with sharing class QuoteTechnicalController {
         }
     }
 
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Object> getCalendarData(Id recordId, String startDate, String endDate) {
+        Map<String, Object> result = new Map<String, Object>();
+        try {
+            // 1. Obtener Recursos de Servicio activos
+            List<ServiceResource> resList = [SELECT Id, Name, ResourceType, RelatedRecord.SmallPhotoUrl FROM ServiceResource WHERE IsActive = true LIMIT 50];
+            result.put('resources', resList);
+            
+            // 2. Obtener Citas de Servicio a través de AssignedResource
+            Date startDt = Date.valueOf(startDate);
+            Date endDt = Date.valueOf(endDate);
+            
+            // Consultamos AssignedResource para obtener la relación Cita <-> Recurso
+            List<AssignedResource> assignments = [
+                SELECT ServiceAppointmentId, ServiceResourceId, 
+                       ServiceAppointment.Subject, ServiceAppointment.SchedStartTime, 
+                       ServiceAppointment.SchedEndTime, ServiceAppointment.Status
+                FROM AssignedResource 
+                WHERE ServiceAppointment.SchedStartTime >= :startDt AND ServiceAppointment.SchedStartTime <= :endDt
+            ];
+
+            List<Map<String, Object>> appList = new List<Map<String, Object>>();
+            for (AssignedResource ar : assignments) {
+                Map<String, Object> app = new Map<String, Object>();
+                app.put('Id', ar.ServiceAppointmentId);
+                app.put('ServiceResourceId', ar.ServiceResourceId);
+                app.put('Subject', ar.ServiceAppointment.Subject);
+                app.put('SchedStartTime', ar.ServiceAppointment.SchedStartTime);
+                app.put('SchedEndTime', ar.ServiceAppointment.SchedEndTime);
+                app.put('Status', ar.ServiceAppointment.Status);
+                appList.add(app);
+            }
+            
+            result.put('appointments', appList);
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+        return result;
+    }
+
     @AuraEnabled
     public static void deleteDocument(Id documentId) {
         try {

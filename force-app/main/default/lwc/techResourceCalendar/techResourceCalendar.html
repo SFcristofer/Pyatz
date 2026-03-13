@@ -1,0 +1,82 @@
+<template>
+    <div class="calendar-container">
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Cargando calendario..." size="medium" variant="brand"></lightning-spinner>
+        </template>
+
+        <!-- HEADER DEL CALENDARIO -->
+        <div class="calendar-header slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-bottom_medium">
+            <div>
+                <h2 class="slds-text-heading_medium slds-font-weight_bold">Planificación de Servicios Pyatz</h2>
+                <p class="slds-text-color_weak">Asignación de técnicos y gestión de disponibilidad</p>
+            </div>
+            <div class="slds-grid slds-grid_vertical-align-center">
+                <lightning-button-group>
+                    <lightning-button-icon icon-name="utility:left" variant="border-filled" onclick={handlePrevMonth}></lightning-button-icon>
+                    <lightning-button label={currentMonthYear} variant="neutral" class="month-label-btn"></lightning-button>
+                    <lightning-button-icon icon-name="utility:right" variant="border-filled" onclick={handleNextMonth}></lightning-button-icon>
+                </lightning-button-group>
+                <lightning-button label="Hoy" variant="brand-outline" onclick={handleGoToToday} class="slds-m-left_small"></lightning-button>
+            </div>
+        </div>
+
+        <!-- LAYOUT PRINCIPAL: RECURSOS + GRILLA -->
+        <div class="calendar-grid-wrapper slds-box slds-p-around_none">
+            <div class="slds-grid">
+                <!-- COLUMNA DE AGENTES (Y-AXIS) -->
+                <div class="agents-column slds-col slds-no-flex">
+                    <div class="grid-header-cell agents-header">Técnicos / Agentes</div>
+                    <template for:each={resources} for:item="res">
+                        <div key={res.Id} class="agent-cell slds-grid slds-grid_vertical-align-center">
+                            <lightning-avatar src={res.RelatedRecord.SmallPhotoUrl} variant="circle" size="small" class="slds-m-right_x-small"></lightning-avatar>
+                            <div class="slds-truncate">
+                                <span class="agent-name">{res.Name}</span>
+                                <p class="agent-info">{res.ResourceType}</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- GRILLA DE DÍAS (X-AXIS) -->
+                <div class="days-grid-scroll slds-col">
+                    <div class="days-header-row slds-grid">
+                        <template for:each={calendarDays} for:item="day">
+                            <div key={day.date} class={day.headerClass}>
+                                <span class="day-name">{day.weekday}</span>
+                                <span class="day-number">{day.dayNumber}</span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- CUERPO DE LA GRILLA (CITAS) -->
+                    <template for:each={resourceRows} for:item="row">
+                        <div key={row.resourceId} class="resource-data-row slds-grid">
+                            <template for:each={row.days} for:item="cell">
+                                <div key={cell.date} class="grid-data-cell" onclick={handleCellClick} data-res={row.resourceId} data-date={cell.date}>
+                                    <template for:each={cell.appointments} for:item="app">
+                                        <div key={app.Id} class={app.cssClass} title={app.Subject} onclick={handleAppClick} data-id={app.Id}>
+                                            <span class="app-time">{app.formattedTime}</span>
+                                            <span class="app-subject slds-truncate">{app.Subject}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE LEYENDA Y RESUMEN -->
+        <div class="calendar-footer slds-m-top_medium slds-grid slds-grid_align-spread">
+            <div class="legend slds-grid">
+                <div class="legend-item"><span class="dot done"></span> Ejecutado</div>
+                <div class="legend-item"><span class="dot pending"></span> Pendiente</div>
+                <div class="legend-item"><span class="dot alert"></span> Alerta / Retraso</div>
+            </div>
+            <div class="stats">
+                <lightning-badge label={appointmentStatsLabel} icon-name="utility:event"></lightning-badge>
+            </div>
+        </div>
+    </div>
+</template>
