@@ -4,11 +4,11 @@
             <lightning-spinner alternative-text="Cargando calendario..." size="medium" variant="brand"></lightning-spinner>
         </template>
 
-        <!-- HEADER DEL CALENDARIO -->
+        <!-- HEADER -->
         <div class="calendar-header slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-bottom_medium">
             <div>
-                <h2 class="slds-text-heading_medium slds-font-weight_bold">Planificación de Servicios Pyatz</h2>
-                <p class="slds-text-color_weak">Asignación de técnicos y gestión de disponibilidad</p>
+                <h2 class="slds-text-heading_medium slds-font-weight_bold">Consola de Programación Pyatz</h2>
+                <p class="slds-text-color_weak">Monitoreo de agentes y servicios en tiempo real</p>
             </div>
             <div class="slds-grid slds-grid_vertical-align-center">
                 <lightning-button-group>
@@ -20,24 +20,26 @@
             </div>
         </div>
 
-        <!-- LAYOUT PRINCIPAL: RECURSOS + GRILLA -->
+        <!-- LAYOUT -->
         <div class="calendar-grid-wrapper slds-box slds-p-around_none">
             <div class="slds-grid">
-                <!-- COLUMNA DE AGENTES (Y-AXIS) -->
+                <!-- COLUMNA DE AGENTES -->
                 <div class="agents-column slds-col slds-no-flex">
-                    <div class="grid-header-cell agents-header">Técnicos / Agentes</div>
+                    <div class="grid-header-cell agents-header">Técnicos / Estado</div>
                     <template for:each={resources} for:item="res">
                         <div key={res.Id} class="agent-cell slds-grid slds-grid_vertical-align-center">
-                            <lightning-avatar src={res.RelatedRecord.SmallPhotoUrl} variant="circle" size="small" class="slds-m-right_x-small"></lightning-avatar>
-                            <div class="slds-truncate">
+                            <div class="status-indicator">
+                                <span class={res.statusColor}></span>
+                            </div>
+                            <div class="slds-col slds-grow slds-truncate slds-p-left_small">
                                 <span class="agent-name">{res.Name}</span>
-                                <p class="agent-info">{res.ResourceType}</p>
+                                <p class="agent-info">{res.statusLabel} • {res.workloadHours}h hoy</p>
                             </div>
                         </div>
                     </template>
                 </div>
 
-                <!-- GRILLA DE DÍAS (X-AXIS) -->
+                <!-- GRILLA -->
                 <div class="days-grid-scroll slds-col">
                     <div class="days-header-row slds-grid">
                         <template for:each={calendarDays} for:item="day">
@@ -48,15 +50,48 @@
                         </template>
                     </div>
 
-                    <!-- CUERPO DE LA GRILLA (CITAS) -->
                     <template for:each={resourceRows} for:item="row">
                         <div key={row.resourceId} class="resource-data-row slds-grid">
                             <template for:each={row.days} for:item="cell">
-                                <div key={cell.date} class="grid-data-cell" onclick={handleCellClick} data-res={row.resourceId} data-date={cell.date}>
+                                <div key={cell.date} class="grid-data-cell" data-res={row.resourceId} data-date={cell.date}>
                                     <template for:each={cell.appointments} for:item="app">
-                                        <div key={app.Id} class={app.cssClass} title={app.Subject} onclick={handleAppClick} data-id={app.Id}>
-                                            <span class="app-time">{app.formattedTime}</span>
-                                            <span class="app-subject slds-truncate">{app.Subject}</span>
+                                        <!-- TARJETA DE CITA CON POPOVER -->
+                                        <div key={app.Id} class={app.cssClass} 
+                                             onmouseenter={handleShowPopover} 
+                                             onmouseleave={handleHidePopover}
+                                             data-id={app.Id}>
+                                            <div class="app-header slds-grid slds-grid_align-spread">
+                                                <span class="app-time">{app.formattedTime}</span>
+                                                <span class="app-duration">{app.Duration}h</span>
+                                            </div>
+                                            <span class="app-client slds-truncate">{app.AccountName}</span>
+                                            
+                                            <!-- POPOVER FLOTANTE -->
+                                            <section if:true={app.showPopover} class="slds-popover slds-popover_panel slds-nubbin_left-top custom-popover" role="dialog">
+                                                <div class="slds-popover__body">
+                                                    <div class="slds-media slds-m-bottom_small">
+                                                        <div class="slds-media__figure">
+                                                            <lightning-icon icon-name="standard:service_appointment" size="small"></lightning-icon>
+                                                        </div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-title_caps slds-line-height_reset">Cita de Servicio</p>
+                                                            <h3 class="slds-text-heading_small">{app.Folio}</h3>
+                                                        </div>
+                                                    </div>
+                                                    <dl class="slds-list_horizontal slds-wrap">
+                                                        <dt class="slds-item_label slds-text-color_weak slds-truncate">Cliente:</dt>
+                                                        <dd class="slds-item_detail slds-truncate slds-font-weight_bold">{app.AccountName}</dd>
+                                                        <dt class="slds-item_label slds-text-color_weak slds-truncate">Asunto:</dt>
+                                                        <dd class="slds-item_detail">{app.Subject}</dd>
+                                                        <dt class="slds-item_label slds-text-color_weak slds-truncate">Inicio:</dt>
+                                                        <dd class="slds-item_detail">{app.formattedTime}</dd>
+                                                        <dt class="slds-item_label slds-text-color_weak slds-truncate">Estado:</dt>
+                                                        <dd class="slds-item_detail">
+                                                            <lightning-badge label={app.Status} variant="brand"></lightning-badge>
+                                                        </dd>
+                                                    </dl>
+                                                </div>
+                                            </section>
                                         </div>
                                     </template>
                                 </div>
@@ -67,15 +102,17 @@
             </div>
         </div>
 
-        <!-- PANEL DE LEYENDA Y RESUMEN -->
         <div class="calendar-footer slds-m-top_medium slds-grid slds-grid_align-spread">
             <div class="legend slds-grid">
-                <div class="legend-item"><span class="dot done"></span> Ejecutado</div>
-                <div class="legend-item"><span class="dot pending"></span> Pendiente</div>
-                <div class="legend-item"><span class="dot alert"></span> Alerta / Retraso</div>
+                <div class="legend-item"><span class="dot done"></span> Completado</div>
+                <div class="legend-item"><span class="dot pending"></span> Programado</div>
+                <div class="legend-item"><span class="dot alert"></span> Incidencia</div>
             </div>
-            <div class="stats">
-                <lightning-badge label={appointmentStatsLabel} icon-name="utility:event"></lightning-badge>
+            <div class="availability-legend slds-grid slds-m-left_large">
+                <span class="slds-m-right_small">Disponibilidad de Técnicos:</span>
+                <div class="legend-item"><span class="availability-dot status-green"></span> Libre</div>
+                <div class="legend-item"><span class="availability-dot status-yellow"></span> Medio</div>
+                <div class="legend-item"><span class="availability-dot status-red"></span> Saturado</div>
             </div>
         </div>
     </div>

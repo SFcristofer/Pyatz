@@ -682,32 +682,39 @@ public with sharing class QuoteTechnicalController {
     public static Map<String, Object> getCalendarData(Id recordId, String startDate, String endDate) {
         Map<String, Object> result = new Map<String, Object>();
         try {
+            Date startDt = Date.valueOf(startDate);
+            Date endDt = Date.valueOf(endDate);
+
             // 1. Obtener Recursos de Servicio activos
             List<ServiceResource> resList = [SELECT Id, Name, ResourceType, RelatedRecord.SmallPhotoUrl FROM ServiceResource WHERE IsActive = true LIMIT 50];
             result.put('resources', resList);
             
-            // 2. Obtener Citas de Servicio a través de AssignedResource
-            Date startDt = Date.valueOf(startDate);
-            Date endDt = Date.valueOf(endDate);
-            
-            // Consultamos AssignedResource para obtener la relación Cita <-> Recurso
-            List<AssignedResource> assignments = [
-                SELECT ServiceAppointmentId, ServiceResourceId, 
-                       ServiceAppointment.Subject, ServiceAppointment.SchedStartTime, 
-                       ServiceAppointment.SchedEndTime, ServiceAppointment.Status
-                FROM AssignedResource 
-                WHERE ServiceAppointment.SchedStartTime >= :startDt AND ServiceAppointment.SchedStartTime <= :endDt
+            // 2. Obtener TODAS las Citas de Servicio en el rango (Asignadas y No Asignadas)
+            List<ServiceAppointment> allApps = [
+                SELECT Id, Subject, SchedStartTime, SchedEndTime, Status, Duration, AppointmentNumber, Account.Name,
+                       (SELECT ServiceResourceId FROM ServiceResources)
+                FROM ServiceAppointment 
+                WHERE SchedStartTime >= :startDt AND SchedStartTime <= :endDt
+                ORDER BY SchedStartTime ASC
             ];
 
             List<Map<String, Object>> appList = new List<Map<String, Object>>();
-            for (AssignedResource ar : assignments) {
+            for (ServiceAppointment sa : allApps) {
                 Map<String, Object> app = new Map<String, Object>();
-                app.put('Id', ar.ServiceAppointmentId);
-                app.put('ServiceResourceId', ar.ServiceResourceId);
-                app.put('Subject', ar.ServiceAppointment.Subject);
-                app.put('SchedStartTime', ar.ServiceAppointment.SchedStartTime);
-                app.put('SchedEndTime', ar.ServiceAppointment.SchedEndTime);
-                app.put('Status', ar.ServiceAppointment.Status);
+                app.put('Id', sa.Id);
+                app.put('Folio', sa.AppointmentNumber);
+                app.put('Subject', sa.Subject);
+                app.put('AccountName', sa.Account.Name != null ? sa.Account.Name : 'Sin Cliente');
+                app.put('SchedStartTime', sa.SchedStartTime);
+                app.put('SchedEndTime', sa.SchedEndTime);
+                app.put('Status', sa.Status);
+                app.put('Duration', sa.Duration != null ? sa.Duration : 0);
+                
+                if (!sa.ServiceResources.isEmpty()) {
+                    app.put('ServiceResourceId', sa.ServiceResources[0].ServiceResourceId);
+                } else {
+                    app.put('ServiceResourceId', 'UNASSIGNED');
+                }
                 appList.add(app);
             }
             

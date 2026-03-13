@@ -1,5 +1,4 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getCalendarData from '@salesforce/apex/QuoteTechnicalController.getCalendarData';
 
 export default class TechResourceCalendar extends LightningElement {
@@ -11,8 +10,7 @@ export default class TechResourceCalendar extends LightningElement {
     @track calendarDays = [];
     @track resourceRows = [];
 
-    // Opciones de visualización
-    daysToShow = 14; // Ver dos semanas por defecto
+    daysToShow = 14;
 
     connectedCallback() {
         this.updateCalendarHeader();
@@ -32,14 +30,46 @@ export default class TechResourceCalendar extends LightningElement {
                 startDate: this.calendarDays[0].date,
                 endDate: this.calendarDays[this.calendarDays.length - 1].date
             });
-            this.resources = data.resources;
-            this.appointments = data.appointments;
+            
+            this.appointments = data.appointments.map(app => ({...app, showPopover: false}));
+            this.resources = this.processResources(data.resources);
             this.buildResourceRows();
         } catch (error) {
             console.error('Error fetching calendar:', error);
         } finally {
             this.isLoading = false;
         }
+    }
+
+    processResources(rawResources) {
+        const processed = rawResources.map(res => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayApps = this.appointments.filter(a => a.ServiceResourceId === res.Id && a.SchedStartTime.startsWith(todayStr));
+            const totalHours = todayApps.reduce((sum, a) => sum + (a.Duration || 0), 0);
+
+            let statusColor = 'status-green';
+            let statusLabel = 'Disponible';
+            if (totalHours > 6) { statusColor = 'status-red'; statusLabel = 'Saturado'; }
+            else if (totalHours > 3) { statusColor = 'status-yellow'; statusLabel = 'Ocupado'; }
+
+            return {
+                ...res,
+                workloadHours: totalHours,
+                statusColor: `availability-dot ${statusColor}`,
+                statusLabel: statusLabel
+            };
+        });
+
+        const unassignedRes = { 
+            Id: 'UNASSIGNED', 
+            Name: 'POR ASIGNAR', 
+            ResourceType: 'Trabajo Pendiente',
+            RelatedRecord: { SmallPhotoUrl: '' },
+            statusColor: 'availability-dot status-gray',
+            statusLabel: 'N/A'
+        };
+
+        return [unassignedRes, ...processed];
     }
 
     updateCalendarHeader() {
@@ -68,10 +98,12 @@ export default class TechResourceCalendar extends LightningElement {
                 const dayApps = this.appointments
                     .filter(app => app.ServiceResourceId === res.Id && app.SchedStartTime.startsWith(day.date))
                     .map(app => {
-                        const time = new Date(app.SchedStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        let statusClass = 'app-entry ';
+                        const startTime = new Date(app.SchedStartTime);
+                        const time = startTime.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+                        
+                        let statusClass = 'app-card ';
                         if (app.Status === 'Completed') statusClass += 'status-done';
-                        else if (app.Status === 'Scheduled') statusClass += 'status-pending';
+                        else if (app.Status === 'None' || app.Status === 'Scheduled') statusClass += 'status-pending';
                         else statusClass += 'status-alert';
 
                         return {
@@ -99,11 +131,24 @@ export default class TechResourceCalendar extends LightningElement {
         return this.currentDate.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }).toUpperCase();
     }
 
-    get appointmentStatsLabel() {
-        return `${this.appointments.length} Citas en este periodo`;
+    // HANDLERS PARA POPOVER
+    handleShowPopover(event) {
+        const appId = event.currentTarget.dataset.id;
+        this.appointments = this.appointments.map(app => ({
+            ...app,
+            showPopover: app.Id === appId
+        }));
+        this.buildResourceRows();
     }
 
-    // HANDLERS
+    handleHidePopover() {
+        this.appointments = this.appointments.map(app => ({
+            ...app,
+            showPopover: false
+        }));
+        this.buildResourceRows();
+    }
+
     handleNextMonth() {
         this.currentDate.setDate(this.currentDate.getDate() + 7);
         this.updateCalendarHeader();
@@ -120,18 +165,5 @@ export default class TechResourceCalendar extends LightningElement {
         this.currentDate = new Date();
         this.updateCalendarHeader();
         this.fetchData();
-    }
-
-    handleAppClick(event) {
-        event.stopPropagation();
-        const appId = event.currentTarget.dataset.id;
-        console.log('Abrir cita:', appId);
-        // Aquí podríamos disparar un evento para que el 360 abra el detalle
-    }
-
-    handleCellClick(event) {
-        const resId = event.currentTarget.dataset.res;
-        const date = event.currentTarget.dataset.date;
-        console.log('Nueva cita para:', resId, 'en fecha:', date);
     }
 }

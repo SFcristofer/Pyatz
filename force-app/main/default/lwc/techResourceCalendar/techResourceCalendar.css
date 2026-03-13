@@ -7,25 +7,32 @@
     overflow: hidden;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* COLUMNA DE AGENTES */
 .agents-column {
-    width: 200px;
+    width: 220px;
     border-right: 2px solid #e5e7eb;
     background: #f9fafb;
 }
 
 .agent-cell {
-    height: 80px;
+    height: 90px;
     padding: 0.75rem;
     border-bottom: 1px solid #e5e7eb;
+    transition: background 0.2s;
+}
+
+.agent-cell:hover {
+    background: #f3f4f6;
 }
 
 .agent-name {
     font-weight: 700;
     color: #111827;
     font-size: 0.85rem;
+    display: block;
 }
 
 .agent-info {
@@ -33,7 +40,22 @@
     color: #6b7280;
 }
 
-/* GRILLA DE DÍAS */
+/* INDICADORES DE DISPONIBILIDAD */
+.availability-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.status-green { background: #10b981; }
+.status-yellow { background: #f59e0b; }
+.status-red { background: #ef4444; }
+.status-gray { background: #9ca3af; }
+
+/* GRILLA */
 .days-grid-scroll {
     overflow-x: auto;
     display: flex;
@@ -41,8 +63,8 @@
 }
 
 .grid-header-cell {
-    min-width: 120px;
-    height: 50px;
+    min-width: 140px;
+    height: 60px;
     padding: 0.5rem;
     text-align: center;
     border-bottom: 2px solid #e5e7eb;
@@ -55,73 +77,95 @@
 
 .day-cell.today {
     background: #eff6ff;
-    border-bottom: 2px solid #2563eb;
-}
-
-.day-cell.today .day-number {
-    color: #2563eb;
-    font-weight: 800;
+    border-bottom: 3px solid #2563eb;
 }
 
 .day-name {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     color: #6b7280;
+    font-weight: 700;
 }
 
 .day-number {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 800;
 }
 
-/* CELDA DE DATOS */
 .grid-data-cell {
-    min-width: 120px;
-    height: 80px;
+    min-width: 140px;
+    height: 90px;
     border-bottom: 1px solid #f3f4f6;
     border-right: 1px solid #f3f4f6;
-    padding: 4px;
+    padding: 6px;
     background: white;
-    cursor: cell;
 }
 
-.grid-data-cell:hover {
-    background: #fcfcfc;
-}
-
-/* CITAS (APP ENTRIES) */
-.app-entry {
-    font-size: 0.7rem;
-    padding: 4px 6px;
-    border-radius: 4px;
-    margin-bottom: 2px;
+/* TARJETAS DE CITA */
+.app-card {
+    padding: 6px;
+    border-radius: 6px;
+    margin-bottom: 4px;
     color: white;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    transition: transform 0.1s;
+    font-family: inherit;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid rgba(0,0,0,0.2);
+    position: relative;
+    cursor: help;
 }
-
-.app-entry:hover {
-    transform: scale(1.02);
-}
-
-.status-done { background: #10b981; }
-.status-pending { background: #3b82f6; }
-.status-alert { background: #f59e0b; }
 
 .app-time {
-    display: block;
-    font-size: 0.6rem;
+    font-size: 0.65rem;
+    font-weight: 800;
     opacity: 0.9;
 }
 
-/* LEYENDA */
+.app-duration {
+    font-size: 0.6rem;
+    background: rgba(255,255,255,0.2);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.app-client {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-top: 2px;
+    text-transform: uppercase;
+}
+
+.status-done { background: #059669; }
+.status-pending { background: #2563eb; }
+.status-alert { background: #dc2626; }
+
+/* POPOVER */
+.custom-popover {
+    position: absolute;
+    left: 105%;
+    top: -10px;
+    width: 280px;
+    z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    background: white;
+    color: #3e3e3c;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* LEYENDAS */
 .legend-item {
-    margin-right: 1.5rem;
+    margin-right: 1.25rem;
     font-size: 0.75rem;
     display: flex;
     align-items: center;
+    font-weight: 600;
 }
 
 .dot {
@@ -131,11 +175,12 @@
     margin-right: 6px;
 }
 
-.dot.done { background: #10b981; }
-.dot.pending { background: #3b82f6; }
-.dot.alert { background: #f59e0b; }
+.dot.done { background: #059669; }
+.dot.pending { background: #2563eb; }
+.dot.alert { background: #dc2626; }
 
 .month-label-btn {
-    min-width: 150px;
-    font-weight: bold;
+    min-width: 180px;
+    font-weight: 800;
+    color: #1e40af;
 }
