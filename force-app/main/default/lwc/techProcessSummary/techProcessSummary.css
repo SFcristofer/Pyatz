@@ -1,0 +1,64 @@
+.summary-card {
+    border: 1px solid #e0e5ee;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: #ffffff;
+}
+
+.header-title {
+    color: #1b5297;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-container {
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #f3f3f3;
+}
+
+.custom-table thead th {
+    background-color: #f8f9fb;
+    color: #514f6d;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 12px 8px;
+}
+
+.stage-label {
+    font-size: 10px;
+    font-weight: bold;
+    color: #747474;
+    background: #f0f7ff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.substage-text {
+    font-weight: 600;
+    color: #080707;
+}
+
+.date-text {
+    font-size: 11px;
+}
+
+.dropdown-selector {
+    width: 320px;
+    --slds-c-input-spacing-vertical-start: 4px;
+    --slds-c-input-spacing-vertical-end: 4px;
+}
+
+/* Efecto Hover sutil */
+.slds-hint-parent:hover {
+    background-color: #fafafb !important;
+}
+
+/* Ajustes de insignias para que se vean más modernas */
+.slds-badge {
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 10px;
+}

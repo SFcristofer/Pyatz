@@ -94,6 +94,52 @@ public with sharing class QuoteTechnicalController {
         return results;
     }
 
+    /**
+     * Guarda o actualiza el seguimiento de una sub-etapa específica.
+     */
+    @AuraEnabled
+    public static void saveStageTracking(Id opportunityId, String stage, String subStage, String status) {
+        try {
+            String uniqueKey = opportunityId + '_' + stage + '_' + subStage;
+            Seguimiento_Etapas_Pyatz__c track = new Seguimiento_Etapas_Pyatz__c();
+            track.Oportunidad__c = opportunityId;
+            track.Etapa__c = stage;
+            track.Subetapa__c = subStage;
+            track.Estado__c = status;
+            track.Clave_Unica__c = uniqueKey;
+            
+            upsert track Clave_Unica__c;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al guardar seguimiento: ' + e.getMessage());
+        }
+    }
+
+    /**
+     * Recupera el historial de estados para el Dashboard de Autorización.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Seguimiento_Etapas_Pyatz__c> getProcessHistory(Id opportunityId) {
+        return [SELECT Etapa__c, Subetapa__c, Estado__c, LastModifiedDate 
+                FROM Seguimiento_Etapas_Pyatz__c 
+                WHERE Oportunidad__c = :opportunityId 
+                ORDER BY CreatedDate ASC];
+    }
+
+    /**
+     * Recupera la lista de oportunidades abiertas (Pipeline Activo).
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getOpenOpportunities() {
+        List<Map<String, String>> options = new List<Map<String, String>>();
+        for(Opportunity o : [SELECT Id, Name FROM Opportunity WHERE IsClosed = false ORDER BY Name ASC LIMIT 100]) {
+            options.add(new Map<String, String>{
+                'label' => o.Name,
+                'value' => o.Id
+            });
+        }
+        return options;
+    }
+
     @AuraEnabled(cacheable=true)
     public static Map<String, Integer> getQuoteStats() {
         Map<String, Integer> stats = new Map<String, Integer>{

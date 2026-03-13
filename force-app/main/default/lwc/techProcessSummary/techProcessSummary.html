@@ -1,0 +1,73 @@
+<template>
+    <div class="slds-box slds-theme_default slds-m-bottom_medium summary-card">
+        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small slds-p-horizontal_small slds-grid_vertical-align-end">
+            <div class="slds-grid slds-grid_vertical-align-center">
+                <lightning-icon icon-name="standard:answer_best" size="small" class="slds-m-right_small"></lightning-icon>
+                <div>
+                    <h3 class="slds-text-heading_small header-title">
+                        Resumen de Ejecución Comercial y Operativa
+                    </h3>
+                    <p if:true={isViewingOther} class="slds-text-color_error slds-text-title_bold">
+                        ⚠️ MODO CONSULTA: Viendo referencia externa
+                    </p>
+                </div>
+            </div>
+            
+            <div class="slds-grid slds-grid_vertical-align-end">
+                <lightning-combobox
+                    label="Consultar Pipeline Activo"
+                    placeholder="Seleccionar oportunidad..."
+                    options={openOppOptions}
+                    onchange={handleRecordChange}
+                    class="slds-m-right_small dropdown-selector"
+                    value={displayRecordId}>
+                </lightning-combobox>
+
+                <div class="slds-m-bottom_xx-small">
+                    <lightning-button-icon 
+                        if:true={isViewingOther}
+                        icon-name="utility:undo" 
+                        variant="brand"
+                        onclick={resetToDefault} 
+                        tooltip="Regresar a Actual"
+                        class="slds-m-right_x-small">
+                    </lightning-button-icon>
+                    <lightning-button-icon icon-name="utility:refresh" size="small" onclick={refreshData} tooltip="Actualizar Datos"></lightning-button-icon>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-no-row-hover custom-table">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th scope="col" style="width: 25%;"><div class="slds-truncate" title="Etapa Macro">ETAPA MACRO</div></th>
+                        <th scope="col" style="width: 35%;"><div class="slds-truncate" title="Punto de Control">SUB-ETAPA (PUNTO DE CONTROL)</div></th>
+                        <th scope="col" style="width: 25%; text-align: center;"><div class="slds-truncate" title="Estatus">ESTATUS ACTUAL</div></th>
+                        <th scope="col" style="width: 15%;"><div class="slds-truncate" title="Última Act.">FECHA ACT.</div></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={processedData} for:item="row">
+                        <tr key={row.subStage} class="slds-hint-parent">
+                            <td>
+                                <div class="stage-label">{row.stage}</div>
+                            </td>
+                            <td>
+                                <div class="slds-truncate substage-text">{row.subStage}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class={row.statusClass}>
+                                    {row.status}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="slds-text-color_weak date-text">{row.lastUpdate}</div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>

@@ -208,6 +208,11 @@
                     <c-tech-work-order-console record-id={recordId}></c-tech-work-order-console>
                 </template>
 
+                <!-- MÓDULO: RESUMEN DE EJECUCIÓN (CIERRE - AUTORIZACIÓN) -->
+                <template if:true={isAutorizacionPhase}>
+                    <c-tech-process-summary record-id={recordId}></c-tech-process-summary>
+                </template>
+
                 <!-- OTROS MÓDULOS (PLACEHOLDER) -->
                 <template if:false={isLevantamientoPhase}>
                     <template if:false={isMemoriaPhase}>

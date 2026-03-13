@@ -8,6 +8,8 @@ import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
 import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
 import getOpportunitiesList from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesList';
+import saveStageTracking from '@salesforce/apex/QuoteTechnicalController.saveStageTracking';
+import getProcessHistory from '@salesforce/apex/QuoteTechnicalController.getProcessHistory';
 import TechSlackModal from 'c/techSlackModal';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
@@ -134,6 +136,26 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     async syncOpportunityStatus() {
         if (!this.recordId || !this.currentStep) return;
 
+        // 1. Guardar en el Objeto de Seguimiento (Para Reportes y Dashboard de Cierre)
+        if (this.subPhase && this.currentStatus) {
+            try {
+                await saveStageTracking({
+                    opportunityId: this.recordId,
+                    stage: this.currentStep,
+                    subStage: this.subPhase,
+                    status: this.currentStatus
+                });
+                
+                // Si el dashboard está visible, le pedimos que se refresque
+                const summaryComp = this.template.querySelector('c-tech-process-summary');
+                if (summaryComp) {
+                    summaryComp.refreshData();
+                }
+            } catch (e) {
+                console.error('Error tracking:', e);
+            }
+        }
+
         const fields = {};
         fields[ID_FIELD.fieldApiName] = this.recordId;
         fields[STAGE_FIELD.fieldApiName] = this.currentStep;
@@ -143,7 +165,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         const recordInput = { fields };
         try {
             await updateRecord(recordInput);
-            console.log('Sincronización Exitosa: ' + this.currentStep + ' > ' + this.subPhase + ' (' + this.currentStatus + ')');
+            console.log('Sincronización Exitosa');
         } catch (error) { console.error('Error sync:', error); }
     }
 
@@ -200,6 +222,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get isPresupuestoPhase() { return this.isCosteo && this.currentSubStep === '2'; }
     get isEnvioPhase() { return this.currentStep === 'Negociación' && this.currentSubStep === '1'; }
     get isSeguimientoPhase() { return this.currentStep === 'Negociación' && this.currentSubStep === '2'; }
+    get isAutorizacionPhase() { return this.currentStep === 'Cierre' && this.currentSubStep === '1'; }
     get isContratoPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '2'; }
 
     handleLogCall() { this.navigateToGlobalAction('LogACall'); }

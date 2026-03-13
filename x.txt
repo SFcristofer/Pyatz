@@ -1,22 +1,28 @@
-channels:history
-View messages and other content in public channels that "Salesforce PYATZ" has been added to
-channels:join
-Join public channels in a workspace
-channels:manage
-Manage public channels that "Salesforce PYATZ" has been added to and create new ones
-channels:read
-View basic information about public channels in a workspace
-chat:write
-Send messages as @Salesforce PYATZ
-chat:write.public
-Send messages to channels @Salesforce PYATZ isn't a member of
-files:read
-View files shared in channels and conversations that "Salesforce PYATZ" has been added to
-files:write
-Upload, edit, and delete files as "Salesforce PYATZ"
-groups:history
-View messages and other content in private channels that "Salesforce PYATZ" has been added to
-pins:write
-Add and remove pinned messages and files
-users:read
-View people in a workspace
+Etapa
+Sub-etapa
+Estado
+Última Act.
+Definición
+Levantamiento
+Realizado	
+3/12/2026
+Definición
+Memoria
+En proceso	
+3/12/2026
+Costeo
+Def. solución
+Falta información	
+3/12/2026
+Costeo
+Presupuesto
+Falta información	
+3/12/2026
+Negociación
+Envío cotización
+Recepción no confirmada con cliente.	
+3/12/2026
+Negociación
+Seguimiento
+Sin seguimiento	
+3/12/202
