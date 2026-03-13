@@ -650,20 +650,19 @@ public with sharing class QuoteTechnicalController {
         Map<String, String> states = new Map<String, String>();
         if (opportunityId == null) return states;
 
-        List<ContentDocumentLink> links = [SELECT ContentDocument.Title FROM ContentDocumentLink WHERE LinkedEntityId = :opportunityId];
-        Set<String> titles = new Set<String>();
-        for (ContentDocumentLink l : links) titles.add(l.ContentDocument.Title.toUpperCase());
-
+        List<ContentDocumentLink> links = [SELECT ContentDocumentId, ContentDocument.Title FROM ContentDocumentLink WHERE LinkedEntityId = :opportunityId];
+        
         String[] docKeys = new String[]{'INE', 'CURP', 'CSF', 'IMSS', 'VIGENCIA', 'DC3_ALTURAS', 'DC3_CONFINADOS', 'DC3_QUIMICOS', 'DC3_EXT1', 'DC3_EXT2'};
+        
         for (String key : docKeys) {
-            Boolean found = false;
-            for (String title : titles) {
-                if (title.startsWith('[' + key + ']')) {
-                    found = true;
+            String foundId = null;
+            for (ContentDocumentLink l : links) {
+                if (l.ContentDocument.Title.toUpperCase().startsWith('[' + key + ']')) {
+                    foundId = l.ContentDocumentId;
                     break;
                 }
             }
-            states.put(key, found ? 'Si' : 'No');
+            states.put(key, foundId);
         }
         return states;
     }
@@ -676,6 +675,15 @@ public with sharing class QuoteTechnicalController {
             update doc;
         } catch (Exception e) {
             throw new AuraHandledException('Error al renombrar: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static void deleteDocument(Id documentId) {
+        try {
+            delete [SELECT Id FROM ContentDocument WHERE Id = :documentId];
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al eliminar: ' + e.getMessage());
         }
     }
 

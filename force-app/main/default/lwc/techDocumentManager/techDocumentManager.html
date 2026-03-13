@@ -4,16 +4,16 @@
             <lightning-spinner alternative-text="Procesando..." size="medium" variant="brand"></lightning-spinner>
         </template>
 
-        <!-- HEADER CON PROGRESO -->
+        <!-- HEADER -->
         <div class="header-section slds-m-bottom_x-large">
             <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-end slds-m-bottom_small">
                 <div>
                     <h2 class="main-title">Expediente de Onboarding</h2>
-                    <p class="sub-title">Carga de documentos legales y técnicos para alta de cliente</p>
+                    <p class="sub-title">Gestión técnica y legal de documentos</p>
                 </div>
                 <div class="progress-stats">
                     <span class="percentage">{completedPercentage}%</span>
-                    <span class="count">{completedCount} de {totalCount}</span>
+                    <span class="count">{completedCount} de {totalCount} completados</span>
                 </div>
             </div>
             <lightning-progress-bar value={completedPercentage} size="medium" variant="circular" class="custom-progress"></lightning-progress-bar>
@@ -24,8 +24,8 @@
             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                 <template for:each={leftColumn} for:item="doc">
                     <div key={doc.key} class={doc.containerClass}>
-                        <div class="doc-card-content slds-grid slds-grid_vertical-align-center">
-                            <div class="status-icon-container slds-m-right_medium">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="slds-m-right_small">
                                 <lightning-icon 
                                     icon-name={doc.statusIcon} 
                                     size="small" 
@@ -34,35 +34,40 @@
                             </div>
                             <div class="slds-col slds-grow">
                                 <span class="doc-label">{doc.label}</span>
-                                <p class="doc-status-textText">{doc.statusText}</p>
+                                <span class={doc.badgeClass}>{doc.statusLabel}</span>
                             </div>
-                            <div class="actions-container slds-grid slds-grid_vertical-align-center">
-                                <lightning-radio-group 
-                                    name={doc.key}
-                                    options={options}
-                                    value={doc.value}
-                                    type="button"
-                                    variant="label-hidden"
-                                    class="minimal-radio"
-                                    disabled>
-                                </lightning-radio-group>
-                                <!-- CONTENEDOR DE SUBIDA MEJORADO -->
-                                <div class="upload-wrapper slds-m-left_small">
-                                    <lightning-icon 
-                                        icon-name="utility:upload" 
-                                        size="xx-small" 
-                                        class="fake-icon-visual">
-                                    </lightning-icon>
-                                    <lightning-file-upload
-                                        label=""
-                                        name="fileUploader"
-                                        accept=".pdf,.png,.jpg,.jpeg"
-                                        record-id={recordId}
-                                        onuploadfinished={handleUploadFinished}
-                                        data-key={doc.key}
-                                        class="real-uploader-overlay">
-                                    </lightning-file-upload>
-                                </div>
+                            <div class="actions slds-grid slds-grid_vertical-align-center">
+                                <!-- Acciones para documentos cargados -->
+                                <template if:true={doc.isCompleted}>
+                                    <lightning-button-icon 
+                                        icon-name="utility:preview" 
+                                        variant="border-filled"
+                                        onclick={handlePreview}
+                                        data-id={doc.value}
+                                        class="slds-m-right_xx-small"
+                                        tooltip="Previsualizar">
+                                    </lightning-button-icon>
+                                    <lightning-button-icon 
+                                        icon-name="utility:delete" 
+                                        variant="border-filled"
+                                        onclick={handleDelete}
+                                        data-id={doc.value}
+                                        data-label={doc.label}
+                                        class="slds-m-right_x-small btn-delete"
+                                        tooltip="Eliminar">
+                                    </lightning-button-icon>
+                                </template>
+                                
+                                <lightning-file-upload
+                                    label=""
+                                    name="fileUploader"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    record-id={recordId}
+                                    onuploadfinished={handleUploadFinished}
+                                    data-key={doc.key}
+                                    class="upload-button-styled"
+                                    variant="label-hidden">
+                                </lightning-file-upload>
                             </div>
                         </div>
                     </div>
@@ -73,8 +78,8 @@
             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                 <template for:each={rightColumn} for:item="doc">
                     <div key={doc.key} class={doc.containerClass}>
-                        <div class="doc-card-content slds-grid slds-grid_vertical-align-center">
-                            <div class="status-icon-container slds-m-right_medium">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="slds-m-right_small">
                                 <lightning-icon 
                                     icon-name={doc.statusIcon} 
                                     size="small" 
@@ -83,35 +88,39 @@
                             </div>
                             <div class="slds-col slds-grow">
                                 <span class="doc-label">{doc.label}</span>
-                                <p class="doc-status-textText">{doc.statusText}</p>
+                                <span class={doc.badgeClass}>{doc.statusLabel}</span>
                             </div>
-                            <div class="actions-container slds-grid slds-grid_vertical-align-center">
-                                <lightning-radio-group 
-                                    name={doc.key}
-                                    options={options}
-                                    value={doc.value}
-                                    type="button"
-                                    variant="label-hidden"
-                                    class="minimal-radio"
-                                    disabled>
-                                </lightning-radio-group>
-                                <!-- CONTENEDOR DE SUBIDA MEJORADO -->
-                                <div class="upload-wrapper slds-m-left_small">
-                                    <lightning-icon 
-                                        icon-name="utility:upload" 
-                                        size="xx-small" 
-                                        class="fake-icon-visual">
-                                    </lightning-icon>
-                                    <lightning-file-upload
-                                        label=""
-                                        name="fileUploader"
-                                        accept=".pdf,.png,.jpg,.jpeg"
-                                        record-id={recordId}
-                                        onuploadfinished={handleUploadFinished}
-                                        data-key={doc.key}
-                                        class="real-uploader-overlay">
-                                    </lightning-file-upload>
-                                </div>
+                            <div class="actions slds-grid slds-grid_vertical-align-center">
+                                <template if:true={doc.isCompleted}>
+                                    <lightning-button-icon 
+                                        icon-name="utility:preview" 
+                                        variant="border-filled"
+                                        onclick={handlePreview}
+                                        data-id={doc.value}
+                                        class="slds-m-right_xx-small"
+                                        tooltip="Previsualizar">
+                                    </lightning-button-icon>
+                                    <lightning-button-icon 
+                                        icon-name="utility:delete" 
+                                        variant="border-filled"
+                                        onclick={handleDelete}
+                                        data-id={doc.value}
+                                        data-label={doc.label}
+                                        class="slds-m-right_x-small btn-delete"
+                                        tooltip="Eliminar">
+                                    </lightning-button-icon>
+                                </template>
+
+                                <lightning-file-upload
+                                    label=""
+                                    name="fileUploader"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    record-id={recordId}
+                                    onuploadfinished={handleUploadFinished}
+                                    data-key={doc.key}
+                                    class="upload-button-styled"
+                                    variant="label-hidden">
+                                </lightning-file-upload>
                             </div>
                         </div>
                     </div>
