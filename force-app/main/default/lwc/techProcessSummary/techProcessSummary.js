@@ -93,8 +93,30 @@ export default class TechProcessSummary extends LightningElement {
                 subStage: item.Subetapa__c,
                 status: `${emoji} ${item.Estado__c}`,
                 statusClass: statusClass + ' slds-p-horizontal_small slds-m-vertical_xx-small',
+                aging: this.calculateAging(item.LastModifiedDate),
+                agingClass: this.getAgingClass(item.LastModifiedDate),
                 lastUpdate: new Date(item.LastModifiedDate).toLocaleDateString()
             };
         });
+    }
+
+    calculateAging(lastModDate) {
+        const lastMod = new Date(lastModDate);
+        const today = new Date();
+        const diffTime = Math.abs(today - lastMod);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) return 'Hoy';
+        return `${diffDays} día${diffDays > 1 ? 's' : ''}`;
+    }
+
+    getAgingClass(lastModDate) {
+        const lastMod = new Date(lastModDate);
+        const today = new Date();
+        const diffDays = Math.floor(Math.abs(today - lastMod) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 5) return 'slds-text-color_error slds-text-title_bold'; // Alerta: más de 5 días
+        if (diffDays > 2) return 'slds-text-color_warning slds-text-title_bold'; // Precaución: más de 2 días
+        return 'slds-text-color_weak';
     }
 }

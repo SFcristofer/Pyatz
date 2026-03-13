@@ -1,0 +1,152 @@
+.premium-container {
+    background: #ffffff;
+    border-radius: 12px;
+    min-height: 500px;
+}
+
+/* HEADER */
+.main-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    letter-spacing: -0.02em;
+}
+
+.sub-title {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.percentage {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2b6cb0;
+    display: block;
+    text-align: right;
+    line-height: 1;
+}
+
+.count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #a0aec0;
+    text-transform: uppercase;
+}
+
+.custom-progress {
+    --slds-c-progress-bar-color-background: #edf2f7;
+    --slds-c-progress-bar-color-foreground: #3182ce;
+}
+
+/* DOC CARDS */
+.doc-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.doc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.doc-card.completed {
+    border-left: 4px solid #48bb78;
+    background: #f0fff4;
+}
+
+.doc-card.pending {
+    border-left: 4px solid #cbd5e0;
+}
+
+.doc-label {
+    font-weight: 700;
+    color: #2d3748;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.doc-status-textText {
+    font-size: 0.75rem;
+    color: #718096;
+}
+
+/* RADIO BUTTONS (SI/NO) */
+.minimal-radio :dangerous-internal-shadow-root .slds-radio_button__label {
+    border: 1px solid #cbd5e0 !important;
+    background: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    height: 24px !important;
+    line-height: 22px !important;
+    min-width: 35px !important;
+}
+
+.minimal-radio :dangerous-internal-shadow-root .slds-radio_button [type="radio"]:checked + .slds-radio_button__label {
+    background: #3182ce !important;
+    color: white !important;
+    border-color: #3182ce !important;
+}
+
+/* UPLOADER TOTALMENTE REACTIVO */
+.upload-wrapper {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.fake-icon-visual {
+    z-index: 1;
+    --slds-c-icon-color-foreground: #4a5568;
+}
+
+.completed .upload-wrapper {
+    border-color: #48bb78;
+}
+
+.completed .fake-icon-visual {
+    --slds-c-icon-color-foreground: #48bb78;
+}
+
+/* El uploader real se expande para llenar TODO el wrapper y está encima de todo */
+.real-uploader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 2;
+    cursor: pointer;
+}
+
+/* Forzar que el botón interno de Salesforce también ocupe todo el espacio */
+.real-uploader-overlay :dangerous-internal-shadow-root .slds-file-selector__button,
+.real-uploader-overlay :dangerous-internal-shadow-root .slds-file-selector__dropzone {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.doc-card {
+    animation: fadeIn 0.3s ease-out forwards;
+}

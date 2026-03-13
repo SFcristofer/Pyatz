@@ -645,6 +645,40 @@ public with sharing class QuoteTechnicalController {
         } catch (Exception e) { throw new AuraHandledException('Error envío: ' + e.getMessage()); }
     }
 
+    @AuraEnabled(cacheable=true)
+    public static Map<String, String> getDocumentStates(Id opportunityId) {
+        Map<String, String> states = new Map<String, String>();
+        if (opportunityId == null) return states;
+
+        List<ContentDocumentLink> links = [SELECT ContentDocument.Title FROM ContentDocumentLink WHERE LinkedEntityId = :opportunityId];
+        Set<String> titles = new Set<String>();
+        for (ContentDocumentLink l : links) titles.add(l.ContentDocument.Title.toUpperCase());
+
+        String[] docKeys = new String[]{'INE', 'CURP', 'CSF', 'IMSS', 'VIGENCIA', 'DC3_ALTURAS', 'DC3_CONFINADOS', 'DC3_QUIMICOS', 'DC3_EXT1', 'DC3_EXT2'};
+        for (String key : docKeys) {
+            Boolean found = false;
+            for (String title : titles) {
+                if (title.startsWith('[' + key + ']')) {
+                    found = true;
+                    break;
+                }
+            }
+            states.put(key, found ? 'Si' : 'No');
+        }
+        return states;
+    }
+
+    @AuraEnabled
+    public static void renameUploadedFile(Id documentId, String docType) {
+        try {
+            ContentDocument doc = [SELECT Id, Title FROM ContentDocument WHERE Id = :documentId LIMIT 1];
+            doc.Title = '[' + docType.toUpperCase() + '] - ' + doc.Title;
+            update doc;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al renombrar: ' + e.getMessage());
+        }
+    }
+
     @AuraEnabled
     public static Id cloneQuote(Id quoteId, Map<String, Object> options, Id targetSedeId, Id targetProspectoId) {
         try {

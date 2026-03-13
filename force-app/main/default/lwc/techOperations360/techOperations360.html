@@ -214,6 +214,14 @@
                 </template>
 
                 <!-- OTROS MÓDULOS (PLACEHOLDER) -->
+                <template if:true={isAltaCliente}>
+                    <div class="slds-m-bottom_medium slds-text-align_right">
+                        <lightning-badge label="MODO VERIFICACIÓN: ALTAS - ALTA CLIENTE" icon-name="utility:check" variant="brand"></lightning-badge>
+                    </div>
+                    <!-- GESTOR DE DOCUMENTOS FUNCIONAL (SUBIDA DE ARCHIVOS + AUTO-CHECK) -->
+                    <c-tech-document-manager record-id={recordId}></c-tech-document-manager>
+                </template>
+
                 <template if:false={isLevantamientoPhase}>
                     <template if:false={isMemoriaPhase}>
                         <template if:false={isPresupuestoPhase}>

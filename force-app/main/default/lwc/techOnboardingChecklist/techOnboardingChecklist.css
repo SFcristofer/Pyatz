@@ -1,0 +1,48 @@
+.checklist-container {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 4px;
+}
+
+.checklist-header {
+    color: #333333;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.document-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+.document-label {
+    color: #4f4f4f;
+    font-size: 0.95rem;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Estilo personalizado para los botones Si/No */
+:host {
+    --slds-c-radio-button-color-border: #90caf9; /* Azul claro para el borde */
+    --slds-c-radio-button-color-background-checked: #e3f2fd; /* Relleno azul muy claro al seleccionar */
+    --slds-c-radio-button-text-color-checked: #1976d2; /* Texto azul al seleccionar */
+}
+
+/* Forzar el look minimalista de x.txt */
+.custom-radio-group :dangerous-internal-shadow-root .slds-radio_button__label {
+    border-color: #90caf9 !important;
+    background-color: #f8fbff !important;
+    color: #90caf9 !important;
+    padding: 0 1rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.custom-radio-group :dangerous-internal-shadow-root .slds-radio_button [type="radio"]:checked + .slds-radio_button__label {
+    background-color: #e3f2fd !important;
+    color: #1976d2 !important;
+    border-color: #1976d2 !important;
+    font-weight: bold;
+}

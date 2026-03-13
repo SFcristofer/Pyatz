@@ -1,0 +1,41 @@
+<template>
+    <div class="checklist-container">
+        <h2 class="checklist-header slds-m-bottom_large">Documentos requeridos:</h2>
+        
+        <div class="slds-grid slds-wrap slds-gutters">
+            <!-- Columna Izquierda -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                <template for:each={leftColumn} for:item="doc">
+                    <div key={doc.name} class="document-item slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                        <span class="document-label">{doc.label}</span>
+                        <lightning-radio-group 
+                            name={doc.name}
+                            options={options}
+                            value={doc.value}
+                            type="button"
+                            variant="label-hidden"
+                            class="custom-radio-group">
+                        </lightning-radio-group>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                <template for:each={rightColumn} for:item="doc">
+                    <div key={doc.name} class="document-item slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                        <span class="document-label">{doc.label}</span>
+                        <lightning-radio-group 
+                            name={doc.name}
+                            options={options}
+                            value={doc.value}
+                            type="button"
+                            variant="label-hidden"
+                            class="custom-radio-group">
+                        </lightning-radio-group>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>
