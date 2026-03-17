@@ -19,9 +19,30 @@ export default class TechMemoriaManager extends LightningElement {
     @track isSaving = false;
     @track showSolModal = false;
     @track newSolName = '';
+    @track isFullScreen = false;
 
     connectedCallback() {
         this.loadDetails();
+    }
+
+    toggleFullScreen() {
+        this.isFullScreen = !this.isFullScreen;
+    }
+
+    get editorContainerClass() {
+        return this.isFullScreen ? 'editor-card full-screen-active' : 'editor-card';
+    }
+
+    get fullScreenIcon() {
+        return this.isFullScreen ? 'utility:contract' : 'utility:expand';
+    }
+
+    get hideSidebarsClass() {
+        return this.isFullScreen ? 'slds-hide' : '';
+    }
+
+    get editorColumnSize() {
+        return this.isFullScreen ? '12' : '6';
     }
 
     loadDetails() {
@@ -36,15 +57,41 @@ export default class TechMemoriaManager extends LightningElement {
             const type = rec.Tipo_Servicio__c || 'GENERAL';
             if (!groups[type]) groups[type] = { label: type, records: [] };
             
+            // Construir Nombre Descriptivo Único
+            const identifier = [rec.Nivel__c, rec.Area_Cocina_Banos__c, rec.Zona_Genero__c]
+                .filter(item => item)
+                .join(' - ');
+            
+            const displayName = identifier ? identifier : rec.Name;
+
             let detailItems = [];
             if (rec.Nivel__c) detailItems.push({ label: 'Nivel', value: rec.Nivel__c });
             if (rec.Area_Cocina_Banos__c) detailItems.push({ label: 'Área', value: rec.Area_Cocina_Banos__c });
-            if (rec.Estado_Instalacion__c) detailItems.push({ label: 'Estado', value: rec.Estado_Instalacion__c });
+            if (rec.Zona_Genero__c) detailItems.push({ label: 'Zona', value: rec.Zona_Genero__c });
+            
+            // Métricas y Especificaciones Técnicas (Traer TODO lo capturado)
+            let specs = [];
+            if (rec.Cantidad_Principal__c > 0) specs.push(`Cant: ${rec.Cantidad_Principal__c}`);
+            if (rec.Metros_Lineales__c > 0) specs.push(`${rec.Metros_Lineales__c} mts`);
+            if (rec.Frecuencia__c) specs.push(`Freq: ${rec.Frecuencia__c}`);
+
+            // Estado Class
+            let estadoClass = 'status-badge';
+            if (rec.Estado_Instalacion__c) {
+                const est = rec.Estado_Instalacion__c.toUpperCase();
+                if (est.includes('MAL') || est.includes('PÉSIMO')) estadoClass += ' status-red';
+                else if (est.includes('BIEN') || est.includes('CORRECTO')) estadoClass += ' status-green';
+            }
 
             groups[type].records.push({
                 id: rec.Id,
-                name: rec.Name,
+                name: displayName,
                 fields: detailItems,
+                metrics: specs.join(' | '),
+                estado: rec.Estado_Instalacion__c,
+                estadoClass: estadoClass,
+                observaciones: rec.Observaciones_Tecnicas__c,
+                hasSolutions: rec.Soluciones_Tecnicas__r && rec.Soluciones_Tecnicas__r.length > 0,
                 className: this.selectedRecordId === rec.Id ? 'record-detail-card active-card' : 'record-detail-card'
             });
         });

@@ -457,7 +457,9 @@ public with sharing class QuoteTechnicalController {
         try {
             Id oppId = recordId;
             if (recordId != null && recordId.getSObjectType().getDescribe().getName() == 'Quote') oppId = [SELECT OpportunityId FROM Quote WHERE Id = :recordId].OpportunityId;
-            return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, Metros_Lineales__c, Observaciones_Tecnicas__c, Memoria_Descriptiva__c, CreatedDate FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId ORDER BY Tipo_Servicio__c, CreatedDate ASC];
+            return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, Metros_Lineales__c, Observaciones_Tecnicas__c, Memoria_Descriptiva__c, CreatedDate,
+                    (SELECT Id FROM Soluciones_Tecnicas__r LIMIT 1) 
+                    FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId ORDER BY Tipo_Servicio__c, CreatedDate ASC];
         } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 
