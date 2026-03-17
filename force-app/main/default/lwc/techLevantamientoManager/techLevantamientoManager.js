@@ -4,7 +4,7 @@ import saveSurveyData from '@salesforce/apex/QuoteTechnicalController.saveSurvey
 
 export default class TechLevantamientoManager extends LightningElement {
     @api recordId;
-    @track surveyType = 'Bioenzimatico';
+    @track surveyType = 'BIOENZIMÁTICO'; // Sincronizado con el valor oficial
     @track surveyData = [];
     @track isSaving = false;
 
@@ -103,20 +103,21 @@ export default class TechLevantamientoManager extends LightningElement {
     }
 
     handleAddSurveyRow() {
-        let newRow = { id: Date.now(), rowNumber: this.surveyData.length + 1 };
+        const type = this.surveyType;
+        let newRow = { id: Date.now() + Math.random(), rowNumber: this.surveyData.length + 1 };
         
-        if (this.isBio) {
+        if (type === 'BIOENZIMÁTICO') {
             Object.assign(newRow, { nivel: '', area: '', zona: '', ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, foto: '', residuos: '', escamoche: '', instala: '', azolves: '', obs: '', coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, modelo: '', st1: 0, ovalines: 0 });
-        } else if (this.isGrasas) {
+        } else if (type === 'GRASAS') {
             Object.assign(newRow, { nivel: '', area: '', zona: '', sp: 0, ent: 0, modelo: '', frecuencia: '', estado: '', tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, foto: '' });
-        } else if (this.isIntima) {
+        } else if (type === 'INTIMA') {
             Object.assign(newRow, { nivel: '', area: '', zona: '', wc: 0, frecuencia: '', dias: '' });
-        } else if (this.isDesazolveMec) {
+        } else if (type === 'DESAZOLVE MECANICO') {
             Object.assign(newRow, { nivel: '', area: '', zona: '', ovalines: 0, coladeras: 0, tapon: 0, mingitorios: 0, wc: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0 });
-        } else if (this.isAromatizantes) {
+        } else if (type === 'AROMATIZANTES') {
             Object.assign(newRow, { nivel: '', area: '', zona: '', arm: 0 });
-        } else if (this.isVactor) {
-            Object.assign(newRow, { desc: '', medida: '', material: '', servicio: '', largo: 0, ancho: 0, prof: 0, mtLineal: 0, distancia: '', permDelegacion: '', permPlaza: '', dificultad: '', alcance: '', obs: '' });
+        } else if (type === 'VACTOR') {
+            Object.assign(newRow, { descripcion: '', medida: '', material: '', servicio: '', largo: 0, ancho: 0, prof: 0, mtLineal: 0, distancia: '', permDelegacion: '', permPlaza: '', dificultad: '', alcance: '', obs: '' });
         }
         
         this.surveyData = [...this.surveyData, newRow];
@@ -138,9 +139,9 @@ export default class TechLevantamientoManager extends LightningElement {
 
         // Lógica de colores dinámica
         if (field === 'escamoche') {
-            if (value.includes('Correcto')) data[index].escamocheClass = 'cell-select bg-green-soft';
-            else if (value.includes('medias')) data[index].escamocheClass = 'cell-select bg-orange-soft';
-            else if (value.includes('Pésimo')) data[index].escamocheClass = 'cell-select bg-red-soft';
+            if (value && value.includes('Correcto')) data[index].escamocheClass = 'cell-select bg-green-soft';
+            else if (value && value.includes('medias')) data[index].escamocheClass = 'cell-select bg-orange-soft';
+            else if (value && value.includes('Pésimo')) data[index].escamocheClass = 'cell-select bg-red-soft';
             else data[index].escamocheClass = 'cell-select';
         }
         if (field === 'estado') {
@@ -159,21 +160,26 @@ export default class TechLevantamientoManager extends LightningElement {
 
     // Getters para totales automáticos
     get surveyTotals() {
+        const type = this.surveyType;
         let totals = { ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, st1: 0, ovalines: 0, sp: 0, ent: 0, tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, wc: 0, mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, largo: 0, ancho: 0, prof: 0, mtLinealVactor: 0 };
+        
         this.surveyData.forEach(row => {
-            if (this.isBio) { 
+            if (type === 'BIOENZIMÁTICO') { 
                 totals.ve += Number(row.ve || 0); totals.vp += Number(row.vp || 0); totals.c10l += Number(row.c10l || 0); totals.c20l += Number(row.c20l || 0); totals.c25l += Number(row.c25l || 0); totals.piso += Number(row.piso || 0); totals.mueble += Number(row.mueble || 0); totals.pared += Number(row.pared || 0); totals.coladeras += Number(row.coladeras || 0); totals.tapon += Number(row.tapon || 0); totals.tarja += Number(row.tarja || 0); totals.tinas += Number(row.tinas || 0); totals.tgrasa += Number(row.tgrasa || 0); totals.st1 += Number(row.st1 || 0); totals.ovalines += Number(row.ovalines || 0); 
             }
-            else if (this.isGrasas) { 
+            else if (type === 'GRASAS') { 
                 totals.sp += Number(row.sp || 0); totals.ent += Number(row.ent || 0); totals.tornillo += Number(row.tornillo || 0); totals.sello += Number(row.sello || 0); totals.mampara += Number(row.mampara || 0); totals.canastilla += Number(row.canastilla || 0); totals.retSalida += Number(row.retSalida || 0); 
             }
-            else if (this.isIntima) { totals.wc += Number(row.wc || 0); }
-            else if (this.isDesazolveMec) { 
+            else if (type === 'INTIMA') { totals.wc += Number(row.wc || 0); }
+            else if (type === 'DESAZOLVE MECANICO') { 
                 totals.ovalines += Number(row.ovalines || 0); totals.coladeras += Number(row.coladeras || 0); totals.tapon += Number(row.tapon || 0); totals.mingitorios += Number(row.mingitorios || 0); totals.wc += Number(row.wc || 0); totals.mtLineal += Number(row.mtLineal || 0); totals.tarjas += Number(row.tarjas || 0); totals.cuartoHumado += Number(row.cuartoHumado || 0); 
             }
-            else if (this.isAromatizantes) { totals.arm += Number(row.arm || 0); }
-            else if (this.isVactor) { 
-                totals.largo += Number(row.largo || 0); totals.ancho += Number(row.ancho || 0); totals.prof += Number(row.prof || 0); totals.mtLinealVactor += Number(row.mtLineal || 0); 
+            else if (type === 'AROMATIZANTES') { totals.arm += Number(row.arm || 0); }
+            else if (type === 'VACTOR') { 
+                totals.largo += Number(row.largo || 0); 
+                totals.ancho += Number(row.ancho || 0); 
+                totals.prof += Number(row.prof || 0); 
+                totals.mtLinealVactor += Number(row.mtLineal || 0); 
             }
         });
         return totals;

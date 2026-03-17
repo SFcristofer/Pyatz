@@ -231,6 +231,17 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleLogCall() { this.navigateToGlobalAction('LogACall'); }
     handleNewTask() { this.navigateToGlobalAction('NewTask'); }
 
+    // --- ACCIÓN GLOBAL: CREAR NUEVA OPORTUNIDAD ---
+    handleNewOpportunity() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__objectPage',
+            attributes: {
+                objectApiName: 'Opportunity',
+                actionName: 'new'
+            }
+        });
+    }
+
     navigateToGlobalAction(actionName) {
         this[NavigationMixin.Navigate]({
             type: 'standard__quickAction',

@@ -42,6 +42,17 @@
     border-radius: 20px;
 }
 
+/* Contenedor de Módulos: Permeabilidad para Dropdowns */
+.module-container {
+    background: white; 
+    border: 1px solid #dddbda; 
+    border-radius: 4px;
+    min-height: 500px;
+    overflow: visible !important;
+    position: relative;
+    z-index: 1;
+}
+
 /* Estilo para el link de la oportunidad en la tabla dashboard */
 .opportunity-link {
     font-weight: bold;

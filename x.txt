@@ -1,31 +1,5 @@
-A professional and clean minimalist screenshot of a two-column digital checklist form with dark-grey text on a plain white background. The header "Documentos requeridos:" is at the top left. The form is organized into two distinct columns of items, each with corresponding blue-outlined "Si" / "No" option boxes.
+Fila de Totales Huérfana: La fila gris de "TOTALES ACUMULADOS" aparece justo debajo del header negro. No hay espacio para los datos.
 
-In the first column (left side), from top to bottom, the items are listed exactly as:
+Valores en Cero: Las columnas de "Largo", "Ancho", etc., muestran 0. Esto indica que, o no hay datos cargados, o el sistema no está encontrando nada que sumar.
 
-INE (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-CURP (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-Const. Situación Fiscal (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-Alta IMSS (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-Vigencia de derechos (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-The option boxes for "Si" and "No" have a light blue border and a very light blue fill for the box, with the word "Si" in light blue and "No" in light blue.
-
-In the second column (right side), from top to bottom, the items are listed exactly as:
-
-DC-3 Alturas NOM-009-STPS-2011 (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-DC-3 Confinados (followed by a blue-outlined "Si" box and a blue-outlined "No" box, with a standard mouse cursor arrowhead positioned over the "Conf" part of "Confinados")
-
-DC-3 Quimicos (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-DC-3 ??? (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-DC-3 ???? (followed by a blue-outlined "Si" box and a blue-outlined "No" box)
-
-The option boxes are identical in style to the left column. All text is in a clear, legible sans-serif font. The overall look is a straightforward, functional digital form. The mouse cursor is small and sharp, typical of a web form interface.
-
-Note: If creating a high-fidelity rendering, the font should be a generic but clear UI font like Roboto or Open Sans.
+Inconsistencia Visual: El cursor está sobre un área vacía donde debería haber una fila, pero solo vemos el fondo blanco.
