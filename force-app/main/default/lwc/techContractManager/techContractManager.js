@@ -3,19 +3,28 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getQuoteLineItems from '@salesforce/apex/QuoteContractPDFController.getQuoteLineItems';
 import searchUsers from '@salesforce/apex/QuoteTechnicalController.searchUsers';
-import getInitialData from '@salesforce/apex/QuoteTechnicalController.getInitialData';
+import getContractInitialData from '@salesforce/apex/QuoteTechnicalController.getContractInitialData';
+import saveContractData from '@salesforce/apex/QuoteTechnicalController.saveContractData';
 import getEmailTemplatesByFolder from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolder';
 import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
 
 export default class TechContractManager extends NavigationMixin(LightningElement) {
-    @api recordId;
+    @api recordId; // ID de la Oportunidad
 
+    // Datos de Selección
+    @track availableQuotes = [];
+    @track selectedQuoteId = '';
+    @track selectedQuoteName = '';
+    @track syncedQuoteId = '';
+    
+    // Partidas y Totales
     @track quoteLineItems = [];
     @track totals = { total: 0 };
     @track isLoading = true;
     
-    // Configuración de visualización
+    // Configuración
     @track selections = { show_total: true, show_line_prices: true };
+    @track contactOptions = [];
 
     // Responsables
     @track userSearchTermCreator = '';
@@ -25,25 +34,14 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track selectedCreator = { id: '', name: '' };
     @track selectedManager = { id: '', name: '' };
 
-    // Firmante del Cliente (Temporal)
+    // Firmante del Cliente
     @track selectedClientSigner = '';
-    get clientSignerOptions() {
-        return [
-            { label: 'Juan Pérez (Director)', value: 'Juan Pérez' },
-            { label: 'María García (Compras)', value: 'María García' },
-            { label: 'Representante Legal', value: 'Representante Legal' }
-        ];
-    }
+    @track signatureSource = 'creator';
 
-    // Firma
-    @track signatureSource = 'creator'; // 'creator' o 'manager'
-
-    // Datos del Contacto
+    // Datos del Contrato
     @track isManualContract = false;
     @track fechaPrimerServicio = '';
     @track fechaLimiteServicio = '';
-
-    // Vigencia y Observaciones
     @track fechaInicioContrato = '';
     @track fechaFinContrato = '';
     @track observacionesPrivadas = '';
@@ -53,16 +51,18 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track plantillaSeleccionada = '';
     @track contenidoLegal = '';
     @track introduccionPresupuesto = '';
-    @track plantillaOptions = []; // Ahora se cargará de la DB
-
-    get selectedClientSignerDisplay() {
-        return this.selectedClientSigner || 'No seleccionado';
-    }
+    @track plantillaOptions = [];
 
     // Modales
     @track showEditModal = false;
     @track editingItem = {};
     @track editingIndex = -1;
+
+    get selectedClientSignerDisplay() {
+        if (!this.selectedClientSigner) return 'No seleccionado';
+        const contact = this.contactOptions.find(c => c.value === this.selectedClientSigner);
+        return contact ? contact.label : this.selectedClientSigner;
+    }
 
     get isSignatureCreator() { return this.signatureSource === 'creator'; }
     get isSignatureManager() { return this.signatureSource === 'manager'; }
@@ -75,66 +75,93 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     }
 
     connectedCallback() {
-        // Delay ligero para asegurar que el recordId esté disponible si viene del 360
         setTimeout(() => {
-            if (this.recordId) {
-                this.loadInitialData();
-            } else {
-                console.warn('techContractManager: No se recibió recordId');
-            }
+            if (this.recordId) this.loadInitialData();
         }, 300);
     }
 
     loadInitialData() {
-        console.log('Cargando datos iniciales para contrato:', this.recordId);
-        this.fetchLineItems();
-        this.fetchQuoteData();
-        this.fetchTemplates();
+        this.isLoading = true;
+        getContractInitialData({ oppId: this.recordId })
+            .then(result => {
+                this.availableQuotes = result.quotes.map(q => ({
+                    ...q,
+                    isSynced: q.Id === result.syncedQuoteId,
+                    containerClass: q.Id === result.syncedQuoteId ? 'quote-item synced' : 'quote-item'
+                }));
+                this.syncedQuoteId = result.syncedQuoteId;
+                
+                // Mapear contactos
+                if (result.contacts) {
+                    this.contactOptions = result.contacts.map(c => ({
+                        label: `${c.Name} (${c.Title || 'Sin Cargo'})`,
+                        value: c.Id
+                    }));
+                }
+
+                // Si hay una cotización sincronizada, seleccionarla automáticamente
+                if (this.syncedQuoteId) {
+                    this.selectQuote(this.syncedQuoteId);
+                } else {
+                    this.isLoading = false;
+                }
+                
+                this.fetchTemplates();
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error cargando datos de contrato:', error);
+            });
+    }
+
+    handleQuoteSelect(event) {
+        const quoteId = event.currentTarget.dataset.id;
+        this.selectQuote(quoteId);
+    }
+
+    selectQuote(quoteId) {
+        this.isLoading = true;
+        this.selectedQuoteId = quoteId;
+        const quote = this.availableQuotes.find(q => q.Id === quoteId);
+        this.selectedQuoteName = quote ? `${quote.QuoteNumber} - ${quote.Name}` : 'Presupuesto seleccionado';
+        
+        // Cargar las partidas del presupuesto seleccionado
+        this.fetchLineItems(quoteId);
+        
+        // Cargar datos específicos del presupuesto (Introducción, etc.)
+        const qData = this.availableQuotes.find(q => q.Id === quoteId);
+        // Aquí podrías cargar más datos si fuera necesario
+        this.isLoading = false;
+    }
+
+    handleBackToSelection() {
+        this.selectedQuoteId = '';
+        this.quoteLineItems = [];
     }
 
     fetchTemplates() {
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Condiciones de Contrato' })
             .then(result => {
                 if (result && result.length > 0) {
-                    this.plantillaOptions = result.map(t => ({ label: t.Name, value: t.Id }));
+                    this.plantillaOptions = result.map(t => ({ label: t.name, value: t.id }));
                 }
             })
             .catch(error => console.error('Error cargando plantillas de contrato:', error));
     }
 
-    fetchQuoteData() {
-        getInitialData({ recordId: this.recordId })
+    fetchLineItems(quoteId) {
+        getQuoteLineItems({ quoteId: quoteId })
             .then(result => {
-                if (result && result.quote) {
-                    this.introduccionPresupuesto = result.quote.Introduction_Text__c || '';
-                    // Mapear fechas de la Quote si ya existen
-                    this.fechaInicioContrato = result.quote.ExpirationDate || ''; 
-                }
-            })
-            .catch(error => console.error('Error al cargar datos del presupuesto:', error));
-    }
-
-    fetchLineItems() {
-        this.isLoading = true;
-        getQuoteLineItems({ quoteId: this.recordId })
-            .then(result => {
-                console.log('Servicios recuperados:', result.length);
-                this.quoteLineItems = result.map(item => {
-                    return {
-                        ...item,
-                        ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
-                        ProductName: item.Product2 ? item.Product2.Name : 'Producto',
-                        Sede: (item.Quote && item.Quote.Technical_Sedes__c) ? item.Quote.Technical_Sedes__c : '---',
-                        isSelected: true
-                    };
-                });
+                this.quoteLineItems = result.map(item => ({
+                    ...item,
+                    ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
+                    ProductName: item.Product2 ? item.Product2.Name : 'Producto',
+                    Sede: (item.Quote && item.Quote.Technical_Sedes__c) ? item.Quote.Technical_Sedes__c : '---',
+                    isSelected: true
+                }));
                 this.calculateTotals();
-                this.isLoading = false;
             })
-            .catch(error => {
-                this.isLoading = false;
-                console.error('Error recuperando servicios:', error);
-            });
+            .catch(error => console.error('Error recuperando partidas:', error));
     }
 
     // BÚSQUEDA DE USUARIOS
@@ -180,12 +207,10 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         this.selectedClientSigner = event.detail.value;
     }
 
-    // GESTIÓN DE FIRMA (Excluyente)
     handleSignatureToggle(event) {
         this.signatureSource = event.target.dataset.id;
     }
 
-    // GESTIÓN DATOS CONTACTO
     handleManualContractToggle(event) {
         this.isManualContract = event.target.checked;
     }
@@ -211,26 +236,20 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     handlePlantillaChange(event) {
         this.plantillaSeleccionada = event.detail.value;
         if (this.plantillaSeleccionada) {
-            renderTemplate({ templateId: this.plantillaSeleccionada, quoteId: this.recordId })
+            renderTemplate({ templateId: this.plantillaSeleccionada, quoteId: this.selectedQuoteId })
                 .then(result => {
                     this.contenidoLegal = result;
                 })
                 .catch(error => {
                     console.error('Error renderizando plantilla:', error);
-                    this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo cargar el contenido de la plantilla.', variant: 'error' }));
+                    this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo cargar la plantilla.', variant: 'error' }));
                 });
         }
     }
 
-    handleContenidoChange(event) {
-        this.contenidoLegal = event.target.value;
-    }
+    handleContenidoChange(event) { this.contenidoLegal = event.target.value; }
+    handleIntroChange(event) { this.introduccionPresupuesto = event.target.value; }
 
-    handleIntroChange(event) {
-        this.introduccionPresupuesto = event.target.value;
-    }
-
-    // GESTIÓN DE PARTIDAS
     handleItemToggle(event) {
         const itemId = event.target.dataset.id;
         this.quoteLineItems = this.quoteLineItems.map(item => {
@@ -276,9 +295,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         let total = 0;
         this.quoteLineItems.forEach(item => {
             if (item.isSelected) {
-                const base = (item.Quantity || 0) * (item.UnitPrice || 0);
-                const desc = item.Discount ? (base * (item.Discount / 100)) : 0;
-                total += (base - desc) * 1.16;
+                total += (item.TotalPrice || 0) * 1.16;
             }
         });
         this.totals = { total };
@@ -288,11 +305,18 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         this.selections[event.target.dataset.id] = event.target.checked;
     }
 
-    handleReset() {
-        this.fetchLineItems();
-        this.selectedCreator = { id: '', name: '' };
-        this.selectedManager = { id: '', name: '' };
-        this.signatureSource = 'creator';
+    handleSaveDraft() {
+        const data = {
+            fechaVencimiento: this.fechaFinContrato,
+            introduccion: this.introduccionPresupuesto,
+            observaciones: this.observacionesPrivadas,
+            status: 'In Review'
+        };
+        saveContractData({ quoteId: this.selectedQuoteId, contractData: data })
+            .then(() => {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Borrador de contrato guardado.', variant: 'success' }));
+            })
+            .catch(error => console.error('Error guardando borrador:', error));
     }
 
     handleGenerateContract() {
@@ -301,14 +325,20 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             return;
         }
 
-        // PENDIENTE DEFINIR: ¿Quieres que estas fechas o el check manual tengan algún comportamiento especial al generar el PDF?
+        // Primero guardar
+        this.handleSaveDraft();
+
         const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
-        let url = `/apex/QuoteContractPDF?id=${this.recordId}&selectedItems=${selectedIds.join(',')}`;
+        let url = `/apex/QuoteContractPDF?id=${this.selectedQuoteId}&selectedItems=${selectedIds.join(',')}`;
         url += `&show_total=${this.selections.show_total}&show_line_prices=${this.selections.show_line_prices}`;
         url += `&createdBy=${this.selectedCreator.id}&managedBy=${this.selectedManager.id}&sigSource=${this.signatureSource}`;
         url += `&clientSigner=${encodeURIComponent(this.selectedClientSigner)}`;
 
         window.open(url, '_blank');
+    }
+
+    handleGoToQuotes() {
+        this.dispatchEvent(new CustomEvent('navquotes'));
     }
 
     handleGoToWorkOrders() {
@@ -317,5 +347,10 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
 
     handleCancel() {
         this.dispatchEvent(new CustomEvent('cancel'));
+    }
+
+    handleReset() {
+        this.loadInitialData();
+        this.selectedQuoteId = '';
     }
 }

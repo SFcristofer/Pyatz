@@ -1,11 +1,62 @@
+/* ARQUITECTURA GENERAL CARD */
 .main-card {
     --slds-c-card-header-spacing-block-start: 1rem;
     --slds-c-card-header-spacing-block-end: 1rem;
 }
 
+/* TARJETAS DE SELECCIÓN DE PRESUPUESTO */
+.quote-item {
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quote-item:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.quote-item.synced {
+    border-left: 5px solid #22c55e;
+    background: #f0fdf4;
+}
+
+/* HOJA VIRTUAL PARA EDITOR LEGAL */
+.bg-virtual-paper {
+    background: #f1f5f9 !important;
+    padding: 2rem !important;
+    border-radius: 8px;
+}
+
+.legal-editor-container lightning-input-rich-text {
+    --slds-c-textarea-shadow: none;
+    display: block;
+}
+
+.legal-editor-container lightning-input-rich-text .slds-rich-text-editor__content {
+    background: white !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    min-height: 500px !important;
+    padding: 45px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+    border: 1px solid #cbd5e1 !important;
+    font-family: 'Helvetica', 'Arial', sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+}
+
+/* TABLA DE SERVICIOS MODERNIZADA */
 .table-container {
-    border: 1px solid #dddbda;
-    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     overflow: hidden;
     background: #fff;
 }
@@ -16,37 +67,28 @@
 }
 
 .custom-table th {
-    background-color: #f8f9fb;
-    color: #514f4d;
-    font-weight: 700;
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 800;
     text-transform: uppercase;
-    font-size: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-bottom: 2px solid #dddbda;
+    font-size: 0.7rem;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
 .custom-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f3f2f2;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: top;
 }
 
-.custom-table tr:hover {
-    background-color: #faffff;
-}
-
-.totals-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
-
+/* TOTALES PROFESIONALES */
 .totals-card {
     width: 320px;
-    background: #f8f9fb;
-    padding: 1.25rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
+    background: #1e293b;
+    padding: 1.5rem;
+    border-radius: 8px;
+    color: white;
 }
 
 .total-row {
@@ -54,28 +96,20 @@
     justify-content: space-between;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
-    color: #4b5563;
+    color: #cbd5e1;
 }
 
 .total-row.final {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 2px solid #0070d2;
-    color: #0070d2;
+    border-top: 1px solid #475569;
+    color: white;
     font-weight: 800;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
 }
 
-.text-red {
-    color: #ea001e;
-}
-
-.bg-light-blue {
-    background-color: #f0f7ff;
-}
-
-.btn-add {
-    margin-top: 0.75rem;
-    --slds-c-button-spacing-block-start: 0.5rem;
-    --slds-c-button-spacing-block-end: 0.5rem;
-}
+.bg-light-blue { background-color: #f0f7ff; }
+.shadow-card { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.border-bottom { border-bottom: 1px solid #e2e8f0; }
+.border-top { border-top: 1px solid #e2e8f0; }
+.border-dashed { border: 2px dashed #e2e8f0; }

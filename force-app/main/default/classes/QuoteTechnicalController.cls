@@ -1,6 +1,55 @@
 public with sharing class QuoteTechnicalController {
     
     @AuraEnabled
+    public static Map<String, Object> getContractInitialData(Id oppId) {
+        Map<String, Object> result = new Map<String, Object>();
+        try {
+            Opportunity opp = [SELECT Id, Name, AccountId, SyncedQuoteId, (SELECT Id, QuoteNumber, Name, GrandTotal, Status, CreatedDate FROM Quotes ORDER BY CreatedDate DESC) FROM Opportunity WHERE Id = :oppId LIMIT 1];
+            result.put('opportunity', opp);
+            result.put('quotes', opp.Quotes);
+            result.put('syncedQuoteId', opp.SyncedQuoteId);
+            
+            // Si hay una cotización sincronizada, traer sus datos de contrato actuales
+            if (opp.SyncedQuoteId != null) {
+                Quote q = [SELECT Id, Name, ExpirationDate, Description, Introduction_Text__c, Warranty_Text__c, Status FROM Quote WHERE Id = :opp.SyncedQuoteId];
+                result.put('selectedQuote', q);
+            }
+
+            // Traer contactos para el firmante
+            if (opp.AccountId != null) {
+                result.put('contacts', [SELECT Id, Name, Title FROM Contact WHERE AccountId = :opp.AccountId AND IsEmailBounced = false ORDER BY Name ASC]);
+            }
+        } catch (Exception e) { throw new AuraHandledException('Error cargando datos de contrato: ' + e.getMessage()); }
+        return result;
+    }
+
+    @AuraEnabled
+    public static void saveContractData(Id quoteId, Map<String, Object> contractData) {
+        try {
+            Quote q = [SELECT Id, OpportunityId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            
+            if (contractData.containsKey('fechaVencimiento')) q.ExpirationDate = Date.valueOf((String)contractData.get('fechaVencimiento'));
+            if (contractData.containsKey('introduccion')) q.Introduction_Text__c = (String)contractData.get('introduccion');
+            if (contractData.containsKey('observaciones')) q.Description = (String)contractData.get('observaciones');
+            if (contractData.containsKey('status')) q.Status = (String)contractData.get('status');
+            
+            update q;
+
+            // Opcional: Sincronizar automáticamente si no lo está
+            Opportunity opp = [SELECT SyncedQuoteId FROM Opportunity WHERE Id = :q.OpportunityId];
+            if (opp.SyncedQuoteId != q.Id) {
+                opp.SyncedQuoteId = q.Id;
+                update opp;
+            }
+        } catch (Exception e) { throw new AuraHandledException('Error al guardar contrato: ' + e.getMessage()); }
+    }
+
+    @AuraEnabled
+    public static void cloneQuoteToContract(Id sourceQuoteId, Id targetOppId) {
+        // Lógica futura si se requiere separar presupuesto de contrato
+    }
+
+    @AuraEnabled
     public static Id saveNote(Id parentId, String title, String content) {
         try {
             ContentNote cn = new ContentNote();
@@ -845,7 +894,7 @@ public with sharing class QuoteTechnicalController {
         }
     }
 
-    @Appropriate
+    @AuraEnabled(cacheable=true)
     public static Map<String, Decimal> getHistoricalPL(Id quoteId) {
         Map<String, Decimal> history = new Map<String, Decimal>{ 'current' => 0, 'previous' => 0 };
         try {
