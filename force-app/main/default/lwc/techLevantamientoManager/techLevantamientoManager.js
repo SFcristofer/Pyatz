@@ -1,12 +1,14 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import saveSurveyData from '@salesforce/apex/QuoteTechnicalController.saveSurveyData';
+import getLevantamientoDetails from '@salesforce/apex/QuoteTechnicalController.getLevantamientoDetails';
 
 export default class TechLevantamientoManager extends LightningElement {
     @api recordId;
-    @track surveyType = 'BIOENZIMÁTICO'; // Sincronizado con el valor oficial
+    @track surveyType = 'BIOENZIMÁTICO'; 
     @track surveyData = [];
     @track isSaving = false;
+    @track isLoading = false;
 
     // --- VARIABLES GESTIÓN MENSTRUAL ---
     @track gmUsuariasInt = 0; @track gmUsuariasExt = 0; @track gmFreqUso = '';
@@ -72,9 +74,87 @@ export default class TechLevantamientoManager extends LightningElement {
     }
 
     connectedCallback() {
-        if (this.surveyData.length === 0) {
-            this.handleAddSurveyRow();
-        }
+        this.loadExistingData();
+    }
+
+    handleSurveyTypeChange(event) {
+        this.surveyType = event.detail.value;
+        this.loadExistingData();
+    }
+
+    loadExistingData() {
+        if (!this.recordId) return;
+        this.isLoading = true;
+        this.surveyData = []; 
+        
+        getLevantamientoDetails({ recordId: this.recordId })
+            .then(result => {
+                const type = this.surveyType.toUpperCase();
+                const filtered = result.filter(r => r.Tipo_Servicio__c === type);
+                
+                if (filtered && filtered.length > 0) {
+                    this.surveyData = filtered.map((r, idx) => {
+                        let row = { 
+                            id: r.Id, 
+                            rowNumber: idx + 1, 
+                            nivel: r.Nivel__c, 
+                            area: r.Area_Cocina_Banos__c, 
+                            zona: r.Zona_Genero__c, 
+                            obs: r.Observaciones_Tecnicas__c 
+                        };
+                        
+                        if (type === 'BIOENZIMÁTICO') {
+                            Object.assign(row, { 
+                                ve: r.VE__c, vp: r.VP__c, c10l: r.Bidon_10L__c, c20l: r.Bidon_20L__c, c25l: r.Bidon_25L__c, 
+                                piso: r.Piso__c, mueble: r.Mueble__c, pared: r.Pared__c, 
+                                foto: r.Fotografia__c, // CORRECCIÓN: Mapeo de foto
+                                residuos: r.Residuos_Tarja__c, escamoche: r.Escamoche__c, instala: r.Estado_Instalacion__c, azolves: r.Azolves__c, 
+                                coladeras: r.Coladeras__c, tapon: r.Tapon_Registro__c, tarja: r.Tarja__c, tinas: r.Tinas_por_Tarja__c, 
+                                tgrasa: r.Trampa_Grasa__c, modelo: r.Modelo_TG_Bio__c, st1: r.ST_1__c, ovalines: r.Ovalines_Lavabo__c 
+                            });
+                        } else if (type === 'GRASAS') {
+                            Object.assign(row, { 
+                                sp: r.SP__c, ent: r.ENT__c, modelo: r.Modelo_Grasas__c, frecuencia: r.Frecuencia_Limpieza__c, 
+                                estado: r.Estado_Trampa__c, tornillo: r.Tornillo__c, sello: r.Sello__c, mampara: r.Mampara__c, 
+                                canastilla: r.Canastilla__c, retSalida: r.Ret_Salida__c, 
+                                foto: r.Fotografia__c // Mapeo de foto para grasas también
+                            });
+                        } else if (type === 'INTIMA') {
+                            Object.assign(row, { wc: r.WC__c, frecuencia: r.Frecuencia__c, dias: r.Dias_Servicio_Censo__c });
+                            this.gmUsuariasInt = r.GM_Usuarias_Internas__c;
+                            this.gmUsuariasExt = r.GM_Usuarias_Externas__c;
+                            this.gmFreqUso = r.GM_Frecuencia_Uso__c;
+                            this.gmSanitarios = r.GM_Sanitarios_Totales__c;
+                            this.gmCubiculos = r.GM_Cubiculos_Totales__c;
+                            this.gmContenedores = r.GM_Contenedores_Sugeridos__c;
+                            this.gmFreqRecoleccion = r.GM_Frecuencia_Recoleccion__c;
+                            this.gmDiasServicio = r.GM_Dias_Servicio__c;
+                            this.gmHorario = r.GM_Horario_Servicio__c;
+                            this.gmPermisos = r.GM_Permisos_Acceso__c;
+                            this.gmConsideraciones = r.GM_Consideraciones_Especiales__c;
+                            this.gmCapacitacion = r.GM_Requiere_Capacitacion__c;
+                            this.gmPresupuesto = r.GM_Presupuesto_Asignado__c;
+                            this.gmMotivo = r.GM_Motivo_Necesidad__c;
+                            this.gmPermiteLev = r.GM_Permite_Levantamiento_Foto__c;
+                        } else if (type === 'DESAZOLVE MECANICO') {
+                            Object.assign(row, { ovalines: r.Ovalines_Lavabo__c, coladeras: r.Coladeras__c, tapon: r.Tapon_Registro__c, mingitorios: r.Mingitorios__c, wc: r.WC__c, mtLineal: r.Metros_Lineales__c, tarjas: r.Tarjas_Servicios__c, cuartoHumado: r.Cuarto_Humado__c });
+                        } else if (type === 'AROMATIZANTES') {
+                            Object.assign(row, { arm: r.Equipos_ARM__c });
+                        } else if (type === 'VACTOR') {
+                            Object.assign(row, { descripcion: r.Vactor_Descripcion__c, medida: r.Vactor_Medida__c, material: r.Vactor_Material__c, servicio: r.Vactor_Servicio_Requerido__c, largo: r.Vactor_Largo__c, ancho: r.Vactor_Ancho__c, prof: r.Vactor_Profundidad__c, mtLineal: r.Metros_Lineales__c, distancia: r.Vactor_Distancia_Camion__c, permDelegacion: r.Vactor_Permiso_Delegacion__c, permPlaza: r.Vactor_Permiso_Plaza__c, dificultad: r.Vactor_Dificultad__c, alcance: r.Vactor_Alcance_Pyatz__c });
+                        }
+                        return row;
+                    });
+                } else {
+                    this.handleAddSurveyRow();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading survey:', error);
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
 
     get surveyTypeOptions() {

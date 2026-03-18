@@ -14,7 +14,7 @@
                                 <lightning-accordion-section key={group.label} name={group.label} label={group.label}>
                                     <template for:each={group.records} for:item="rec">
                                         <div key={rec.id} class={rec.className} data-id={rec.id} onclick={handleRecordSelect}>
-                                            <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
+                                            <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
                                                 <span class="record-name">{rec.name}</span>
                                                 <div class="slds-grid slds-grid_vertical-align-center">
                                                     <span if:true={rec.estado} class={rec.estadoClass}>{rec.estado}</span>
@@ -22,22 +22,30 @@
                                                 </div>
                                             </div>
                                             
-                                            <div class="mini-fields">
+                                            <!-- Campos Base Estructurados -->
+                                            <div class="mini-fields-grid slds-m-bottom_x-small">
                                                 <template for:each={rec.fields} for:item="f">
-                                                    <span key={f.label} class="field-item"><strong>{f.label}:</strong> {f.value}</span>
+                                                    <div key={f.label} class="field-item-pill">
+                                                        <span class="pill-label">{f.label}:</span>
+                                                        <span class="pill-value">{f.value}</span>
+                                                    </div>
                                                 </template>
                                             </div>
 
-                                            <div if:true={rec.metrics} class="metrics-area slds-m-top_xx-small">
-                                                <lightning-icon icon-name="utility: Calibration" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                                <span>{rec.metrics}</span>
+                                            <!-- Métricas como Tags -->
+                                            <div if:true={rec.metrics.length} class="metrics-tags slds-m-bottom_x-small">
+                                                <template for:each={rec.metrics} for:item="m">
+                                                    <span key={m} class="metric-tag">{m}</span>
+                                                </template>
                                             </div>
 
-                                            <div if:true={rec.observaciones} class="obs-preview slds-m-top_xx-small">
-                                                <p class="slds-truncate" title={rec.observaciones}>
-                                                    <lightning-icon icon-name="utility:note" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                                    {rec.observaciones}
-                                                </p>
+                                            <!-- Observaciones -->
+                                            <div if:true={rec.observaciones} class="obs-box">
+                                                <div class="obs-header">
+                                                    <lightning-icon icon-name="utility:note" size="xx-small" class="slds-m-right_xxx-small"></lightning-icon>
+                                                    <span>Observaciones Técnicas:</span>
+                                                </div>
+                                                <p class="obs-text">{rec.observaciones}</p>
                                             </div>
                                         </div>
                                     </template>

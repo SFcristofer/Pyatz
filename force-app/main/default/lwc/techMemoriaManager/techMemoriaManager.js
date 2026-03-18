@@ -69,11 +69,35 @@ export default class TechMemoriaManager extends LightningElement {
             if (rec.Area_Cocina_Banos__c) detailItems.push({ label: 'Área', value: rec.Area_Cocina_Banos__c });
             if (rec.Zona_Genero__c) detailItems.push({ label: 'Zona', value: rec.Zona_Genero__c });
             
-            // Métricas y Especificaciones Técnicas (Traer TODO lo capturado)
+            // --- DETALLE TÉCNICO PROFUNDO (ESPECIFICACIONES) ---
             let specs = [];
-            if (rec.Cantidad_Principal__c > 0) specs.push(`Cant: ${rec.Cantidad_Principal__c}`);
-            if (rec.Metros_Lineales__c > 0) specs.push(`${rec.Metros_Lineales__c} mts`);
-            if (rec.Frecuencia__c) specs.push(`Freq: ${rec.Frecuencia__c}`);
+            const typeUpper = type.toUpperCase();
+
+            if (typeUpper === 'BIOENZIMÁTICO') {
+                if (rec.VE__c) specs.push(`VE: ${rec.VE__c}`);
+                if (rec.VP__c) specs.push(`VP: ${rec.VP__c}`);
+                if (rec.Bidon_10L__c) specs.push(`10L: ${rec.Bidon_10L__c}`);
+                if (rec.Bidon_20L__c) specs.push(`20L: ${rec.Bidon_20L__c}`);
+                if (rec.Bidon_25L__c) specs.push(`25L: ${rec.Bidon_25L__c}`);
+                if (rec.Piso__c || rec.Mueble__c || rec.Pared__c) specs.push(`Ubic: P:${rec.Piso__c}/M:${rec.Mueble__c}/W:${rec.Pared__c}`);
+                if (rec.Escamoche__c) specs.push(`Escamoche: ${rec.Escamoche__c}`);
+            } else if (typeUpper === 'GRASAS') {
+                if (rec.Modelo_Grasas__c) specs.push(`Mod: ${rec.Modelo_Grasas__c}`);
+                if (rec.Estado_Trampa__c) specs.push(`Estado: ${rec.Estado_Trampa__c}`);
+                if (rec.SP__c || rec.ENT__c) specs.push(`SP:${rec.SP__c} / ENT:${rec.ENT__c}`);
+            } else if (typeUpper === 'VACTOR') {
+                if (rec.Vactor_Largo__c) specs.push(`L:${rec.Vactor_Largo__c}m`);
+                if (rec.Vactor_Ancho__c) specs.push(`A:${rec.Vactor_Ancho__c}m`);
+                if (rec.Vactor_Profundidad__c) specs.push(`P:${rec.Vactor_Profundidad__c}m`);
+                if (rec.Metros_Lineales__c) specs.push(`Total: ${rec.Metros_Lineales__c}m lineales`);
+                if (rec.Vactor_Dificultad__c) specs.push(`Dificultad: ${rec.Vactor_Dificultad__c}`);
+            } else if (typeUpper === 'INTIMA') {
+                if (rec.WC__c) specs.push(`WC: ${rec.WC__c}`);
+                if (rec.Frecuencia__c) specs.push(`Freq: ${rec.Frecuencia__c}`);
+            } else if (typeUpper === 'DESAZOLVE MECANICO') {
+                if (rec.Metros_Lineales__c) specs.push(`Mts: ${rec.Metros_Lineales__c}`);
+                if (rec.WC__c || rec.Ovalines_Lavabo__c || rec.Mingitorios__c) specs.push(`Puntos: WC:${rec.WC__c}/Ov:${rec.Ovalines_Lavabo__c}/Min:${rec.Mingitorios__c}`);
+            }
 
             // Estado Class
             let estadoClass = 'status-badge';
@@ -87,7 +111,7 @@ export default class TechMemoriaManager extends LightningElement {
                 id: rec.Id,
                 name: displayName,
                 fields: detailItems,
-                metrics: specs.join(' | '),
+                metrics: specs, // Cambiado de join a array
                 estado: rec.Estado_Instalacion__c,
                 estadoClass: estadoClass,
                 observaciones: rec.Observaciones_Tecnicas__c,

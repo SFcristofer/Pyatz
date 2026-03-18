@@ -1,5 +1,10 @@
 <template>
     <div class="main-container">
+        <!-- SPINNER DE CARGA -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Cargando datos..." size="medium"></lightning-spinner>
+        </template>
+
         <!-- HEADER DE CONTROL -->
         <div class="header-section">
             <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
@@ -93,14 +98,14 @@
                                     <td><input type="number" class="cell-input" data-index={index} data-field="pared" value={row.pared} onchange={handleSurveyChange}></td>
                                     <td><input type="text" class="cell-input" data-index={index} data-field="foto" value={row.foto} onchange={handleSurveyChange}></td>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="residuos" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="residuos" value={row.residuos} onchange={handleSurveyChange}>
                                             <option value="">-</option>
                                             <option value="Sin residuos (Correcto)">No</option>
                                             <option value="Presencia de residuos sólidos">Sí</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <select class={row.escamocheClass} data-index={index} data-field="escamoche" onchange={handleSurveyChange}>
+                                        <select class={row.escamocheClass} data-index={index} data-field="escamoche" value={row.escamoche} onchange={handleSurveyChange}>
                                             <option value="">-</option>
                                             <option value="Correcto, separan orgánico e inorgánico">Correcto</option>
                                             <option value="Lo hacen a medias, basura en suelo, botes con basura revuelta">A medias</option>
@@ -108,7 +113,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="instala" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="instala" value={row.instala} onchange={handleSurveyChange}>
                                             <option value="">-</option>
                                             <option value="Bien">Bien</option>
                                             <option value="Regular">Regular</option>
@@ -116,7 +121,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="azolves" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="azolves" value={row.azolves} onchange={handleSurveyChange}>
                                             <option value="NA">NA</option>
                                             <option value="1 año">1 año</option>
                                             <option value="1 mes">1 mes</option>
