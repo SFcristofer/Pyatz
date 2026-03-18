@@ -71,15 +71,22 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     getStateParameters(currentPageReference) {
         if (currentPageReference && currentPageReference.state.c__recordId) {
             this.recordId = currentPageReference.state.c__recordId;
-            this.loadInitialData();
         }
     }
 
     connectedCallback() {
-        if (this.recordId) this.loadInitialData();
+        // Delay ligero para asegurar que el recordId esté disponible si viene del 360
+        setTimeout(() => {
+            if (this.recordId) {
+                this.loadInitialData();
+            } else {
+                console.warn('techContractManager: No se recibió recordId');
+            }
+        }, 300);
     }
 
     loadInitialData() {
+        console.log('Cargando datos iniciales para contrato:', this.recordId);
         this.fetchLineItems();
         this.fetchQuoteData();
         this.fetchTemplates();
@@ -89,7 +96,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Condiciones de Contrato' })
             .then(result => {
                 if (result && result.length > 0) {
-                    this.plantillaOptions = result.map(t => ({ label: t.name, value: t.id }));
+                    this.plantillaOptions = result.map(t => ({ label: t.Name, value: t.Id }));
                 }
             })
             .catch(error => console.error('Error cargando plantillas de contrato:', error));
@@ -100,6 +107,8 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             .then(result => {
                 if (result && result.quote) {
                     this.introduccionPresupuesto = result.quote.Introduction_Text__c || '';
+                    // Mapear fechas de la Quote si ya existen
+                    this.fechaInicioContrato = result.quote.ExpirationDate || ''; 
                 }
             })
             .catch(error => console.error('Error al cargar datos del presupuesto:', error));
@@ -109,20 +118,22 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         this.isLoading = true;
         getQuoteLineItems({ quoteId: this.recordId })
             .then(result => {
-                this.quoteLineItems = result.map(item => ({
-                    ...item,
-                    ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
-                    ProductName: item.Product2 ? item.Product2.Name : 'Producto',
-                    Sede: item.Quote ? item.Quote.Technical_Sedes__c : '---',
-                    DescuentoDisplay: item.Discount ? `${item.Discount}%` : '-',
-                    isSelected: true
-                }));
+                console.log('Servicios recuperados:', result.length);
+                this.quoteLineItems = result.map(item => {
+                    return {
+                        ...item,
+                        ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
+                        ProductName: item.Product2 ? item.Product2.Name : 'Producto',
+                        Sede: (item.Quote && item.Quote.Technical_Sedes__c) ? item.Quote.Technical_Sedes__c : '---',
+                        isSelected: true
+                    };
+                });
                 this.calculateTotals();
                 this.isLoading = false;
             })
             .catch(error => {
                 this.isLoading = false;
-                console.error(error);
+                console.error('Error recuperando servicios:', error);
             });
     }
 

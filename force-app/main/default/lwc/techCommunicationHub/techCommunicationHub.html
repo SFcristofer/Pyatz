@@ -4,86 +4,94 @@
             
             <!-- PANEL IZQUIERDO: CONFIGURACIÓN Y ADJUNTOS (Ancho 4 de 12) -->
             <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
-                <div class="side-panel slds-box slds-theme_shade full-height">
-                    <div class="slds-text-heading_small slds-m-bottom_small border-bottom slds-p-bottom_x-small">
-                        <lightning-icon icon-name="utility:attach" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                        Plantillas y Adjuntos
+                <div class="side-panel slds-box slds-theme_shade full-height flex-column">
+                    
+                    <!-- 1. HEADER DEL PANEL (FIJO) -->
+                    <div class="panel-header slds-p-bottom_small border-bottom">
+                        <div class="slds-text-heading_small slds-m-bottom_small">
+                            <lightning-icon icon-name="utility:attach" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            Plantillas y Adjuntos
+                        </div>
+
+                        <lightning-combobox
+                            name="folder"
+                            label="Carpeta de Plantillas"
+                            value={selectedFolder}
+                            options={folderOptions}
+                            onchange={handleFolderChange}
+                            placeholder="Seleccione una carpeta..."
+                            class="slds-m-bottom_x-small">
+                        </lightning-combobox>
+
+                        <lightning-combobox
+                            name="template"
+                            label="Plantilla a usar"
+                            value={selectedTemplateId}
+                            options={filteredTemplates}
+                            onchange={handleTemplateChange}
+                            placeholder="Seleccione una plantilla..."
+                            disabled={isTemplateDisabled}>
+                        </lightning-combobox>
                     </div>
 
-                    <!-- SELECCIÓN DE CARPETA -->
-                    <lightning-combobox
-                        name="folder"
-                        label="Carpeta de Plantillas"
-                        value={selectedFolder}
-                        options={folderOptions}
-                        onchange={handleFolderChange}
-                        placeholder="Seleccione una carpeta..."
-                        class="slds-m-bottom_small">
-                    </lightning-combobox>
-
-                    <!-- SELECCIÓN DE PLANTILLA -->
-                    <lightning-combobox
-                        name="template"
-                        label="Plantilla a usar"
-                        value={selectedTemplateId}
-                        options={filteredTemplates}
-                        onchange={handleTemplateChange}
-                        placeholder="Seleccione una plantilla..."
-                        disabled={isTemplateDisabled}
-                        class="slds-m-bottom_medium">
-                    </lightning-combobox>
-
-                    <div class="slds-section slds-is-open">
-                        <h3 class="slds-section__title slds-theme_offline">
-                            <span class="slds-truncate slds-p-horizontal_small" title="Documentos PDF">Selección de Documentos (PDF)</span>
-                        </h3>
-                        <div class="slds-section__content slds-p-around_x-small bg-white scrollable-attachments">
+                    <!-- 2. CUERPO DEL PANEL (SCROLL INDEPENDIENTE) -->
+                    <div class="panel-body flex-grow scrollable-attachments">
+                        <div class="slds-p-vertical_small">
+                            <p class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">DOCUMENTOS PDF:</p>
+                            
                             <template if:true={isLoadingAttachments}>
-                                <lightning-spinner alternative-text="Cargando..." size="small"></lightning-spinner>
+                                <div class="slds-align_absolute-center slds-p-around_large">
+                                    <lightning-spinner alternative-text="Cargando..." size="small" variant="brand" style="position: relative;"></lightning-spinner>
+                                </div>
                             </template>
                             
                             <template if:false={isLoadingAttachments}>
-                                <div class="att-group-title">
-                                    <lightning-icon icon-name="utility:quote" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    Presupuestos
-                                </div>
-                                <template for:each={availableAttachments.quotes} for:item="quote">
-                                    <div key={quote.id} class="att-item">
-                                        <lightning-input type="checkbox" label={quote.name} data-id={quote.id} data-type="Quote" onchange={handleAttachmentToggle}></lightning-input>
+                                <div class="slds-p-horizontal_x-small">
+                                    <div class="att-group-title first-group">
+                                        <lightning-icon icon-name="utility:quote" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        Presupuestos
                                     </div>
-                                </template>
+                                    <template for:each={availableAttachments.quotes} for:item="quote">
+                                        <div key={quote.id} class="att-item">
+                                            <lightning-input type="checkbox" label={quote.name} data-id={quote.id} data-type="Quote" onchange={handleAttachmentToggle}></lightning-input>
+                                        </div>
+                                    </template>
 
-                                <div class="att-group-title slds-m-top_small">
-                                    <lightning-icon icon-name="utility:survey" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    Levantamientos
-                                </div>
-                                <template for:each={availableAttachments.surveys} for:item="survey">
-                                    <div key={survey.name} class="att-item">
-                                        <lightning-input type="checkbox" label={survey.name} data-id={survey.id} data-type="Survey" onchange={handleAttachmentToggle}></lightning-input>
+                                    <div class="att-group-title">
+                                        <lightning-icon icon-name="utility:survey" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        Levantamientos
                                     </div>
-                                </template>
+                                    <template for:each={availableAttachments.surveys} for:item="survey">
+                                        <div key={survey.name} class="att-item">
+                                            <lightning-input type="checkbox" label={survey.name} data-id={survey.id} data-type="Survey" onchange={handleAttachmentToggle}></lightning-input>
+                                        </div>
+                                    </template>
 
-                                <div class="att-group-title slds-m-top_small">
-                                    <lightning-icon icon-name="utility:pdf_ext" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    Archivos PDF
-                                </div>
-                                <template for:each={availableAttachments.files} for:item="file">
-                                    <div key={file.id} class="att-item">
-                                        <lightning-input type="checkbox" label={file.name} data-id={file.id} data-type="File" onchange={handleAttachmentToggle}></lightning-input>
+                                    <div class="att-group-title">
+                                        <lightning-icon icon-name="utility:pdf_ext" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        Archivos PDF
                                     </div>
-                                </template>
+                                    <template for:each={availableAttachments.files} for:item="file">
+                                        <div key={file.id} class="att-item">
+                                            <lightning-input type="checkbox" label={file.name} data-id={file.id} data-type="File" onchange={handleAttachmentToggle}></lightning-input>
+                                        </div>
+                                    </template>
+                                </div>
                             </template>
                         </div>
                     </div>
 
-                    <div class="slds-file-selector slds-file-selector_files slds-m-top_medium">
-                        <div class="slds-file-selector__dropzone">
-                            <input type="file" class="slds-file-selector__input slds-assistive-text" id="file-upload-input-01" />
-                            <label class="slds-file-selector__body" for="file-upload-input-01">
-                                <span class="slds-file-selector__button slds-button slds-button_neutral">
-                                    <lightning-icon icon-name="utility:upload" size="x-small" class="slds-m-right_x-small"></lightning-icon>Subir archivo
-                                </span>
-                            </label>
+                    <!-- 3. FOOTER DEL PANEL (FIJO AL FONDO) -->
+                    <div class="panel-footer slds-p-top_small border-top">
+                        <div class="slds-file-selector slds-file-selector_files">
+                            <div class="slds-file-selector__dropzone">
+                                <input type="file" class="slds-file-selector__input slds-assistive-text" id="file-upload-input-01" />
+                                <label class="slds-file-selector__body slds-size_1-of-1" for="file-upload-input-01">
+                                    <span class="slds-file-selector__button slds-button slds-button_neutral slds-size_1-of-1">
+                                        <lightning-icon icon-name="utility:upload" size="x-small" class="slds-m-right_x-small"></lightning-icon>Subir archivo local
+                                    </span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

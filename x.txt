@@ -1,5 +1,19 @@
-Fila de Totales Huérfana: La fila gris de "TOTALES ACUMULADOS" aparece justo debajo del header negro. No hay espacio para los datos.
+p{margin-top:0px; margin-bottom:0px;}
 
-Valores en Cero: Las columnas de "Largo", "Ancho", etc., muestran 0. Esto indica que, o no hay datos cargados, o el sistema no está encontrando nada que sumar.
 
-Inconsistencia Visual: El cursor está sobre un área vacía donde debería haber una fila, pero solo vemos el fondo blanco.
+Estimad@ , BODEGA TACUBAYA,
+
+Por medio del presente confirmo nuestra visita programada para la capacitación del personal del área de (limpieza / cocina / mantenimiento / administrativo).
+
+Fecha:
+Hora:
+Dirección:
+
+Personal que se presentará:
+
+Agradeceremos su amable confirmación de recepción. En caso de requerir reprogramar la visita, le solicitamos nos lo informe con al menos 24 horas de anticipación, a fin de coordinar adecuadamente la agenda de nuestro personal.
+
+Quedo a sus órdenes para cualquier duda o comentario.
+
+Saludos cordiales.
+

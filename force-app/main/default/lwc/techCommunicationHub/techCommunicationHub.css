@@ -38,6 +38,38 @@
     background: white;
 }
 
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.side-panel {
+    background: #ffffff;
+    border: 1px solid #e0e5ee;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    height: 650px; /* Altura fija para que el flexbox funcione correctamente */
+}
+
+.panel-header {
+    flex-shrink: 0;
+}
+
+.panel-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 8px 0;
+}
+
+.panel-footer {
+    flex-shrink: 0;
+    background: #ffffff;
+}
+
 .att-group-title {
     font-size: 0.65rem;
     font-weight: 800;
@@ -47,8 +79,13 @@
     background: #f8fafc;
     padding: 6px 12px;
     border-radius: 4px;
+    margin-top: 20px; /* Margen superior uniforme para todos los grupos */
     margin-bottom: 10px;
     border-left: 3px solid #cbd5e1;
+}
+
+.att-group-title.first-group {
+    margin-top: 8px; /* El primero tiene menos margen para no desperdiciar espacio */
 }
 
 .att-item {
@@ -75,17 +112,11 @@
     flex-grow: 1;
 }
 
-/* Scroll personalizado para los adjuntos */
+/* Scroll personalizado refinado */
 .scrollable-attachments::-webkit-scrollbar { width: 6px; }
-.scrollable-attachments::-webkit-scrollbar-track { background: #f1f5f9; }
+.scrollable-attachments::-webkit-scrollbar-track { background: transparent; }
 .scrollable-attachments::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 .scrollable-attachments::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-.scrollable-attachments {
-    max-height: 350px;
-    padding: 4px;
-    overflow-y: auto;
-}
 
 .rich-text-container {
     background: #f1f5f9;
