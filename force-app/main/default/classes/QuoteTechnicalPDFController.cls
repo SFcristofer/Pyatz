@@ -18,6 +18,22 @@ public with sharing class QuoteTechnicalPDFController {
                               FROM Quote 
                               WHERE Id = :quoteId];
 
+        // 1.1. Procesar etiquetas dinámicas (Lazy Loading)
+        if (this.technicalQuote.Introduction_Text__c != null) {
+            this.technicalQuote.Introduction_Text__c = this.technicalQuote.Introduction_Text__c
+                .replace('[[SEDES]]', this.technicalQuote.Technical_Sedes__c != null ? this.technicalQuote.Technical_Sedes__c : '')
+                .replace('[[CLIENTE]]', this.technicalQuote.Account.Name != null ? this.technicalQuote.Account.Name : '')
+                .replace('[[CUENTA]]', this.technicalQuote.Account.Name != null ? this.technicalQuote.Account.Name : '')
+                .replace('[[FOLIO]]', this.technicalQuote.QuoteNumber != null ? this.technicalQuote.QuoteNumber : '');
+        }
+        if (this.technicalQuote.Warranty_Text__c != null) {
+            this.technicalQuote.Warranty_Text__c = this.technicalQuote.Warranty_Text__c
+                .replace('[[SEDES]]', this.technicalQuote.Technical_Sedes__c != null ? this.technicalQuote.Technical_Sedes__c : '')
+                .replace('[[CLIENTE]]', this.technicalQuote.Account.Name != null ? this.technicalQuote.Account.Name : '')
+                .replace('[[CUENTA]]', this.technicalQuote.Account.Name != null ? this.technicalQuote.Account.Name : '')
+                .replace('[[FOLIO]]', this.technicalQuote.QuoteNumber != null ? this.technicalQuote.QuoteNumber : '');
+        }
+
         // 2. Extraer HTML de la memoria persistente
         if (String.isNotBlank(this.technicalQuote.Markers_Data__c)) {
             try {

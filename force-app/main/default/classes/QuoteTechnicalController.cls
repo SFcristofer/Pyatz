@@ -294,11 +294,8 @@ public with sharing class QuoteTechnicalController {
             if (body != null && body.contains('<body')) { body = body.substringAfter('>'); if (body.contains('</body>')) body = body.substringBeforeLast('</body>'); }
             
             String finalBody = body != null ? body.trim() : '';
-            if (q.Account != null && q.Account.Name != null) {
-                finalBody = finalBody.replace('[[CUENTA]]', q.Account.Name).replace('[[CLIENTE]]', q.Account.Name);
-            }
-            finalBody = finalBody.replace('[[SEDES]]', q.Technical_Sedes__c != null ? q.Technical_Sedes__c : '');
-            finalBody = finalBody.replace('[[FOLIO]]', q.QuoteNumber);
+            // El reemplazo de etiquetas [[SEDES]], [[CUENTA]], [[CLIENTE]], [[FOLIO]] 
+            // se ha diferido a los controladores de PDF para garantizar la carga perezosa (Lazy Loading)
             return finalBody;
         } catch (Exception e) { throw new AuraHandledException('Error render: ' + e.getMessage()); }
     }
