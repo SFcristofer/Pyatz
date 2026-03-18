@@ -39,28 +39,51 @@
 }
 
 .att-group-title {
-    font-size: 0.75rem;
-    font-weight: bold;
+    font-size: 0.65rem;
+    font-weight: 800;
     text-transform: uppercase;
-    color: #706e6b;
-    letter-spacing: 0.0625rem;
-    border-bottom: 1px solid #f3f2f2;
-    padding-bottom: 4px;
-    margin-bottom: 8px;
+    color: #475569;
+    letter-spacing: 1px;
+    background: #f8fafc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    border-left: 3px solid #cbd5e1;
 }
 
 .att-item {
-    padding: 4px 8px;
-    transition: background 0.2s;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
 }
 
 .att-item:hover {
-    background: #f3f2f2;
-    border-radius: 4px;
+    border-color: #3b82f6;
+    background: #f0f9ff;
+    transform: translateX(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.att-item lightning-input {
+    --slds-c-checkbox-label-font-size: 0.85rem;
+    --slds-c-checkbox-label-color: #334155;
+    flex-grow: 1;
+}
+
+/* Scroll personalizado para los adjuntos */
+.scrollable-attachments::-webkit-scrollbar { width: 6px; }
+.scrollable-attachments::-webkit-scrollbar-track { background: #f1f5f9; }
+.scrollable-attachments::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.scrollable-attachments::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
 .scrollable-attachments {
-    max-height: 250px;
+    max-height: 350px;
+    padding: 4px;
     overflow-y: auto;
 }
 

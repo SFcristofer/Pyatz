@@ -43,21 +43,30 @@
                             </template>
                             
                             <template if:false={isLoadingAttachments}>
-                                <div class="att-group-title">Presupuestos</div>
+                                <div class="att-group-title">
+                                    <lightning-icon icon-name="utility:quote" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Presupuestos
+                                </div>
                                 <template for:each={availableAttachments.quotes} for:item="quote">
                                     <div key={quote.id} class="att-item">
                                         <lightning-input type="checkbox" label={quote.name} data-id={quote.id} data-type="Quote" onchange={handleAttachmentToggle}></lightning-input>
                                     </div>
                                 </template>
 
-                                <div class="att-group-title slds-m-top_small">Levantamientos</div>
+                                <div class="att-group-title slds-m-top_small">
+                                    <lightning-icon icon-name="utility:survey" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Levantamientos
+                                </div>
                                 <template for:each={availableAttachments.surveys} for:item="survey">
                                     <div key={survey.name} class="att-item">
                                         <lightning-input type="checkbox" label={survey.name} data-id={survey.id} data-type="Survey" onchange={handleAttachmentToggle}></lightning-input>
                                     </div>
                                 </template>
 
-                                <div class="att-group-title slds-m-top_small">Archivos PDF</div>
+                                <div class="att-group-title slds-m-top_small">
+                                    <lightning-icon icon-name="utility:pdf_ext" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Archivos PDF
+                                </div>
                                 <template for:each={availableAttachments.files} for:item="file">
                                     <div key={file.id} class="att-item">
                                         <lightning-input type="checkbox" label={file.name} data-id={file.id} data-type="File" onchange={handleAttachmentToggle}></lightning-input>
