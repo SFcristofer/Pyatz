@@ -62,7 +62,7 @@ public with sharing class QuoteContractPDFController {
 
     @AuraEnabled(cacheable=true)
     public static List<QuoteLineItem> getQuoteLineItems(Id quoteId) {
-        return [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
+        return [SELECT Id, PricebookEntryId, Product2Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
                        ListPrice, Description, Discount, Quote.Technical_Sedes__c
                 FROM QuoteLineItem WHERE QuoteId = :quoteId ORDER BY CreatedDate ASC];
     }

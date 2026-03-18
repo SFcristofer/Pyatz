@@ -6,54 +6,72 @@ public with sharing class TechWorkOrderController {
         try {
             Quote targetQuote;
             if (quoteId != null) {
-                targetQuote = [SELECT Id, QuoteNumber, Name, GrandTotal, Technical_Sedes__c, Markers_Data__c, 
-                                      Business_Lines_Selected__c, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId, ContactId
+                targetQuote = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId, ContactId
                                FROM Quote WHERE Id = :quoteId LIMIT 1];
             } else {
-                List<Quote> syncingQuotes = [SELECT Id, QuoteNumber, Name, GrandTotal, Technical_Sedes__c, Markers_Data__c, 
-                                                   Business_Lines_Selected__c, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId, ContactId
+                List<Quote> syncingQuotes = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId, ContactId
                                             FROM Quote WHERE OpportunityId = :oppId AND IsSyncing = true LIMIT 1];
                 if (syncingQuotes.isEmpty()) throw new AuraHandledException('No hay un presupuesto sincronizado.');
                 targetQuote = syncingQuotes[0];
             }
             
+            // INTELIGENCIA DE PRECISIÓN: Buscar el Contrato de Servicio formal (Fuente de Verdad Técnica)
+            String scName = 'Contrato: ' + targetQuote.QuoteNumber + ' - ' + targetQuote.Name;
+            List<ServiceContract> contracts = [SELECT Id, StartDate, EndDate, Description, SpecialTerms 
+                                              FROM ServiceContract 
+                                              WHERE Name = :scName AND AccountId = :targetQuote.AccountId LIMIT 1];
+            
             result.put('quoteId', targetQuote.Id);
             result.put('oppId', targetQuote.OpportunityId);
             result.put('accountId', targetQuote.AccountId);
-            result.put('contactId', targetQuote.ContactId);
             result.put('folio', targetQuote.QuoteNumber);
             result.put('cliente', targetQuote.Account.Name);
-            result.put('sedes', targetQuote.Technical_Sedes__c);
-            result.put('lineaNegocio', targetQuote.Business_Lines_Selected__c);
-            result.put('fechaInicio', targetQuote.CreatedDate.format('dd-MMM-yyyy'));
-            result.put('fechaFin', targetQuote.ExpirationDate != null ? targetQuote.ExpirationDate.format() : 'No definida');
+            
+            if (!contracts.isEmpty()) {
+                ServiceContract sc = contracts[0];
+                result.put('fechaInicio', sc.StartDate != null ? sc.StartDate.format() : '---');
+                result.put('fechaFin', sc.EndDate != null ? sc.EndDate.format() : '---');
+                
+                // Cargar Partidas Reales del Contrato
+                List<ContractLineItem> clis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description 
+                                              FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
+                
+                List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
+                for (ContractLineItem cli : clis) {
+                    Map<String, Object> t = new Map<String, Object>();
+                    t.put('id', cli.Id);
+                    t.put('name', cli.Product2.Name);
+                    t.put('quantity', cli.Quantity);
+                    t.put('description', cli.Description);
+                    t.put('zonas', cli.Description); // Heredamos la descripción técnica como zonas
+                    tratamientos.add(t);
+                }
+                result.put('tratamientos', tratamientos);
+                result.put('sedes', 'Ver detalle en partidas'); // El contrato agrupa sedes en partidas
+            } else {
+                // Respaldo por presupuesto
+                result.put('fechaInicio', targetQuote.CreatedDate.format('dd-MMM-yyyy'));
+                result.put('fechaFin', targetQuote.ExpirationDate != null ? targetQuote.ExpirationDate.format() : 'No definida');
+                result.put('sedes', 'Pendiente de definir en contrato');
+                
+                List<QuoteLineItem> qlis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description 
+                                           FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
+                
+                List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
+                for (QuoteLineItem qli : qlis) {
+                    Map<String, Object> t = new Map<String, Object>();
+                    t.put('id', qli.Id);
+                    t.put('name', qli.Product2.Name);
+                    t.put('quantity', qli.Quantity);
+                    t.put('description', qli.Description);
+                    t.put('zonas', qli.Description);
+                    tratamientos.add(t);
+                }
+                result.put('tratamientos', tratamientos);
+            }
 
-            if (targetQuote.Markers_Data__c != null) {
-                try {
-                    String decoded = EncodingUtil.base64Decode(targetQuote.Markers_Data__c).toString();
-                    Map<String, Object> markers = (Map<String, Object>) JSON.deserializeUntyped(EncodingUtil.urlDecode(decoded, 'UTF-8'));
-                    result.put('fechaPrimerTratamiento', markers.get('fechaInicioContrato')); 
-                    result.put('fechaLimiteServicios', markers.get('fechaFinContrato'));
-                } catch (Exception e) { System.debug(e.getMessage()); }
-            }
-            
-            List<QuoteLineItem> qlis = [SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Quantity, Description 
-                                       FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
-            
-            List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
-            for (QuoteLineItem qli : qlis) {
-                Map<String, Object> t = new Map<String, Object>();
-                t.put('id', qli.Id);
-                t.put('productId', qli.Product2Id);
-                t.put('name', qli.Product2.Name);
-                t.put('code', qli.Product2.ProductCode);
-                t.put('quantity', qli.Quantity);
-                t.put('description', qli.Description);
-                tratamientos.add(t);
-            }
-            result.put('tratamientos', tratamientos);
             return result;
-        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+        } catch (Exception e) { throw new AuraHandledException('Error en Carga ODT: ' + e.getMessage()); }
     }
 
     @AuraEnabled

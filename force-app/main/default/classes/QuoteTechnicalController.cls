@@ -24,24 +24,70 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled
-    public static void saveContractData(Id quoteId, Map<String, Object> contractData) {
+    public static String saveContractData(Id quoteId, Map<String, Object> contractData) {
         try {
-            Quote q = [SELECT Id, OpportunityId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            Quote q = [SELECT Id, OpportunityId, AccountId, Pricebook2Id, QuoteNumber, Name FROM Quote WHERE Id = :quoteId LIMIT 1];
             
-            if (contractData.containsKey('fechaVencimiento')) q.ExpirationDate = Date.valueOf((String)contractData.get('fechaVencimiento'));
-            if (contractData.containsKey('introduccion')) q.Introduction_Text__c = (String)contractData.get('introduccion');
-            if (contractData.containsKey('observaciones')) q.Description = (String)contractData.get('observaciones');
-            if (contractData.containsKey('status')) q.Status = (String)contractData.get('status');
+            // 1. Intentar buscar un contrato existente por nombre (ya que Quote_Source__c no existe)
+            String scName = 'Contrato: ' + q.QuoteNumber + ' - ' + q.Name;
+            List<ServiceContract> existing = [SELECT Id FROM ServiceContract WHERE Name = :scName AND AccountId = :q.AccountId LIMIT 1];
+            ServiceContract sc = existing.isEmpty() ? new ServiceContract() : existing[0];
+
+            // Mapeo de Cabecera (SOLO CAMPOS CONFIRMADOS EXISTENTES)
+            sc.Name = scName;
+            sc.AccountId = q.AccountId;
+            sc.Pricebook2Id = q.Pricebook2Id;
             
+            // Fechas Estándar (Confirmadas)
+            if (contractData.containsKey('fechaInicioContrato') && String.isNotBlank((String)contractData.get('fechaInicioContrato'))) {
+                sc.StartDate = Date.valueOf((String)contractData.get('fechaInicioContrato'));
+            }
+            if (contractData.containsKey('fechaVencimiento') && String.isNotBlank((String)contractData.get('fechaVencimiento'))) {
+                sc.EndDate = Date.valueOf((String)contractData.get('fechaVencimiento'));
+            }
+            
+            // Firmante y Contacto Estándar
+            if (contractData.containsKey('clientSignerId') && String.isNotBlank((String)contractData.get('clientSignerId'))) {
+                sc.ContactId = (Id)contractData.get('clientSignerId');
+            }
+            
+            // Textos y Observaciones (Usando campos estándar para mayor seguridad)
+            if (contractData.containsKey('contenidoLegal')) sc.Legal_Content__c = (String)contractData.get('contenidoLegal');
+            if (contractData.containsKey('introduccion')) sc.Description = (String)contractData.get('introduccion');
+            if (contractData.containsKey('observaciones')) sc.SpecialTerms = (String)contractData.get('observaciones');
+            
+            upsert sc;
+
+            // 2. Mapear Partidas (ContractLineItem)
+            if (contractData.containsKey('lineItemsJson')) {
+                delete [SELECT Id FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
+                
+                List<Object> items = (List<Object>)JSON.deserializeUntyped((String)contractData.get('lineItemsJson'));
+                List<ContractLineItem> cliList = new List<ContractLineItem>();
+                
+                for (Object obj : items) {
+                    Map<String, Object> it = (Map<String, Object>)obj;
+                    if (it.containsKey('isSelected') && (Boolean)it.get('isSelected')) {
+                        ContractLineItem cli = new ContractLineItem();
+                        cli.ServiceContractId = sc.Id;
+                        cli.PricebookEntryId = (Id)it.get('PricebookEntryId');
+                        cli.Quantity = Decimal.valueOf(String.valueOf(it.get('Quantity')));
+                        cli.UnitPrice = Decimal.valueOf(String.valueOf(it.get('UnitPrice')));
+                        cli.Description = (String)it.get('Description');
+                        cliList.add(cli);
+                    }
+                }
+                if (!cliList.isEmpty()) insert cliList;
+            }
+
+            // 3. Actualizar la Quote
+            q.Status = 'In Review';
             update q;
 
-            // Opcional: Sincronizar automáticamente si no lo está
-            Opportunity opp = [SELECT SyncedQuoteId FROM Opportunity WHERE Id = :q.OpportunityId];
-            if (opp.SyncedQuoteId != q.Id) {
-                opp.SyncedQuoteId = q.Id;
-                update opp;
-            }
-        } catch (Exception e) { throw new AuraHandledException('Error al guardar contrato: ' + e.getMessage()); }
+            return sc.Id;
+        } catch (Exception e) { 
+            throw new AuraHandledException('Error en Contrato Nativo: ' + e.getMessage()); 
+        }
     }
 
     @AuraEnabled

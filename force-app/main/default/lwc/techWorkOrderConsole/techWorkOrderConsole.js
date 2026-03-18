@@ -79,14 +79,19 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                     durationHours: 1,
                     durationMinutes: 0,
                     durationSeconds: 0,
-                    zonas: t.description || 'Sin descripción técnica',
+                    zonas: t.zonas || t.description || 'Sin descripción técnica',
                     schedulingRows: this.generateSchedulingRows(t.quantity)
                 }))
             }];
             this.isLoading = false;
         } else if (error) {
-            this.isLoading = false;
+            this.isLoading = false; // DETENER SPINNER EN ERROR
             console.error('Error cargando datos ODT:', error);
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error de carga',
+                message: error.body ? error.body.message : 'Error desconocido al recuperar datos del contrato.',
+                variant: 'error'
+            }));
         }
     }
 
