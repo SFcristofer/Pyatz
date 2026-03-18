@@ -443,7 +443,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             this.selectedProductId = res.productId;
             this.selectedProductName = res.name;
             this.selectedProductPrice = res.unitPrice;
-            this.modalDescription = res.description;
+            // Convertir saltos de línea en <br> para que el editor rico los respete
+            this.modalDescription = res.description ? res.description.replace(/\n/g, '<br>') : '';
             this.searchResults = [];
             this.loadProductPrices();
             this.initModalTable();
