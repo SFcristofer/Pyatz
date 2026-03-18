@@ -31,39 +31,6 @@
                         </lightning-radio-group>
                     </div>
                 </div>
-
-                <div class="section-card slds-m-bottom_large">
-                    <div class="section-header">
-                        <div class="blue-square slds-m-right_small"></div>
-                        <h2 class="slds-text-heading_small">Origen: Necesidad</h2>
-                    </div>
-                    <div class="slds-p-around_large">
-                        <div class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end">
-                            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3" style="position: relative;">
-                                <lightning-input type="search" label="Buscar Necesidad relacionada" 
-                                    placeholder="Escriba el nombre o folio..."
-                                    onchange={handleNecesidadChange}
-                                    value={necesidadSeleccionada}>
-                                </lightning-input>
-                                <template if:true={necesidadesResults.length}>
-                                    <div class="slds-dropdown slds-dropdown_fluid slds-p-around_xx-small" style="position: absolute; display: block; z-index: 9999;">
-                                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
-                                            <template for:each={necesidadesResults} for:item="n">
-                                                <li key={n.id} role="presentation" class="slds-listbox__item" onclick={handleNecesidadSelect} data-id={n.id}>
-                                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain" role="option">
-                                                        <span class="slds-media__body">
-                                                            <span class="slds-truncate" title={n.name}>{n.name}</span>
-                                                        </span>
-                                                    </div>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </template>
 
             <!-- PASO 2: DATOS TÉCNICOS Y SEDES -->

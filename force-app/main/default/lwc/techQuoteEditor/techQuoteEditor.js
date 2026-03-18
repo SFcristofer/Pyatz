@@ -237,18 +237,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         ];
     }
     handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
-    handleNecesidadChange(event) {
-        const term = event.target.value; this.necesidadSeleccionada = term;
-        if (term.length >= 3) searchNecesidades({ searchTerm: term }).then(res => this.necesidadesResults = res);
-        else this.necesidadesResults = [];
-    }
-    handleNecesidadSelect(event) {
-        const n = this.necesidadesResults.find(x => x.id === event.currentTarget.dataset.id);
-        if (n) { this.necesidadId = n.id; this.necesidadNombre = n.name; this.necesidadSeleccionada = n.name; this.necesidadesResults = []; this.autoFillAsunto(); }
-    }
+    
     autoFillAsunto() {
         const est = this.estrategiaOptions.find(o => o.value === this.estrategiaVenta)?.label || '';
-        this.asunto = `${est} @ ${this.necesidadNombre || 'Servicio Técnico'}`;
+        this.asunto = `${est} @ Servicio Técnico`;
     }
 
     // --- LÓGICA PASO 2 ---
