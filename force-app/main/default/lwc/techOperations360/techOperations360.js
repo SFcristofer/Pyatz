@@ -48,6 +48,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track currentSubStep = '1';
     @track currentStatus = ''; 
     @track allStatusOptions = [];
+    @track processHistory = []; // Almacenará los estados de todas las subetapas
     @track quoteViewMode = 'list';
     @track selectedQuoteId = null;
 
@@ -81,9 +82,39 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (data) {
             this.allStatusOptions = data.picklistFieldValues.Estado_Subetapa__c.values;
             this.buildHybridStages(data.picklistFieldValues);
+            
+            // Si ya hay un recordId, cargar historial ahora que las opciones existen
+            if (this.recordId) {
+                this.loadProcessHistory();
+            }
         } else if (error) {
             console.error('Error metadatos:', error);
         }
+    }
+
+    // Carga inicial del historial
+    loadProcessHistory() {
+        if (!this.recordId) return;
+        getProcessHistory({ opportunityId: this.recordId })
+            .then(data => {
+                this.processHistory = data;
+                this.updateCurrentStatusFromHistory();
+            })
+            .catch(error => console.error('Error history:', error));
+    }
+
+    // Busca en el historial el estado que corresponde a la etapa/subetapa actual
+    updateCurrentStatusFromHistory() {
+        if (!this.processHistory.length || !this.subPhase) {
+            this.currentStatus = '';
+            return;
+        }
+        // Comparación robusta (sin importar espacios o acentos si fuera necesario)
+        const record = this.processHistory.find(h => 
+            String(h.Etapa__c).trim() === String(this.currentStep).trim() && 
+            String(h.Subetapa__c).trim() === String(this.subPhase).trim()
+        );
+        this.currentStatus = record ? record.Estado__c : '';
     }
 
     buildHybridStages(picklists) {
@@ -108,7 +139,11 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             });
 
         this.stages = [...dynamicStages, ...this.OPERATIONAL_STAGES];
-        if (!this.currentStep && this.stages.length > 0) this.currentStep = this.stages[0].value;
+        
+        // Cargar etapa actual desde la Oportunidad si es posible
+        if (!this.currentStep && this.stages.length > 0) {
+            this.currentStep = this.stages[0].value;
+        }
     }
 
     // --- LÓGICA DE ESTADOS (DROPDOWN) ---
@@ -129,6 +164,15 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     handleStatusChange(event) {
         this.currentStatus = event.detail.value;
+        
+        // Actualizar historial en memoria de inmediato para persistencia visual
+        const existingIdx = this.processHistory.findIndex(h => h.Etapa__c === this.currentStep && h.Subetapa__c === this.subPhase);
+        if (existingIdx !== -1) {
+            this.processHistory[existingIdx].Estado__c = this.currentStatus;
+        } else {
+            this.processHistory.push({ Etapa__c: this.currentStep, Subetapa__c: this.subPhase, Estado__c: this.currentStatus });
+        }
+        
         this.syncOpportunityStatus();
     }
 
@@ -136,7 +180,12 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     async syncOpportunityStatus() {
         if (!this.recordId || !this.currentStep) return;
 
-        // 1. Guardar en el Objeto de Seguimiento (Para Reportes y Dashboard de Cierre)
+        // Recuperar estatus del historial antes de sincronizar si currentStatus está vacío
+        if (!this.currentStatus) {
+            this.updateCurrentStatusFromHistory();
+        }
+
+        // 1. Guardar en el Objeto de Seguimiento
         if (this.subPhase && this.currentStatus) {
             try {
                 await saveStageTracking({

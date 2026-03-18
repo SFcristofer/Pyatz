@@ -34,15 +34,32 @@
 /* BUSCADOR DE PRODUCTOS ESTILO GOOGLE */
 .product-search-results {
     position: absolute;
-    z-index: 10000;
+    z-index: 1005; /* Ajustado para que viva dentro del modal pero sobre otros inputs */
     width: 100%;
-    background: white;
+    background: #ffffff !important;
     border: 1px solid var(--slate-200);
     border-radius: 8px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     max-height: 300px;
     overflow-y: auto;
     margin-top: 2px;
+}
+
+/* CORRECCIÓN DE SUPERPOSICIÓN EN MODALES */
+.slds-modal__content {
+    background-color: #ffffff !important;
+}
+
+.slds-modal__header {
+    background-color: #ffffff !important;
+}
+
+.slds-modal__footer {
+    background-color: #ffffff !important;
+}
+
+.slds-backdrop {
+    background-color: rgba(15, 23, 42, 0.8) !important; /* Slate-900 con 80% opacidad */
 }
 
 .product-result-item {
