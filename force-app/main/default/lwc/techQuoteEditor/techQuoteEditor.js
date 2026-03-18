@@ -78,8 +78,145 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track zonaInput = '';
     @track zonasAfectadas = [];
     @track showIndicaciones = false;
+
+    // --- ESTRUCTURA P&L COMPARATIVA (Año 1 y Año 2) ---
+    @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+    @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+
+    calculatePL(data) {
+        const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
+        const ind = venta * (data.indirecto / 100);
+        const com1 = venta * (data.comision1 / 100);
+        const com2 = venta * (data.comision2 / 100);
+        const reg = venta * (data.regalia / 100);
+        const fin = venta * 0.000611 * data.dias;
+
+        const utilidadBruta = venta - data.costo - ind - com1 - com2 - reg - fin;
+        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
+        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
+
+        const costoTotal = parseFloat(data.costo) + ind + com1 + com2 + reg + fin + isr + ru;
+        const margenDolares = venta - costoTotal;
+        const margenPct = venta > 0 ? (margenDolares / venta) * 100 : 0;
+
+        return {
+            venta: venta.toFixed(2),
+            ind: ind.toFixed(2),
+            com1: com1.toFixed(2),
+            com2: com2.toFixed(2),
+            reg: reg.toFixed(2),
+            fin: fin.toFixed(2),
+            isr: isr.toFixed(2),
+            ru: ru.toFixed(2),
+            costoTotal: costoTotal.toFixed(2),
+            resPesos: margenDolares.toFixed(2),
+            resPct: margenPct.toFixed(2)
+        };
+    }
+
+    get res1() { return this.calculatePL(this.pl1); }
+    get res2() { return this.calculatePL(this.pl2); }
+
+    handlePL1Change(event) {
+        const field = event.target.dataset.field;
+        this.pl1 = { ...this.pl1, [field]: parseFloat(event.target.value) || 0 };
+    }
+
+    handlePL2Change(event) {
+        const field = event.target.dataset.field;
+        this.pl2 = { ...this.pl2, [field]: parseFloat(event.target.value) || 0 };
+    }
+
+    handleDiscountTypeChange(event) {
+        this.discountType = event.target.value;
+        this.recalculateModalData();
+    }
+
+    handleSelectAllSedes(event) {
+        const checked = event.target.checked;
+        this.modalTableData = this.modalTableData.map(row => ({
+            ...row,
+            isSelected: checked,
+            isDisabled: !checked
+        }));
+        this.recalculateModalData();
+    }
+
+    get discountMontoVariant() { return this.discountType === 'monto' ? 'brand' : 'neutral'; }
+    get discountPercentVariant() { return this.discountType === 'porcentaje' ? 'brand' : 'neutral'; }
+
     @track modalSedeSearchTerm = '';
     
+    // --- ESTRUCTURA P&L COMPARATIVA (Año 1 y Año 2) ---
+    @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+    @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+    @track historicalPL = { current: 0, previous: 0 };
+
+    // Fórmulas de cálculo genéricas para P&L
+    calculatePL(data) {
+        const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
+        const ind = venta * (data.indirecto / 100);
+        const com1 = venta * (data.comision1 / 100);
+        const com2 = venta * (data.comision2 / 100);
+        const reg = venta * (data.regalia / 100);
+        const fin = venta * 0.000611 * data.dias;
+
+        const utilidadBruta = venta - data.costo - ind - com1 - com2 - reg - fin;
+        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
+        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
+
+        const costoTotal = parseFloat(data.costo) + ind + com1 + com2 + reg + fin + isr + ru;
+        const margenDolares = venta - costoTotal;
+        const margenPct = venta > 0 ? (margenDolares / venta) * 100 : 0;
+
+        return {
+            venta: venta.toFixed(2),
+            ind: ind.toFixed(2),
+            com1: com1.toFixed(2),
+            com2: com2.toFixed(2),
+            reg: reg.toFixed(2),
+            fin: fin.toFixed(2),
+            isr: isr.toFixed(2),
+            ru: ru.toFixed(2),
+            costoTotal: costoTotal.toFixed(2),
+            resPesos: margenDolares.toFixed(2),
+            resPct: margenPct.toFixed(2)
+        };
+    }
+
+    get res1() { return this.calculatePL(this.pl1); }
+    get res2() { return this.calculatePL(this.pl2); }
+
+    handlePL1Change(event) {
+        const field = event.target.dataset.field;
+        this.pl1 = { ...this.pl1, [field]: parseFloat(event.target.value) || 0 };
+    }
+
+    handlePL2Change(event) {
+        const field = event.target.dataset.field;
+        this.pl2 = { ...this.pl2, [field]: parseFloat(event.target.value) || 0 };
+    }
+
+    // --- MANEJADORES MODAL PARTIDAS ---
+    @track discountType = 'monto'; // 'monto' o 'porcentaje'
+    get discountMontoVariant() { return this.discountType === 'monto' ? 'brand' : 'neutral'; }
+    get discountPercentVariant() { return this.discountType === 'porcentaje' ? 'brand' : 'neutral'; }
+
+    handleDiscountTypeChange(event) {
+        this.discountType = event.target.value;
+        this.recalculateModalData();
+    }
+
+    handleSelectAllSedes(event) {
+        const checked = event.target.checked;
+        this.modalTableData = this.modalTableData.map(row => ({
+            ...row,
+            isSelected: checked,
+            isDisabled: !checked
+        }));
+        this.recalculateModalData();
+    }
+
     // --- CONFIGURACIÓN PDF ---
     @track showTotal = true;
     @track showTaxes = true;
@@ -371,7 +508,15 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.modalTableData = this.modalTableData.map(row => {
             let newRow = { ...row, importeTotal: this.selectedProductPrice };
             let base = this.isUnitario ? (newRow.importeTotal * newRow.cantidad) : newRow.importeTotal;
-            newRow.totalSinImpuestos = base - (newRow.descuento || 0);
+            
+            let finalDesc = 0;
+            if (this.discountType === 'porcentaje') {
+                finalDesc = base * (newRow.descuento / 100);
+            } else {
+                finalDesc = newRow.descuento || 0;
+            }
+
+            newRow.totalSinImpuestos = base - finalDesc;
             return newRow;
         });
     }

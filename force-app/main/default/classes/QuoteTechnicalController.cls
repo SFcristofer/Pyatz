@@ -845,6 +845,25 @@ public with sharing class QuoteTechnicalController {
         }
     }
 
+    @Appropriate
+    public static Map<String, Decimal> getHistoricalPL(Id quoteId) {
+        Map<String, Decimal> history = new Map<String, Decimal>{ 'current' => 0, 'previous' => 0 };
+        try {
+            Quote q = [SELECT AccountId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            Id accId = q.AccountId;
+            Integer currentYear = Date.today().year();
+            
+            // Año Actual (Facturación Ganada)
+            AggregateResult curr = [SELECT SUM(Amount) total FROM Opportunity WHERE AccountId = :accId AND IsWon = true AND CALENDAR_YEAR(CloseDate) = :currentYear];
+            history.put('current', (Decimal)curr.get('total') != null ? (Decimal)curr.get('total') : 0);
+            
+            // Año Anterior
+            AggregateResult prev = [SELECT SUM(Amount) total FROM Opportunity WHERE AccountId = :accId AND IsWon = true AND CALENDAR_YEAR(CloseDate) = :(currentYear - 1)];
+            history.put('previous', (Decimal)prev.get('total') != null ? (Decimal)prev.get('total') : 0);
+        } catch (Exception e) {}
+        return history;
+    }
+
     @AuraEnabled
     public static Id cloneQuote(Id quoteId, Map<String, Object> options, Id targetSedeId, Id targetProspectoId) {
         try {

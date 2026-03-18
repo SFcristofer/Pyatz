@@ -372,11 +372,21 @@
                                     <table class="slds-table slds-table_bordered">
                                         <thead>
                                             <tr>
-                                                <th style="width: 3rem;"></th>
+                                                <th style="width: 3rem;"><lightning-input type="checkbox" onchange={handleSelectAllSedes}></lightning-input></th>
                                                 <th>Sede</th>
                                                 <th style="width: 80px;">Cant.</th>
                                                 <th style="width: 140px;">Importe</th>
-                                                <template if:true={showDiscountColumn}><th style="width: 100px;">Desc. ($)</th></template>
+                                                <template if:true={showDiscountColumn}>
+                                                    <th style="width: 160px;">
+                                                        <div class="slds-grid slds-grid_vertical-align-center">
+                                                            <span class="slds-m-right_xx-small">Desc.</span>
+                                                            <lightning-button-group>
+                                                                <lightning-button label="$" variant={discountMontoVariant} onclick={handleDiscountTypeChange} value="monto" size="subatomic"></lightning-button>
+                                                                <lightning-button label="%" variant={discountPercentVariant} onclick={handleDiscountTypeChange} value="porcentaje" size="subatomic"></lightning-button>
+                                                            </lightning-button-group>
+                                                        </div>
+                                                    </th>
+                                                </template>
                                                 <th style="width: 140px; text-align: right;">Total</th>
                                             </tr>
                                         </thead>
@@ -437,14 +447,115 @@
         <!-- MODAL P&L -->
         <template if:true={showPLModal}>
             <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header"><h2>Análisis de Rentabilidad (P&L)</h2></header>
-                    <div class="slds-modal__content slds-p-around_medium">
-                        <div class="slds-grid slds-wrap slds-gutters">
-                            <div class="slds-col slds-size_1-of-3"><div class="slds-box slds-theme_shade"><p class="slds-text-title_bold">Margen Bruto</p><h3 class="slds-text-heading_large">25%</h3></div></div>
-                            <div class="slds-col slds-size_1-of-3"><div class="slds-box slds-theme_shade"><p class="slds-text-title_bold">Costo Total</p><h3 class="slds-text-heading_large">$0.00</h3></div></div>
-                            <div class="slds-col slds-size_1-of-3"><div class="slds-box slds-theme_shade"><p class="slds-text-title_bold">Utilidad</p><h3 class="slds-text-heading_large">$0.00</h3></div></div>
-                        </div>
+                <div class="slds-modal__container" style="max-width: 90%; width: 950px;">
+                    <header class="slds-modal__header bg-blue-dark text-white">
+                        <h2 class="slds-text-heading_medium">Dashboard de Análisis de Rentabilidad</h2>
+                        <p class="slds-text-title">Comparativa de Operación: Año 1 vs Año 2</p>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_none">
+                        <table class="pl-table slds-table slds-table_bordered">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left; padding-left: 20px;">CONCEPTO / INDICADOR</th>
+                                    <th style="text-align: center;">SERV / AÑO 1</th>
+                                    <th style="text-align: center;">SERV / AÑO 2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- GRUPO 1: ENTRADAS -->
+                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
+                                    <td colspan="3" class="slds-p-around_x-small">1. CAMPOS DE CAPTURA (DATOS DE ENTRADA)</td>
+                                </tr>
+                                <tr>
+                                    <td>COSTO DIRECTO (Materiales + MO)</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.costo} data-field="costo" onchange={handlePL1Change} formatter="currency" step="0.01"></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.costo} data-field="costo" onchange={handlePL2Change} formatter="currency" step="0.01"></lightning-input></td>
+                                </tr>
+                                <tr>
+                                    <td>MARGEN ESPERADO (%)</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.margen} data-field="margen" onchange={handlePL1Change} step="0.01"></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.margen} data-field="margen" onchange={handlePL2Change} step="0.01"></lightning-input></td>
+                                </tr>
+                                <tr style="background: #eef4ff;">
+                                    <td class="slds-font-weight_bold">PRECIO DE VENTA SUGERIDO</td>
+                                    <td class="slds-text-align_right slds-p-around_small" style="color: #0070d2; font-size: 1.1rem; font-weight: bold;">${res1.venta}</td>
+                                    <td class="slds-text-align_right slds-p-around_small" style="color: #0070d2; font-size: 1.1rem; font-weight: bold;">${res2.venta}</td>
+                                </tr>
+
+                                <!-- GRUPO 2: GASTOS -->
+                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
+                                    <td colspan="3" class="slds-p-around_x-small">2. GASTOS OPERATIVOS E INDIRECTOS</td>
+                                </tr>
+                                <tr>
+                                    <td>Indirecto (15%)</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.ind}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.ind}</td>
+                                </tr>
+                                <tr>
+                                    <td>Comisión Comercial (2%)</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.com1}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.com1}</td>
+                                </tr>
+                                <tr>
+                                    <td>Comisión 2 (%)</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.comision2} data-field="comision2" onchange={handlePL1Change} step="0.01"></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.comision2} data-field="comision2" onchange={handlePL2Change} step="0.01"></lightning-input></td>
+                                </tr>
+                                <tr style="background: #f9f9f9;">
+                                    <td>Monto Comisión 2</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.com2}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.com2}</td>
+                                </tr>
+                                <tr>
+                                    <td>Regalía Franquicia (5%)</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.reg}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.reg}</td>
+                                </tr>
+                                <tr>
+                                    <td>Días de Financiamiento</td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.dias} data-field="dias" onchange={handlePL1Change}></lightning-input></td>
+                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.dias} data-field="dias" onchange={handlePL2Change}></lightning-input></td>
+                                </tr>
+                                <tr style="background: #f9f9f9;">
+                                    <td>Costo Financiamiento</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.fin}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.fin}</td>
+                                </tr>
+
+                                <!-- GRUPO 3: IMPUESTOS -->
+                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
+                                    <td colspan="3" class="slds-p-around_x-small">3. IMPUESTOS (BASADOS EN UTILIDAD BRUTA)</td>
+                                </tr>
+                                <tr>
+                                    <td>ISR (6% s/Utilidad)</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.isr}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.isr}</td>
+                                </tr>
+                                <tr>
+                                    <td>RU (5% s/Utilidad)</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res1.ru}</td>
+                                    <td class="slds-text-align_right slds-p-around_small">${res2.ru}</td>
+                                </tr>
+
+                                <!-- TOTALES FINALES -->
+                                <tr style="background: #333; color: white;">
+                                    <td class="slds-font-weight_bold" style="font-size: 1rem;">COSTO TOTAL DE OPERACIÓN</td>
+                                    <td class="slds-text-align_right slds-p-around_small" style="font-size: 1rem;">${res1.costoTotal}</td>
+                                    <td class="slds-text-align_right slds-p-around_small" style="font-size: 1rem;">${res2.costoTotal}</td>
+                                </tr>
+                                <tr style="background: #d4edda;">
+                                    <td class="slds-text-heading_small slds-font-weight_bold">UTILIDAD NETA FINAL (Margen Real)</td>
+                                    <td class="slds-text-align_right slds-p-around_small">
+                                        <span style="font-size: 1.2rem; font-weight: bold; color: #155724;">${res1.resPesos}</span>
+                                        <div class="slds-text-title_bold slds-text-color_weak">{res1.resPct}%</div>
+                                    </td>
+                                    <td class="slds-text-align_right slds-p-around_small">
+                                        <span style="font-size: 1.2rem; font-weight: bold; color: #155724;">${res2.resPesos}</span>
+                                        <div class="slds-text-title_bold slds-text-color_weak">{res2.resPct}%</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <footer class="slds-modal__footer"><lightning-button label="Cerrar" onclick={handleClosePLModal}></lightning-button></footer>
                 </div>
