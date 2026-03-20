@@ -7,6 +7,7 @@ import { NavigationMixin } from 'lightning/navigation';
 export default class TechWorkOrderConsole extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
     @api quoteId;  // Quote ID específico
+    @api serviceContractId; // ID del contrato formal nativo
     
     @track isLoading = true;
     @track isSaving = false;
@@ -45,9 +46,14 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         { label: 'Técnico 2 - María López', value: 't2' }
     ];
 
-    @wire(getInitialWorkOrderData, { oppId: '$recordId', quoteId: '$quoteId' })
+    @wire(getInitialWorkOrderData, { oppId: '$recordId', quoteId: '$quoteId', serviceContractId: '$serviceContractId' })
     wiredData({ error, data }) {
         if (data) {
+            // GUARDIA: Solo procesar si es un contrato nuevo o si el ID ha cambiado
+            if (this.oppId === data.oppId && this.sedesList.length > 0) {
+                return; 
+            }
+
             this.contractFolio = data.folio;
             this.accountId = data.accountId;
             this.oppId = data.oppId;

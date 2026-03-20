@@ -17,12 +17,11 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
     @track noteTitle = '';
     @track noteContent = '';
 
-    // --- CONFIGURACIÓN ARCHIVOS ---
-    get acceptedFormats() {
-        return ['.pdf', '.png', '.jpg', '.jpeg', '.docx', '.xlsx'];
+    connectedCallback() {
+        this.loadHistory();
     }
 
-    // --- MANEJADORES DE NOTAS ---
+    // --- MANEJADORES DE ARCHIVOS ---
     handleNoteTitleChange(event) { this.noteTitle = event.detail.value; }
     handleNoteContentChange(event) { this.noteContent = event.detail.value; }
     

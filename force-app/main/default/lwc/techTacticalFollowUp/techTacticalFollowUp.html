@@ -1,19 +1,11 @@
 <template>
     <div class="tactical-container">
         <!-- INTERRUPTOR DE HISTORIAL (FUERA DEL CUADRO) -->
-        <div class="slds-m-bottom_medium slds-p-horizontal_small slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+        <div class="slds-m-bottom_medium slds-p-horizontal_small slds-grid slds-grid_vertical-align-center">
             <div class="slds-grid slds-grid_vertical-align-center">
                 <lightning-icon icon-name="standard:follow" size="small" class="slds-m-right_small"></lightning-icon>
-                <h2 class="slds-text-heading_small slds-font-weight_bold">Gestión Táctica de Seguimiento</h2>
+                <h2 class="slds-text-heading_small slds-font-weight_bold">Gestión de Seguimiento</h2>
             </div>
-            <lightning-input 
-                type="toggle" 
-                label="Desplegar Historial de Auditoría" 
-                checked={showFullHistory} 
-                onchange={handleToggleHistory}
-                message-toggle-active="Historial Abierto" 
-                message-toggle-inactive="Historial Oculto">
-            </lightning-input>
         </div>
 
         <!-- EL CUADRO PROFESIONAL (TABSET SCOPED) -->
@@ -77,9 +69,8 @@
             </lightning-tabset>
         </div>
 
-        <!-- SECCIÓN HISTORIAL (SOLO SI EL CHECK ESTÁ ACTIVO) -->
-        <template if:true={showFullHistory}>
-            <div class="timeline-container slds-m-top_medium slds-p-around_medium bg-timeline border-top">
+        <!-- SECCIÓN HISTORIAL (PERMANENTE) -->
+        <div class="timeline-container slds-m-top_medium slds-p-around_medium bg-timeline border-top">
                 <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
                     <h3 class="slds-text-title_bold" style="color: #0070d2;">Línea de Tiempo Consolidada (360°)</h3>
                     <lightning-button-icon icon-name="utility:refresh" variant="bare" onclick={refreshHistory}></lightning-button-icon>
@@ -120,7 +111,6 @@
                     </template>
                 </template>
             </div>
-        </template>
 
         <!-- GUÍA DE CIERRE (PIE DE PÁGINA) -->
         <div class="slds-m-top_medium slds-p-around_small bg-info border-all radius-8">

@@ -200,12 +200,12 @@
 
                 <!-- MÓDULO: CONTRATO -->
                 <template if:true={isContratoPhase}>
-                    <c-tech-contract-manager record-id={recordId}></c-tech-contract-manager>
+                    <c-tech-contract-manager record-id={recordId} oncontractgenerated={handleContractGenerated}></c-tech-contract-manager>
                 </template>
 
                 <!-- MÓDULO: CREACIÓN ODT'S -->
                 <template if:true={isWorkOrderPhase}>
-                    <c-tech-work-order-console record-id={recordId}></c-tech-work-order-console>
+                    <c-tech-work-order-console record-id={recordId} quote-id={selectedQuoteId} service-contract-id={selectedContractId}></c-tech-work-order-console>
                 </template>
 
                 <!-- MÓDULO: RESUMEN DE EJECUCIÓN (CIERRE - AUTORIZACIÓN) -->

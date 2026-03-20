@@ -306,17 +306,46 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     }
 
     handleSaveDraft() {
+        if (!this.selectedQuoteId) return;
+
         const data = {
+            fechaInicioContrato: this.fechaInicioContrato,
             fechaVencimiento: this.fechaFinContrato,
+            fechaPrimerServicio: this.fechaPrimerServicio,
+            fechaLimiteServicio: this.fechaLimiteServicio,
             introduccion: this.introduccionPresupuesto,
-            observaciones: this.observacionesPrivadas,
-            status: 'In Review'
+            observaciones: this.observacionesRenovacion, // Mapeado a SpecialTerms
+            observacionesPrivadas: this.observacionesPrivadas,
+            contenidoLegal: this.contenidoLegal,
+            status: 'In Review',
+            creatorId: this.selectedCreator.id,
+            managerId: this.selectedManager.id,
+            clientSignerId: this.selectedClientSigner,
+            lineItemsJson: JSON.stringify(this.quoteLineItems) // ENVIAMOS TODA LA MATERIALIDAD EDITADA
         };
+
+        this.isLoading = true;
         saveContractData({ quoteId: this.selectedQuoteId, contractData: data })
-            .then(() => {
-                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Borrador de contrato guardado.', variant: 'success' }));
+            .then(scId => {
+                this.isLoading = false;
+                this.dispatchEvent(new ShowToastEvent({ 
+                    title: 'Éxito', 
+                    message: 'Contrato de Servicio generado y guardado en Salesforce.', 
+                    variant: 'success' 
+                }));
+                
+                // NOTIFICAR AL DASHBOARD DEL NUEVO CONTRATO
+                this.dispatchEvent(new CustomEvent('contractgenerated', { detail: scId }));
             })
-            .catch(error => console.error('Error guardando borrador:', error));
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error guardando contrato:', error);
+                this.dispatchEvent(new ShowToastEvent({ 
+                    title: 'Error', 
+                    message: error.body.message, 
+                    variant: 'error' 
+                }));
+            });
     }
 
     handleGenerateContract() {

@@ -51,6 +51,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track processHistory = []; // Almacenará los estados de todas las subetapas
     @track quoteViewMode = 'list';
     @track selectedQuoteId = null;
+    @track selectedContractId = null; // Nueva propiedad para seguimiento de contrato formal
 
     OPERATIONAL_STAGES = [
         {
@@ -305,6 +306,12 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleEditQuote(event) { this.selectedQuoteId = event.detail; this.quoteViewMode = 'edit'; }
     handleCreateNewQuote() { this.selectedQuoteId = null; this.quoteViewMode = 'edit'; }
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
+
+    // MANEJADOR DE CONTRATO GENERADO
+    handleContractGenerated(event) {
+        this.selectedContractId = event.detail;
+        console.log('Contrato capturado en Dashboard:', this.selectedContractId);
+    }
 
     get isFirstStep() { return this.isDefinicion && this.currentSubStep === '1'; }
     get isLastStep() { 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Service_Limit_Date__c</fullName>
+    <description>Fecha límite establecida para la prestación de los servicios contratados.</description>
+    <externalId>false</externalId>
+    <label>Fecha Límite Servicio</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Date</type>
+</CustomField>
