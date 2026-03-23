@@ -208,6 +208,11 @@
                     <c-tech-work-order-console record-id={recordId} quote-id={selectedQuoteId} service-contract-id={selectedContractId}></c-tech-work-order-console>
                 </template>
 
+                <!-- MÓDULO: ENHORABUENA (COMUNICACIÓN OFICIAL) -->
+                <template if:true={isEnhorabuenaPhase}>
+                    <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
+                </template>
+
                 <!-- MÓDULO: RESUMEN DE EJECUCIÓN (CIERRE - AUTORIZACIÓN) -->
                 <template if:true={isAutorizacionPhase}>
                     <c-tech-process-summary record-id={recordId}></c-tech-process-summary>
