@@ -280,6 +280,17 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get isWorkOrderPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '3'; }
     get isEnhorabuenaPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '4'; }
 
+    // --- LÓGICA DE CONTROL VISUAL ---
+    get showGenericPlaceholder() {
+        return !(
+            this.isLevantamientoPhase || this.isMemoriaPhase || this.isDefSolucionPhase || 
+            this.isPresupuestoPhase || this.isEnvioPhase || this.isSeguimientoPhase || 
+            this.isContratoPhase || this.isWorkOrderPhase || this.isEnhorabuenaPhase || 
+            this.isAutorizacionPhase || this.isAltaCliente || this.isAltaPyatz || 
+            this.isCalendarioPhase
+        );
+    }
+
     handleLogCall() { this.navigateToGlobalAction('LogACall'); }
     handleNewTask() { this.navigateToGlobalAction('NewTask'); }
 
