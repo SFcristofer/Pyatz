@@ -375,6 +375,14 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     async handleNext() {
+        // 1. Validar Estado Obligatorio
+        const statusCombo = this.template.querySelector('.status-combobox');
+        if (statusCombo && !statusCombo.checkValidity()) {
+            statusCombo.reportValidity();
+            return;
+        }
+
+        // 2. Validar Guardado de Levantamiento (Si aplica)
         if (this.isLevantamientoPhase) {
             const surveyComp = this.template.querySelector('c-tech-levantamiento-manager');
             if (surveyComp) {

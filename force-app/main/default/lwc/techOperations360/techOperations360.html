@@ -133,18 +133,6 @@
                             </template>
                         </lightning-progress-indicator>
                     </div>
-                    <!-- Selector de Estado (Compacto) -->
-                    <div class="slds-col slds-no-flex slds-p-horizontal_medium status-container">
-                        <lightning-combobox
-                            label="Estado"
-                            placeholder="Estado..."
-                            value={currentStatus}
-                            options={statusOptions}
-                            onchange={handleStatusChange}
-                            variant="label-hidden"
-                            class="status-dropdown">
-                        </lightning-combobox>
-                    </div>
                 </div>
             </div>
 
@@ -253,9 +241,25 @@
             </div>
 
             <!-- ACCIONES DE NAVEGACIÓN -->
-            <div class="slds-m-top_medium slds-grid slds-grid_align-spread">
+            <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
                 <lightning-button label="Anterior" variant="neutral" icon-name="utility:back" onclick={handlePrev} disabled={isFirstStep}></lightning-button>
-                <lightning-button label="Guardar y Continuar" variant="brand" icon-name="utility:forward" icon-position="right" onclick={handleNext} disabled={isLastStep}></lightning-button>
+                
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <!-- Selector de Estado Reubicado -->
+                    <div class="slds-m-right_medium" style="width: 250px;">
+                        <lightning-combobox
+                            label="Estado de Sub-etapa"
+                            placeholder="Definir Estado..."
+                            value={currentStatus}
+                            options={statusOptions}
+                            onchange={handleStatusChange}
+                            variant="label-hidden"
+                            class="status-combobox"
+                            required>
+                        </lightning-combobox>
+                    </div>
+                    <lightning-button label="Guardar y Continuar" variant="brand" icon-name="utility:forward" icon-position="right" onclick={handleNext} disabled={isLastStep}></lightning-button>
+                </div>
             </div>
 
         </div>
