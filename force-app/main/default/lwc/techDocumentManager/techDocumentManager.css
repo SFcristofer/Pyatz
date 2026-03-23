@@ -108,6 +108,26 @@
     --slds-c-button-icon-color-foreground: #ea001e;
 }
 
+.doc-row.completed.enterprise {
+    background: #f0f7ff;
+    border-color: #0176d3;
+    border-left: 4px solid #0176d3;
+}
+
+.custom-badge.enterprise {
+    background: #0176d3;
+    color: white;
+}
+
+.enterprise .doc-label {
+    color: #0176d3;
+}
+
+.enterprise .upload-button-styled :dangerous-internal-shadow-root .slds-file-selector__button {
+    background: #0176d3 !important;
+    border-color: #0176d3 !important;
+}
+
 /* Progress Bar */
 .custom-progress {
     --slds-c-progress-bar-color-foreground: #0176d3;

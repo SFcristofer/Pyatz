@@ -19,11 +19,34 @@
             <lightning-progress-bar value={completedPercentage} size="medium" variant="circular" class="custom-progress"></lightning-progress-bar>
         </div>
         
+        <!-- BUSCADOR DINÁMICO -->
+        <div class="search-section slds-m-bottom_large slds-grid slds-grid_vertical-align-end slds-gutters_small">
+            <div class="slds-col slds-size_2-of-3">
+                <lightning-input 
+                    type="text" 
+                    label="Declarar nuevo documento (ej: ACTA, RFC, CONTRATO)" 
+                    placeholder="Escriba el nombre del documento..." 
+                    value={newTagInput}
+                    onchange={handleTagInputChange}>
+                </lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-button 
+                    variant="brand" 
+                    label="Añadir a Expediente" 
+                    icon-name="utility:add" 
+                    onclick={handleAddTag}
+                    class="slds-m-left_x-small"
+                    style="width: 100%;">
+                </lightning-button>
+            </div>
+        </div>
+        
         <div class="slds-grid slds-wrap slds-gutters_large">
-            <!-- Columna Izquierda -->
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                <template for:each={leftColumn} for:item="doc">
-                    <div key={doc.key} class={doc.containerClass}>
+            <!-- LISTA DINÁMICA DE CARDS -->
+            <template for:each={documents} for:item="doc">
+                <div key={doc.key} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <div class={doc.containerClass}>
                         <div class="slds-grid slds-grid_vertical-align-center">
                             <div class="slds-m-right_small">
                                 <lightning-icon 
@@ -71,61 +94,8 @@
                             </div>
                         </div>
                     </div>
-                </template>
-            </div>
-
-            <!-- Columna Derecha -->
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                <template for:each={rightColumn} for:item="doc">
-                    <div key={doc.key} class={doc.containerClass}>
-                        <div class="slds-grid slds-grid_vertical-align-center">
-                            <div class="slds-m-right_small">
-                                <lightning-icon 
-                                    icon-name={doc.statusIcon} 
-                                    size="small" 
-                                    variant={doc.statusVariant}>
-                                </lightning-icon>
-                            </div>
-                            <div class="slds-col slds-grow">
-                                <span class="doc-label">{doc.label}</span>
-                                <span class={doc.badgeClass}>{doc.statusLabel}</span>
-                            </div>
-                            <div class="actions slds-grid slds-grid_vertical-align-center">
-                                <template if:true={doc.isCompleted}>
-                                    <lightning-button-icon 
-                                        icon-name="utility:preview" 
-                                        variant="border-filled"
-                                        onclick={handlePreview}
-                                        data-id={doc.value}
-                                        class="slds-m-right_xx-small"
-                                        tooltip="Previsualizar">
-                                    </lightning-button-icon>
-                                    <lightning-button-icon 
-                                        icon-name="utility:delete" 
-                                        variant="border-filled"
-                                        onclick={handleDelete}
-                                        data-id={doc.value}
-                                        data-label={doc.label}
-                                        class="slds-m-right_x-small btn-delete"
-                                        tooltip="Eliminar">
-                                    </lightning-button-icon>
-                                </template>
-
-                                <lightning-file-upload
-                                    label=""
-                                    name="fileUploader"
-                                    accept=".pdf,.png,.jpg,.jpeg"
-                                    record-id={recordId}
-                                    onuploadfinished={handleUploadFinished}
-                                    data-key={doc.key}
-                                    class="upload-button-styled"
-                                    variant="label-hidden">
-                                </lightning-file-upload>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
+                </div>
+            </template>
         </div>
     </div>
 </template>

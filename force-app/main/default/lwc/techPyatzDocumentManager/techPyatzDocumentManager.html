@@ -1,0 +1,75 @@
+<template>
+    <div class="premium-container slds-p-around_large">
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Enviando..." size="medium" variant="brand"></lightning-spinner>
+        </template>
+
+        <!-- HEADER -->
+        <div class="header-section slds-m-bottom_x-large">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-end slds-m-bottom_small">
+                <div>
+                    <h2 class="main-title">Expediente Maestro de Pyatz</h2>
+                    <p class="sub-title">Documentación legal para entrega a clientes</p>
+                </div>
+                <div class="progress-stats">
+                    <lightning-button 
+                        variant="brand" 
+                        label="Enviar Expediente al Cliente" 
+                        icon-name="utility:email" 
+                        onclick={handleSendAll}>
+                    </lightning-button>
+                </div>
+            </div>
+            <div class="slds-box slds-theme_shade slds-m-top_small">
+                <p class="slds-text-body_small">
+                    <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                    Estos documentos son los oficiales de Pyatz y se adjuntarán automáticamente al expediente del cliente al ser enviados.
+                </p>
+            </div>
+        </div>
+        
+        <div class="slds-grid slds-wrap slds-gutters_large">
+            <template for:each={documents} for:item="doc">
+                <div key={doc.key} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <div class={doc.containerClass}>
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <div class="slds-m-right_small">
+                                <lightning-icon 
+                                    icon-name="standard:reward" 
+                                    size="small">
+                                </lightning-icon>
+                            </div>
+                            <div class="slds-col slds-grow">
+                                <span class="doc-label">{doc.label}</span>
+                                <span class="custom-badge pyatz">{doc.statusLabel}</span>
+                            </div>
+                            <div class="actions slds-grid slds-grid_vertical-align-center">
+                                <template if:true={doc.isCompleted}>
+                                    <lightning-button-icon 
+                                        icon-name="utility:preview" 
+                                        variant="border-filled"
+                                        onclick={handlePreview}
+                                        data-id={doc.value}
+                                        class="slds-m-right_x-small"
+                                        tooltip="Previsualizar Documento Maestro">
+                                    </lightning-button-icon>
+                                </template>
+                                
+                                <lightning-file-upload
+                                    label=""
+                                    name="fileUploader"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    record-id={recordId}
+                                    onuploadfinished={handleUploadFinished}
+                                    data-key={doc.key}
+                                    class="upload-button-pyatz"
+                                    variant="label-hidden">
+                                </lightning-file-upload>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

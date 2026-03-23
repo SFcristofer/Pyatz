@@ -10,44 +10,81 @@ import { refreshApex } from '@salesforce/apex';
 export default class TechDocumentManager extends NavigationMixin(LightningElement) {
     @api recordId;
     @track isLoading = false;
+    @track newTagInput = '';
     wiredDocumentResult;
 
-    @track documents = [
-        { key: 'INE', label: 'INE (Identificación)', value: null, column: 'left' },
-        { key: 'CURP', label: 'CURP Certificada', value: null, column: 'left' },
-        { key: 'CSF', label: 'Const. Situación Fiscal', value: null, column: 'left' },
-        { key: 'IMSS', label: 'Alta IMSS / Registro Patronal', value: null, column: 'left' },
-        { key: 'VIGENCIA', label: 'Vigencia de Derechos', value: null, column: 'left' },
-        { key: 'DC3_ALTURAS', label: 'DC-3 Alturas (NOM-009)', value: null, column: 'right' },
-        { key: 'DC3_CONFINADOS', label: 'DC-3 Espacios Confinados', value: null, column: 'right' },
-        { key: 'DC3_QUIMICOS', label: 'DC-3 Manejo de Químicos', value: null, column: 'right' },
-        { key: 'DC3_EXT1', label: 'DC-3 Especialidad A', value: null, column: 'right' },
-        { key: 'DC3_EXT2', label: 'DC-3 Especialidad B', value: null, column: 'right' }
-    ];
+    @track documents = []; // LISTA DINÁMICA
 
     @wire(getDocumentStates, { opportunityId: '$recordId' })
     wiredStates(result) {
         this.wiredDocumentResult = result;
         if (result.data) {
             this.updateLocalStates(result.data);
+        } else if (result.error) {
+            console.error('Error recuperando expediente:', result.error);
         }
     }
 
+    handleTagInputChange(event) {
+        this.newTagInput = event.target.value.toUpperCase();
+    }
+
+    handleAddTag() {
+        if (!this.newTagInput) return;
+        
+        // Verificar si ya existe en la lista
+        const exists = this.documents.find(d => d.key === this.newTagInput);
+        if (exists) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Aviso', message: 'Esta etiqueta ya está en la lista', variant: 'info' }));
+            return;
+        }
+
+        // Añadir card vacía
+        const newDoc = {
+            key: this.newTagInput,
+            label: this.newTagInput,
+            value: null,
+            isCompleted: false,
+            isEnterprise: this.checkIsEnterprise(this.newTagInput),
+            containerClass: 'doc-row pending dynamic-add',
+            statusIcon: 'action:priority',
+            statusVariant: 'inverse',
+            statusLabel: 'ESPERANDO ARCHIVO',
+            badgeClass: 'custom-badge pending'
+        };
+
+        this.documents = [newDoc, ...this.documents];
+        this.newTagInput = '';
+    }
+
+    checkIsEnterprise(tag) {
+        return ['INE', 'CURP', 'CSF', 'IMSS', 'VIGENCIA', 'ACTA', 'RFC'].includes(tag);
+    }
+
     updateLocalStates(data) {
-        this.documents = this.documents.map(doc => {
-            const docId = data[doc.key];
-            const isDone = docId != null;
-            return { 
-                ...doc, 
+        // 1. Transformar lo que viene de Salesforce en nuestro formato de cards
+        const existingDocs = Object.keys(data).map(tag => {
+            const isEnterpriseDoc = this.checkIsEnterprise(tag);
+            const docId = data[tag];
+            return {
+                key: tag,
+                label: tag,
                 value: docId,
-                isCompleted: isDone,
-                containerClass: isDone ? 'doc-row completed' : 'doc-row pending',
-                statusIcon: isDone ? 'action:approval' : 'action:priority',
-                statusVariant: isDone ? 'success' : 'inverse',
-                statusLabel: isDone ? 'CARGADO' : 'PENDIENTE',
-                badgeClass: isDone ? 'custom-badge success' : 'custom-badge pending'
+                isCompleted: true,
+                isEnterprise: isEnterpriseDoc,
+                containerClass: isEnterpriseDoc ? 'doc-row completed enterprise' : 'doc-row completed',
+                statusIcon: isEnterpriseDoc ? 'standard:account' : 'action:approval',
+                statusVariant: 'success',
+                statusLabel: isEnterpriseDoc ? 'PERFIL CLIENTE' : 'EXPEDIENTE OK',
+                badgeClass: isEnterpriseDoc ? 'custom-badge enterprise' : 'custom-badge success'
             };
         });
+
+        // 2. Mezclar con lo que el usuario haya añadido manualmente pero que aún no tiene archivo
+        const pendingDocs = this.documents.filter(d => !d.isCompleted && !data[d.key]);
+        
+        // 3. Ordenar: Primero los completados, luego los pendientes
+        this.documents = [...existingDocs, ...pendingDocs];
     }
 
     get completedCount() { return this.documents.filter(d => d.isCompleted).length; }

@@ -95,6 +95,51 @@
                             <div class="slds-m-top_x-small slds-text-body_small slds-text-color_weak italic">
                                 {item.desc}
                             </div>
+
+                            <!-- GESTIÓN DE TAREA (Solo para Actividades) -->
+                            <template if:true={item.isTask}>
+                                <div class="slds-m-top_small slds-border_top slds-p-top_small">
+                                    <template if:false={item.isEditing}>
+                                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                            <span class="slds-badge slds-theme_inverse">{item.status}</span>
+                                            <lightning-button-icon 
+                                                icon-name="utility:edit" 
+                                                variant="bare" 
+                                                alternative-text="Gestionar Tarea" 
+                                                title="Gestionar Tarea"
+                                                data-id={item.id}
+                                                onclick={handleEditTask}>
+                                            </lightning-button-icon>
+                                        </div>
+                                    </template>
+                                    
+                                    <template if:true={item.isEditing}>
+                                        <div class="slds-box slds-theme_shade slds-m-top_x-small">
+                                            <div class="slds-grid slds-gutters slds-m-bottom_x-small">
+                                                <div class="slds-col slds-size_1-of-1">
+                                                    <lightning-combobox
+                                                        label="Nuevo Estado"
+                                                        value={item.status}
+                                                        options={statusOptions}
+                                                        data-id={item.id}
+                                                        onchange={handleStatusChange}>
+                                                    </lightning-combobox>
+                                                </div>
+                                            </div>
+                                            <lightning-textarea 
+                                                label="Añadir Observación de Seguimiento" 
+                                                placeholder="Ej: El cliente solicitó reagendar..."
+                                                data-id={item.id}
+                                                onchange={handleObsTaskChange}>
+                                            </lightning-textarea>
+                                            <div class="slds-m-top_small slds-grid slds-grid_align-end">
+                                                <lightning-button label="Cancelar" variant="neutral" onclick={handleCancelEdit} class="slds-m-right_x-small"></lightning-button>
+                                                <lightning-button label="Guardar Avance" variant="brand" data-id={item.id} onclick={handleSaveTaskUpdate}></lightning-button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
                             
                             <!-- NUEVO: Previsualización de Imagen si aplica -->
                             <template if:true={item.previewUrl}>

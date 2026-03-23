@@ -2,6 +2,13 @@
     <div class="slds-box slds-theme_default slds-m-bottom_medium summary-card">
         <div class="slds-grid slds-grid_align-spread slds-m-bottom_small slds-p-horizontal_small slds-grid_vertical-align-end">
             <div class="slds-grid slds-grid_vertical-align-center">
+                <lightning-button-icon
+                    icon-name={toggleIcon}
+                    variant="border-filled"
+                    onclick={handleToggleVisibility}
+                    tooltip={toggleTooltip}
+                    class="slds-m-right_small">
+                </lightning-button-icon>
                 <lightning-icon icon-name="standard:answer_best" size="small" class="slds-m-right_small"></lightning-icon>
                 <div>
                     <h3 class="slds-text-heading_small header-title">
@@ -37,41 +44,115 @@
             </div>
         </div>
         
-        <div class="table-container">
-            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-no-row-hover custom-table">
-                <thead>
-                    <tr class="slds-line-height_reset">
-                        <th scope="col" style="width: 20%;"><div class="slds-truncate" title="Etapa Macro">ETAPA MACRO</div></th>
-                        <th scope="col" style="width: 30%;"><div class="slds-truncate" title="Punto de Control">SUB-ETAPA</div></th>
-                        <th scope="col" style="width: 20%; text-align: center;"><div class="slds-truncate" title="Estatus">ESTATUS</div></th>
-                        <th scope="col" style="width: 15%; text-align: center;"><div class="slds-truncate" title="Antigüedad">ANTIGÜEDAD</div></th>
-                        <th scope="col" style="width: 15%;"><div class="slds-truncate" title="Última Act.">FECHA</div></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template for:each={processedData} for:item="row">
-                        <tr key={row.subStage} class="slds-hint-parent">
-                            <td>
-                                <div class="stage-label">{row.stage}</div>
-                            </td>
-                            <td>
-                                <div class="slds-truncate substage-text">{row.subStage}</div>
-                            </td>
-                            <td style="text-align: center;">
-                                <span class={row.statusClass}>
-                                    {row.status}
-                                </span>
-                            </td>
-                            <td style="text-align: center;">
-                                <div class={row.agingClass}>{row.aging}</div>
-                            </td>
-                            <td>
-                                <div class="slds-text-color_weak date-text">{row.lastUpdate}</div>
-                            </td>
+        <template if:true={isExpanded}>
+            <div class="table-container">
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-no-row-hover custom-table">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" style="width: 20%;"><div class="slds-truncate" title="Etapa Macro">ETAPA MACRO</div></th>
+                            <th scope="col" style="width: 30%;"><div class="slds-truncate" title="Punto de Control">SUB-ETAPA</div></th>
+                            <th scope="col" style="width: 20%; text-align: center;"><div class="slds-truncate" title="Estatus">ESTATUS</div></th>
+                            <th scope="col" style="width: 15%; text-align: center;"><div class="slds-truncate" title="Antigüedad">ANTIGÜEDAD</div></th>
+                            <th scope="col" style="width: 15%;"><div class="slds-truncate" title="Última Act.">FECHA</div></th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={processedData} for:item="row">
+                            <tr key={row.subStage} class="slds-hint-parent">
+                                <td>
+                                    <div class="stage-label">{row.stage}</div>
+                                </td>
+                                <td>
+                                    <div class="slds-truncate substage-text">{row.subStage}</div>
+                                </td>
+                                <td style="text-align: center;">
+                                    <span class={row.statusClass}>
+                                        {row.status}
+                                    </span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <div class={row.agingClass}>{row.aging}</div>
+                                </td>
+                                <td>
+                                    <div class="slds-text-color_weak date-text">{row.lastUpdate}</div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <!-- SECCIÓN: GESTIÓN DE EVIDENCIAS (NUEVO) -->
+        <div class="evidence-section slds-m-top_medium slds-p-around_medium border-top bg-light">
+            <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name="utility:attach" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <h4 class="slds-text-title_bold">Gestión de Evidencias (Autorización)</h4>
+                </div>
+            </div>
+
+            <div class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input 
+                        type="search" 
+                        label="¿Qué documento desea adjuntar?" 
+                        placeholder="Ej: Orden de Compra, Examen, Correo..." 
+                        value={docSearchTerm}
+                        onchange={handleDocSearchChange}
+                        onkeypress={handleDocSearchKeyPress}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <template if:true={isUploadVisible}>
+                        <div class="upload-container slds-p-around_x-small border-dashed radius-8">
+                            <lightning-file-upload
+                                label={activeDocTag}
+                                name="fileUploader"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                                record-id={displayRecordId}
+                                onuploadfinished={handleUploadFinished}
+                                class="slds-text-align_center">
+                            </lightning-file-upload>
+                        </div>
                     </template>
-                </tbody>
-            </table>
+                </div>
+            </div>
+
+            <!-- GALERÍA DE EVIDENCIAS -->
+            <div class="evidence-gallery slds-grid slds-wrap slds-gutters">
+                <template for:each={evidenceList} for:item="doc">
+                    <div key={doc.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+                        <div class="evidence-card border-all radius-8 bg-white shadow-sm overflow-hidden clickable-card" 
+                             onclick={handlePreviewFile} 
+                             data-id={doc.id}>
+                            <div class="card-header slds-p-around_xx-small bg-slate-100 slds-text-align_center">
+                                <span class="tag-label">{doc.tag}</span>
+                            </div>
+                            <div class="card-body slds-p-around_small slds-text-align_center">
+                                <template if:true={doc.isImage}>
+                                    <div class="preview-thumb slds-m-bottom_x-small">
+                                        <img src={doc.previewUrl} alt={doc.title} />
+                                    </div>
+                                </template>
+                                <template if:false={doc.isImage}>
+                                    <lightning-icon icon-name="doctype:pdf" size="large" class="slds-m-bottom_x-small"></lightning-icon>
+                                </template>
+                                <div class="slds-truncate slds-text-title_bold doc-title" title={doc.title}>{doc.title}</div>
+                                <div class="slds-text-color_weak date-subtext">
+                                    <lightning-formatted-date-time value={doc.date} month="short" day="2-digit"></lightning-formatted-date-time>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <template if:false={evidenceList.length}>
+                <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak italic">
+                    No se han cargado evidencias para este proyecto.
+                </div>
+            </template>
         </div>
     </div>
 </template>

@@ -128,18 +128,34 @@ public with sharing class QuoteTechnicalController {
             allRelatedIds.add(sol.Id);
         }
         
-        // 2. Tareas y Llamadas (Solo de la Oportunidad para no saturar)
-        for (Task t : [SELECT Id, Subject, Status, Description, TaskSubtype, CreatedDate FROM Task WHERE WhatId = :oppId ORDER BY CreatedDate DESC LIMIT 20]) {
-            String icon = t.TaskSubtype == 'Call' ? 'standard:log_a_call' : 'standard:task';
-            String color = t.TaskSubtype == 'Call' ? 'background: #e1f5fe;' : 'background: #fff3e0;';
-            history.add(new Map<String, Object>{ 'id' => t.Id, 'type' => 'Actividad', 'label' => t.TaskSubtype == 'Call' ? 'Llamada' : 'Tarea', 'subject' => t.Subject, 'date' => t.CreatedDate, 'icon' => icon, 'color' => color, 'desc' => t.Description });
+        // 2. Tareas y Llamadas (Limpia duplicidad de EmailMessage al centralizar aquí)
+        for (Task t : [SELECT Id, Subject, Status, Description, TaskSubtype, CreatedDate FROM Task WHERE WhatId = :oppId ORDER BY CreatedDate DESC LIMIT 40]) {
+            String subType = t.TaskSubtype != null ? t.TaskSubtype : 'Task';
+            String icon = subType == 'Call' ? 'standard:log_a_call' : (subType == 'Email' ? 'standard:email' : 'standard:task');
+            String color = subType == 'Call' ? 'background: #e3f2fd;' : (subType == 'Email' ? 'background: #f1f8e9;' : 'background: #fff3e0;');
+            
+            history.add(new Map<String, Object>{ 
+                'id' => t.Id, 
+                'type' => 'Actividad', 
+                'label' => subType, 
+                'subject' => t.Subject, 
+                'date' => t.CreatedDate, 
+                'icon' => icon, 
+                'color' => color, 
+                'desc' => t.Description,
+                'status' => t.Status,
+                'isTask' => (subType != 'Email') // Todas las actividades menos los correos informativos son gestionables
+            });
         }
 
-        // 3. Correos
-        for (EmailMessage em : [SELECT Id, Subject, MessageDate, IsOpened, ToAddress FROM EmailMessage WHERE RelatedToId = :oppId ORDER BY MessageDate DESC LIMIT 20]) {
-            history.add(new Map<String, Object>{ 'id' => em.Id, 'type' => 'Email', 'label' => 'Correo', 'subject' => em.Subject, 'date' => em.MessageDate, 'icon' => 'standard:email', 'color' => 'background: #e8f5e9;', 'desc' => 'Para: ' + em.ToAddress + (em.IsOpened ? ' (Abierto)' : ' (No leído)') });
+        // 3. HITOS DE NEGOCIO: Levantamientos y Soluciones
+        for (Levantamiento_Tecnico__c lev : [SELECT Id, Name, Tipo_Servicio__c, CreatedDate FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId ORDER BY CreatedDate DESC]) {
+            history.add(new Map<String, Object>{ 'id' => lev.Id, 'type' => 'Levantamiento', 'label' => 'Auditoría Técnica', 'subject' => 'Levantamiento: ' + lev.Tipo_Servicio__c, 'date' => lev.CreatedDate, 'icon' => 'standard:survey', 'color' => 'background: #ede7f6;', 'desc' => 'Se registraron hallazgos técnicos en la sede cliente.' });
         }
-
+        for (Solucion_Tecnica__c sol : [SELECT Id, Name, CreatedDate, Levantamiento_Tecnico__r.Tipo_Servicio__c FROM Solucion_Tecnica__c WHERE Levantamiento_Tecnico__r.Oportunidad__c = :oppId ORDER BY CreatedDate DESC]) {
+            history.add(new Map<String, Object>{ 'id' => sol.Id, 'type' => 'Solución', 'label' => 'Propuesta Técnica', 'subject' => 'Solución: ' + sol.Name, 'date' => sol.CreatedDate, 'icon' => 'standard:solution', 'color' => 'background: #e8f5e9;', 'desc' => 'Propuesta técnica derivada del levantamiento de ' + sol.Levantamiento_Tecnico__r.Tipo_Servicio__c });
+        }
+        
         // 4. Notas y Archivos Agregados (Oportunidad + Levantamientos + Soluciones)
         Set<Id> docIds = new Set<Id>();
         Map<Id, Id> docToEntityMap = new Map<Id, Id>();
@@ -176,6 +192,24 @@ public with sharing class QuoteTechnicalController {
         }
 
         return history;
+    }
+
+    @AuraEnabled
+    public static void updateTaskActivity(Id taskId, String newStatus, String observation) {
+        try {
+            Task t = [SELECT Id, Status, Description FROM Task WHERE Id = :taskId LIMIT 1];
+            if (String.isNotBlank(newStatus)) {
+                t.Status = newStatus;
+            }
+            if (String.isNotBlank(observation)) {
+                String timestamp = '[' + System.now().format('dd/MM/yyyy HH:mm') + ' - ' + UserInfo.getName() + ']: ';
+                String currentDesc = t.Description != null ? t.Description : '';
+                t.Description = currentDesc + '\n' + timestamp + observation;
+            }
+            update t;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al actualizar tarea: ' + e.getMessage());
+        }
     }
 
     @AuraEnabled(cacheable=true)
@@ -856,31 +890,136 @@ public with sharing class QuoteTechnicalController {
         Map<String, String> states = new Map<String, String>();
         if (opportunityId == null) return states;
 
-        List<ContentDocumentLink> links = [SELECT ContentDocumentId, ContentDocument.Title FROM ContentDocumentLink WHERE LinkedEntityId = :opportunityId];
+        // 1. Obtener AccountId del cliente
+        Opportunity opp = [SELECT AccountId FROM Opportunity WHERE Id = :opportunityId LIMIT 1];
+        Id clientAccountId = opp.AccountId;
+
+        // 2. Obtener AccountId del Repositorio Maestro de Pyatz
+        Id pyatzMasterId = null;
+        List<Account> pyatzAccs = [SELECT Id FROM Account WHERE Name = 'Pyatz Corporativo' LIMIT 1];
+        if (!pyatzAccs.isEmpty()) pyatzMasterId = pyatzAccs[0].Id;
+
+        // 3. Buscar en todas las entidades relevantes (Oportunidad, Cliente y Pyatz)
+        Set<Id> entities = new Set<Id>{opportunityId};
+        if (clientAccountId != null) entities.add(clientAccountId);
+        if (pyatzMasterId != null) entities.add(pyatzMasterId);
+
+        List<ContentDocumentLink> links = [SELECT ContentDocumentId, ContentDocument.Title 
+                                           FROM ContentDocumentLink 
+                                           WHERE LinkedEntityId IN :entities];
         
-        String[] docKeys = new String[]{'INE', 'CURP', 'CSF', 'IMSS', 'VIGENCIA', 'DC3_ALTURAS', 'DC3_CONFINADOS', 'DC3_QUIMICOS', 'DC3_EXT1', 'DC3_EXT2'};
-        
-        for (String key : docKeys) {
-            String foundId = null;
-            for (ContentDocumentLink l : links) {
-                if (l.ContentDocument.Title.toUpperCase().startsWith('[' + key + ']')) {
-                    foundId = l.ContentDocumentId;
-                    break;
+        // 4. LÓGICA DINÁMICA: Detectar cualquier etiqueta entre corchetes [TAG]
+        for (ContentDocumentLink l : links) {
+            String title = l.ContentDocument.Title;
+            if (title.startsWith('[') && title.contains(']')) {
+                String tag = title.substringBetween('[', ']').toUpperCase();
+                // Si hay varios archivos con el mismo TAG, nos quedamos con el más reciente
+                if (!states.containsKey(tag)) {
+                    states.put(tag, l.ContentDocumentId);
                 }
             }
-            states.put(key, foundId);
         }
         return states;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getEvidenceGallery(Id opportunityId) {
+        List<Map<String, Object>> gallery = new List<Map<String, Object>>();
+        try {
+            Set<Id> docIds = new Set<Id>();
+            for (ContentDocumentLink cdl : [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :opportunityId]) {
+                docIds.add(cdl.ContentDocumentId);
+            }
+
+            if (!docIds.isEmpty()) {
+                for (ContentVersion cv : [SELECT Id, Title, FileExtension, ContentDocumentId, CreatedDate FROM ContentVersion WHERE ContentDocumentId IN :docIds AND IsLatest = true ORDER BY CreatedDate DESC]) {
+                    String title = cv.Title;
+                    // Detectar si tiene etiqueta [TAG]
+                    if (title.startsWith('[') && title.contains(']')) {
+                        String tag = title.substringBetween('[', ']');
+                        String cleanTitle = title.substringAfter(']').replace('-', '').trim();
+                        String ext = cv.FileExtension != null ? cv.FileExtension.toLowerCase() : '';
+                        Boolean isImg = new Set<String>{'png', 'jpg', 'jpeg', 'gif'}.contains(ext);
+
+                        gallery.add(new Map<String, Object>{
+                            'id' => cv.ContentDocumentId,
+                            'versionId' => cv.Id,
+                            'tag' => tag.toUpperCase(),
+                            'title' => cleanTitle,
+                            'ext' => ext,
+                            'isImage' => isImg,
+                            'previewUrl' => isImg ? '/sfc/servlet.shepherd/version/download/' + cv.Id : null,
+                            'date' => cv.CreatedDate
+                        });
+                    }
+                }
+            }
+        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+        return gallery;
     }
 
     @AuraEnabled
     public static void renameUploadedFile(Id documentId, String docType) {
         try {
+            // 1. Identificar el archivo con su etiqueta
             ContentDocument doc = [SELECT Id, Title FROM ContentDocument WHERE Id = :documentId LIMIT 1];
             doc.Title = '[' + docType.toUpperCase() + '] - ' + doc.Title;
             update doc;
+
+            // 2. Lógica de Vinculación Inteligente
+            if (docType.toUpperCase().startsWith('PY_')) {
+                // Documento Maestro de Pyatz -> Vincular a Repositorio Global
+                Id pyatzId = getOrCreatePyatzMasterAccount();
+                linkDocumentToEntity(documentId, pyatzId);
+            } else {
+                // Documento de Cliente o Proyecto -> Vincular a Cuenta del Cliente
+                Id oppId = getOppIdFromDocument(documentId);
+                if (oppId != null) {
+                    Opportunity opp = [SELECT AccountId FROM Opportunity WHERE Id = :oppId LIMIT 1];
+                    if (opp.AccountId != null) {
+                        linkDocumentToEntity(documentId, opp.AccountId);
+                    }
+                }
+            }
         } catch (Exception e) {
-            throw new AuraHandledException('Error al renombrar: ' + e.getMessage());
+            throw new AuraHandledException('Error al procesar archivo maestro: ' + e.getMessage());
+        }
+    }
+
+    private static Id getOrCreatePyatzMasterAccount() {
+        List<Account> accs = [SELECT Id FROM Account WHERE Name = 'Pyatz Corporativo' LIMIT 1];
+        if (!accs.isEmpty()) return accs[0].Id;
+        
+        Account pyatz = new Account(
+            Name = 'Pyatz Corporativo', 
+            Type = 'Other', 
+            Description = 'Repositorio Maestro de Documentos Legales de Pyatz'
+        );
+        insert pyatz;
+        return pyatz.Id;
+    }
+
+    private static Id getOppIdFromDocument(Id docId) {
+        List<ContentDocumentLink> currentLinks = [SELECT LinkedEntityId FROM ContentDocumentLink 
+                                                 WHERE ContentDocumentId = :docId];
+        for (ContentDocumentLink cdl : currentLinks) {
+            if (cdl.LinkedEntityId.getSObjectType().getDescribe().getName() == 'Opportunity') {
+                return cdl.LinkedEntityId;
+            }
+        }
+        return null;
+    }
+
+    private static void linkDocumentToEntity(Id docId, Id entityId) {
+        List<ContentDocumentLink> existing = [SELECT Id FROM ContentDocumentLink 
+                                              WHERE ContentDocumentId = :docId AND LinkedEntityId = :entityId];
+        if (existing.isEmpty()) {
+            ContentDocumentLink cdl = new ContentDocumentLink();
+            cdl.ContentDocumentId = docId;
+            cdl.LinkedEntityId = entityId;
+            cdl.ShareType = 'V';
+            cdl.Visibility = 'AllUsers';
+            insert cdl;
         }
     }
 

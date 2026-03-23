@@ -62,3 +62,83 @@
     text-transform: uppercase;
     font-size: 10px;
 }
+
+/* GESTIÓN DE EVIDENCIAS */
+.bg-light {
+    background-color: #fcfcfd;
+}
+
+.border-top {
+    border-top: 1px solid #e2e8f0;
+}
+
+.border-dashed {
+    border: 2px dashed #cbd5e1;
+}
+
+.radius-8 {
+    border-radius: 8px;
+}
+
+.bg-slate-100 {
+    background-color: #f1f5f9;
+}
+
+.evidence-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.evidence-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.clickable-card {
+    cursor: pointer;
+}
+
+.tag-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #475569;
+    letter-spacing: 0.5px;
+}
+
+.preview-thumb {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #f8fafc;
+}
+
+.preview-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doc-title {
+    font-size: 11px;
+    color: #1e293b;
+    margin-top: 4px;
+}
+
+.date-subtext {
+    font-size: 10px;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.italic {
+    font-style: italic;
+}

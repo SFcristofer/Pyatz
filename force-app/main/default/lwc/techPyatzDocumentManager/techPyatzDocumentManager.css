@@ -1,0 +1,71 @@
+.premium-container {
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+.main-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #4A154B; /* Color corporativo Slack/Pyatz mix */
+}
+
+.sub-title {
+    color: #6e6e6e;
+    font-size: 0.85rem;
+}
+
+.doc-row {
+    background: #fdfdfd;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.doc-row.completed.pyatz {
+    background: #f9f0ff;
+    border-color: #4A154B;
+    border-left: 4px solid #4A154B;
+}
+
+.doc-row.pending.pyatz-pending {
+    background: #fffcf0;
+    border-color: #b07e00;
+    border-left: 4px solid #b07e00;
+}
+
+.pyatz-pending .doc-label {
+    color: #b07e00;
+}
+
+.pyatz-pending .custom-badge.pyatz {
+    background: #b07e00;
+}
+
+.upload-button-pyatz :dangerous-internal-shadow-root .slds-file-selector__button {
+    background: #4A154B !important;
+    border-color: #4A154B !important;
+    color: white !important;
+}
+
+.pyatz-pending .upload-button-pyatz :dangerous-internal-shadow-root .slds-file-selector__button {
+    background: #b07e00 !important;
+    border-color: #b07e00 !important;
+}
+
+.doc-label {
+    font-weight: 600;
+    color: #4A154B;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.custom-badge.pyatz {
+    background: #4A154B;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}

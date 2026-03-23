@@ -1,41 +1,72 @@
 <template>
-    <div class="checklist-container">
-        <h2 class="checklist-header slds-m-bottom_large">Documentos requeridos:</h2>
+    <div class="onboarding-container slds-box slds-theme_default">
         
-        <div class="slds-grid slds-wrap slds-gutters">
-            <!-- Columna Izquierda -->
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                <template for:each={leftColumn} for:item="doc">
-                    <div key={doc.name} class="document-item slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                        <span class="document-label">{doc.label}</span>
-                        <lightning-radio-group 
-                            name={doc.name}
-                            options={options}
-                            value={doc.value}
-                            type="button"
-                            variant="label-hidden"
-                            class="custom-radio-group">
-                        </lightning-radio-group>
-                    </div>
-                </template>
-            </div>
+        <!-- HEADER PRINCIPAL -->
+        <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
+            <lightning-icon icon-name="standard:service_contract" size="small" class="slds-m-right_small"></lightning-icon>
+            <h2 class="slds-text-heading_small slds-font-weight_bold">Expediente Digital de Cliente (Altas)</h2>
+        </div>
 
-            <!-- Columna Derecha -->
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                <template for:each={rightColumn} for:item="doc">
-                    <div key={doc.name} class="document-item slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                        <span class="document-label">{doc.label}</span>
-                        <lightning-radio-group 
-                            name={doc.name}
-                            options={options}
-                            value={doc.value}
-                            type="button"
-                            variant="label-hidden"
-                            class="custom-radio-group">
-                        </lightning-radio-group>
+        <!-- BUSCADOR DE DOCUMENTO -->
+        <div class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-bottom_large bg-light slds-p-around_small radius-8 border-all">
+            <div class="slds-col slds-size_1-of-2">
+                <lightning-input 
+                    type="search" 
+                    label="¿Qué documento del cliente desea adjuntar?" 
+                    placeholder="Ej: INE, CURP, CSF, DC3... (Presione Enter)" 
+                    value={docSearchTerm}
+                    onchange={handleDocSearchChange}
+                    onkeypress={handleDocSearchKeyPress}>
+                </lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+                <template if:true={isUploadVisible}>
+                    <div class="upload-wrapper border-dashed radius-8 slds-p-around_x-small bg-white">
+                        <lightning-file-upload
+                            label={activeDocTag}
+                            name="fileUploader"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            record-id={recordId}
+                            onuploadfinished={handleUploadFinished}
+                            class="slds-text-align_center">
+                        </lightning-file-upload>
                     </div>
                 </template>
             </div>
         </div>
+
+        <!-- GALERÍA DE EVIDENCIAS -->
+        <h3 class="slds-text-title_bold slds-m-bottom_small">Documentos en Expediente:</h3>
+        <div class="evidence-gallery slds-grid slds-wrap slds-gutters">
+            <template for:each={evidenceList} for:item="doc">
+                <div key={doc.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
+                    <div class="evidence-card border-all radius-8 bg-white shadow-sm overflow-hidden clickable-card" 
+                         onclick={handlePreviewFile} 
+                         data-id={doc.id}>
+                        <div class="card-header slds-p-around_xx-small bg-slate-100 slds-text-align_center">
+                            <span class="tag-label">{doc.tag}</span>
+                        </div>
+                        <div class="card-body slds-p-around_small slds-text-align_center">
+                            <template if:true={doc.isImage}>
+                                <div class="preview-thumb slds-m-bottom_x-small">
+                                    <img src={doc.previewUrl} alt={doc.title} />
+                                </div>
+                            </template>
+                            <template if:false={doc.isImage}>
+                                <lightning-icon icon-name="doctype:pdf" size="large" class="slds-m-bottom_x-small"></lightning-icon>
+                            </template>
+                            <div class="slds-truncate slds-text-title_bold doc-title" title={doc.title}>{doc.title}</div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <template if:false={evidenceList.length}>
+            <div class="slds-text-align_center slds-p-around_large slds-text-color_weak italic">
+                No se han cargado documentos en este expediente.
+            </div>
+        </template>
+
     </div>
 </template>

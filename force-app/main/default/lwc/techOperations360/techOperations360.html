@@ -219,6 +219,11 @@
                     <c-tech-document-manager record-id={recordId}></c-tech-document-manager>
                 </template>
 
+                <template if:true={isAltaPyatz}>
+                    <!-- GESTOR DE DOCUMENTOS PYATZ (ENVÍO AL CLIENTE) -->
+                    <c-tech-pyatz-document-manager record-id={recordId}></c-tech-pyatz-document-manager>
+                </template>
+
                 <template if:true={isCalendarioPhase}>
                     <!-- CALENDARIO DE RECURSOS (NATIVO FIELD SERVICE) -->
                     <c-tech-resource-calendar record-id={recordId}></c-tech-resource-calendar>
