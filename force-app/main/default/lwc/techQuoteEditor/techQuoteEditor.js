@@ -22,6 +22,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     // --- DATOS PRESUPUESTO ---
     @track folio = 'POR GENERAR';
     @track asunto = '';
+    @track opportunityName = ''; // Nuevo: Almacena el nombre de la oportunidad
     @track introduccion = '';
     @track warranty = '';
     @track observacionesPago = '';
@@ -255,6 +256,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         getInitialData({ recordId: this.recordId })
             .then(result => {
                 if (result.agenteNombre) this.agenteNombre = result.agenteNombre;
+                if (result.opportunityName) this.opportunityName = result.opportunityName;
+
                 if (result.quote) {
                     const q = result.quote;
                     this.folio = q.QuoteNumber;
@@ -281,6 +284,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     }
                 } else if (result.opportunity) {
                     this.accountId = result.opportunity.AccountId;
+                    this.autoFillAsunto();
                 }
                 if (this.accountId) this.fetchSedes();
                 this.isLoading = false;
@@ -376,8 +380,9 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
     
     autoFillAsunto() {
-        const est = this.estrategiaOptions.find(o => o.value === this.estrategiaVenta)?.label || '';
-        this.asunto = `${est} @ Servicio Técnico`;
+        const folioDisplay = this.folio || 'POR GENERAR';
+        const oppName = this.opportunityName || 'Sin Oportunidad';
+        this.asunto = `PYATZ - Ptto ${folioDisplay} - ${oppName}`;
     }
 
     // --- LÓGICA PASO 2 ---

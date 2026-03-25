@@ -350,15 +350,18 @@ public with sharing class QuoteTechnicalController {
             if(sType == 'Quote') {
                 Quote q = [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Status, Description, 
                            Markers_Data__c, Introduction_Text__c, Warranty_Text__c, Business_Lines_Selected__c, 
-                           Technical_Sedes__c, Show_Introduction__c, Show_Warranty__c, CreatedBy.Name, CreatedDate
+                           Technical_Sedes__c, Show_Introduction__c, Show_Warranty__c, CreatedBy.Name, CreatedDate,
+                           OpportunityId, Opportunity.Name
                            FROM Quote WHERE Id = :recordId];
                 accountId = q.AccountId;
                 result.put('quote', q);
+                result.put('opportunityName', q.Opportunity.Name); // Nuevo: Enviar nombre de opp
                 result.put('agenteNombre', q.CreatedBy.Name);
             } else if(sType == 'Opportunity') {
                 Opportunity opp = [SELECT Id, Name, AccountId, Account.Name, Pricebook2Id FROM Opportunity WHERE Id = :recordId];
                 accountId = opp.AccountId;
                 result.put('opportunity', opp);
+                result.put('opportunityName', opp.Name); // Nuevo: Enviar nombre de opp
                 result.put('agenteNombre', UserInfo.getName());
             }
         }
