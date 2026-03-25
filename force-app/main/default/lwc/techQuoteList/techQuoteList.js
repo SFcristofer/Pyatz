@@ -85,7 +85,7 @@ export default class TechQuoteList extends NavigationMixin(LightningElement) {
         }
     }
 
-    @wire(getQuotesList)
+    @wire(getQuotesList, { opportunityId: '$opportunityId' })
     wiredQuotes({ error, data }) {
         this.isLoading = true;
         if (data) {

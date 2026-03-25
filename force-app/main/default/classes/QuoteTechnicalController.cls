@@ -305,19 +305,37 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Map<String, Object>> getQuotesList() {
+    public static List<Map<String, Object>> getQuotesList(Id opportunityId) {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
-        for(Quote q : [SELECT Id, QuoteNumber, Name, Account.Name, Status, GrandTotal, CreatedDate, CreatedBy.Name 
-                       FROM Quote ORDER BY CreatedDate DESC LIMIT 50]) {
+        
+        String query = 'SELECT Id, QuoteNumber, Name, Account.Name, Status, GrandTotal, CreatedDate, CreatedBy.Name, Technical_Sedes__c ' +
+                      'FROM Quote ';
+        
+        if (opportunityId != null) {
+            query += 'WHERE OpportunityId = :opportunityId ';
+        }
+        
+        query += 'ORDER BY CreatedDate DESC LIMIT 50';
+
+        for(Quote q : Database.query(query)) {
             Map<String, Object> row = new Map<String, Object>();
             row.put('id', q.Id);
             row.put('folio', q.QuoteNumber);
             row.put('asunto', q.Name);
             row.put('cliente', q.Account.Name);
+            row.put('sede', q.Technical_Sedes__c);
             row.put('generadoPor', q.CreatedBy.Name);
             row.put('fecha', q.CreatedDate);
             row.put('monto', q.GrandTotal);
             row.put('estado', q.Status);
+            
+            // Lógica de clases CSS para estados
+            String css = 'slds-badge';
+            if (q.Status == 'Approved' || q.Status == 'Aprobada') css += ' slds-theme_success';
+            else if (q.Status == 'Draft' || q.Status == 'Borrador') css += ' slds-theme_warning';
+            else if (q.Status == 'Rejected' || q.Status == 'Rechazada') css += ' slds-theme_error';
+            row.put('estadoClass', css);
+            
             result.add(row);
         }
         return result;
@@ -447,7 +465,6 @@ public with sharing class QuoteTechnicalController {
                 q.Markers_Data__c = (String)p.get('markersData');
                 q.Technical_Sedes__c = (String)p.get('technicalSedes');
                 q.Description = (String)p.get('observacionesPago');
-                q.Show_Introduction__c = true; q.Show_Warranty__c = true;
                 update q;
             } else {
                 Id oppId = (rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') ? rid : null;
@@ -458,7 +475,7 @@ public with sharing class QuoteTechnicalController {
                 q.Name = (String)p.get('name'); q.OpportunityId = oppId; q.Pricebook2Id = pbId; q.Status = status;
                 q.Introduction_Text__c = (String)p.get('intro'); q.Warranty_Text__c = (String)p.get('warranty');
                 q.Markers_Data__c = (String)p.get('markersData'); q.Technical_Sedes__c = (String)p.get('technicalSedes');
-                q.Description = (String)p.get('observacionesPago'); q.Show_Introduction__c = true; q.Show_Warranty__c = true;
+                q.Description = (String)p.get('observacionesPago'); 
                 q.ExpirationDate = Date.today().addDays(30);
                 insert q;
                 rid = q.Id;
@@ -524,7 +541,15 @@ public with sharing class QuoteTechnicalController {
 
             for (Object obj : rows) {
                 Map<String, Object> row = (Map<String, Object>)obj;
-                Id rowId = (row.get('id') != null && String.valueOf(row.get('id')).length() >= 15) ? (Id)row.get('id') : null;
+                String rawId = (row.get('id') != null) ? String.valueOf(row.get('id')) : null;
+                Id rowId = null;
+                
+                // VALIDACIÓN ROBUSTA DE ID: Solo si tiene 15 o 18 caracteres y no contiene puntos decimales
+                if (String.isNotBlank(rawId) && (rawId.length() == 15 || rawId.length() == 18) && !rawId.contains('.')) {
+                    try {
+                        rowId = (Id)rawId;
+                    } catch (Exception e) { rowId = null; }
+                }
                 
                 Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(
                     Oportunidad__c = oppId,
