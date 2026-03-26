@@ -16,6 +16,18 @@ import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
 
 export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @api recordId;
+    
+    _opportunityId;
+    @api 
+    get opportunityId() { return this._opportunityId; }
+    set opportunityId(value) {
+        this._opportunityId = value;
+        if (value) {
+            this.parentOpportunityId = value;
+        }
+    }
+
+    @track parentOpportunityId; // Variable interna persistente
     @track currentStep = '1';
     @track isLoading = false;
 
@@ -246,6 +258,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     ];
 
     connectedCallback() {
+        // Priorizar el ID recibido desde el dashboard si existe
+        if (this.opportunityId) {
+            this.parentOpportunityId = this.opportunityId;
+        }
         this.loadInitialData();
         this.loadBusinessLines();
         this.loadTemplates();
@@ -253,7 +269,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     loadInitialData() {
         this.isLoading = true;
-        getInitialData({ recordId: this.recordId })
+        // Si no hay recordId (nuevo), usar opportunityId para traer datos del cliente/opp
+        const searchId = this.recordId ? this.recordId : this.opportunityId;
+
+        getInitialData({ recordId: searchId })
             .then(result => {
                 if (result.agenteNombre) this.agenteNombre = result.agenteNombre;
                 if (result.opportunityName) this.opportunityName = result.opportunityName;
@@ -265,6 +284,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.introduccion = q.Introduction_Text__c;
                     this.warranty = q.Warranty_Text__c;
                     this.accountId = q.AccountId;
+                    this.parentOpportunityId = q.OpportunityId; // Asegurar vinculación
                     if (q.Account) this.clienteNombre = q.Account.Name;
 
                     if (q.Markers_Data__c) {
@@ -284,6 +304,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     }
                 } else if (result.opportunity) {
                     this.accountId = result.opportunity.AccountId;
+                    this.parentOpportunityId = result.opportunity.Id; // Capturar ID de origen
                     this.autoFillAsunto();
                 }
                 if (this.accountId) this.fetchSedes();
@@ -334,6 +355,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             
             const payload = {
                 quoteId: this.recordId,
+                opportunityId: this.parentOpportunityId, // ID de oportunidad para vinculación forzada
                 name: this.asunto,
                 status: 'Borrador',
                 intro: this.introduccion,
@@ -674,6 +696,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         // 2. Preparar el Payload Maestro alineado a campos reales de Pyatz
         const payload = {
             quoteId: this.recordId,
+            opportunityId: this.parentOpportunityId, // Vincular siempre con la oportunidad
             name: this.asunto,
             status: status,
             intro: this.introduccion,
@@ -729,6 +752,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         
         const payload = {
             quoteId: this.recordId,
+            opportunityId: this.parentOpportunityId, // Vincular siempre con la oportunidad
             name: this.asunto,
             status: 'Borrador',
             intro: this.introduccion,

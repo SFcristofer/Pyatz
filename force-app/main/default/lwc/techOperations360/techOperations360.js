@@ -9,6 +9,7 @@ import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
 import getOpportunitiesList from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesList';
 import saveStageTracking from '@salesforce/apex/QuoteTechnicalController.saveStageTracking';
+import saveTechnicalData from '@salesforce/apex/QuoteTechnicalController.saveTechnicalData';
 import getProcessHistory from '@salesforce/apex/QuoteTechnicalController.getProcessHistory';
 import TechSlackModal from 'c/techSlackModal';
 
@@ -317,7 +318,35 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get showQuoteEditor() { return this.isPresupuestoPhase && this.quoteViewMode === 'edit'; }
 
     handleEditQuote(event) { this.selectedQuoteId = event.detail; this.quoteViewMode = 'edit'; }
-    handleCreateNewQuote() { this.selectedQuoteId = null; this.quoteViewMode = 'edit'; }
+    
+    async handleCreateNewQuote() {
+        this.isLoading = true;
+        try {
+            // 1. Crear presupuesto base vinculado antes de abrir el editor
+            const payload = {
+                opportunityId: this.recordId,
+                name: 'Nuevo Presupuesto Técnico',
+                status: 'Borrador',
+                lineItems: '[]'
+            };
+            
+            const newQuoteId = await saveStageTracking({ 
+                opportunityId: this.recordId, 
+                stage: this.currentStep, 
+                subStage: this.subPhase, 
+                status: 'En proceso' 
+            }).then(() => saveTechnicalData({ data: payload }));
+
+            // 2. Abrir el editor ya con el ID del registro creado
+            this.selectedQuoteId = newQuoteId;
+            this.quoteViewMode = 'edit';
+            this.isLoading = false;
+        } catch (error) {
+            this.isLoading = false;
+            console.error('Error al crear presupuesto inicial:', error);
+        }
+    }
+
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
 
     // MANEJADOR DE CONTRATO GENERADO

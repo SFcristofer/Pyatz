@@ -455,6 +455,11 @@ public with sharing class QuoteTechnicalController {
         try {
             Map<String, Object> p = data.containsKey('data') ? (Map<String, Object>)data.get('data') : data;
             Id rid = (Id)p.get('quoteId');
+            
+            // Extraer ID de oportunidad de forma robusta
+            String oppIdStr = (String)p.get('opportunityId');
+            Id oppId = (oppIdStr != null && oppIdStr != '') ? (Id)oppIdStr : null;
+            
             String itemsJson = (String)p.get('lineItems');
             String status = (String)p.get('status');
             
@@ -470,14 +475,27 @@ public with sharing class QuoteTechnicalController {
                 q.Description = (String)p.get('observacionesPago');
                 update q;
             } else {
-                Id oppId = (rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') ? rid : null;
+                // Fallback: si rid era la Opp, la usamos como oppId
+                if (oppId == null && rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') {
+                    oppId = rid;
+                }
+                
                 Id pbId;
-                if (oppId != null) pbId = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1].Pricebook2Id;
+                if (oppId != null) {
+                    List<Opportunity> opps = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1];
+                    if (!opps.isEmpty()) pbId = opps[0].Pricebook2Id;
+                }
                 if (pbId == null) try { pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id; } catch(Exception e) {}
+                
                 q = new Quote();
-                q.Name = (String)p.get('name'); q.OpportunityId = oppId; q.Pricebook2Id = pbId; q.Status = status;
-                q.Introduction_Text__c = (String)p.get('intro'); q.Warranty_Text__c = (String)p.get('warranty');
-                q.Markers_Data__c = (String)p.get('markersData'); q.Technical_Sedes__c = (String)p.get('technicalSedes');
+                q.Name = (String)p.get('name'); 
+                q.OpportunityId = oppId; 
+                q.Pricebook2Id = pbId; 
+                q.Status = status;
+                q.Introduction_Text__c = (String)p.get('intro'); 
+                q.Warranty_Text__c = (String)p.get('warranty');
+                q.Markers_Data__c = (String)p.get('markersData'); 
+                q.Technical_Sedes__c = (String)p.get('technicalSedes');
                 q.Description = (String)p.get('observacionesPago'); 
                 q.ExpirationDate = Date.today().addDays(30);
                 insert q;
