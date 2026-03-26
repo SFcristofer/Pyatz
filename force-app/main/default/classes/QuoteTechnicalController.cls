@@ -455,6 +455,7 @@ public with sharing class QuoteTechnicalController {
         try {
             Map<String, Object> p = data.containsKey('data') ? (Map<String, Object>)data.get('data') : data;
             Id rid = (Id)p.get('quoteId');
+            Id contactId = p.containsKey('contactId') && p.get('contactId') != null ? (Id)p.get('contactId') : null;
             
             // Extraer ID de oportunidad de forma robusta
             String oppIdStr = (String)p.get('opportunityId');
@@ -468,6 +469,7 @@ public with sharing class QuoteTechnicalController {
                 q = [SELECT Id FROM Quote WHERE Id = :rid LIMIT 1];
                 q.Name = (String)p.get('name');
                 q.Status = status;
+                q.ContactId = contactId;
                 q.Introduction_Text__c = (String)p.get('intro');
                 q.Warranty_Text__c = (String)p.get('warranty');
                 q.Markers_Data__c = (String)p.get('markersData');
@@ -492,6 +494,7 @@ public with sharing class QuoteTechnicalController {
                 q.OpportunityId = oppId; 
                 q.Pricebook2Id = pbId; 
                 q.Status = status;
+                q.ContactId = contactId;
                 q.Introduction_Text__c = (String)p.get('intro'); 
                 q.Warranty_Text__c = (String)p.get('warranty');
                 q.Markers_Data__c = (String)p.get('markersData'); 
@@ -781,6 +784,23 @@ public with sharing class QuoteTechnicalController {
         for (Account a : [SELECT Id, Name FROM Account WHERE Name LIKE :key AND ParentId = null LIMIT 10]) {
             results.add(new Map<String, String>{'id' => a.Id, 'name' => a.Name});
         }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getSedeContacts(Id sedeId) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        try {
+            if (sedeId == null) return results;
+            for (Contact c : [SELECT Id, Name, Title FROM Contact WHERE AccountId = :sedeId AND IsEmailBounced = false ORDER BY Name ASC LIMIT 50]) {
+                results.add(new Map<String, String>{
+                    'label' => c.Name,
+                    'value' => c.Id,
+                    'name' => c.Name,
+                    'title' => c.Title != null ? c.Title : ''
+                });
+            }
+        } catch (Exception e) {}
         return results;
     }
 

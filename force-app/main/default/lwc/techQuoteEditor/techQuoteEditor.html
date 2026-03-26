@@ -67,6 +67,19 @@
                                 </lightning-button-menu>
                             </div>
                             <div class="slds-p-around_large">
+                                <div class="slds-grid slds-gutters slds-m-bottom_small">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <lightning-dual-listbox
+                                            name="contactSelector"
+                                            label="Dirigido a (Atención):"
+                                            source-label="Disponibles"
+                                            selected-label="Seleccionados"
+                                            options={contactOptions}
+                                            value={selectedContactIds}
+                                            onchange={handleContactChange}>
+                                        </lightning-dual-listbox>
+                                    </div>
+                                </div>
                                 <lightning-input-rich-text value={introduccion} onchange={handleIntroChange} variant="bottom-toolbar"></lightning-input-rich-text>
                             </div>
                         </div>

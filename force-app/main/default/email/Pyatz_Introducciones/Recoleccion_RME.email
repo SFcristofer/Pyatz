@@ -1,6 +1,6 @@
 <html>
 <body>
-    <p>Estimad@ <strong>{!Quote.Contact}</strong>,</p>
+    <p>Estimad@ <strong>[[ATENCION]]</strong>,</p>
 
     <p>De acuerdo con tu solicitud, presentamos el programa de recolección, traslado y disposición de las aguas grasas generados en sus instalaciones.</p>
 

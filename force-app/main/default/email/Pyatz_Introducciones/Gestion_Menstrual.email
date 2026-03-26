@@ -1,6 +1,6 @@
 <html>
 <body>
-    <p>Estimad@ <strong>{!Quote.Contact}</strong>,</p>
+    <p>Estimad@ <strong>[[ATENCION]]</strong>,</p>
 
     <p>De acuerdo con tu solicitud, presentamos la propuesta que contempla un programa de limpieza de trampas de grasa que incluye el traslado y disposición de las mismas generados en sus instalaciones. El programa incluye pláticas semestrales de concientización sobre las buenas prácticas en cocina para la separación de sólidos, así como la integración de todas las áreas responsables del manejo de sólidos con el fin de cuidar sus instalaciones con una mayor consciencia sobre la salud hidrosanitaria y el impacto ambiental que esto tiene.</p>
 

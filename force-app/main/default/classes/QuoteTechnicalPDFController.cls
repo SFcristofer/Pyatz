@@ -34,11 +34,28 @@ public with sharing class QuoteTechnicalPDFController {
                 .replace('[[FOLIO]]', this.technicalQuote.QuoteNumber != null ? this.technicalQuote.QuoteNumber : '');
         }
 
-        // 2. Extraer HTML de la memoria persistente
+        // 2. Extraer HTML y datos de la memoria persistente
         if (String.isNotBlank(this.technicalQuote.Markers_Data__c)) {
             try {
                 String decodedJson = EncodingUtil.base64Decode(this.technicalQuote.Markers_Data__c).toString();
                 Map<String, Object> fullState = (Map<String, Object>)JSON.deserializeUntyped(decodedJson);
+                
+                // --- PROCESAR CONTACTOS MÚLTIPLES ---
+                String atencionNames = '';
+                if (fullState.containsKey('selectedContactNames')) {
+                    atencionNames = (String)fullState.get('selectedContactNames');
+                } else if (this.technicalQuote.ContactId != null) {
+                    atencionNames = this.technicalQuote.Contact.Name;
+                }
+
+                if (this.technicalQuote.Introduction_Text__c != null) {
+                    this.technicalQuote.Introduction_Text__c = this.technicalQuote.Introduction_Text__c.replace('[[ATENCION]]', atencionNames);
+                }
+                if (this.technicalQuote.Warranty_Text__c != null) {
+                    this.technicalQuote.Warranty_Text__c = this.technicalQuote.Warranty_Text__c.replace('[[ATENCION]]', atencionNames);
+                }
+                // ------------------------------------
+
                 if (fullState.containsKey('serviciosData')) {
                     List<Object> servicios = (List<Object>)fullState.get('serviciosData');
                     // Mapear por nombre de producto y sede para coincidir con las líneas
