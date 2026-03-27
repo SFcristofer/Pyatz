@@ -512,6 +512,20 @@ public with sharing class QuoteTechnicalController {
             if (String.isNotBlank(itemsJson) && rid != null) {
                 List<Object> items = (List<Object>)JSON.deserializeUntyped(itemsJson);
                 delete [SELECT Id FROM QuoteLineItem WHERE QuoteId = :rid];
+                
+                // --- AJUSTE DINÁMICO DE LISTA DE PRECIOS ---
+                if (!items.isEmpty()) {
+                    Map<String, Object> firstItem = (Map<String, Object>)items[0];
+                    String firstPbeId = (String)firstItem.get('pbeId');
+                    if (String.isNotBlank(firstPbeId) && firstPbeId != 'null' && firstPbeId.length() >= 15) {
+                        PricebookEntry pbe = [SELECT Pricebook2Id FROM PricebookEntry WHERE Id = :firstPbeId LIMIT 1];
+                        Quote currentQ = [SELECT Pricebook2Id FROM Quote WHERE Id = :rid LIMIT 1];
+                        if (currentQ.Pricebook2Id != pbe.Pricebook2Id) {
+                            update new Quote(Id = rid, Pricebook2Id = pbe.Pricebook2Id);
+                        }
+                    }
+                }
+
                 List<QuoteLineItem> qlis = new List<QuoteLineItem>();
                 for (Object obj : items) {
                     Map<String, Object> it = (Map<String, Object>)obj;
