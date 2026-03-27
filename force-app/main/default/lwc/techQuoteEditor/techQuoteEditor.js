@@ -284,6 +284,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
     handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
 
+    get estrategiaOptions() {
+        return [
+            { label: 'E1 - Póliza Anual', value: 'E1' }, { label: 'E2 - Extraordinario', value: 'E2' },
+            { label: 'E3 - Cliente Nuevo', value: 'E3' }, { label: 'E4 - Retardantes', value: 'E4' }, { label: 'E5 - Cedis', value: 'E5' }
+        ];
+    }
+
+    get sedeScopeLabel() { return this.isGlobalSedeSearch ? 'Búsqueda Global' : 'Solo este Cliente'; }
+    get sedeSearchPlaceholder() { return this.isGlobalSedeSearch ? 'Buscar en todo Salesforce...' : 'Filtrar sedes de este cliente...'; }
+    get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
+    get technicalSedesString() { return this.selectedSedesObjects.map(s => s.Name).join(', '); }
+
     handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
     autoFillAsunto() {
         const folioDisplay = this.folio || 'POR GENERAR';
