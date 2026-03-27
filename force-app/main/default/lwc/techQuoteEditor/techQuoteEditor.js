@@ -125,7 +125,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             com2: com2.toFixed(2),
             reg: reg.toFixed(2),
             fin: fin.toFixed(2),
-            isr: i.toFixed(2),
+            isr: isr.toFixed(2),
             ru: ru.toFixed(2),
             costoTotal: costoTotal.toFixed(2),
             resPesos: margenDolares.toFixed(2),
@@ -232,9 +232,16 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                             if (decoded.selectedContactNames) this.selectedContactNames = decoded.selectedContactNames;
                             if (decoded.selectedLines) {
                                 this.selectedLines = decoded.selectedLines;
-                                this.loadBusinessLines(); // Recargar para aplicar checks
+                                this.loadBusinessLines();
                             }
                             
+                            // Persistencia de Opciones de Pago y Trabajo
+                            if (decoded.pagoTransferencia !== undefined) this.pagoTransferencia = decoded.pagoTransferencia;
+                            if (decoded.pagoTarjeta !== undefined) this.pagoTarjeta = decoded.pagoTarjeta;
+                            if (decoded.trabajoPuntual !== undefined) this.trabajoPuntual = decoded.trabajoPuntual;
+                            if (decoded.ventaProducto !== undefined) this.ventaProducto = decoded.ventaProducto;
+                            if (decoded.trabajoMantenimiento !== undefined) this.trabajoMantenimiento = decoded.trabajoMantenimiento;
+
                             if (decoded.necesidadId) {
                                 this.necesidadId = decoded.necesidadId;
                                 this.necesidadNombre = decoded.necesidadNombre;
@@ -550,9 +557,11 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     handleApplyTemplate(event) {
         const templateId = event.detail.value;
-        const targetField = event.currentTarget.getAttribute('data-field') || event.target.dataset.field;
+        // Forma robusta de obtener el campo destino desde el menú o el item
+        const targetField = event.target.dataset.field || event.currentTarget.dataset.field;
+        
         if (!this.recordId) {
-            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Guarde el presupuesto antes.', variant: 'warning' }));
+            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Guarde el presupuesto antes para poder procesar la plantilla.', variant: 'warning' }));
             return;
         }
         this.isLoading = true;
@@ -564,7 +573,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 else if (targetField === 'modalDescription') this.modalDescription = result;
                 this.isLoading = false;
             })
-            .catch(error => { this.isLoading = false; console.error(error); });
+            .catch(error => { 
+                this.isLoading = false; 
+                console.error('Error render:', error);
+            });
     }
 
     handleFinalize() { this.handleSave('Approved'); }
@@ -582,6 +594,17 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleIntroChange(event) { this.introduccion = event.target.value; }
     handleWarrantyChange(event) { this.warranty = event.target.value; }
     handleObservacionesPagoChange(event) { this.observacionesPago = event.target.value; }
+    
+    // Manejadores de Opciones de Pago
+    // Versión 1.0.2 - Corrección de manejadores de pago
+    handlePagoTransferenciaChange(event) { this.pagoTransferencia = event.target.checked; }
+    handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
+    
+    // Manejadores de Tipo de Trabajo
+    handleTrabajoPuntualChange(event) { this.trabajoPuntual = event.target.checked; }
+    handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
+    handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
+
     handleOpenModal() { this.showModal = true; }
     handleCloseModal() { this.showModal = false; this.resetModal(); }
     handleOpenSeparatorModal() { this.showSeparatorModal = true; }

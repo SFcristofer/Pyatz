@@ -535,6 +535,12 @@ public with sharing class QuoteTechnicalController {
                 }
                 if (!qlis.isEmpty()) insert qlis;
             }
+            
+            // Automatizar Sincronización para actualizar Importe de Oportunidad
+            if (oppId != null && rid != null) {
+                update new Opportunity(Id = oppId, SyncedQuoteId = rid);
+            }
+            
             return rid;
         } catch (Exception e) { throw new AuraHandledException('Error Apex: ' + e.getMessage()); }
     }
