@@ -392,10 +392,10 @@ public with sharing class QuoteTechnicalController {
         if (pbId == null) pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1].Id;
         
         String query = '%' + searchTerm + '%';
-        String soql = 'SELECT Id, Product2Id, Product2.Name, Product2.Description, UnitPrice FROM PricebookEntry WHERE Pricebook2Id = :pbId AND (Product2.Name LIKE :query OR Product2.ProductCode LIKE :query) AND IsActive = true ';
+        String soql = 'SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Product2.Description, UnitPrice FROM PricebookEntry WHERE Pricebook2Id = :pbId AND (Product2.Name LIKE :query OR Product2.ProductCode LIKE :query) AND IsActive = true ';
         if (!allowOtherLines && businessLines != null && !businessLines.isEmpty()) soql += 'AND Product2.Family IN :businessLines ';
         for (PricebookEntry pbe : Database.query(soql + ' LIMIT 15')) {
-            results.add(new Map<String, Object>{ 'id' => pbe.Id, 'productId' => pbe.Product2Id, 'name' => pbe.Product2.Name, 'description' => pbe.Product2.Description, 'unitPrice' => pbe.UnitPrice });
+            results.add(new Map<String, Object>{ 'id' => pbe.Id, 'productId' => pbe.Product2Id, 'name' => pbe.Product2.Name, 'sku' => pbe.Product2.ProductCode, 'description' => pbe.Product2.Description, 'unitPrice' => pbe.UnitPrice });
         }
         return results;
     }

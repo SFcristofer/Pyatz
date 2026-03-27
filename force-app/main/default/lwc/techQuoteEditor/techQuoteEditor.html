@@ -346,6 +346,7 @@
                                 <div class="product-search-results">
                                     <template for:each={searchResults} for:item="res">
                                         <div key={res.id} class="product-result-item" onclick={handleProductSelect} data-id={res.id}>
+                                            <span class="product-sku-label" if:true={res.sku}>[{res.sku}]</span>
                                             <span class="product-name-only"><strong>{res.name}</strong></span>
                                         </div>
                                     </template>

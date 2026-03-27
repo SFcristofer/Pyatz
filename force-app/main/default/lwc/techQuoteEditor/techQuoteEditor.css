@@ -69,6 +69,18 @@
     transition: background 0.2s;
 }
 
+.product-sku-label {
+    color: #0070d2;
+    font-weight: bold;
+    margin-right: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    background: #f0f7ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #c2e0ff;
+}
+
 .product-result-item:hover { background: var(--slate-50); }
 .product-name { font-weight: 700; color: var(--slate-900); display: block; }
 .product-desc { font-size: 0.75rem; color: var(--slate-600); display: block; margin-top: 2px; }

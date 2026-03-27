@@ -230,6 +230,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                             if (decoded.estrategiaVenta) this.estrategiaVenta = decoded.estrategiaVenta;
                             if (decoded.selectedContactIds) this.selectedContactIds = decoded.selectedContactIds;
                             if (decoded.selectedContactNames) this.selectedContactNames = decoded.selectedContactNames;
+                            if (decoded.selectedLines) {
+                                this.selectedLines = decoded.selectedLines;
+                                this.loadBusinessLines(); // Recargar para aplicar checks
+                            }
                             
                             if (decoded.necesidadId) {
                                 this.necesidadId = decoded.necesidadId;
