@@ -350,8 +350,37 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 const last = names.pop();
                 this.selectedContactNames = `${names.join(', ')} y ${last}`;
             }
+            this.updateIntroWithContacts();
         } else {
             this.selectedContactNames = '';
+        }
+    }
+
+    updateIntroWithContacts() {
+        if (!this.introduccion) return;
+        
+        // Patrones reales detectados en las plantillas de Pyatz
+        const patterns = [
+            /\[\[ATENCION\]\]/g,
+            /Estimad@\s*,/g,
+            /Estimado\/a\s*,/g,
+            /Estimado\(a\)\s*,/g
+        ];
+
+        let newIntro = this.introduccion;
+        const greeting = this.selectedContactIds.length > 1 ? 'Estimados' : 'Estimado(a)';
+        const displayNames = this.selectedContactNames || 'a quien corresponda';
+        
+        let replaced = false;
+        patterns.forEach(pattern => {
+            if (newIntro.match(pattern)) {
+                newIntro = newIntro.replace(pattern, `${this.selectedContactNames ? displayNames : 'a quien corresponda'}`);
+                replaced = true;
+            }
+        });
+
+        if (replaced) {
+            this.introduccion = newIntro;
         }
     }
 

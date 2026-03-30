@@ -58,7 +58,7 @@
                             <div class="section-header slds-grid slds-grid_align-spread">
                                 <div class="slds-grid slds-grid_vertical-align-center">
                                     <lightning-icon icon-name="utility:announcement" size="small" class="slds-m-right_small"></lightning-icon>
-                                    <h2 class="slds-text-heading_small">Introducción</h2>
+                                    <h2 class="slds-text-heading_small">Introducción Técnica</h2>
                                 </div>
                                 <lightning-button-menu label="Cargar Plantilla" icon-name="utility:insert_tag_field" variant="border-filled" onselect={handleApplyTemplate} data-field="introduccion">
                                     <template for:each={introTemplates} for:item="tpl">
@@ -69,16 +69,21 @@
                             <div class="slds-p-around_large">
                                 <div class="slds-grid slds-gutters slds-m-bottom_small">
                                     <div class="slds-col slds-size_1-of-1">
+                                        <p class="slds-text-title_bold slds-m-bottom_x-small">Dirigido a (Atención):</p>
                                         <lightning-checkbox-group
                                             name="contactSelector"
-                                            label="Dirigido a (Atención):"
+                                            label="Contactos disponibles"
+                                            variant="label-hidden"
                                             options={contactOptions}
                                             value={selectedContactIds}
                                             onchange={handleContactChange}>
                                         </lightning-checkbox-group>
                                     </div>
                                 </div>
-                                <lightning-input-rich-text value={introduccion} onchange={handleIntroChange} variant="bottom-toolbar"></lightning-input-rich-text>
+                                <div class="slds-m-top_medium">
+                                    <p class="slds-text-title_bold slds-m-bottom_x-small">Cuerpo de la Introducción:</p>
+                                    <lightning-input-rich-text value={introduccion} onchange={handleIntroChange} variant="bottom-toolbar"></lightning-input-rich-text>
+                                </div>
                             </div>
                         </div>
 
@@ -100,8 +105,7 @@
                             </div>
                         </div>
 
-                        <div class="section-card">
-                            <div class="section-header slds-grid slds-grid_align-spread">
+                        <div class="section-card">                            <div class="section-header slds-grid slds-grid_align-spread">
                                 <div class="slds-grid slds-grid_vertical-align-center">
                                     <lightning-icon icon-name="standard:location" size="small" class="slds-m-right_small"></lightning-icon>
                                     <h2 class="slds-text-heading_small">Selección de Sedes</h2>

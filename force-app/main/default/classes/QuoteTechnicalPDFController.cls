@@ -13,7 +13,7 @@ public with sharing class QuoteTechnicalPDFController {
                                      Show_Warranty__c, Warranty_Text__c, Markers_Data__c,
                                      Business_Lines_Selected__c, Technical_Sedes__c, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                      Subtotal, Tax, TotalPrice, Description,
-                                     (SELECT Id, Product2.Name, Description, Pyatz_Technical_Description__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice 
+                                     (SELECT Id, Product2.Name, Description, Pyatz_Technical_Description__c, Descripcion_Detallada__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice 
                                       FROM QuoteLineItems)
                               FROM Quote 
                               WHERE Id = :quoteId];

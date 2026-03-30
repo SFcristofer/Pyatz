@@ -15,6 +15,7 @@ import TechSlackModal from 'c/techSlackModal';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api objectApiName;
     
     // --- ACCIÓN GLOBAL: SLACK 360 ---
     async handleOpenSlack() {
@@ -221,7 +222,16 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     connectedCallback() {
-        if (!this.recordId) this.loadOpportunities();
+        if (this.recordId) {
+            // Modo Expediente Directo: Configurar estado inicial para el ID recibido
+            this.currentStep = 'Definición';
+            this.currentSubStep = '1';
+            this.quoteViewMode = 'list';
+            this.loadProcessHistory();
+        } else {
+            // Modo Dashboard: Cargar lista de todas las oportunidades
+            this.loadOpportunities();
+        }
     }
 
     get showDashboard() { return !this.recordId; }

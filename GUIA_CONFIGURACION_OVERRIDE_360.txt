@@ -1,0 +1,55 @@
+# DOCUMENTACIÓN TÉCNICA: CONFIGURACIÓN DE REDIRECCIÓN POST-CREACIÓN (ACTION OVERRIDE)
+# Proyecto: Pyatz - Operations 360 Hub
+# Fecha: 27 de Marzo de 2026
+
+## RESUMEN
+Este documento describe el procedimiento estándar de Salesforce para interceptar la navegación nativa tras la creación de una Oportunidad, redirigiendo al usuario automáticamente al componente especializado "Pyatz Operations 360 Hub".
+
+---
+
+## ESCENARIO DE USO
+El usuario desea utilizar el modal estándar de creación de Oportunidades ("New Opportunity") para aprovechar la validación nativa y el diseño original de Salesforce. Tras completar el guardado (Save), el sistema debe redirigir al usuario al entorno de gestión 360 en lugar de la página de detalle estándar.
+
+---
+
+## REQUISITOS PREVIOS
+1. El componente Aura 'techOperations360Wrapper' debe estar desplegado en la organización.
+2. El usuario debe tener permisos de "System Administrator" o "Customize Application".
+
+---
+
+## PASOS DE CONFIGURACIÓN (LIGHTNING EXPERIENCE)
+
+### 1. Acceso al Administrador de Objetos
+1. Inicie sesión en su organización de Salesforce.
+2. Haga clic en el ícono de engranaje (Setup) en la esquina superior derecha.
+3. Seleccione la pestaña 'Object Manager' (Administrador de Objetos).
+4. Localice y haga clic en el objeto 'Opportunity' (Oportunidad).
+
+### 2. Configuración de la Acción "Ver" (View)
+Para lograr la redirección post-guardado, debemos sobreescribir la acción de visualización del registro:
+1. En el menú lateral izquierdo, seleccione 'Buttons, Links, and Actions' (Botones, Vínculos y Acciones).
+2. Localice la acción estándar con el nombre 'View' (Ver).
+3. Haga clic en la flecha desplegable al final de la fila y seleccione 'Edit' (Editar).
+
+### 3. Asignación del Componente de Sustitución
+1. Desplácese hasta la sección 'Lightning Experience Override'.
+2. Seleccione la opción 'Lightning Component'.
+3. En el menú desplegable, seleccione: 'c:techOperations360Wrapper'.
+4. En la sección 'Mobile Override', se recomienda seleccionar la misma opción para mantener la consistencia en Salesforce Mobile.
+5. Haga clic en 'Save' (Guardar).
+
+---
+
+## VALIDACIÓN DEL FLUJO
+Una vez completada la configuración, valide el proceso siguiendo estos pasos:
+1. Diríjase a la pestaña 'Opportunities'.
+2. Haga clic en el botón 'New' (Nuevo).
+3. Complete los campos obligatorios en el modal estándar de Salesforce.
+4. Haga clic en 'Save' (Guardar).
+5. El sistema procesará el registro y, en lugar de mostrar el detalle estándar, cargará automáticamente la interfaz 'Operations 360 Hub' con el contexto del nuevo registro.
+
+---
+
+## NOTA TÉCNICA
+Esta configuración utiliza un 'Aura Wrapper' (techOperations360Wrapper) que actúa como puente de interoperabilidad, permitiendo que un Lightning Web Component (LWC) sea elegible para los menús de 'Action Override' de la interfaz clásica de configuración de Salesforce.

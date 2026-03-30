@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "c:/Users/crist/OneDrive/Documentos/Proyecto pyatz/Pyatz"
+    }
+  ],
+  "settings": {
+    "eslint.workingDirectories": [
+      "c:/Users/crist/OneDrive/Documentos/Proyecto pyatz/Pyatz"
+    ],
+    "eslint.validate": [
+      "javascript",
+      "typescript"
+    ],
+    "eslint.options": {
+      "overrideConfigFile": "c:\\Users\\crist\\OneDrive\\Documentos\\Proyecto pyatz\\Pyatz\\.eslintrc.json"
+    }
+  }
+}

@@ -1,0 +1,3 @@
+<aura:component implements="lightning:actionOverride,force:hasRecordId,force:hasSObjectName" access="global">
+    <c:techOperations360 recordId="{!v.recordId}" />
+</aura:component>

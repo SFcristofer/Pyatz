@@ -4,253 +4,192 @@
             <style type="text/css">
                 @page { 
                     size: letter; 
-                    margin: 1.0cm; 
-                    @bottom-right {
-                        content: "Página " counter(page) " de " counter(pages);
-                        font-family: 'Helvetica', 'Arial', sans-serif;
-                        font-size: 8pt;
-                        color: #666;
-                        padding-right: 20pt;
-                        vertical-align: top;
-                        padding-top: 10pt;
-                    }
+                    margin: 2.0cm; 
                 }
-                body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; color: #333; line-height: 1.3; margin: 0; padding: 0; }
-
-                /* CLASES PARA SALTOS DE PÁGINA */
-                .page-break { page-break-before: always; }
-                .no-break { page-break-inside: avoid; }
-
-                .header-img { width: 100%; margin-bottom: 20pt; display: block; }
-                .footer-img { width: 100%; position: fixed; bottom: -0.5cm; left: 0; display: block; height: 3cm; z-index: -1; }
-
-                .content-body { padding: 0 35pt 3.5cm 35pt; }
-
-                .title-quote { font-size: 18pt; font-weight: bold; margin-bottom: 2pt; color: #000; }                .line-business { font-size: 11pt; color: #333; margin-bottom: 12pt; font-weight: normal; }
-                .data-label { font-weight: bold; width: 85px; display: inline-block; }
-                .client-name { font-size: 14pt; font-weight: bold; margin-top: 15pt; }
                 
-                .table-services { width: 100%; border-collapse: collapse; margin-top: 15pt; page-break-inside: auto; }
-                .table-services tr { page-break-inside: avoid; page-break-after: auto; }
-                .table-services th { background-color: #D4EDDA; color: #333; padding: 8pt; border: 0.5pt solid #fff; text-align: center; font-size: 9pt; }
-                .table-services td { padding: 8pt; border-bottom: 0.5pt solid #eee; vertical-align: top; }
+                body { 
+                    font-family: 'Arial', 'Helvetica', sans-serif; 
+                    font-size: 10pt; 
+                    color: #333; 
+                    line-height: 1.3;
+                    margin: 0; 
+                    padding: 0; 
+                }
+
+                /* TABLAS ESTRUCTURALES */
+                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
                 
-                /* Estilo especial para separadores que fuerzan salto */
-                .separator-row { background-color: #f1f5f9; font-weight: bold; color: #0070d2; text-transform: uppercase; font-size: 9pt; }
+                .table-services { width: 100%; border-collapse: collapse; margin-top: 15pt; }
+                .table-services th { background-color: #D4EDDA; padding: 8pt; border-bottom: 1.5pt solid #0070d2; font-size: 8pt; text-align: center; text-transform: uppercase; }
+                
+                /* Fila Comercial */
+                .row-commercial td { padding: 8pt 5pt; vertical-align: middle; font-size: 10pt; background-color: #fff; }
+                
+                /* Fila de Detalle Técnico (Expandida) */
+                .row-technical-detail td { 
+                    padding: 5pt 15pt 15pt 15pt; 
+                    border-bottom: 0.5pt solid #eee; 
+                    font-size: 9pt; 
+                    color: #444; 
+                    line-height: 1.4;
+                }
+                
+                .separator-row td { background-color: #f1f5f9; font-weight: bold; color: #0070d2; padding: 10pt; border-top: 2pt solid #0070d2; }
 
-                .table-pago { width: 100%; border-collapse: collapse; margin-top: 20pt; page-break-inside: avoid; }
-                .table-pago th.pago-header { background-color: #0070d2; color: white; padding: 5pt; text-align: center; font-weight: bold; border: 0.5pt solid #0070d2; }
-                .table-pago th { background-color: #D4EDDA; color: #333; padding: 5pt; text-align: center; border: 0.5pt solid #fff; }
-                .table-pago td { padding: 8pt; border: 0.5pt solid #eee; text-align: center; font-size: 9pt; }
-
-                .totals-box { width: 300pt; float: right; margin-top: 10pt; page-break-inside: avoid; }
-                .total-row { display: table; width: 100%; padding: 3pt 0; }
-                .total-label { display: table-cell; text-align: right; padding-right: 10pt; font-weight: bold; }
-                .total-value { display: table-cell; text-align: right; width: 80pt; border-bottom: 0.5pt solid #eee; }
-                .grand-total { font-size: 12pt; color: #0070d2; border-bottom: 2pt solid #0070d2; }
+                .totals-box { width: 220pt; margin-left: auto; margin-top: 10pt; }
+                .grand-total { font-size: 13pt; color: #0070d2; font-weight: bold; border-top: 1.5pt solid #0070d2; padding-top: 8pt; }
 
                 .signature-section { margin-top: 50pt; width: 100%; page-break-inside: avoid; }
-                .sig-box { width: 33%; text-align: center; display: inline-block; vertical-align: bottom; }
-                .sig-line { border-top: 1px solid #333; margin: 0 20pt; padding-top: 5pt; font-size: 9pt; }
+                .sig-box { width: 33.3%; text-align: center; display: inline-block; vertical-align: top; }
+                .sig-line { border-top: 1pt solid #333; margin: 0 20pt; padding-top: 5pt; font-size: 8.5pt; }
+
+                .rich-text-content { text-align: left; display: block; width: 100%; }
+                /* Asegurar que las imágenes dentro del texto no rompan el PDF */
+                .rich-text-content img { max-width: 100% !important; height: auto !important; }
+
+                .page-number { text-align: right; font-size: 8pt; color: #999; margin-top: 20pt; }
             </style>
         </head>
         <body>
-            <img src="/servlet/servlet.ImageServer?id=015V9000005wj9x&oid={!$Organization.Id}" class="header-img" />
+            <div style="padding-top: 0;">
+                <!-- CABECERA -->
+                <table width="100%">
+                    <tr>
+                        <td width="65%">
+                            <div style="font-size: 22pt; font-weight: bold;">PRESUPUESTO No. {!technicalQuote.QuoteNumber}</div>
+                            <div style="font-size: 13pt; color: #0070d2; font-weight: bold; margin-top: 5pt;">{!technicalQuote.Business_Lines_Selected__c}</div>
+                        </td>
+                        <td width="35%" align="right" style="font-size: 10pt;">
+                            <div><strong>Fecha:</strong> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!technicalQuote.CreatedDate}" /></apex:outputText></div>
+                            <div><strong>Agente:</strong> {!technicalQuote.CreatedBy.Name}</div>
+                        </td>
+                    </tr>
+                </table>
 
-            <div class="content-body">
-                <div class="title-quote">PRESUPUESTO No. {!technicalQuote.QuoteNumber}</div>
-                <div class="line-business">{!technicalQuote.Business_Lines_Selected__c}</div>
+                <div style="font-size: 16pt; font-weight: bold; margin-top: 30pt; border-bottom: 1pt solid #eee; padding-bottom: 5pt;">{!technicalQuote.Technical_Sedes__c}</div>
+                <div style="margin-top: 10pt; font-size: 11pt;"><strong>Asunto:</strong> {!technicalQuote.Name}</div>
 
-                <div style="margin-top: 5pt; font-size: 10pt;">
-                    <div><strong>Fecha:</strong> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!technicalQuote.CreatedDate}" /></apex:outputText></div>
-                    <div><strong>Agente:</strong> {!technicalQuote.CreatedBy.Name}</div>
-                </div>
-
-                <div class="client-name" style="margin-top: 15pt;">{!technicalQuote.Technical_Sedes__c}</div>
-                <div style="font-size: 11pt; margin-top: 5pt;"><strong>Asunto:</strong> {!technicalQuote.Name}</div>
-
-                <!-- 1. INTRODUCCIÓN (VISIBILIDAD BASADA EN CONTENIDO) -->
+                <!-- INTRODUCCIÓN -->
                 <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Introduction_Text__c))}">
-                    <div style="margin-top: 10pt; text-align: justify; display: block; line-height: 1.4;">
+                    <div class="rich-text-content" style="margin-top: 15pt;">
                         <apex:outputText value="{!technicalQuote.Introduction_Text__c}" escape="false"/>
                     </div>
                 </apex:outputPanel>
 
-                <!-- 2. PRODUCTOS Y SERVICIOS -->
+                <!-- TABLA DE SERVICIOS INTEGRADA -->
                 <table class="table-services">
                     <thead>
                         <tr>
-                            <th width="45%">CONCEPTO</th>
+                            <th width="50%">CONCEPTO / SERVICIO</th>
                             <th width="10%">CANT</th>
-                            <th width="15%">P. UNITARIO</th>
-                            <apex:variable var="anyDiscount" value="0" />
-                            <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="check">
-                                <apex:variable var="anyDiscount" value="1" rendered="{!BLANKVALUE(check.Discount, 0) > 0 || (BLANKVALUE(check.ListPrice, 0) - BLANKVALUE(check.UnitPrice, 0)) > 0}" />
-                            </apex:repeat>
-                            <apex:outputPanel rendered="{!anyDiscount == '1'}" layout="none">
-                                <th width="10%">DESC.</th>
-                            </apex:outputPanel>
+                            <th width="20%">P. UNITARIO</th>
                             <th width="20%">IMPORTE</th>
                         </tr>
                     </thead>
                     <tbody>
                         <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                            <!-- LÓGICA DE SEPARADOR / SALTO DE PÁGINA -->
+                            <!-- CASO 1: SEPARADOR -->
                             <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
-                                <tr class="page-break separator-row">
-                                    <td colspan="{!IF(anyDiscount == '1', 5, 4)}" style="padding: 10pt; background-color: #f1f5f9; border-top: 1pt solid #0070d2;">
-                                        <strong>{!item.Product2.Name}</strong>
-                                    </td>
+                                <tr class="separator-row">
+                                    <td colspan="4"><strong>{!item.Product2.Name}</strong></td>
                                 </tr>
                             </apex:outputPanel>
 
-                            <!-- LÓGICA DE PARTIDA ESTÁNDAR -->
+                            <!-- CASO 2: PARTIDA COMERCIAL + DETALLE TÉCNICO -->
                             <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
-                                <tr>
+                                <!-- FILA A: DATOS COMERCIALES -->
+                                <tr class="row-commercial">
                                     <td><strong>{!item.Product2.Name}</strong></td>
                                     <td align="center">{!item.Quantity}</td>
-                                    <td align="right">
-                                        <apex:outputText value="{0, number, currency}">
-                                            <apex:param value="{!BLANKVALUE(item.ListPrice, 0)}" />
-                                        </apex:outputText>
-                                    </td>
-                                    <apex:outputPanel rendered="{!anyDiscount == '1'}" layout="none">
-                                        <td align="center" style="color: #d8000c; font-weight: bold;">
-                                            <apex:outputPanel rendered="{!NOT(ISNULL(item.Discount)) && item.Discount > 0}">
-                                                {!item.Discount}%
-                                            </apex:outputPanel>
-                                            <apex:outputPanel rendered="{!(ISNULL(item.Discount) || item.Discount == 0) && (BLANKVALUE(item.ListPrice, 0) > BLANKVALUE(item.UnitPrice, 0))}">
-                                                <apex:outputText value="{0, number, currency}">
-                                                    <apex:param value="{!BLANKVALUE(item.ListPrice, 0) - BLANKVALUE(item.UnitPrice, 0)}" />
-                                                </apex:outputText>
-                                            </apex:outputPanel>
-                                            <apex:outputPanel rendered="{!BLANKVALUE(item.ListPrice, 0) == BLANKVALUE(item.UnitPrice, 0) && (ISNULL(item.Discount) || item.Discount == 0)}">
-                                                -
-                                            </apex:outputPanel>
-                                        </td>
-                                    </apex:outputPanel>
-                                    <td align="right">
-                                        <apex:outputText value="{0, number, currency}">
-                                            <apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}" />
-                                        </apex:outputText>
-                                    </td>
+                                    <td align="right"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}" /></apex:outputText></td>
+                                    <td align="right"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}" /></apex:outputText></td>
                                 </tr>
+                                <!-- FILA B: DETALLE TÉCNICO EXPANDIDO (Si existe descripción) -->
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
+                                    <tr class="row-technical-detail">
+                                        <td colspan="4">
+                                            <div class="rich-text-content" style="border-left: 2pt solid #eee; padding-left: 10pt;">
+                                                <apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </apex:outputPanel>
                             </apex:outputPanel>
                         </apex:repeat>
                     </tbody>
                 </table>
 
-                <!-- 2.1 DETALLE TÉCNICO DE SERVICIOS (FUERA DE TABLA) -->
-                <div style="margin-top: 10pt;">
-                    <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                        <apex:outputPanel rendered="{!NOT(ISBLANK(item.Pyatz_Technical_Description__c)) || NOT(ISBLANK(item.Description))}">
-                            <div style="margin-bottom: 8pt; border-bottom: 0.5pt solid #eee; padding-bottom: 4pt;">
-                                <div style="font-weight: bold; color: #0070d2; font-size: 9pt;">Detalle: {!item.Product2.Name}</div>
-                                <div style="font-size: 9pt; color: #333; margin-top: 2pt; text-align: justify;">
-                                    <apex:outputText escape="false" value="{!IF(NOT(ISBLANK(item.Pyatz_Technical_Description__c)), item.Pyatz_Technical_Description__c, item.Description)}" />
-                                </div>
-                            </div>
-                        </apex:outputPanel>
-                    </apex:repeat>
-                </div>
-
-                <!-- 3. TOTALES -->
+                <!-- TOTALES -->
                 <div class="totals-box">
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table width="100%">
                         <tr>
-                            <td style="padding: 3pt 0; text-align: left; color: #666; font-size: 9pt;">SUBTOTAL</td>
-                            <td style="padding: 3pt 0; text-align: right; font-weight: bold; width: 80pt;">
-                                <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}" />
-                                </apex:outputText>
+                            <td align="right" style="font-weight: bold; color: #666; padding: 5pt;">SUBTOTAL</td>
+                            <td align="right" width="80pt" style="border-bottom: 0.5pt solid #eee;">
+                                <apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}" /></apex:outputText>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 3pt 0; text-align: left; color: #d8000c; font-size: 9pt;">DESCUENTO</td>
-                            <td style="padding: 3pt 0; text-align: right; font-weight: bold; color: #d8000c;">
-                                - <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!BLANKVALUE(technicalQuote.Discount, 0)}" />
-                                </apex:outputText>
+                            <td align="right" style="font-weight: bold; color: #666; padding: 5pt;">I.V.A. (16%)</td>
+                            <td align="right" style="border-bottom: 0.5pt solid #eee;">
+                                <apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}" /></apex:outputText>
                             </td>
                         </tr>
-                        <tr>
-                            <td style="padding: 3pt 0; text-align: left; color: #666; font-size: 9pt;">I.V.A. (16%)</td>
-                            <td style="padding: 3pt 0; text-align: right; font-weight: bold;">
-                                <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}" />
-                                </apex:outputText>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8pt 0; text-align: left; font-size: 12pt; font-weight: bold; color: #0070d2;">TOTAL</td>
-                            <td style="padding: 8pt 0; text-align: right; font-size: 12pt; font-weight: bold; color: #0070d2; border-bottom: 2pt solid #0070d2;">
-                                <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}" />
-                                </apex:outputText>
+                        <tr class="grand-total">
+                            <td align="right" style="padding: 10pt 5pt;">TOTAL</td>
+                            <td align="right">
+                                <apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}" /></apex:outputText>
                             </td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="clear: both;"></div>
-
-                <!-- 4. DATOS DE PAGO -->
-                <div style="background-color: #0070d2; color: white; padding: 4pt; text-align: center; font-weight: bold; font-size: 10pt; margin-top: 20pt; border: 0.5pt solid #0070d2;">DATOS DE PAGO</div>
-                <table class="table-pago" style="margin-top: 0;">
-                    <thead>
+                <!-- DATOS DE PAGO -->
+                <div style="margin-top: 25pt; border: 1pt solid #ccc; page-break-inside: avoid;">
+                    <div style="background-color: #0070d2; color: white; padding: 5pt; text-align: center; font-weight: bold; text-transform: uppercase;">Condiciones de Pago</div>
+                    <table width="100%">
                         <tr>
-                            <th style="background-color: #D4EDDA; color: #333; width: 25%;">Método de pago</th>
-                            <th style="background-color: #D4EDDA; color: #333; width: 50%;">OBSERVACIONES SOBRE PAGOS</th>
-                            <th style="background-color: #D4EDDA; color: #333; width: 25%;">TIPO DE TRABAJO A REALIZAR</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">
-                                Transferencia / Tarjeta
-                            </td>
-                            <td style="text-align: left; vertical-align: top;">
+                            <td width="30%" align="center" style="border-right: 1pt solid #ccc; background-color: #f9f9f9; vertical-align: middle; font-weight: bold;">Transferencia / Depósito</td>
+                            <td width="70%" style="padding: 10pt; text-align: justify;">
                                 <apex:outputText value="{!technicalQuote.Description}" escape="false" />
                             </td>
-                            <td style="text-align: center; vertical-align: middle;">
-                                Servicio Técnico
-                            </td>
                         </tr>
-                    </tbody>
-                </table>
+                    </table>
+                </div>
 
-                <!-- 5. CONDICIONES / ANEXOS / CLAUSULAS (VISIBILIDAD BASADA EN CONTENIDO) -->
+                <!-- CONDICIONES / CLAUSULAS -->
                 <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Warranty_Text__c))}">
-                    <div style="margin-top: 30pt; border-top: 1pt solid #ccc; padding-top: 10pt;">
-                        <div style="font-weight: bold; font-size: 11pt; margin-bottom: 8pt; text-transform: uppercase; color: #000;">Condiciones / Anexos / Cláusulas</div>
-                        <div style="font-size: 9pt; text-align: justify; line-height: 1.4;">
+                    <div style="margin-top: 30pt; border-top: 1.5pt solid #0070d2; padding-top: 15pt;">
+                        <div style="font-weight: bold; font-size: 11pt; margin-bottom: 8pt; text-transform: uppercase;">Condiciones / Anexos / Cláusulas</div>
+                        <div class="rich-text-content" style="font-size: 9.5pt;">
                             <apex:outputText escape="false" value="{!technicalQuote.Warranty_Text__c}" />
                         </div>
                     </div>
                 </apex:outputPanel>
 
-                <!-- SECCIÓN DE FIRMAS -->
+                <!-- FIRMAS -->
                 <div class="signature-section">
-                    <div class="sig-box">
-                        <div class="sig-line">Firma del CLIENTE</div>
-                    </div>
-                    <div class="sig-box">
-                        <div style="margin-bottom: 10pt;">
-                            <div style="font-family: cursive; font-size: 16pt;">{!technicalQuote.CreatedBy.Name}</div>
-                        </div>
-                        <div class="sig-line">
-                            Firma de {!technicalQuote.CreatedBy.Name}<br/>
-                            E-MAIL: {!technicalQuote.CreatedBy.Email}
-                        </div>
-                    </div>
-                    <div class="sig-box">
-                        <div style="border: 1px solid #ccc; width: 60pt; height: 60pt; margin: 0 auto 5pt auto; border-radius: 50%; font-size: 8pt; line-height: 60pt;">SELLO</div>
-                        <div class="sig-line">Sello de la empresa</div>
-                    </div>
+                    <table width="100%">
+                        <tr>
+                            <td width="33%" align="center">
+                                <div style="height: 70pt;"></div>
+                                <div class="sig-line">Firma del CLIENTE</div>
+                            </td>
+                            <td width="33%" align="center">
+                                <div style="height: 70pt; vertical-align: bottom; padding-bottom: 10pt;">
+                                    <div style="font-family: 'Courier New', monospace; font-size: 18pt; color: #0070d2;">{!technicalQuote.CreatedBy.Name}</div>
+                                </div>
+                                <div class="sig-line">FIRMA AUTORIZADA PYATZ</div>
+                            </td>
+                            <td width="33%" align="center">
+                                <div style="border: 1pt solid #ccc; width: 60pt; height: 60pt; border-radius: 50%; margin: 0 auto 8pt auto; line-height: 60pt; font-size: 8pt; color: #bbb;">SELLO</div>
+                                <div class="sig-line">Sello de la Empresa</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-            </div> <!-- Cierre de content-body -->
-
-            <img src="/servlet/servlet.ImageServer?id=015V9000005wjDB&oid={!$Organization.Id}" class="footer-img" />
+                
+                <div class="page-number">Página <span class="pagenumber"/> de <span class="pagecount"/></div>
+            </div>
         </body>
     </html>
 </apex:page>
