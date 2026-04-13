@@ -8,6 +8,7 @@ import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
 import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
 import getOpportunitiesList from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesList';
+import getOpportunitiesByAccount from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesByAccount';
 import saveStageTracking from '@salesforce/apex/QuoteTechnicalController.saveStageTracking';
 import saveTechnicalData from '@salesforce/apex/QuoteTechnicalController.saveTechnicalData';
 import getProcessHistory from '@salesforce/apex/QuoteTechnicalController.getProcessHistory';
@@ -16,16 +17,43 @@ import TechSlackModal from 'c/techSlackModal';
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
+
+    // --- ESTADO DEL MODAL ---
+    @track isCreationModalOpen = false;
+    @track activeOppId = null; 
+    
+    // LISTA EXTENDIDA DE CAMPOS (Configuración Manual Estable)
+    @track opportunityFields = [
+        'Name', 
+        'StageName', 
+        'CloseDate', 
+        'Amount', 
+        'Type', 
+        'LeadSource', 
+        'NextStep', 
+        'Description',
+        'CampaignId',
+        'Probability'
+    ];
+
+    // --- DETECCIÓN DE CONTEXTO ---
+    get isAccountContext() {
+        return this.objectApiName === 'Account';
+    }
+
+    get effectiveRecordId() {
+        return this.isAccountContext ? this.activeOppId : this.recordId;
+    }
     
     // --- ACCIÓN GLOBAL: SLACK 360 ---
     async handleOpenSlack() {
+        const targetId = this.effectiveRecordId;
         const result = await TechSlackModal.open({
             size: 'large',
             description: 'Modal de comunicación Slack 360',
-            recordId: this.recordId,
+            recordId: targetId,
             currentPhase: this.currentStage ? this.currentStage.label : 'General'
         });
-        console.log('Modal cerrado:', result);
     }
 
     // --- ESTADO DEL DASHBOARD ---
@@ -50,10 +78,10 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track currentSubStep = '1';
     @track currentStatus = ''; 
     @track allStatusOptions = [];
-    @track processHistory = []; // Almacenará los estados de todas las subetapas
+    @track processHistory = []; 
     @track quoteViewMode = 'list';
     @track selectedQuoteId = null;
-    @track selectedContractId = null; // Nueva propiedad para seguimiento de contrato formal
+    @track selectedContractId = null;
 
     OPERATIONAL_STAGES = [
         {
@@ -85,20 +113,14 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (data) {
             this.allStatusOptions = data.picklistFieldValues.Estado_Subetapa__c.values;
             this.buildHybridStages(data.picklistFieldValues);
-            
-            // Si ya hay un recordId, cargar historial ahora que las opciones existen
-            if (this.recordId) {
-                this.loadProcessHistory();
-            }
-        } else if (error) {
-            console.error('Error metadatos:', error);
-        }
+            if (this.effectiveRecordId) this.loadProcessHistory();
+        } else if (error) console.error('Error metadatos:', error);
     }
 
-    // Carga inicial del historial
     loadProcessHistory() {
-        if (!this.recordId) return;
-        getProcessHistory({ opportunityId: this.recordId })
+        const targetId = this.effectiveRecordId;
+        if (!targetId) return;
+        getProcessHistory({ opportunityId: targetId })
             .then(data => {
                 this.processHistory = data;
                 this.updateCurrentStatusFromHistory();
@@ -106,13 +128,11 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             .catch(error => console.error('Error history:', error));
     }
 
-    // Busca en el historial el estado que corresponde a la etapa/subetapa actual
     updateCurrentStatusFromHistory() {
         if (!this.processHistory.length || !this.subPhase) {
             this.currentStatus = '';
             return;
         }
-        // Comparación robusta (sin importar espacios o acentos si fuera necesario)
         const record = this.processHistory.find(h => 
             String(h.Etapa__c).trim() === String(this.currentStep).trim() && 
             String(h.Subetapa__c).trim() === String(this.subPhase).trim()
@@ -142,74 +162,37 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             });
 
         this.stages = [...dynamicStages, ...this.OPERATIONAL_STAGES];
-        
-        // Cargar etapa actual desde la Oportunidad si es posible
-        if (!this.currentStep && this.stages.length > 0) {
-            this.currentStep = this.stages[0].value;
-        }
-    }
-
-    // --- LÓGICA DE ESTADOS (DROPDOWN) ---
-    get statusOptions() {
-        if (!this.allStatusOptions.length || !this.subPhase) return [];
-        return this.allStatusOptions.filter(opt => {
-            const label = this.subPhase;
-            if (label === 'Levantamiento' || label === 'Memoria') 
-                return ['Pendiente confirmación cliente', 'Pendiente confirmación Pyatz', 'En proceso', 'Realizado'].includes(opt.label);
-            if (label === 'Def. solución') return ['Falta información', 'Realizado'].includes(opt.label);
-            if (label === 'Presupuesto') return ['En proceso - en tiempo', 'Falta información', 'Realizado'].includes(opt.label);
-            if (label === 'Envío cotización') return ['Pendiente definición', 'Pendiente de envío a cliente', 'Recepción no confirmada con cliente.', 'Recepción confirmada con cliente'].includes(opt.label);
-            if (label === 'Seguimiento') return ['Sin seguimiento', 'Sin respuesta del cliente', 'Seguimiento activo', 'Pendiente definición'].includes(opt.label);
-            if (label === 'Autorización') return ['Rechazado', 'En proceso de autorización', 'Ajuste de presupuesto', 'Aceptado'].includes(opt.label);
-            return true;
-        });
+        if (!this.currentStep && this.stages.length > 0) this.currentStep = this.stages[0].value;
     }
 
     handleStatusChange(event) {
         this.currentStatus = event.detail.value;
-        
-        // Actualizar historial en memoria de inmediato para persistencia visual
         const existingIdx = this.processHistory.findIndex(h => h.Etapa__c === this.currentStep && h.Subetapa__c === this.subPhase);
-        if (existingIdx !== -1) {
-            this.processHistory[existingIdx].Estado__c = this.currentStatus;
-        } else {
-            this.processHistory.push({ Etapa__c: this.currentStep, Subetapa__c: this.subPhase, Estado__c: this.currentStatus });
-        }
-        
+        if (existingIdx !== -1) this.processHistory[existingIdx].Estado__c = this.currentStatus;
+        else this.processHistory.push({ Etapa__c: this.currentStep, Subetapa__c: this.subPhase, Estado__c: this.currentStatus });
         this.syncOpportunityStatus();
     }
 
-    // --- SINCRONIZACIÓN CON SALESFORCE ---
     async syncOpportunityStatus() {
-        if (!this.recordId || !this.currentStep) return;
+        const targetId = this.effectiveRecordId;
+        if (!targetId || !this.currentStep) return;
+        if (!this.currentStatus) this.updateCurrentStatusFromHistory();
 
-        // Recuperar estatus del historial antes de sincronizar si currentStatus está vacío
-        if (!this.currentStatus) {
-            this.updateCurrentStatusFromHistory();
-        }
-
-        // 1. Guardar en el Objeto de Seguimiento
         if (this.subPhase && this.currentStatus) {
             try {
                 await saveStageTracking({
-                    opportunityId: this.recordId,
+                    opportunityId: targetId,
                     stage: this.currentStep,
                     subStage: this.subPhase,
                     status: this.currentStatus
                 });
-                
-                // Si el dashboard está visible, le pedimos que se refresque
                 const summaryComp = this.template.querySelector('c-tech-process-summary');
-                if (summaryComp) {
-                    summaryComp.refreshData();
-                }
-            } catch (e) {
-                console.error('Error tracking:', e);
-            }
+                if (summaryComp) summaryComp.refreshData();
+            } catch (e) { console.error('Error tracking:', e); }
         }
 
         const fields = {};
-        fields[ID_FIELD.fieldApiName] = this.recordId;
+        fields[ID_FIELD.fieldApiName] = targetId;
         fields[STAGE_FIELD.fieldApiName] = this.currentStep;
         fields[SUBSTAGE_FIELD.fieldApiName] = this.subPhase;
         if (this.currentStatus) fields[STATUS_FIELD.fieldApiName] = this.currentStatus;
@@ -217,45 +200,62 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         const recordInput = { fields };
         try {
             await updateRecord(recordInput);
-            console.log('Sincronización Exitosa');
         } catch (error) { console.error('Error sync:', error); }
     }
 
     connectedCallback() {
         if (this.recordId) {
-            // Modo Expediente Directo: Configurar estado inicial para el ID recibido
-            this.currentStep = 'Definición';
-            this.currentSubStep = '1';
-            this.quoteViewMode = 'list';
-            this.loadProcessHistory();
+            if (this.objectApiName === 'Opportunity') {
+                this.activeOppId = this.recordId;
+                this.currentStep = 'Definición';
+                this.currentSubStep = '1';
+                this.quoteViewMode = 'list';
+                this.loadProcessHistory();
+            } else if (this.isAccountContext) {
+                this.activeOppId = null;
+                this.loadOpportunities();
+            }
         } else {
-            // Modo Dashboard: Cargar lista de todas las oportunidades
+            this.activeOppId = null;
             this.loadOpportunities();
         }
     }
 
-    get showDashboard() { return !this.recordId; }
+    get showDashboard() { 
+        if (this.isAccountContext) return !this.activeOppId || this.viewingDashboard;
+        return !this.recordId || (this.recordId && this.viewingDashboard); 
+    }
+
+    @track viewingDashboard = false;
 
     loadOpportunities() {
         this.isLoading = true;
-        getOpportunitiesList()
-            .then(data => { this.opportunities = data; this.isLoading = false; })
+        const action = this.isAccountContext ? getOpportunitiesByAccount({ accountId: this.recordId }) : getOpportunitiesList();
+        action.then(data => { 
+                this.opportunities = data; 
+                this.isLoading = false; 
+            })
             .catch(error => { console.error('Error:', error); this.isLoading = false; });
     }
 
     handleRowAction(event) {
-        if (event.detail.action.name === 'open_360') {
-            this.recordId = event.detail.row.id;
+        const actionName = event.detail.action.name;
+        const row = event.detail.row;
+        if (actionName === 'open_360') {
+            this.activeOppId = row.id;
+            this.viewingDashboard = false;
             this.currentStep = 'Definición';
             this.currentSubStep = '1';
-            // Intentar cargar estado actual si viene en el row
-            this.currentStatus = event.detail.row.stageName === 'Definición' ? 'En proceso' : ''; 
             this.quoteViewMode = 'list';
-            this.syncOpportunityStatus();
+            this.loadProcessHistory();
         }
     }
 
-    handleBackToDashboard() { this.recordId = null; this.loadOpportunities(); }
+    handleBackToDashboard() { 
+        this.viewingDashboard = true;
+        this.activeOppId = null;
+        this.loadOpportunities();
+    }
 
     get currentStage() { return this.stages.find(s => s.value === this.currentStep); }
 
@@ -291,36 +291,34 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get isWorkOrderPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '3'; }
     get isEnhorabuenaPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '4'; }
 
-    // --- LÓGICA DE CONTROL VISUAL ---
-    get showGenericPlaceholder() {
-        return !(
-            this.isLevantamientoPhase || this.isMemoriaPhase || this.isDefSolucionPhase || 
-            this.isPresupuestoPhase || this.isEnvioPhase || this.isSeguimientoPhase || 
-            this.isContratoPhase || this.isWorkOrderPhase || this.isEnhorabuenaPhase || 
-            this.isAutorizacionPhase || this.isAltaCliente || this.isAltaPyatz || 
-            this.isCalendarioPhase
-        );
-    }
-
     handleLogCall() { this.navigateToGlobalAction('LogACall'); }
     handleNewTask() { this.navigateToGlobalAction('NewTask'); }
 
-    // --- ACCIÓN GLOBAL: CREAR NUEVA OPORTUNIDAD ---
     handleNewOpportunity() {
-        this[NavigationMixin.Navigate]({
-            type: 'standard__objectPage',
-            attributes: {
-                objectApiName: 'Opportunity',
-                actionName: 'new'
-            }
-        });
+        this.isCreationModalOpen = true;
+    }
+
+    closeCreationModal() {
+        this.isCreationModalOpen = false;
+    }
+
+    handleOpportunitySuccess(event) {
+        const newOppId = event.detail.id;
+        this.isCreationModalOpen = false;
+        this.activeOppId = newOppId;
+        this.viewingDashboard = false;
+        this.currentStep = 'Definición';
+        this.currentSubStep = '1';
+        this.quoteViewMode = 'list';
+        this.loadProcessHistory();
     }
 
     navigateToGlobalAction(actionName) {
+        const targetId = this.effectiveRecordId;
         this[NavigationMixin.Navigate]({
             type: 'standard__quickAction',
             attributes: { apiName: `Global.${actionName}` },
-            state: { recordId: this.recordId, contextId: this.recordId, defaultFieldValues: `WhatId=${this.recordId}` }
+            state: { recordId: targetId, contextId: targetId, defaultFieldValues: `WhatId=${targetId}` }
         });
     }
 
@@ -331,39 +329,29 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     
     async handleCreateNewQuote() {
         this.isLoading = true;
+        const targetId = this.effectiveRecordId;
         try {
-            // 1. Crear presupuesto base vinculado antes de abrir el editor
             const payload = {
-                opportunityId: this.recordId,
+                opportunityId: targetId,
                 name: 'Nuevo Presupuesto Técnico',
                 status: 'Borrador',
                 lineItems: '[]'
             };
-            
             const newQuoteId = await saveStageTracking({ 
-                opportunityId: this.recordId, 
+                opportunityId: targetId, 
                 stage: this.currentStep, 
                 subStage: this.subPhase, 
                 status: 'En proceso' 
             }).then(() => saveTechnicalData({ data: payload }));
 
-            // 2. Abrir el editor ya con el ID del registro creado
             this.selectedQuoteId = newQuoteId;
             this.quoteViewMode = 'edit';
             this.isLoading = false;
-        } catch (error) {
-            this.isLoading = false;
-            console.error('Error al crear presupuesto inicial:', error);
-        }
+        } catch (error) { this.isLoading = false; }
     }
 
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
-
-    // MANEJADOR DE CONTRATO GENERADO
-    handleContractGenerated(event) {
-        this.selectedContractId = event.detail;
-        console.log('Contrato capturado en Dashboard:', this.selectedContractId);
-    }
+    handleContractGenerated(event) { this.selectedContractId = event.detail; }
 
     get isFirstStep() { return this.isDefinicion && this.currentSubStep === '1'; }
     get isLastStep() { 
@@ -375,7 +363,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleStepClick(event) {
         this.currentStep = event.target.value;
         this.currentSubStep = '1';
-        this.currentStatus = ''; // Reset estado al cambiar macro-etapa
+        this.currentStatus = ''; 
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
     }
@@ -387,10 +375,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.syncOpportunityStatus();
     }
 
-    // --- CÁLCULO DE PROGRESO GLOBAL ---
     get overallProgress() {
         if (!this.stages.length || !this.currentStep) return 0;
-        
         let totalSubStages = 0;
         let completedSubStages = 0;
         let foundCurrent = false;
@@ -400,28 +386,22 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
                 totalSubStages++;
                 if (!foundCurrent) {
                     if (stage.value === this.currentStep && sub.value === this.currentSubStep) {
-                        foundCurrent = true;
-                        completedSubStages++;
-                    } else {
-                        completedSubStages++;
-                    }
+                        foundCurrent = true; completedSubStages++;
+                    } else completedSubStages++;
                 }
             });
         });
-
         if (totalSubStages === 0) return 0;
         return Math.round((completedSubStages / totalSubStages) * 100);
     }
 
     async handleNext() {
-        // 1. Validar Estado Obligatorio
         const statusCombo = this.template.querySelector('.status-combobox');
         if (statusCombo && !statusCombo.checkValidity()) {
             statusCombo.reportValidity();
             return;
         }
 
-        // 2. Validar Guardado de Levantamiento (Si aplica)
         if (this.isLevantamientoPhase) {
             const surveyComp = this.template.querySelector('c-tech-levantamiento-manager');
             if (surveyComp) {
@@ -433,9 +413,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         const maxSubSteps = this.currentSubStages.length;
         let nextSub = parseInt(this.currentSubStep) + 1;
 
-        if (nextSub <= maxSubSteps) {
-            this.currentSubStep = nextSub.toString();
-        } else {
+        if (nextSub <= maxSubSteps) this.currentSubStep = nextSub.toString();
+        else {
             const currentIndex = this.stages.findIndex(s => s.value === this.currentStep);
             if (currentIndex < this.stages.length - 1) {
                 this.currentStep = this.stages[currentIndex + 1].value;
@@ -449,9 +428,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     handlePrev() {
         let prevSub = parseInt(this.currentSubStep) - 1;
-        if (prevSub >= 1) {
-            this.currentSubStep = prevSub.toString();
-        } else {
+        if (prevSub >= 1) this.currentSubStep = prevSub.toString();
+        else {
             const currentIndex = this.stages.findIndex(s => s.value === this.currentStep);
             if (currentIndex > 0) {
                 const prevStage = this.stages[currentIndex - 1];

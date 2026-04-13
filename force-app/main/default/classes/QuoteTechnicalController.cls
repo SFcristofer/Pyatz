@@ -1192,7 +1192,7 @@ public with sharing class QuoteTechnicalController {
             target.Name = 'CLON - ' + source.Name;
             target.Status = 'Draft';
             insert target;
-            
+
             Boolean copyItems = options != null && options.containsKey('copyLineItems') ? (Boolean)options.get('copyLineItems') : true;
             if (copyItems) {
                 List<QuoteLineItem> qlis = [SELECT PricebookEntryId, Quantity, UnitPrice, Description, Discount, ServiceDate FROM QuoteLineItem WHERE QuoteId = :quoteId];
@@ -1208,5 +1208,33 @@ public with sharing class QuoteTechnicalController {
             }
             return target.Id;
         } catch (Exception e) { throw new AuraHandledException('Error clonación: ' + e.getMessage()); }
+    }
+
+    @AuraEnabled
+    public static List<Map<String, Object>> getOpportunitiesByAccount(Id accountId) {
+        List<Map<String, Object>> results = new List<Map<String, Object>>();
+        try {
+            List<Opportunity> opps = [SELECT Id, Name, StageName, Amount, CloseDate, Owner.Name, Account.Name, Subetapa__c, Estado_Subetapa__c 
+                                    FROM Opportunity 
+                                    WHERE AccountId = :accountId 
+                                    ORDER BY CreatedDate DESC];
+            
+            for (Opportunity o : opps) {
+                Map<String, Object> m = new Map<String, Object>();
+                m.put('id', o.Id);
+                m.put('name', o.Name);
+                m.put('account', o.Account.Name);
+                m.put('stageName', o.StageName);
+                m.put('amount', o.Amount != null ? o.Amount : 0);
+                m.put('closeDate', o.CloseDate);
+                m.put('owner', o.Owner.Name);
+                m.put('subetapa', o.Subetapa__c);
+                m.put('estado', o.Estado_Subetapa__c);
+                results.add(m);
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException('Error cargando proyectos del cliente: ' + e.getMessage());
+        }
+        return results;
     }
 }

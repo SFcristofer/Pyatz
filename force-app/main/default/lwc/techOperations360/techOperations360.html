@@ -1,5 +1,5 @@
 <template>
-    <!-- VISTA DASHBOARD (CUANDO NO HAY RECORD ID) -->
+    <!-- VISTA DASHBOARD (PIPELINE) -->
     <template if:true={showDashboard}>
         <div class="slds-box slds-theme_default" style="min-height: 80vh; background: #fdfdfd;">
             <!-- HEADER DASHBOARD -->
@@ -34,7 +34,7 @@
         </div>
     </template>
 
-    <!-- VISTA EXPEDIENTE 360 (CUANDO HAY RECORD ID) -->
+    <!-- VISTA EXPEDIENTE 360 (WIZARD) -->
     <template if:false={showDashboard}>
         <div class="slds-box slds-theme_default" style="min-height: 80vh; background: #fdfdfd;">
             
@@ -48,220 +48,154 @@
                     </div>
                 </div>
                 <div class="slds-grid slds-grid_vertical-align-center">
-                    <!-- Botón Global de Slack (Solo Icono con color oficial) -->
-                    <lightning-button-icon 
-                        icon-name="utility:slack" 
-                        variant="border-filled" 
-                        class="slds-m-right_small slack-icon-only" 
-                        style="--slds-c-icon-color-foreground: #4A154B; border-color: #4A154B;"
-                        onclick={handleOpenSlack} 
-                        tooltip="Abrir Slack 360">
-                    </lightning-button-icon>
-                    
+                    <lightning-button-icon icon-name="utility:slack" variant="border-filled" class="slds-m-right_small slack-icon-only" style="--slds-c-icon-color-foreground: #4A154B; border-color: #4A154B;" onclick={handleOpenSlack} tooltip="Abrir Slack 360"></lightning-button-icon>
                     <lightning-button label="Volver al Pipeline" icon-name="utility:back" onclick={handleBackToDashboard}></lightning-button>
                 </div>
             </header>
 
-            <!-- INFORMACIÓN DE LA OPORTUNIDAD (SECCIÓN OPPORTUNITY INFORMATION) -->
+            <!-- INFORMACIÓN DE LA OPORTUNIDAD -->
             <div class="slds-box slds-theme_shade slds-m-bottom_medium">
                 <h3 class="slds-text-heading_small slds-m-bottom_small slds-p-horizontal_small" style="color: #0070d2; font-weight: bold; border-left: 3px solid #0070d2;">
                     Información de la Oportunidad
                 </h3>
-                <lightning-record-view-form record-id={recordId} object-api-name="Opportunity">
+                <lightning-record-view-form record-id={effectiveRecordId} object-api-name="Opportunity">
                     <div class="slds-grid slds-wrap slds-p-horizontal_small">
-                        <!-- Columna Izquierda -->
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                             <lightning-output-field field-name="AccountId"></lightning-output-field>
                             <lightning-output-field field-name="Name"></lightning-output-field>
                             <lightning-output-field field-name="Amount"></lightning-output-field>
-                            <lightning-output-field field-name="Auxiliar_oportunidad__c"></lightning-output-field>
                         </div>
-                        <!-- Columna Derecha -->
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                             <lightning-output-field field-name="CloseDate"></lightning-output-field>
                             <lightning-output-field field-name="StageName"></lightning-output-field>
-                            <lightning-output-field field-name="Subetapa__c"></lightning-output-field>
-                            
-                            <!-- BARRA DE PROGRESO DE EXPEDIENTE (REEMPLAZA PROBABILIDAD) -->
                             <div class="slds-p-around_x-small slds-m-top_x-small" style="background: white; border-radius: 4px; border: 1px solid #e0e5ee;">
                                 <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
                                     <span class="slds-text-title_bold" style="color: #0070d2;">Avance del Expediente</span>
                                     <span class="slds-text-title_bold">{overallProgress}%</span>
                                 </div>
-                                <lightning-progress-bar 
-                                    value={overallProgress} 
-                                    size="medium" 
-                                    variant="circular">
-                                </lightning-progress-bar>
+                                <lightning-progress-bar value={overallProgress} size="medium" variant="circular"></lightning-progress-bar>
                             </div>
                         </div>
                     </div>
                 </lightning-record-view-form>
             </div>
 
-            <!-- INDICADOR DE ETAPAS PRINCIPALES (X.TXT) -->
+            <!-- NAVEGACIÓN -->
             <div class="slds-m-vertical_medium">
                 <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
                     <template for:each={stages} for:item="stage">
-                        <lightning-progress-step 
-                            key={stage.value} 
-                            label={stage.label} 
-                            value={stage.value} 
-                            onclick={handleStepClick}>
-                        </lightning-progress-step>
+                        <lightning-progress-step key={stage.value} label={stage.label} value={stage.value} onclick={handleStepClick}></lightning-progress-step>
                     </template>
                 </lightning-progress-indicator>
             </div>
 
-            <!-- BARRA DE CONTROL DE SUB-PROCESO (INTEGRADA) -->
             <div class="substage-toolbar slds-m-bottom_medium">
-                <div class="slds-grid slds-grid_vertical-align-center">
-                    <!-- Barra de Progreso (Flexible) -->
-                    <div class="slds-col slds-grow">
-                        <lightning-progress-indicator 
-                            current-step={currentSubStep} 
-                            type="path" 
-                            variant="base"
-                            class="substage-path">
-                            <template for:each={currentSubStages} for:item="sub">
-                                <lightning-progress-step 
-                                    key={sub.value} 
-                                    label={sub.label} 
-                                    value={sub.value} 
-                                    onclick={handleSubStepClick}>
-                                </lightning-progress-step>
-                            </template>
-                        </lightning-progress-indicator>
-                    </div>
-                </div>
+                <lightning-progress-indicator current-step={currentSubStep} type="path" variant="base" class="substage-path">
+                    <template for:each={currentSubStages} for:item="sub">
+                        <lightning-progress-step key={sub.value} label={sub.label} value={sub.value} onclick={handleSubStepClick}></lightning-progress-step>
+                    </template>
+                </lightning-progress-indicator>
             </div>
 
-            <!-- CONTENIDO DE ETAPA ACTIVA -->
             <div class="module-container slds-p-around_medium">
-                
-                <!-- MÓDULO: LEVANTAMIENTO -->
                 <template if:true={isLevantamientoPhase}>
-                    <c-tech-levantamiento-manager record-id={recordId}></c-tech-levantamiento-manager>
+                    <c-tech-levantamiento-manager record-id={effectiveRecordId}></c-tech-levantamiento-manager>
                 </template>
-
-                <!-- MÓDULO: MEMORIA TÉCNICA -->
                 <template if:true={isMemoriaPhase}>
-                    <c-tech-memoria-manager record-id={recordId}></c-tech-memoria-manager>
+                    <c-tech-memoria-manager record-id={effectiveRecordId}></c-tech-memoria-manager>
                 </template>
-
-                <!-- MÓDULO: DEF. SOLUCIÓN -->
                 <template if:true={isDefSolucionPhase}>
-                    <c-tech-solution-costing record-id={recordId}></c-tech-solution-costing>
+                    <c-tech-solution-costing record-id={effectiveRecordId}></c-tech-solution-costing>
                 </template>
-
-                <!-- MÓDULO: PRESUPUESTO (COMPUESTO: LISTA + EDITOR) -->
                 <template if:true={isPresupuestoPhase}>
-                    <!-- Sub-vista 1: Listado de Presupuestos -->
                     <template if:true={showQuoteList}>
-                        <c-tech-quote-list 
-                            opportunity-id={recordId} 
-                            oneditquote={handleEditQuote} 
-                            oncreatenew={handleCreateNewQuote}>
-                        </c-tech-quote-list>
+                        <c-tech-quote-list opportunity-id={effectiveRecordId} oneditquote={handleEditQuote} oncreatenew={handleCreateNewQuote}></c-tech-quote-list>
                     </template>
-                    <!-- Sub-vista 2: Editor de Presupuesto -->
                     <template if:true={showQuoteEditor}>
                         <div class="slds-m-bottom_small">
                             <lightning-button label="Volver al Listado" icon-name="utility:back" onclick={handleBackToQuoteList}></lightning-button>
                         </div>
-                        <c-tech-quote-editor 
-                            record-id={selectedQuoteId} 
-                            opportunity-id={recordId}>
-                        </c-tech-quote-editor>
+                        <c-tech-quote-editor record-id={selectedQuoteId} opportunity-id={effectiveRecordId}></c-tech-quote-editor>
                     </template>
                 </template>
-
-                <!-- MÓDULO: ENVÍO COTIZACIÓN (COMMUNICATION HUB) -->
                 <template if:true={isEnvioPhase}>
-                    <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
+                    <c-tech-communication-hub record-id={effectiveRecordId}></c-tech-communication-hub>
                 </template>
-
-                <!-- MÓDULO: SEGUIMIENTO TÁCTICO (3.2) - CAJA TÁCTICA PROFESIONAL -->
                 <template if:true={isSeguimientoPhase}>
-                    <c-tech-tactical-follow-up record-id={recordId}></c-tech-tactical-follow-up>
+                    <c-tech-tactical-follow-up record-id={effectiveRecordId}></c-tech-tactical-follow-up>
                 </template>
-
-                <!-- MÓDULO: CONTRATO -->
                 <template if:true={isContratoPhase}>
-                    <c-tech-contract-manager record-id={recordId} oncontractgenerated={handleContractGenerated}></c-tech-contract-manager>
+                    <c-tech-contract-manager record-id={effectiveRecordId} oncontractgenerated={handleContractGenerated}></c-tech-contract-manager>
                 </template>
-
-                <!-- MÓDULO: CREACIÓN ODT'S -->
                 <template if:true={isWorkOrderPhase}>
-                    <c-tech-work-order-console record-id={recordId} quote-id={selectedQuoteId} service-contract-id={selectedContractId}></c-tech-work-order-console>
+                    <c-tech-work-order-console record-id={effectiveRecordId} quote-id={selectedQuoteId} service-contract-id={selectedContractId}></c-tech-work-order-console>
                 </template>
-
-                <!-- MÓDULO: ENHORABUENA (COMUNICACIÓN OFICIAL) -->
                 <template if:true={isEnhorabuenaPhase}>
-                    <c-tech-communication-hub record-id={recordId} folder-name="Enhorabuena"></c-tech-communication-hub>
+                    <c-tech-communication-hub record-id={effectiveRecordId} folder-name="Enhorabuena"></c-tech-communication-hub>
                 </template>
-
-                <!-- MÓDULO: RESUMEN DE EJECUCIÓN (CIERRE - AUTORIZACIÓN) -->
                 <template if:true={isAutorizacionPhase}>
-                    <c-tech-process-summary record-id={recordId}></c-tech-process-summary>
+                    <c-tech-process-summary record-id={effectiveRecordId}></c-tech-process-summary>
                 </template>
-
-                <!-- OTROS MÓDULOS (PLACEHOLDER) -->
                 <template if:true={isAltaCliente}>
-                    <!-- GESTOR DE DOCUMENTOS FUNCIONAL (SUBIDA DE ARCHIVOS + AUTO-CHECK) -->
-                    <c-tech-document-manager record-id={recordId}></c-tech-document-manager>
+                    <c-tech-document-manager record-id={effectiveRecordId}></c-tech-document-manager>
                 </template>
-
                 <template if:true={isAltaPyatz}>
-                    <!-- GESTOR DE DOCUMENTOS PYATZ (ENVÍO AL CLIENTE) -->
-                    <c-tech-pyatz-document-manager record-id={recordId}></c-tech-pyatz-document-manager>
+                    <c-tech-pyatz-document-manager record-id={effectiveRecordId}></c-tech-pyatz-document-manager>
                 </template>
-
                 <template if:true={isCalendarioPhase}>
-                    <!-- CALENDARIO DE RECURSOS (NATIVO FIELD SERVICE) -->
-                    <c-tech-resource-calendar record-id={recordId}></c-tech-resource-calendar>
-                </template>
-
-                <!-- PLACEHOLDER GENÉRICO (SOLO SI NO HAY MÓDULO ASIGNADO) -->
-                <template if:true={showGenericPlaceholder}>
-                    <div class="slds-text-align_center slds-p-around_large">
-                        <h2 class="slds-text-heading_small slds-text-color_weak slds-m-bottom_small">
-                            {currentStage.label} > {subPhase}
-                        </h2>
-                        
-                        <div class="slds-box slds-theme_shade">
-                            <p>Espacio de trabajo para la sub-etapa: <strong>{subPhase}</strong></p>
-                            <p class="slds-m-top_x-small slds-text-color_weak">Record ID Activo: {recordId}</p>
-                            <div class="slds-m-top_large">
-                                <lightning-icon icon-name="standard:task" size="large"></lightning-icon>
-                            </div>
-                        </div>
-                    </div>
+                    <c-tech-resource-calendar record-id={effectiveRecordId}></c-tech-resource-calendar>
                 </template>
             </div>
 
-            <!-- ACCIONES DE NAVEGACIÓN -->
+            <!-- NAVEGACIÓN -->
             <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
                 <lightning-button label="Anterior" variant="neutral" icon-name="utility:back" onclick={handlePrev} disabled={isFirstStep}></lightning-button>
-                
                 <div class="slds-grid slds-grid_vertical-align-center">
-                    <!-- Selector de Estado Reubicado -->
                     <div class="slds-m-right_medium" style="width: 250px;">
-                        <lightning-combobox
-                            label="Estado de Sub-etapa"
-                            placeholder="Definir Estado..."
-                            value={currentStatus}
-                            options={statusOptions}
-                            onchange={handleStatusChange}
-                            variant="label-hidden"
-                            class="status-combobox"
-                            required>
-                        </lightning-combobox>
+                        <lightning-combobox label="Estado" placeholder="Estado..." value={currentStatus} options={statusOptions} onchange={handleStatusChange} variant="label-hidden" class="status-combobox" required></lightning-combobox>
                     </div>
                     <lightning-button label="Guardar y Continuar" variant="brand" icon-name="utility:forward" icon-position="right" onclick={handleNext} disabled={isLastStep}></lightning-button>
                 </div>
             </div>
-
         </div>
+    </template>
+
+    <!-- MODAL DINÁMICO (BASADO EN ACCIÓN RÁPIDA) -->
+    <template if:true={isCreationModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={closeCreationModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium">Nuevo Proyecto Pyatz</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-record-edit-form object-api-name="Opportunity" onsuccess={handleOpportunitySuccess}>
+                        <lightning-messages></lightning-messages>
+                        
+                        <!-- RENDERIZADO DINÁMICO DE CAMPOS EN 2 COLUMNAS -->
+                        <div class="slds-grid slds-wrap">
+                            <template for:each={opportunityFields} for:item="f">
+                                <div key={f} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_x-small">
+                                    <lightning-input-field field-name={f}></lightning-input-field>
+                                </div>
+                            </template>
+                            
+                            <!-- Campo oculto para vinculación automática al cliente actual -->
+                            <div class="slds-hide">
+                                <lightning-input-field field-name="AccountId" value={recordId}></lightning-input-field>
+                            </div>
+                        </div>
+
+                        <div class="slds-m-top_medium slds-text-align_right">
+                            <lightning-button label="Cancelar" onclick={closeCreationModal} class="slds-m-right_small"></lightning-button>
+                            <lightning-button type="submit" label="Crear e Iniciar 360" variant="brand"></lightning-button>
+                        </div>
+                    </lightning-record-edit-form>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
     </template>
 </template>
