@@ -1,0 +1,52 @@
+.health-container {
+    background: #fdfdfd;
+    border-top: 1px solid #e0e5ee;
+    overflow-x: auto;
+}
+
+.macro-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.macro-label {
+    font-size: 10px;
+    font-weight: bold;
+    color: #1b5297;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.dots-row {
+    display: flex;
+    gap: 12px;
+}
+
+.dot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #e0e5ee; /* Gris (Pendiente) */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.dot-sub-label {
+    font-size: 8px;
+    color: #747474;
+    margin-top: 2px;
+}
+
+/* Semáforos */
+.dot-green { background-color: #2e844a; box-shadow: 0 0 4px #2e844a; }
+.dot-yellow { background-color: #ff9a05; box-shadow: 0 0 4px #ff9a05; }
+.dot-red { background-color: #ea001e; box-shadow: 0 0 4px #ea001e; }
+.dot-gray { background-color: #e0e5ee; }
+.dot-blue { background-color: #0070d2; box-shadow: 0 0 4px #0070d2; } /* Sub-etapa activa */

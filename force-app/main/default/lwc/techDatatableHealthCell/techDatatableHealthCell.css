@@ -1,0 +1,11 @@
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #e0e5ee;
+}
+.dot-green { background-color: #2e844a; }
+.dot-yellow { background-color: #ff9a05; }
+.dot-red { background-color: #ea001e; }
+.dot-gray { background-color: #e0e5ee; }
+.dot-active { border: 1px solid #000; }

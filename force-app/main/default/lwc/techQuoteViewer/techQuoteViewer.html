@@ -1,0 +1,18 @@
+<template>
+    <div class="viewer-container">
+        <template if:true={recordId}>
+            <iframe 
+                src={pdfUrl} 
+                width="100%" 
+                height="800px" 
+                style="border: none; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"
+                title="Previsualización de Presupuesto Pyatz">
+            </iframe>
+        </template>
+        <template if:false={recordId}>
+            <div class="slds-align_absolute-center" style="height: 200px;">
+                <p class="slds-text-heading_small slds-text-color_weak">Cargando identificador de presupuesto...</p>
+            </div>
+        </template>
+    </div>
+</template>

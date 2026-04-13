@@ -1,112 +1,48 @@
-.onboarding-container {
+.checklist-container {
     background: #ffffff;
-    min-height: 400px;
-}
-
-/* PANTALLA DE BLOQUEO */
-.lock-screen {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    margin: 2rem 0;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.pin-input-container {
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-.custom-pin-input {
-    --slds-c-input-text-align: center;
-    font-size: 1.5rem;
-    letter-spacing: 0.5rem;
-}
-
-/* GESTIÓN DE EVIDENCIAS */
-.bg-light {
-    background-color: #fcfcfd;
-}
-
-.border-all {
-    border: 1px solid #e2e8f0;
-}
-
-.border-dashed {
-    border: 2px dashed #cbd5e1;
-}
-
-.radius-8 {
-    border-radius: 8px;
-}
-
-.radius-12 {
-    border-radius: 12px;
-}
-
-.evidence-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    height: 100%;
-}
-
-.evidence-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.clickable-card {
-    cursor: pointer;
-}
-
-.tag-label {
-    font-size: 9px;
-    font-weight: 800;
-    color: #475569;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.bg-slate-100 {
-    background-color: #f1f5f9;
-}
-
-.preview-thumb {
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    padding: 1.5rem;
     border-radius: 4px;
-    background: #f8fafc;
 }
 
-.preview-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.checklist-header {
+    color: #333333;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: left;
 }
 
-.doc-title {
-    font-size: 11px;
-    color: #1e293b;
-    margin-top: 4px;
+.document-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.5rem;
 }
 
-.italic {
-    font-style: italic;
+.document-label {
+    color: #4f4f4f;
+    font-size: 0.95rem;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-.shadow-sm {
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+/* Estilo personalizado para los botones Si/No */
+:host {
+    --slds-c-radio-button-color-border: #90caf9; /* Azul claro para el borde */
+    --slds-c-radio-button-color-background-checked: #e3f2fd; /* Relleno azul muy claro al seleccionar */
+    --slds-c-radio-button-text-color-checked: #1976d2; /* Texto azul al seleccionar */
 }
 
-.border-bottom {
-    border-bottom: 1px solid #f1f5f9;
+/* Forzar el look minimalista de x.txt */
+.custom-radio-group :dangerous-internal-shadow-root .slds-radio_button__label {
+    border-color: #90caf9 !important;
+    background-color: #f8fbff !important;
+    color: #90caf9 !important;
+    padding: 0 1rem;
+    min-width: 50px;
+    text-align: center;
 }
 
-.upload-wrapper {
-    transition: border-color 0.2s;
-}
-
-.upload-wrapper:hover {
-    border-color: #4f46e5;
+.custom-radio-group :dangerous-internal-shadow-root .slds-radio_button [type="radio"]:checked + .slds-radio_button__label {
+    background-color: #e3f2fd !important;
+    color: #1976d2 !important;
+    border-color: #1976d2 !important;
+    font-weight: bold;
 }

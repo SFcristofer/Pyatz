@@ -1,0 +1,19 @@
+<template>
+    <div class="health-container slds-p-vertical_x-small">
+        <div class="slds-grid slds-grid_align-spread">
+            <template for:each={healthData} for:item="macro">
+                <div key={macro.label} class="macro-group slds-m-right_medium">
+                    <span class="macro-label">{macro.label}</span>
+                    <div class="dots-row">
+                        <template for:each={macro.subStages} for:item="sub">
+                            <div key={sub.label} class="dot-container">
+                                <div class={sub.statusClass} title={sub.tooltip}></div>
+                                <span class="dot-sub-label">{sub.shortLabel}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

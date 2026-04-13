@@ -1,0 +1,111 @@
+:host {
+    --brand-blue: #0070d2;
+    --light-gray: #f8f9fa;
+    --border-color: #dddbda;
+}
+
+.survey-card-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.blue-square {
+    width: 14px;
+    height: 14px;
+    background-color: var(--brand-blue);
+    border-radius: 2px;
+}
+
+.bg-light-gray {
+    background-color: var(--light-gray);
+}
+
+.radius-8 {
+    border-radius: 8px;
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ESTILOS DE TABLA TÉCNICA (HOJA DE CÁLCULO) */
+.survey-table-wrapper {
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.table-scroll-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.survey-table {
+    border-collapse: collapse;
+    font-size: 0.75rem; /* Letra más pequeña */
+    width: 100%;
+}
+
+.survey-table th {
+    background-color: #ebf5ff;
+    color: #1e293b;
+    font-weight: bold;
+    text-align: center;
+    padding: 4px 2px; /* Padding reducido */
+    border: 1px solid var(--border-color);
+}
+
+.survey-header-group th {
+    background-color: #0070d2;
+    color: white;
+    text-transform: uppercase;
+    font-size: 0.65rem; /* Encabezado de grupo aún más pequeño */
+    padding: 3px;
+}
+
+.survey-table td {
+    padding: 0;
+    border: 1px solid var(--border-color);
+    height: 24px; /* Altura de fila fija y baja */
+}
+
+.cell-input, .cell-select {
+    width: 100%;
+    border: none;
+    padding: 4px; /* Espaciado interno mínimo */
+    background: transparent;
+    text-align: center;
+    font-size: 0.75rem;
+    height: 100%;
+}
+
+.cell-select {
+    appearance: none;
+    cursor: pointer;
+    text-align-last: center;
+}
+
+.cell-input:focus {
+    background: #fffdf2;
+    outline: 2px solid #ffb75d;
+    outline-offset: -2px;
+}
+
+.survey-row-totals {
+    background-color: #f1f5f9;
+    font-weight: bold;
+}
+
+.survey-row-totals td {
+    padding: 8px;
+    text-align: right;
+}
+
+/* DIAGNÓSTICO VERTICAL (ÍNTIMA) */
+.vertical-diag-table .diag-label {
+    background-color: var(--light-gray);
+    width: 60%;
+    font-weight: bold;
+    padding-left: 10px;
+}
