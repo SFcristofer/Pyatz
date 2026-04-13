@@ -90,6 +90,45 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN: SEDE SELECCIONADA (NUEVA) -->
+            <div class="slds-box slds-theme_default slds-m-bottom_medium" style="border-left: 4px solid #0070d2; background: #f0f8ff;">
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                    <h2 class="slds-text-heading_small" style="color: #0070d2; font-weight: bold;">Sede de Operación Seleccionada</h2>
+                    <span class="slds-badge slds-theme_info">Folio: {contractData.folioSede}</span>
+                </div>
+                
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
+                    <lightning-icon icon-name="standard:address" size="small" class="slds-m-right_small"></lightning-icon>
+                    <span class="slds-text-heading_medium">{contractData.sedeSeleccionada}</span>
+                </div>
+
+                <!-- REJILLA OPERATIVA -->
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <div class="slds-form-element slds-m-bottom_small">
+                            <span class="slds-text-title_bold" style="color: #4a5568;">Dirección de Ejecución:</span>
+                            <p class="slds-text-body_regular">{contractData.direccionSede}</p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                        <div class="slds-form-element slds-m-bottom_small">
+                            <span class="slds-text-title_bold" style="color: #4a5568;">Contacto en Sede:</span>
+                            <p class="slds-text-body_regular">{contractData.contactoPerson}</p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                        <div class="slds-form-element slds-m-bottom_small">
+                            <span class="slds-text-title_bold" style="color: #4a5568;">Prioridad de Atención:</span>
+                            <p>
+                                <span class="slds-badge slds-theme_warning" style="font-weight: bold;">{contractData.prioridad}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SECCIÓN DE SEDE -->
+
             <!-- 4. SECCIÓN DE SEDE -->
             <template for:each={sedesList} for:item="sede">
                 <div key={sede.id} class="sede-card">
@@ -171,10 +210,11 @@
                                     </div>
 
                                     <div class="slds-m-top_medium">
-                                        <label class="slds-form-element__label">SELECCIÓN DE PERSONAL: TÉCNICOS: 0</label>
-                                        <select multiple class="custom-multi-select slds-select" style="height: 100px;">
+                                        <label class="slds-form-element__label">SELECCIÓN DE PERSONAL: TÉCNICOS: {tra.numTecnicosSeleccionados}</label>
+                                        <select multiple class="custom-multi-select slds-select" style="height: 100px;" 
+                                            data-tra-id={tra.id} onchange={handleTecnicoChange}>
                                             <template for:each={tecnicosOptions} for:item="opt">
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
                                             </template>
                                         </select>
                                     </div>

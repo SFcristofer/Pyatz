@@ -1,6 +1,7 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import getInitialWorkOrderData from '@salesforce/apex/TechWorkOrderController.getInitialWorkOrderData';
 import saveWorkOrders from '@salesforce/apex/TechWorkOrderController.saveWorkOrders';
+import getServiceResources from '@salesforce/apex/TechWorkOrderController.getServiceResources';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
@@ -15,6 +16,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     // IDs de respaldo para el guardado
     accountId;
     oppId;
+    internalQuoteId;
+    internalServiceContractId;
 
     @track contractFolio = 'CARGANDO...';
     @track contractData = {
@@ -32,7 +35,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @track woNotes = '';
     @track startDate = '';
     @track endDate = '';
-    @track showSchedulingSection = false;
+    @track showSchedulingSection = true; // CAMBIO: Visible por defecto para evitar que "desaparezca"
 
     @track daysOfWeek = [
         { label: 'Lunes', checked: true }, { label: 'Martes', checked: true }, 
@@ -41,63 +44,78 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         { label: 'Domingo', checked: false }
     ];
 
-    tecnicosOptions = [
-        { label: 'Técnico 1 - Juan Pérez', value: 't1' },
-        { label: 'Técnico 2 - María López', value: 't2' }
-    ];
+    @track tecnicosOptions = [];
+
+    @wire(getServiceResources)
+    wiredResources({ error, data }) {
+        if (data) {
+            this.tecnicosOptions = data.map(sr => ({ label: sr.name, value: sr.id }));
+        } else if (error) {
+            console.error('Error cargando recursos de servicio:', error);
+        }
+    }
 
     @wire(getInitialWorkOrderData, { oppId: '$recordId', quoteId: '$quoteId', serviceContractId: '$serviceContractId' })
     wiredData({ error, data }) {
         if (data) {
-            // GUARDIA: Solo procesar si es un contrato nuevo o si el ID ha cambiado
-            if (this.oppId === data.oppId && this.sedesList.length > 0) {
-                return; 
+            // Evitar procesar si los datos son los mismos (comparación de Folio)
+            if (this.contractFolio === data.folio && this.sedesList.length > 0) {
+                this.isLoading = false;
+                return;
             }
 
             this.contractFolio = data.folio;
             this.accountId = data.accountId;
             this.oppId = data.oppId;
-            this.quoteId = data.quoteId;
-
+            this.internalQuoteId = data.quoteId;
+            this.internalServiceContractId = this.serviceContractId || data.serviceContractId;
+            
             this.contractData = {
                 cliente: data.cliente || 'Sin cliente',
                 lineaNegocio: data.lineaNegocio || 'No definida',
                 sedes: data.sedes || 'Sin sedes asignadas',
+                sedeSeleccionada: data.sedes ? data.sedes.split(',')[0] : 'Sede Principal',
+                
+                // NUEVOS CAMPOS OPERATIVOS (MAPEADOS DE FORMA SEGURA)
+                folioSede: data.folio ? 'S-' + data.folio : 'Pendiente',
+                direccionSede: data.direccion || 'Consultar en el expediente del Cliente',
+                contactoPerson: data.contacto || 'Responsable de Sede',
+                prioridad: 'Media', // Valor inicial seguro
+                
                 fechaInicio: data.fechaInicio || 'N/A',
                 fechaFin: data.fechaFin || 'N/A',
                 fechaPrimerTratamiento: data.fechaPrimerTratamiento || 'Pendiente',
                 fechaLimiteServicios: data.fechaLimiteServicios || 'Pendiente',
-                tratamientos: data.tratamientos.map(t => t.name).join(', ')
+                tratamientos: data.tratamientos ? data.tratamientos.map(t => t.name).join(', ') : 'Ninguno'
             };
 
-            this.sedesList = [{
-                id: 'main-sede',
-                name: data.sedes,
-                startTime: '08:00:00.000',
-                endTime: '18:00:00.000',
-                startTime2: '',
-                endTime2: '',
-                tratamientos: data.tratamientos.map(t => ({
-                    id: t.id,
-                    name: t.name,
-                    quantity: t.quantity,
-                    numTecnicos: 1,
-                    durationHours: 1,
-                    durationMinutes: 0,
-                    durationSeconds: 0,
-                    zonas: t.zonas || t.description || 'Sin descripción técnica',
-                    schedulingRows: this.generateSchedulingRows(t.quantity)
-                }))
-            }];
+            if (data.tratamientos && data.tratamientos.length > 0) {
+                this.sedesList = [{
+                    id: 'main-sede',
+                    name: data.sedes || 'Sede Principal',
+                    startTime: '08:00:00.000',
+                    endTime: '18:00:00.000',
+                    startTime2: '',
+                    endTime2: '',
+                    tratamientos: data.tratamientos.map(t => ({
+                        id: t.id,
+                        name: t.name,
+                        quantity: t.quantity || 1,
+                        numTecnicos: 1,
+                        durationHours: 1,
+                        durationMinutes: 0,
+                        durationSeconds: 0,
+                        zonas: t.zonas || t.description || 'Sin descripción técnica',
+                        numTecnicosSeleccionados: 0,
+                        tecnicosIds: [],
+                        schedulingRows: this.generateSchedulingRows(t.quantity || 1)
+                    }))
+                }];
+            }
             this.isLoading = false;
         } else if (error) {
-            this.isLoading = false; // DETENER SPINNER EN ERROR
+            this.isLoading = false;
             console.error('Error cargando datos ODT:', error);
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Error de carga',
-                message: error.body ? error.body.message : 'Error desconocido al recuperar datos del contrato.',
-                variant: 'error'
-            }));
         }
     }
 
@@ -146,6 +164,25 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }));
     }
 
+    handleTecnicoChange(event) {
+        const traId = event.target.dataset.traId;
+        const selectedOptions = Array.from(event.target.selectedOptions).map(option => option.value);
+        
+        this.sedesList = this.sedesList.map(sede => ({
+            ...sede,
+            tratamientos: sede.tratamientos.map(tra => {
+                if (tra.id === traId) {
+                    return { 
+                        ...tra, 
+                        tecnicosIds: selectedOptions,
+                        numTecnicosSeleccionados: selectedOptions.length 
+                    };
+                }
+                return tra;
+            })
+        }));
+    }
+
     handleRowChange(event) {
         const field = event.target.dataset.field;
         const rowIndex = event.target.dataset.rowIndex;
@@ -180,7 +217,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         this.isSaving = true;
 
         const payload = {
-            quoteId: this.quoteId,
+            quoteId: this.internalQuoteId,
+            serviceContractId: this.internalServiceContractId,
             oppId: this.oppId,
             accountId: this.accountId,
             folio: this.contractFolio,

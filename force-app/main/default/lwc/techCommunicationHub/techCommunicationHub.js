@@ -9,6 +9,7 @@ import getEmailEngagementDetails from '@salesforce/apex/QuoteTechnicalController
 
 export default class TechCommunicationHub extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
+    @api folderName; // Nombre de la carpeta de plantillas a filtrar (opcional)
 
     @track selectedFolder = '';
     @track selectedTemplateId = '';
@@ -28,6 +29,13 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     @track showEngagementModal = false;
     @track isLoadingEngagement = false;
     @track engagementDetails = [];
+
+    connectedCallback() {
+        // Si se recibe una carpeta específica, la seleccionamos por defecto
+        if (this.folderName) {
+            this.selectedFolder = this.folderName;
+        }
+    }
 
     handleShowEngagement() {
         this.showEngagementModal = true;
@@ -86,18 +94,27 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
         });
     }
 
-    folderOptions = [
-        { label: 'Pyatz - CORREOS A CLIENTES', value: 'Pyatz-CORREOS A CLIENTES' },
-        { label: 'Pyatz - CORREOS INTERNOS', value: 'Pyatz-CORREOS INTERNOS' }
-    ];
+    get folderOptions() {
+        if (this.folderName) {
+            return [{ label: this.folderName, value: this.folderName }];
+        }
+        return [
+            { label: 'Pyatz - CORREOS A CLIENTES', value: 'Pyatz-CORREOS A CLIENTES' },
+            { label: 'Pyatz - CORREOS INTERNOS', value: 'Pyatz-CORREOS INTERNOS' }
+        ];
+    }
 
-    @wire(getEmailTemplatesByFolders, { folderNames: ['Pyatz-CORREOS A CLIENTES', 'Pyatz-CORREOS INTERNOS'] })
+    @wire(getEmailTemplatesByFolders, { folderNames: '$computedFolderNames' })
     wiredTemplates({ error, data }) {
         if (data) {
             this.templates = data;
         } else if (error) {
             console.error('Error loading templates:', error);
         }
+    }
+
+    get computedFolderNames() {
+        return this.folderName ? [this.folderName] : ['Pyatz-CORREOS A CLIENTES', 'Pyatz-CORREOS INTERNOS'];
     }
 
     @wire(getAvailableAttachments, { oppId: '$recordId' })

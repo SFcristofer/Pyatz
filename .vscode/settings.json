@@ -41,5 +41,6 @@
   ],
   "eslint.options": {
     "overrideConfigFile": "c:\\Users\\crist\\OneDrive\\Documentos\\Proyecto pyatz\\Pyatz\\.eslintrc.json"
-  }
+  },
+  "xml.preferences.showSchemaDocumentationType": "none"
 }
