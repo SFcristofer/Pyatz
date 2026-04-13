@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Subetapa__c</fullName>
+    <label>Subetapa</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>StageName</controllingField>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Levantamiento</fullName>
+                <default>false</default>
+                <label>Levantamiento</label>
+            </value>
+            <value>
+                <fullName>Memoria</fullName>
+                <default>false</default>
+                <label>Memoria</label>
+            </value>
+            <value>
+                <fullName>Def. solución</fullName>
+                <default>false</default>
+                <label>Def. solución</label>
+            </value>
+            <value>
+                <fullName>Presupuesto</fullName>
+                <default>false</default>
+                <label>Presupuesto</label>
+            </value>
+            <value>
+                <fullName>Envío cotización</fullName>
+                <default>false</default>
+                <label>Envío cotización</label>
+            </value>
+            <value>
+                <fullName>Seguimiento</fullName>
+                <default>false</default>
+                <label>Seguimiento</label>
+            </value>
+            <value>
+                <fullName>Autorización</fullName>
+                <default>false</default>
+                <label>Autorización</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Definición</controllingFieldValue>
+            <valueName>Levantamiento</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Definición</controllingFieldValue>
+            <valueName>Memoria</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Costeo</controllingFieldValue>
+            <valueName>Def. solución</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Costeo</controllingFieldValue>
+            <valueName>Presupuesto</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Cierre</controllingFieldValue>
+            <valueName>Autorización</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Negociación</controllingFieldValue>
+            <valueName>Envío cotización</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Negociación</controllingFieldValue>
+            <valueName>Seguimiento</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

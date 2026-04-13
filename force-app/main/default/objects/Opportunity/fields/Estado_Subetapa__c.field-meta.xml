@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estado_Subetapa__c</fullName>
+    <label>Estado Subetapa</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Subetapa__c</controllingField>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Pendiente confirmación cliente</fullName>
+                <default>false</default>
+                <label>Pendiente confirmación cliente</label>
+            </value>
+            <value>
+                <fullName>Pendiente confirmación Pyatz</fullName>
+                <default>false</default>
+                <label>Pendiente confirmación Pyatz</label>
+            </value>
+            <value>
+                <fullName>En proceso</fullName>
+                <default>false</default>
+                <label>En proceso</label>
+            </value>
+            <value>
+                <fullName>Realizado</fullName>
+                <default>false</default>
+                <label>Realizado</label>
+            </value>
+            <value>
+                <fullName>Falta información</fullName>
+                <default>false</default>
+                <label>Falta información</label>
+            </value>
+            <value>
+                <fullName>En proceso - en tiempo</fullName>
+                <default>false</default>
+                <label>En proceso - en tiempo</label>
+            </value>
+            <value>
+                <fullName>Pendiente definición</fullName>
+                <default>false</default>
+                <label>Pendiente definición</label>
+            </value>
+            <value>
+                <fullName>Pendiente información Pyatz</fullName>
+                <default>false</default>
+                <label>Pendiente información Pyatz</label>
+            </value>
+            <value>
+                <fullName>Pendiente información proveedor</fullName>
+                <default>false</default>
+                <label>Pendiente información proveedor</label>
+            </value>
+            <value>
+                <fullName>Pendiente de envío a cliente</fullName>
+                <default>false</default>
+                <label>Pendiente de envío a cliente</label>
+            </value>
+            <value>
+                <fullName>Recepción no confirmada con cliente.</fullName>
+                <default>false</default>
+                <label>Recepción no confirmada con cliente.</label>
+            </value>
+            <value>
+                <fullName>Recepción confirmada con cliente</fullName>
+                <default>false</default>
+                <label>Recepción confirmada con cliente</label>
+            </value>
+            <value>
+                <fullName>Sin seguimiento</fullName>
+                <default>false</default>
+                <label>Sin seguimiento</label>
+            </value>
+            <value>
+                <fullName>Sin respuesta del cliente</fullName>
+                <default>false</default>
+                <label>Sin respuesta del cliente</label>
+            </value>
+            <value>
+                <fullName>Seguimiento activo</fullName>
+                <default>false</default>
+                <label>Seguimiento activo</label>
+            </value>
+            <value>
+                <fullName>Rechazado</fullName>
+                <default>false</default>
+                <label>Rechazado</label>
+            </value>
+            <value>
+                <fullName>En proceso de autorización</fullName>
+                <default>false</default>
+                <label>En proceso de autorización</label>
+            </value>
+            <value>
+                <fullName>Ajuste de presupuesto</fullName>
+                <default>false</default>
+                <label>Ajuste de presupuesto</label>
+            </value>
+            <value>
+                <fullName>Aceptado</fullName>
+                <default>false</default>
+                <label>Aceptado</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Levantamiento</controllingFieldValue>
+            <valueName>Pendiente confirmación cliente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Levantamiento</controllingFieldValue>
+            <valueName>Pendiente confirmación Pyatz</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Levantamiento</controllingFieldValue>
+            <valueName>En proceso</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Levantamiento</controllingFieldValue>
+            <controllingFieldValue>Memoria</controllingFieldValue>
+            <controllingFieldValue>Def. solución</controllingFieldValue>
+            <controllingFieldValue>Presupuesto</controllingFieldValue>
+            <valueName>Realizado</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Memoria</controllingFieldValue>
+            <valueName>Falta información</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Memoria</controllingFieldValue>
+            <controllingFieldValue>Def. solución</controllingFieldValue>
+            <controllingFieldValue>Presupuesto</controllingFieldValue>
+            <valueName>En proceso - en tiempo</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Def. solución</controllingFieldValue>
+            <valueName>Pendiente definición</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Presupuesto</controllingFieldValue>
+            <valueName>Pendiente información Pyatz</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Presupuesto</controllingFieldValue>
+            <valueName>Pendiente información proveedor</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Envío cotización</controllingFieldValue>
+            <valueName>Pendiente de envío a cliente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Envío cotización</controllingFieldValue>
+            <valueName>Recepción no confirmada con cliente.</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Envío cotización</controllingFieldValue>
+            <valueName>Recepción confirmada con cliente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Seguimiento</controllingFieldValue>
+            <valueName>Sin seguimiento</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Seguimiento</controllingFieldValue>
+            <valueName>Sin respuesta del cliente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Seguimiento</controllingFieldValue>
+            <valueName>Seguimiento activo</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Autorización</controllingFieldValue>
+            <valueName>Rechazado</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Autorización</controllingFieldValue>
+            <valueName>En proceso de autorización</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Autorización</controllingFieldValue>
+            <valueName>Ajuste de presupuesto</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Autorización</controllingFieldValue>
+            <valueName>Aceptado</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

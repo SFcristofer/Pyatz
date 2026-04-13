@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Collaborators_IDs__c</fullName>
-    <description>Almacena los IDs de los agentes colaboradores autorizados para ver la documentación de onboarding.</description>
-    <label>IDs de Colaboradores Onboarding</label>
+    <fullName>Estatus_Proceso_JSON__c</fullName>
+    <description>Guarda el historial de estados de las sub-etapas en formato JSON para el Panel de Salud 360.</description>
+    <label>Estatus Proceso JSON</label>
     <length>32768</length>
     <trackFeedHistory>false</trackFeedHistory>
     <type>LongTextArea</type>

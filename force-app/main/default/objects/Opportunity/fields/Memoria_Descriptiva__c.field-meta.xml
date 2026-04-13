@@ -4,6 +4,7 @@
     <description>Redacción de la memoria técnica descriptiva del levantamiento.</description>
     <label>Memoria Descriptiva</label>
     <length>32768</length>
+    <trackFeedHistory>false</trackFeedHistory>
     <type>Html</type>
     <visibleLines>25</visibleLines>
 </CustomField>

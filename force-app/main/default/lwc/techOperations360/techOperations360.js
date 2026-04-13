@@ -1,6 +1,7 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import { updateRecord } from 'lightning/uiRecordApi';
+import { updateRecord, deleteRecord } from 'lightning/uiRecordApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getPicklistValuesByRecordType, getObjectInfo } from 'lightning/uiObjectInfoApi';
 import OPPORTUNITY_OBJECT from '@salesforce/schema/Opportunity';
 import ID_FIELD from '@salesforce/schema/Opportunity.Id';
@@ -22,18 +23,15 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track isCreationModalOpen = false;
     @track activeOppId = null; 
     
-    // LISTA EXTENDIDA DE CAMPOS (Configuración Manual Estable)
+    // LISTA DE CAMPOS SEGÚN x.txt
     @track opportunityFields = [
+        'CloseDate', 
         'Name', 
         'StageName', 
-        'CloseDate', 
         'Amount', 
-        'Type', 
-        'LeadSource', 
-        'NextStep', 
-        'Description',
-        'CampaignId',
-        'Probability'
+        'Subetapa__c', 
+        'Auxiliar_oportunidad__c', 
+        'Estado_Subetapa__c'
     ];
 
     // --- DETECCIÓN DE CONTEXTO ---
@@ -69,7 +67,10 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         { label: 'Monto', fieldName: 'amount', type: 'currency', cellAttributes: { alignment: 'left' } },
         { label: 'Fecha de Cierre', fieldName: 'closeDate', type: 'date' },
         { label: 'Propietario', fieldName: 'owner', type: 'text' },
-        { type: 'action', typeAttributes: { rowActions: [{ label: 'Abrir Expediente 360', name: 'open_360', iconName: 'standard:omni_channel' }] } }
+        { type: 'action', typeAttributes: { rowActions: [
+            { label: 'Abrir Expediente 360', name: 'open_360', iconName: 'standard:omni_channel' },
+            { label: 'Eliminar', name: 'delete', iconName: 'utility:delete', variant: 'destructive' }
+        ] } }
     ];
 
     // --- MOTOR HÍBRIDO DE ETAPAS ---
@@ -241,6 +242,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleRowAction(event) {
         const actionName = event.detail.action.name;
         const row = event.detail.row;
+        
         if (actionName === 'open_360') {
             this.activeOppId = row.id;
             this.viewingDashboard = false;
@@ -248,6 +250,31 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             this.currentSubStep = '1';
             this.quoteViewMode = 'list';
             this.loadProcessHistory();
+        } else if (actionName === 'delete') {
+            if (confirm('¿Está seguro de que desea eliminar esta oportunidad?')) {
+                this.isLoading = true;
+                deleteRecord(row.id)
+                    .then(() => {
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Éxito',
+                                message: 'Oportunidad eliminada correctamente',
+                                variant: 'success'
+                            })
+                        );
+                        this.loadOpportunities();
+                    })
+                    .catch(error => {
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Error al eliminar',
+                                message: error.body.message,
+                                variant: 'error'
+                            })
+                        );
+                        this.isLoading = false;
+                    });
+            }
         }
     }
 
