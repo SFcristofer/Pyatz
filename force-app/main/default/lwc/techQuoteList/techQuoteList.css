@@ -91,3 +91,42 @@
 .datatable-container {
     padding: 0;
 }
+
+/* ESTADOS TIPO TEXTO COLORIZADO (DISEÑO LIMPIO) */
+.status-text-success {
+    color: #065f46;
+    font-weight: 700;
+}
+
+.status-text-warning {
+    color: #92400e;
+    font-weight: 700;
+}
+
+.status-text-error {
+    color: #991b1b;
+    font-weight: 700;
+}
+
+.status-text-info {
+    color: #1e40af;
+    font-weight: 700;
+}
+
+.folio-link {
+    color: #0176d3;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.folio-link:hover {
+    text-decoration: underline;
+    color: #014486;
+}
+
+.datatable-container {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}

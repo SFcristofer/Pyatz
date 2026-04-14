@@ -18,8 +18,8 @@
         </div>
 
         <div class="content-area slds-p-horizontal_large">
-            <!-- TARJETAS DE RESUMEN (KPIs) -->
-            <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_large">
+            <!-- TARJETAS DE RESUMEN (KPIs) - OCULTADAS PARA DISEÑO PROFESIONAL -->
+            <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_large slds-hide">
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
                     <div class="kpi-card">
                         <div class="slds-grid slds-grid_vertical-align-center">
@@ -95,16 +95,7 @@
                         <h2 class="slds-text-heading_small">Listado de Presupuestos</h2>
                     </div>
                     <div class="slds-grid slds-grid_vertical-align-center">
-                        <div class="slds-m-right_medium">
-                            <span class="slds-badge badge-filter active">Todos</span>
-                            <span class="slds-badge badge-filter">Aprobada</span>
-                            <span class="slds-badge badge-filter">Pendiente</span>
-                            <span class="slds-badge badge-filter">Rechazada</span>
-                            <span class="slds-badge badge-filter">Actualizada</span>
-                        </div>
-                        <div style="width: 250px;">
-                            <lightning-input type="search" variant="label-hidden" placeholder="Buscar..."></lightning-input>
-                        </div>
+                        <lightning-input type="search" variant="label-hidden" placeholder="Buscar..."></lightning-input>
                     </div>
                 </div>
                 <div class="datatable-container" style="position: relative; min-height: 200px;">

@@ -1,19 +1,18 @@
-p{margin-top:0px; margin-bottom:0px;}
+Nueva oportunidad
+* = Información obligatoria
+Información de la oportunidad
+*Nombre comercial
+Buscar Cuentas...
+Nombre comercialRellene este campo.
+*Fecha de cierre
+Formato: 31/12/2024
+*Nombre de la oportunidad
+*Etapa
 
-
-Estimad@ , BODEGA TACUBAYA,
-
-Por medio del presente confirmo nuestra visita programada para la capacitación del personal del área de (limpieza / cocina / mantenimiento / administrativo).
-
-Fecha:
-Hora:
-Dirección:
-
-Personal que se presentará:
-
-Agradeceremos su amable confirmación de recepción. En caso de requerir reprogramar la visita, le solicitamos nos lo informe con al menos 24 horas de anticipación, a fin de coordinar adecuadamente la agenda de nuestro personal.
-
-Quedo a sus órdenes para cualquier duda o comentario.
-
-Saludos cordiales.
-
+--Ninguno--
+Importe
+Subetapa
+Auxiliar de oportunidad
+Buscar Personas...
+Estado Subetapa
+Probabilidad (%)

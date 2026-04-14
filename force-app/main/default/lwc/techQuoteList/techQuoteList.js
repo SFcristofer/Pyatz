@@ -32,22 +32,25 @@ export default class TechQuoteList extends NavigationMixin(LightningElement) {
 
     get columns() {
         let cols = [
-            { label: 'Folio', fieldName: 'folio', type: 'text', initialWidth: 100 },
+            { label: 'Folio', fieldName: 'folio', type: 'button', initialWidth: 120,
+              typeAttributes: { label: { fieldName: 'folio' }, name: 'edit', variant: 'base', class: 'folio-link' }
+            },
             { label: 'Asunto', fieldName: 'asunto', type: 'text' },
             { label: 'Cliente', fieldName: 'cliente', type: 'text' },
-            { label: 'Sede', fieldName: 'sede', type: 'text' },
-            { label: 'Generado por', fieldName: 'generadoPor', type: 'text' },
-            { label: 'Fecha', fieldName: 'fecha', type: 'date' },
+            { label: 'Sede', fieldName: 'sede', type: 'text', initialWidth: 160 },
+            { label: 'Fecha', fieldName: 'fecha', type: 'date', initialWidth: 110 },
             { 
                 label: 'Monto', 
                 fieldName: 'monto', 
                 type: 'currency',
+                initialWidth: 120,
                 cellAttributes: { alignment: 'left' }
             },
             { 
                 label: 'Estado', 
                 fieldName: 'estado', 
                 type: 'text',
+                initialWidth: 110,
                 cellAttributes: { 
                     class: { fieldName: 'estadoClass' } 
                 }
@@ -89,7 +92,20 @@ export default class TechQuoteList extends NavigationMixin(LightningElement) {
     wiredQuotes({ error, data }) {
         this.isLoading = true;
         if (data) {
-            this.quotes = data;
+            this.quotes = data.map(q => {
+                let statusClass = 'status-text-info'; // Default
+                const status = q.estado ? q.estado.toLowerCase() : '';
+                
+                if (status.includes('aprobada') || status.includes('approved')) {
+                    statusClass = 'status-text-success';
+                } else if (status.includes('borrador') || status.includes('draft') || status.includes('pendiente')) {
+                    statusClass = 'status-text-warning';
+                } else if (status.includes('rechazada') || status.includes('rejected')) {
+                    statusClass = 'status-text-error';
+                }
+                
+                return { ...q, estadoClass: statusClass };
+            });
             this.isLoading = false;
         } else if (error) {
             console.error('Error cargando cotizaciones:', error);
