@@ -466,7 +466,7 @@ public with sharing class QuoteTechnicalController {
             
             Quote q;
             if (rid != null && rid.getSObjectType().getDescribe().getName() == 'Quote') {
-                q = [SELECT Id FROM Quote WHERE Id = :rid LIMIT 1];
+                q = [SELECT Id, Pricebook2Id FROM Quote WHERE Id = :rid LIMIT 1 FOR UPDATE];
                 q.Name = (String)p.get('name');
                 q.Status = status;
                 q.ContactId = contactId;
@@ -481,51 +481,61 @@ public with sharing class QuoteTechnicalController {
                 if (oppId == null && rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') {
                     oppId = rid;
                 }
-                
+
                 Id pbId;
                 if (oppId != null) {
-                    List<Opportunity> opps = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1];
-                    if (!opps.isEmpty()) pbId = opps[0].Pricebook2Id;
+                    List<Opportunity> opps = [SELECT Pricebook2Id, AccountId FROM Opportunity WHERE Id = :oppId LIMIT 1 FOR UPDATE];
+                    if (!opps.isEmpty()) {
+                        pbId = opps[0].Pricebook2Id;
+                    }
                 }
-                if (pbId == null) try { pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id; } catch(Exception e) {}
-                
+                if (pbId == null) {
+                    try { 
+                        pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id; 
+                    } catch(Exception e) {
+                        throw new AuraHandledException('No se encontró una Lista de Precios activa para el presupuesto.');
+                    }
+                }
+
                 q = new Quote();
-                q.Name = (String)p.get('name'); 
-                q.OpportunityId = oppId; 
-                q.Pricebook2Id = pbId; 
+                q.Name = (String)p.get('name');
+                q.OpportunityId = oppId;
+                q.Pricebook2Id = pbId;
                 q.Status = status;
                 q.ContactId = contactId;
-                q.Introduction_Text__c = (String)p.get('intro'); 
+                q.Introduction_Text__c = (String)p.get('intro');
                 q.Warranty_Text__c = (String)p.get('warranty');
-                q.Markers_Data__c = (String)p.get('markersData'); 
+                q.Markers_Data__c = (String)p.get('markersData');
                 q.Technical_Sedes__c = (String)p.get('technicalSedes');
-                q.Description = (String)p.get('observacionesPago'); 
+                q.Description = (String)p.get('observacionesPago');
                 q.ExpirationDate = Date.today().addDays(30);
                 insert q;
                 rid = q.Id;
             }
+
             try {
                 String markersBase64 = (String)p.get('markersData');
                 if (String.isNotBlank(markersBase64) && rid != null) processLevantamientos(rid, markersBase64);
             } catch (Exception e) {}
-            
+
             if (String.isNotBlank(itemsJson) && rid != null) {
                 List<Object> items = (List<Object>)JSON.deserializeUntyped(itemsJson);
-                delete [SELECT Id FROM QuoteLineItem WHERE QuoteId = :rid];
-                
+
+                // Bloqueamos las partidas existentes para limpieza segura
+                delete [SELECT Id FROM QuoteLineItem WHERE QuoteId = :rid FOR UPDATE];
+
                 // --- AJUSTE DINÁMICO DE LISTA DE PRECIOS ---
                 if (!items.isEmpty()) {
                     Map<String, Object> firstItem = (Map<String, Object>)items[0];
                     String firstPbeId = (String)firstItem.get('pbeId');
                     if (String.isNotBlank(firstPbeId) && firstPbeId != 'null' && firstPbeId.length() >= 15) {
-                        PricebookEntry pbe = [SELECT Pricebook2Id FROM PricebookEntry WHERE Id = :firstPbeId LIMIT 1];
-                        Quote currentQ = [SELECT Pricebook2Id FROM Quote WHERE Id = :rid LIMIT 1];
+                        PricebookEntry pbe = [SELECT Pricebook2Id FROM PricebookEntry WHERE Id = :firstPbeId AND IsActive = true LIMIT 1];
+                        Quote currentQ = [SELECT Pricebook2Id FROM Quote WHERE Id = :rid LIMIT 1 FOR UPDATE];
                         if (currentQ.Pricebook2Id != pbe.Pricebook2Id) {
                             update new Quote(Id = rid, Pricebook2Id = pbe.Pricebook2Id);
                         }
                     }
                 }
-
                 List<QuoteLineItem> qlis = new List<QuoteLineItem>();
                 for (Object obj : items) {
                     Map<String, Object> it = (Map<String, Object>)obj;
