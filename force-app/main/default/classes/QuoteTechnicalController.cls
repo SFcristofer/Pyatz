@@ -515,8 +515,13 @@ public with sharing class QuoteTechnicalController {
 
             try {
                 String markersBase64 = (String)p.get('markersData');
-                if (String.isNotBlank(markersBase64) && rid != null) processLevantamientos(rid, markersBase64);
-            } catch (Exception e) {}
+                if (String.isNotBlank(markersBase64) && rid != null) {
+                    processLevantamientos(rid, markersBase64);
+                    syncServiceZones(rid, markersBase64);
+                }
+            } catch (Exception e) {
+                System.debug('Error sincronizando zonas: ' + e.getMessage());
+            }
 
             if (String.isNotBlank(itemsJson) && rid != null) {
                 List<Object> items = (List<Object>)JSON.deserializeUntyped(itemsJson);
@@ -1246,5 +1251,47 @@ public with sharing class QuoteTechnicalController {
             throw new AuraHandledException('Error cargando proyectos del cliente: ' + e.getMessage());
         }
         return results;
+    }
+
+    /**
+     * Convierte los datos técnicos del JSON en registros de Zona de Servicio reales para trazabilidad.
+     */
+    private static void syncServiceZones(Id quoteId, String markersBase64) {
+        try {
+            Quote q = [SELECT AccountId, OpportunityId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            String jsonStr = EncodingUtil.urlDecode(EncodingUtil.base64Decode(markersBase64).toString(), 'UTF-8');
+            Map<String, Object> markers = (Map<String, Object>)JSON.deserializeUntyped(jsonStr);
+            
+            if (!markers.containsKey('surveyData')) return;
+            List<Object> rows = (List<Object>)markers.get('surveyData');
+            
+            List<Zona_Servicio_Pyatz__c> zonesToUpsert = new List<Zona_Servicio_Pyatz__c>();
+            
+            for (Object obj : rows) {
+                Map<String, Object> r = (Map<String, Object>)obj;
+                String zonaNombre = (String)r.get('zona');
+                if (String.isBlank(zonaNombre)) zonaNombre = (String)r.get('area'); // Fallback a Area si no hay zona específica
+                
+                if (String.isNotBlank(zonaNombre)) {
+                    Zona_Servicio_Pyatz__c zs = new Zona_Servicio_Pyatz__c();
+                    zs.Name = zonaNombre;
+                    zs.Cuenta__c = q.AccountId;
+                    zs.Oportunidad__c = q.OpportunityId;
+                    zs.Cotizacion__c = quoteId;
+                    zs.Detalle_Tecnico__c = (String)r.get('obs');
+                    
+                    // ID Único para evitar duplicados en el mismo presupuesto/zona
+                    zs.Id_Unico_Zona__c = quoteId + '_' + zonaNombre.replaceAll(' ', '_');
+                    
+                    zonesToUpsert.add(zs);
+                }
+            }
+            
+            if (!zonesToUpsert.isEmpty()) {
+                upsert zonesToUpsert Id_Unico_Zona__c;
+            }
+        } catch (Exception e) {
+            System.debug('CRITICAL_ERROR_SYNC_ZONES: ' + e.getMessage());
+        }
     }
 }
