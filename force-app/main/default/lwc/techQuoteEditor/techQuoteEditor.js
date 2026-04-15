@@ -102,6 +102,19 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
     @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
 
+    // Banderas de bloqueo para edición profesional
+    @track plLocks = { indirecto: true, comision1: true, regalia: true, dias: true };
+
+    get indLockIcon() { return this.plLocks.indirecto ? 'utility:lock' : 'utility:unlock'; }
+    get com1LockIcon() { return this.plLocks.comision1 ? 'utility:lock' : 'utility:unlock'; }
+    get regLockIcon() { return this.plLocks.regalia ? 'utility:lock' : 'utility:unlock'; }
+    get finLockIcon() { return this.plLocks.dias ? 'utility:lock' : 'utility:unlock'; }
+
+    handleTogglePLLock(event) {
+        const field = event.target.dataset.field;
+        this.plLocks = { ...this.plLocks, [field]: !this.plLocks[field] };
+    }
+
     calculatePL(data) {
         const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
         const ind = venta * (data.indirecto / 100);
@@ -525,6 +538,22 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.isUnitario = (type === 'UNITARIO');
         this.isTotal = !this.isUnitario;
         this.recalculateModalData();
+    }
+
+    handleZonaInput(event) {
+        const value = event.target.value;
+        if (value.includes(',')) {
+            const nuevasZonas = value.split(',').map(z => z.trim()).filter(z => z !== '');
+            this.zonasAfectadas = [...new Set([...this.zonasAfectadas, ...nuevasZonas])];
+            this.zonaInput = '';
+        } else {
+            this.zonaInput = value;
+        }
+    }
+
+    removeZona(event) {
+        const zona = event.target.name;
+        this.zonasAfectadas = this.zonasAfectadas.filter(z => z !== zona);
     }
 
     handleModalInputChange(event) {

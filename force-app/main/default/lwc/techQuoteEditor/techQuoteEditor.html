@@ -503,14 +503,28 @@
                                     <td colspan="3" class="slds-p-around_x-small">2. GASTOS OPERATIVOS E INDIRECTOS</td>
                                 </tr>
                                 <tr>
-                                    <td>Indirecto (15%)</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.ind}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.ind}</td>
+                                    <td>
+                                        Indirecto (%)
+                                        <lightning-button-icon icon-name={indLockIcon} onclick={handleTogglePLLock} data-field="indirecto" variant="bare" class="slds-m-left_xx-small" size="small"></lightning-button-icon>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl1.indirecto} data-field="indirecto" onchange={handlePL1Change} step="0.01" disabled={plLocks.indirecto}></lightning-input>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl2.indirecto} data-field="indirecto" onchange={handlePL2Change} step="0.01" disabled={plLocks.indirecto}></lightning-input>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>Comisión Comercial (2%)</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.com1}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.com1}</td>
+                                    <td>
+                                        Comisión Comercial (%)
+                                        <lightning-button-icon icon-name={com1LockIcon} onclick={handleTogglePLLock} data-field="comision1" variant="bare" class="slds-m-left_xx-small" size="small"></lightning-button-icon>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl1.comision1} data-field="comision1" onchange={handlePL1Change} step="0.01" disabled={plLocks.comision1}></lightning-input>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl2.comision1} data-field="comision1" onchange={handlePL2Change} step="0.01" disabled={plLocks.comision1}></lightning-input>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Comisión 2 (%)</td>
@@ -518,9 +532,38 @@
                                     <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.comision2} data-field="comision2" onchange={handlePL2Change} step="0.01"></lightning-input></td>
                                 </tr>
                                 <tr style="background: #f9f9f9;">
-                                    <td>Monto Comisión 2</td>
+                                    <td>Monto Total Comisiones</td>
                                     <td class="slds-text-align_right slds-p-around_small">${res1.com2}</td>
                                     <td class="slds-text-align_right slds-p-around_small">${res2.com2}</td>
+                                </tr>
+
+                                <!-- GRUPO 3: OTROS -->
+                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
+                                    <td colspan="3" class="slds-p-around_x-small">3. OTROS CARGOS Y FINANCIAMIENTO</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Regalía (%)
+                                        <lightning-button-icon icon-name={regLockIcon} onclick={handleTogglePLLock} data-field="regalia" variant="bare" class="slds-m-left_xx-small" size="small"></lightning-button-icon>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl1.regalia} data-field="regalia" onchange={handlePL1Change} step="0.01" disabled={plLocks.regalia}></lightning-input>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl2.regalia} data-field="regalia" onchange={handlePL2Change} step="0.01" disabled={plLocks.regalia}></lightning-input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Costo Financiero (Días)
+                                        <lightning-button-icon icon-name={finLockIcon} onclick={handleTogglePLLock} data-field="dias" variant="bare" class="slds-m-left_xx-small" size="small"></lightning-button-icon>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl1.dias} data-field="dias" onchange={handlePL1Change} disabled={plLocks.dias}></lightning-input>
+                                    </td>
+                                    <td class="pl-input-cell">
+                                        <lightning-input type="number" variant="label-hidden" value={pl2.dias} data-field="dias" onchange={handlePL2Change} disabled={plLocks.dias}></lightning-input>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Regalía Franquicia (5%)</td>
