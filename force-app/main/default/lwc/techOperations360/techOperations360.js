@@ -79,6 +79,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track currentSubStep = '1';
     @track currentStatus = ''; 
     @track allStatusOptions = [];
+    @track statusControllerValues = {}; // Mapa de dependencias
     @track processHistory = []; 
     @track quoteViewMode = 'list';
     @track selectedQuoteId = null;
@@ -113,6 +114,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     wiredPicklists({ error, data }) {
         if (data) {
             this.allStatusOptions = data.picklistFieldValues.Estado_Subetapa__c.values;
+            this.statusControllerValues = data.picklistFieldValues.Estado_Subetapa__c.controllerValues;
             this.buildHybridStages(data.picklistFieldValues);
             if (this.effectiveRecordId) this.loadProcessHistory();
         } else if (error) console.error('Error metadatos:', error);
@@ -123,20 +125,23 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (!targetId) return;
         getProcessHistory({ opportunityId: targetId })
             .then(data => {
-                this.processHistory = data;
+                // Asegurar que siempre sea una lista, nunca null
+                this.processHistory = data || [];
                 this.updateCurrentStatusFromHistory();
             })
             .catch(error => console.error('Error history:', error));
     }
 
     updateCurrentStatusFromHistory() {
-        if (!this.processHistory.length || !this.subPhase) {
+        // Blindaje contra nulos y listas vacías
+        if (!this.processHistory || !this.processHistory.length || !this.subPhase) {
             this.currentStatus = '';
             return;
         }
         const record = this.processHistory.find(h => 
-            String(h.Etapa__c).trim() === String(this.currentStep).trim() && 
-            String(h.Subetapa__c).trim() === String(this.subPhase).trim()
+            h && 
+            String(h.Etapa__c || '').trim() === String(this.currentStep || '').trim() && 
+            String(h.Subetapa__c || '').trim() === String(this.subPhase || '').trim()
         );
         this.currentStatus = record ? record.Estado__c : '';
     }
@@ -168,9 +173,28 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     handleStatusChange(event) {
         this.currentStatus = event.detail.value;
-        const existingIdx = this.processHistory.findIndex(h => h.Etapa__c === this.currentStep && h.Subetapa__c === this.subPhase);
-        if (existingIdx !== -1) this.processHistory[existingIdx].Estado__c = this.currentStatus;
-        else this.processHistory.push({ Etapa__c: this.currentStep, Subetapa__c: this.subPhase, Estado__c: this.currentStatus });
+        
+        // Blindaje contra nulos en el historial
+        if (!this.processHistory) {
+            this.processHistory = [];
+        }
+
+        const step = this.currentStep || '';
+        const phase = this.subPhase || '';
+
+        const existingIdx = this.processHistory.findIndex(h => 
+            h && h.Etapa__c === step && h.Subetapa__c === phase
+        );
+
+        if (existingIdx !== -1) {
+            this.processHistory[existingIdx].Estado__c = this.currentStatus;
+        } else {
+            this.processHistory.push({ 
+                Etapa__c: step, 
+                Subetapa__c: phase, 
+                Estado__c: this.currentStatus 
+            });
+        }
         this.syncOpportunityStatus();
     }
 
@@ -300,6 +324,25 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get subPhase() {
         const sub = (this.currentSubStages || []).find(ss => ss.value === this.currentSubStep);
         return sub ? sub.label : '';
+    }
+
+    get statusOptions() {
+        if (!this.allStatusOptions || !this.statusControllerValues) return [];
+        
+        const controllerIndex = this.statusControllerValues[this.subPhase];
+        
+        // Caso 1: La subetapa existe en los metadatos de Salesforce (Etapas comerciales)
+        if (controllerIndex !== undefined) {
+            return this.allStatusOptions.filter(opt => opt.validFor.includes(controllerIndex));
+        }
+        
+        // Caso 2: Etapas operativas/manuales (Altas, Organización)
+        // Devolvemos opciones genéricas para permitir el avance del flujo
+        return [
+            { label: 'En proceso', value: 'En proceso' },
+            { label: 'Realizado', value: 'Realizado' },
+            { label: 'Pendiente', value: 'Pendiente' }
+        ];
     }
 
     get isDefinicion() { return this.currentStep === 'Definición'; }
