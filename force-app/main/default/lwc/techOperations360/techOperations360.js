@@ -125,7 +125,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (!targetId) return;
         getProcessHistory({ opportunityId: targetId })
             .then(data => {
-                // Asegurar que siempre sea una lista, nunca null
+                // Guardamos los datos tal cual vienen (read-only por defecto)
                 this.processHistory = data || [];
                 this.updateCurrentStatusFromHistory();
             })
@@ -172,29 +172,30 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     handleStatusChange(event) {
-        this.currentStatus = event.detail.value;
+        const newValue = event.detail.value;
+        this.currentStatus = newValue;
         
-        // Blindaje contra nulos en el historial
-        if (!this.processHistory) {
-            this.processHistory = [];
-        }
-
         const step = this.currentStep || '';
         const phase = this.subPhase || '';
 
-        const existingIdx = this.processHistory.findIndex(h => 
-            h && h.Etapa__c === step && h.Subetapa__c === phase
-        );
+        // PATRÓN DE INMUTABILIDAD: Creamos una nueva referencia del array
+        let history = this.processHistory ? [...this.processHistory] : [];
+        const idx = history.findIndex(h => h && h.Etapa__c === step && h.Subetapa__c === phase);
 
-        if (existingIdx !== -1) {
-            this.processHistory[existingIdx].Estado__c = this.currentStatus;
+        if (idx !== -1) {
+            // Reemplazamos el objeto por uno nuevo con el cambio
+            // Esto evita modificar el objeto original congelado
+            history[idx] = { ...history[idx], Estado__c: newValue };
         } else {
-            this.processHistory.push({ 
+            history.push({ 
                 Etapa__c: step, 
                 Subetapa__c: phase, 
-                Estado__c: this.currentStatus 
+                Estado__c: newValue 
             });
         }
+        
+        // Asignamos la nueva referencia para disparar la reactividad de LWC
+        this.processHistory = history;
         this.syncOpportunityStatus();
     }
 
