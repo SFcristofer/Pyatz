@@ -14,6 +14,8 @@ import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProdu
 import getFilteredSedes from '@salesforce/apex/QuoteTechnicalController.getFilteredSedes';
 import searchParentAccounts from '@salesforce/apex/QuoteTechnicalController.searchParentAccounts';
 import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
+import getPLAnalysis from '@salesforce/apex/QuoteTechnicalController.getPLAnalysis';
+import savePLAnalysis from '@salesforce/apex/QuoteTechnicalController.savePLAnalysis';
 
 export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -284,6 +286,30 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.autoFillAsunto();
                 }
                 if (this.accountId) this.fetchSedes();
+                
+                // Cargar Análisis P&L Persistente
+                if (this.recordId) {
+                    getPLAnalysis({ quoteId: this.recordId })
+                        .then(plRecords => {
+                            if (plRecords && plRecords.length > 0) {
+                                plRecords.forEach(rec => {
+                                    const data = {
+                                        costo: rec.Costo_Inversion__c,
+                                        margen: rec.Margen_Esperado__c,
+                                        indirecto: rec.Gastos_Indirectos__c,
+                                        comision1: rec.Comision_Venta__c,
+                                        comision2: 0,
+                                        regalia: rec.Regalias__c,
+                                        dias: rec.Dias_Financiamiento__c
+                                    };
+                                    if (rec.Anio__c === 1) this.pl1 = data;
+                                    else if (rec.Anio__c === 2) this.pl2 = data;
+                                });
+                            }
+                        })
+                        .catch(err => console.error('Error cargando P&L:', err));
+                }
+
                 this.isLoading = false;
             })
             .catch(error => { console.error(error); this.isLoading = false; });
@@ -690,7 +716,34 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.updatePLCostoFromServices();
         this.showPLModal = true; 
     }
-    handleClosePLModal() { this.showPLModal = false; }
+    
+    handleClosePLModal() { 
+        this.showPLModal = false; 
+        this.persistPLData();
+    }
+
+    persistPLData() {
+        if (!this.recordId) return;
+        
+        const plData = [
+            { anio: 1, ...this.pl1 },
+            { anio: 2, ...this.pl2 }
+        ];
+
+        savePLAnalysis({ quoteId: this.recordId, plDataJson: JSON.stringify(plData) })
+            .then(() => {
+                console.log('Análisis P&L guardado exitosamente.');
+            })
+            .catch(err => {
+                console.error('Error al guardar P&L:', err);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error al guardar P&L',
+                    message: err.body.message,
+                    variant: 'error'
+                }));
+            });
+    }
+
     handleLineChange(event) {
         const line = event.target.dataset.value;
         this.lineaNegocioOptions = this.lineaNegocioOptions.map(opt => (opt.value === line ? { ...opt, checked: event.target.checked } : opt));

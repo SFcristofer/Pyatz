@@ -114,6 +114,57 @@ public with sharing class QuoteTechnicalController {
         } catch (Exception e) { throw new AuraHandledException('Error al guardar nota: ' + e.getMessage()); }
     }
 
+    /**
+     * Recupera el análisis P&L guardado para un presupuesto.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Analisis_PL__c> getPLAnalysis(Id quoteId) {
+        return [SELECT Anio__c, Costo_Inversion__c, Margen_Esperado__c, Gastos_Indirectos__c, 
+                       Comision_Venta__c, Regalias__c, Dias_Financiamiento__c 
+                FROM Analisis_PL__c 
+                WHERE Presupuesto__c = :quoteId 
+                ORDER BY Anio__c ASC];
+    }
+
+    /**
+     * Guarda el análisis P&L para Año 1 y Año 2.
+     */
+    @AuraEnabled
+    public static void savePLAnalysis(Id quoteId, String plDataJson) {
+        try {
+            if (quoteId == null || String.isBlank(plDataJson)) return;
+            
+            List<Object> data = (List<Object>)JSON.deserializeUntyped(plDataJson);
+            List<Analisis_PL__c> toUpsert = new List<Analisis_PL__c>();
+
+            for (Object obj : data) {
+                Map<String, Object> row = (Map<String, Object>)obj;
+                Integer anio = Integer.valueOf(row.get('anio'));
+                
+                Analisis_PL__c pl = new Analisis_PL__c();
+                pl.Presupuesto__c = quoteId;
+                pl.Anio__c = anio;
+                pl.Costo_Inversion__c = Decimal.valueOf(String.valueOf(row.get('costo')));
+                pl.Margen_Esperado__c = Decimal.valueOf(String.valueOf(row.get('margen')));
+                pl.Gastos_Indirectos__c = Decimal.valueOf(String.valueOf(row.get('indirecto')));
+                pl.Comision_Venta__c = Decimal.valueOf(String.valueOf(row.get('comision1')));
+                pl.Regalias__c = Decimal.valueOf(String.valueOf(row.get('regalia')));
+                pl.Dias_Financiamiento__c = Decimal.valueOf(String.valueOf(row.get('dias')));
+                
+                // Clave única para evitar duplicados: QuoteId + Año
+                pl.Clave_Unica__c = quoteId + '_' + anio;
+                
+                toUpsert.add(pl);
+            }
+
+            if (!toUpsert.isEmpty()) {
+                upsert toUpsert Clave_Unica__c;
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al guardar análisis P&L: ' + e.getMessage());
+        }
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getTacticalHistory(Id oppId) {
         List<Map<String, Object>> history = new List<Map<String, Object>>();
