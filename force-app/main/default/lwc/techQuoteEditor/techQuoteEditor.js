@@ -14,8 +14,6 @@ import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProdu
 import getFilteredSedes from '@salesforce/apex/QuoteTechnicalController.getFilteredSedes';
 import searchParentAccounts from '@salesforce/apex/QuoteTechnicalController.searchParentAccounts';
 import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
-import getPLAnalysis from '@salesforce/apex/QuoteTechnicalController.getPLAnalysis';
-import savePLAnalysis from '@salesforce/apex/QuoteTechnicalController.savePLAnalysis';
 
 export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -100,76 +98,17 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track zonasAfectadas = [];
     @track showIndicaciones = false;
 
-    // --- ESTRUCTURA P&L COMPARATIVA (Año 1 y Año 2) ---
-    @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
-    @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
-
-    // Automatización: Sumar costos de servicios agregados
-    updatePLCostoFromServices() {
-        let totalCosto = 0;
+    // Getter para calcular el costo base de inversión (suma de servicios agregados)
+    get costoTotalServicios() {
+        let total = 0;
         if (this.serviciosData && this.serviciosData.length > 0) {
             this.serviciosData.forEach(item => {
                 if (!item.isSeparator) {
-                    // Asumimos que el costo es el 60% del precio de venta si no viene explícito, 
-                    // o usamos el valor de totalSinImpuestos como base de inversión
-                    totalCosto += (item.totalSinImpuestos || 0);
+                    total += (item.totalSinImpuestos || 0);
                 }
             });
         }
-        this.pl1.costo = totalCosto;
-        this.pl2.costo = totalCosto;
-    }
-
-    calculatePL(data) {
-        const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
-        const ind = venta * (data.indirecto / 100);
-        const com1 = venta * (data.comision1 / 100);
-        const com2 = venta * (data.comision2 / 100);
-        const reg = venta * (data.regalia / 100);
-        const fin = venta * 0.000611 * data.dias;
-
-        const utilidadBruta = venta - data.costo - ind - com1 - com2 - reg - fin;
-        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
-        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
-
-        const costoTotal = parseFloat(data.costo) + ind + com1 + com2 + reg + fin + isr + ru;
-        const margenDolares = venta - costoTotal;
-        const margenPct = venta > 0 ? (margenDolares / venta) * 100 : 0;
-
-        return {
-            venta: venta.toFixed(2),
-            ind: ind.toFixed(2),
-            com1: com1.toFixed(2),
-            com2: com2.toFixed(2),
-            reg: reg.toFixed(2),
-            fin: fin.toFixed(2),
-            isr: isr.toFixed(2),
-            ru: ru.toFixed(2),
-            costoTotal: costoTotal.toFixed(2),
-            resPesos: margenDolares.toFixed(2),
-            resPct: margenPct.toFixed(2)
-        };
-    }
-
-    get res1() { return this.calculatePL(this.pl1); }
-    get res2() { return this.calculatePL(this.pl2); }
-
-    handleGlobalPLChange(event) {
-        const field = event.target.dataset.field;
-        const val = parseFloat(event.target.value) || 0;
-        // Actualizamos el mismo porcentaje para ambos años
-        this.pl1 = { ...this.pl1, [field]: val };
-        this.pl2 = { ...this.pl2, [field]: val };
-    }
-
-    handlePL1Change(event) {
-        const field = event.target.dataset.field;
-        this.pl1 = { ...this.pl1, [field]: parseFloat(event.target.value) || 0 };
-    }
-
-    handlePL2Change(event) {
-        const field = event.target.dataset.field;
-        this.pl2 = { ...this.pl2, [field]: parseFloat(event.target.value) || 0 };
+        return total;
     }
 
     handleDiscountTypeChange(event) {
@@ -286,30 +225,6 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.autoFillAsunto();
                 }
                 if (this.accountId) this.fetchSedes();
-                
-                // Cargar Análisis P&L Persistente
-                if (this.recordId) {
-                    getPLAnalysis({ quoteId: this.recordId })
-                        .then(plRecords => {
-                            if (plRecords && plRecords.length > 0) {
-                                plRecords.forEach(rec => {
-                                    const data = {
-                                        costo: rec.Costo_Inversion__c,
-                                        margen: rec.Margen_Esperado__c,
-                                        indirecto: rec.Gastos_Indirectos__c,
-                                        comision1: rec.Comision_Venta__c,
-                                        comision2: 0,
-                                        regalia: rec.Regalias__c,
-                                        dias: rec.Dias_Financiamiento__c
-                                    };
-                                    if (rec.Anio__c === 1) this.pl1 = data;
-                                    else if (rec.Anio__c === 2) this.pl2 = data;
-                                });
-                            }
-                        })
-                        .catch(err => console.error('Error cargando P&L:', err));
-                }
-
                 this.isLoading = false;
             })
             .catch(error => { console.error(error); this.isLoading = false; });
@@ -625,7 +540,6 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             }];
         });
         this.calculateTotals();
-        this.updatePLCostoFromServices(); // Automatización activada al guardar
         this.showModal = false;
         this.resetModal();
     }
@@ -648,13 +562,11 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         if (action === 'delete') {
             this.serviciosData = this.serviciosData.filter(item => item.id !== id);
             this.calculateTotals();
-            this.updatePLCostoFromServices(); // Automatización activada al borrar
         }
     }
 
     handleApplyTemplate(event) {
         const templateId = event.detail.value;
-        // Forma robusta de obtener el campo destino desde el menú o el item
         const targetField = event.target.dataset.field || event.currentTarget.dataset.field;
         
         if (!this.recordId) {
@@ -686,18 +598,14 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
     handleClosePdfModal() { this.showPdfModal = false; this.pdfUrl = ''; }
     
-    // Métodos auxiliares faltantes
     handleAsuntoChange(event) { this.asunto = event.target.value; }
     handleIntroChange(event) { this.introduccion = event.target.value; }
     handleWarrantyChange(event) { this.warranty = event.target.value; }
     handleObservacionesPagoChange(event) { this.observacionesPago = event.target.value; }
     
-    // Manejadores de Opciones de Pago
-    // Versión 1.0.2 - Corrección de manejadores de pago
     handlePagoTransferenciaChange(event) { this.pagoTransferencia = event.target.checked; }
     handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
     
-    // Manejadores de Tipo de Trabajo
     handleTrabajoPuntualChange(event) { this.trabajoPuntual = event.target.checked; }
     handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
     handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
@@ -712,41 +620,11 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.showSeparatorModal = false;
         this.separatorText = '';
     }
+    
     handleOpenPLModal() { 
-        this.updatePLCostoFromServices();
         this.showPLModal = true; 
     }
-    
     handleClosePLModal() { 
         this.showPLModal = false; 
-        this.persistPLData();
-    }
-
-    persistPLData() {
-        if (!this.recordId) return;
-        
-        const plData = [
-            { anio: 1, ...this.pl1 },
-            { anio: 2, ...this.pl2 }
-        ];
-
-        savePLAnalysis({ quoteId: this.recordId, plDataJson: JSON.stringify(plData) })
-            .then(() => {
-                console.log('Análisis P&L guardado exitosamente.');
-            })
-            .catch(err => {
-                console.error('Error al guardar P&L:', err);
-                this.dispatchEvent(new ShowToastEvent({
-                    title: 'Error al guardar P&L',
-                    message: err.body.message,
-                    variant: 'error'
-                }));
-            });
-    }
-
-    handleLineChange(event) {
-        const line = event.target.dataset.value;
-        this.lineaNegocioOptions = this.lineaNegocioOptions.map(opt => (opt.value === line ? { ...opt, checked: event.target.checked } : opt));
-        this.selectedLines = this.lineaNegocioOptions.filter(opt => opt.checked).map(opt => opt.value);
     }
 }
