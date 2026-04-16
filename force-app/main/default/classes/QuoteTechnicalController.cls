@@ -1255,6 +1255,7 @@ public with sharing class QuoteTechnicalController {
 
     /**
      * Convierte los datos técnicos del JSON en registros de Zona de Servicio reales para trazabilidad.
+     * Soporta fragmentación por comas y garantiza unicidad por Servicio + Zona.
      */
     private static void syncServiceZones(Id quoteId, String markersBase64) {
         try {
@@ -1265,25 +1266,38 @@ public with sharing class QuoteTechnicalController {
             if (!markers.containsKey('surveyData')) return;
             List<Object> rows = (List<Object>)markers.get('surveyData');
             
+            // Detectar el tipo de servicio actual del bloque técnico
+            String serviceType = markers.containsKey('surveyType') ? (String)markers.get('surveyType') : 'General';
+            
             List<Zona_Servicio_Pyatz__c> zonesToUpsert = new List<Zona_Servicio_Pyatz__c>();
             
             for (Object obj : rows) {
                 Map<String, Object> r = (Map<String, Object>)obj;
-                String zonaNombre = (String)r.get('zona');
-                if (String.isBlank(zonaNombre)) zonaNombre = (String)r.get('area'); // Fallback a Area si no hay zona específica
+                String rawZonaText = (String)r.get('zona');
+                if (String.isBlank(rawZonaText)) rawZonaText = (String)r.get('area'); 
                 
-                if (String.isNotBlank(zonaNombre)) {
-                    Zona_Servicio_Pyatz__c zs = new Zona_Servicio_Pyatz__c();
-                    zs.Name = zonaNombre;
-                    zs.Cuenta__c = q.AccountId;
-                    zs.Oportunidad__c = q.OpportunityId;
-                    zs.Cotizacion__c = quoteId;
-                    zs.Detalle_Tecnico__c = (String)r.get('obs');
+                if (String.isNotBlank(rawZonaText)) {
+                    List<String> zonaNames = rawZonaText.split(',');
                     
-                    // ID Único para evitar duplicados en el mismo presupuesto/zona
-                    zs.Id_Unico_Zona__c = quoteId + '_' + zonaNombre.replaceAll(' ', '_');
-                    
-                    zonesToUpsert.add(zs);
+                    for (String name : zonaNames) {
+                        String cleanName = name.trim();
+                        if (String.isNotBlank(cleanName)) {
+                            Zona_Servicio_Pyatz__c zs = new Zona_Servicio_Pyatz__c();
+                            zs.Name = cleanName.length() > 80 ? cleanName.substring(0, 80) : cleanName;
+                            zs.Cuenta__c = q.AccountId;
+                            zs.Oportunidad__c = q.OpportunityId;
+                            zs.Cotizacion__c = quoteId;
+                            zs.Tipo_de_Servicio__c = serviceType;
+                            zs.Detalle_Tecnico__c = (String)r.get('obs');
+                            
+                            // CONTROL TOTAL: La clave ahora incluye el Servicio para evitar sobrescritura
+                            String normalizedName = cleanName.replaceAll('[^a-zA-Z0-9]', '_').toLowerCase();
+                            String normalizedService = serviceType.replaceAll('[^a-zA-Z0-9]', '_').toLowerCase();
+                            zs.Id_Unico_Zona__c = quoteId + '_' + normalizedService + '_' + normalizedName;
+                            
+                            zonesToUpsert.add(zs);
+                        }
+                    }
                 }
             }
             

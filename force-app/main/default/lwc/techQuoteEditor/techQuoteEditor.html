@@ -158,9 +158,9 @@
                                     <th style="width: 100px; text-align: center;">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody ondragover={handleDragOver} ondrop={handleDrop}>
+                            <tbody>
                                 <template for:each={serviciosData} for:item="item" for:index="index">
-                                    <tr key={item.id} class={item.rowClass} draggable="true" ondragstart={handleDragStart} data-index={index}>
+                                    <tr key={item.id} class={item.rowClass}>
                                         <td class="drag-handle"><lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon></td>
                                         <td>
                                             <div class="slds-text-title_bold">{item.descripcion}</div>
@@ -186,7 +186,8 @@
                                 <lightning-button label="+ Añadir servicios" variant="brand" class="slds-m-right_small" onclick={handleOpenModal}></lightning-button>
                                 <lightning-button label="+ Añadir Separador" variant="brand-outline" onclick={handleOpenSeparatorModal}></lightning-button>
                             </div>
-                            <lightning-button label="P&L" icon-name="utility:calculator" onclick={handleOpenPLModal}></lightning-button>
+                            <!-- MEJORA: Botón P&L ahora más visible y profesional -->
+                            <lightning-button label="Análisis Estratégico P&L" icon-name="utility:calculator" variant="brand-outline" onclick={handleOpenPLModal}></lightning-button>
                         </div>
                     </div>
                 </div>
@@ -195,13 +196,6 @@
                     <div class="section-header"><h2>Resumen de Totales</h2></div>
                     <div class="datatable-container">
                         <lightning-datatable key-field="id" data={totalesData} columns={totalesColumns} hide-checkbox-column></lightning-datatable>
-                    </div>
-                    <div class="slds-p-around_large bg-white border-top">
-                        <div class="slds-grid slds-wrap slds-gutters">
-                            <div class="slds-col slds-size_1-of-3"><lightning-input type="checkbox" label="Mostrar total" checked={showTotal} onchange={handleShowTotalChange}></lightning-input></div>
-                            <div class="slds-col slds-size_1-of-3"><lightning-input type="checkbox" label="Mostrar impuestos" checked={showTaxes} onchange={handleShowTaxesChange}></lightning-input></div>
-                            <div class="slds-col slds-size_1-of-3"><lightning-input type="checkbox" label="Añadir explicación" checked={showDescription} onchange={handleShowDescriptionChange}></lightning-input></div>
-                        </div>
                     </div>
                 </div>
 
@@ -250,37 +244,22 @@
                 </div>
                 </template>
 
-            <!-- PASO 4: FINALIZAR Y REVISIÓN DE PRECISIÓN -->
+            <!-- PASO 4: FINALIZAR -->
             <template if:true={isStep4}>
                 <div class="section-card no-border bg-dark-workspace">
                     <div class="slds-p-around_medium slds-grid slds-grid_align-spread bg-slate-header">
                         <div class="slds-grid slds-grid_vertical-align-center">
                             <lightning-icon icon-name="doctype:pdf" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
-                            <h2 class="slds-text-heading_small text-white">Revisión Final del Documento (Vista de Impresión)</h2>
-                        </div>
-                        <div class="slds-text-color_inverse-low slds-text-body_small">
-                            ID: {recordId} | Folio: {folio}
+                            <h2 class="slds-text-heading_small text-white">Revisión Final del Documento</h2>
                         </div>
                     </div>
-                    
-                    <!-- WORKSPACE DE PDF ESTILO HERRAMIENTA PROFESIONAL -->
                     <div class="pdf-workspace-container">
                         <template if:true={pdfUrl}>
                             <iframe src={pdfUrl} width="100%" height="100%" class="pdf-workspace-frame"></iframe>
                         </template>
-                        <template if:false={pdfUrl}>
-                            <div class="slds-align_absolute-center slds-p-around_xx-large">
-                                <lightning-spinner alternative-text="Generando previsualización..." size="medium" variant="brand"></lightning-spinner>
-                            </div>
-                        </template>
                     </div>
-
                     <div class="slds-p-around_medium slds-text-align_center bg-white border-top">
-                        <p class="slds-text-color_weak slds-m-bottom_small">Revise que toda la información técnica y los montos sean correctos antes de finalizar.</p>
-                        <div class="slds-grid slds-grid_align-center">
-                            <lightning-button label="Confirmar, Guardar y Finalizar Presupuesto" variant="brand" icon-name="utility:save" size="large" onclick={handleFinalize} class="slds-m-right_medium"></lightning-button>
-                            <lightning-button label="Generar Contrato Legal" variant="success" icon-name="standard:contract" size="large" onclick={handleGoToContract} if:true={recordId}></lightning-button>
-                        </div>
+                        <lightning-button label="Confirmar y Finalizar Presupuesto" variant="brand" icon-name="utility:save" size="large" onclick={handleFinalize}></lightning-button>
                     </div>
                 </div>
             </template>
@@ -297,158 +276,45 @@
             </div>
         </div>
 
-        <!-- MODAL DE PREVISUALIZACIÓN DE PRECISIÓN -->
-        <template if:true={showPdfModal}>
-            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header">
-                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleClosePdfModal}>
-                            <lightning-icon icon-name="utility:close" variant="inverse" size="small"></lightning-icon>
-                        </button>
-                        <h2 class="slds-text-heading_medium">Previsualización de Precisión (PDF Real)</h2>
-                    </header>
-                    <div class="slds-modal__content slds-p-around_medium pdf-viewer-container" style="height: 75vh; background: #525659;">
-                        <iframe src={pdfUrl} width="100%" height="100%" style="border: none; border-radius: 4px;"></iframe>
-                    </div>
-                    <footer class="slds-modal__footer">
-                        <lightning-button label="Cerrar Vista Previa" variant="neutral" onclick={handleClosePdfModal}></lightning-button>
-                    </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
-        </template>
-
-        <!-- MODAL SEPARADOR -->
-        <template if:true={showSeparatorModal}>
-            <section class="slds-modal slds-fade-in-open slds-modal_x-small">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header"><h2>Añadir Separador</h2></header>
-                    <div class="slds-modal__content slds-p-around_medium">
-                        <lightning-input label="Texto del Separador" value={separatorText} onchange={handleSeparatorTextChange}></lightning-input>
-                    </div>
-                    <footer class="slds-modal__footer">
-                        <lightning-button label="Cancelar" onclick={handleCloseSeparatorModal} class="slds-m-right_x-small"></lightning-button>
-                        <lightning-button label="Añadir" variant="brand" onclick={handleAddSeparator}></lightning-button>
-                    </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
-        </template>
-
-        <!-- MODAL SERVICIO PRO (ESTRUCTURA V1 + DISEÑO MODERNO) -->
+        <!-- MODAL SERVICIO PRO -->
         <template if:true={showModal}>
             <section role="dialog" class="slds-modal slds-fade-in-open slds-modal_large">
                 <div class="slds-modal__container">
                     <header class="slds-modal__header"><h2>Configurador de Partida</h2></header>
                     <div class="slds-modal__content slds-p-around_large">
-                        
-                        <div class="section-card slds-p-around_medium slds-m-bottom_medium overflow-visible" style="position: relative;">
-                            <p class="slds-text-title_bold slds-m-bottom_small">1. Localizar artículo en el catálogo</p>
-                            <lightning-input type="search" variant="label-hidden" placeholder="Busque por nombre o SKU..." onchange={handleProductSearch} value={selectedProductName}></lightning-input>
-                            
+                        <div class="section-card slds-p-around_medium slds-m-bottom_medium overflow-visible">
+                            <lightning-input type="search" placeholder="Busque por nombre o SKU..." onchange={handleProductSearch} value={selectedProductName}></lightning-input>
                             <template if:true={searchResults.length}>
                                 <div class="product-search-results">
                                     <template for:each={searchResults} for:item="res">
                                         <div key={res.id} class="product-result-item" onclick={handleProductSelect} data-id={res.id}>
-                                            <span class="product-sku-label" if:true={res.sku}>[{res.sku}]</span>
-                                            <span class="product-name-only"><strong>{res.name}</strong></span>
+                                            <strong>{res.name}</strong>
                                         </div>
                                     </template>
                                 </div>
                             </template>
-
-                            <template if:true={productPriceOptions.length}>
-                                <div class="slds-m-top_large">
-                                    <p class="slds-text-title_bold slds-m-bottom_small">Listas de Precios Disponibles:</p>
-                                    <div class="slds-grid slds-wrap">
-                                        <template for:each={productPriceOptions} for:item="opt">
-                                            <div key={opt.pbeId} class="slds-col slds-size_1-of-3 slds-p-around_xx-small">
-                                                <div class={opt.className} onclick={handlePriceOptionSelect} data-id={opt.pbeId}>
-                                                    <span class="slds-text-title_bold">{opt.pricebookName}</span>
-                                                    <strong><lightning-formatted-number value={opt.unitPrice} format-style="currency"></lightning-formatted-number></strong>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-                            </template>
                         </div>
-
-                        <div class="slds-grid slds-wrap slds-gutters">
-                            <!-- Columna Tabla -->
-                            <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
-                                <div class="section-card slds-p-around_medium">
-                                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                                        <span class="slds-text-title_bold">Desglose por Sede</span>
-                                        <lightning-button-group>
-                                            <lightning-button label="Unitario" variant={isUnitarioVariant} onclick={handlePriceType} value="UNITARIO"></lightning-button>
-                                            <lightning-button label="Total" variant={isTotalVariant} onclick={handlePriceType} value="TOTAL"></lightning-button>
-                                        </lightning-button-group>
-                                    </div>
-                                    <table class="slds-table slds-table_bordered">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 3rem;"><lightning-input type="checkbox" onchange={handleSelectAllSedes}></lightning-input></th>
-                                                <th>Sede</th>
-                                                <th style="width: 80px;">Cant.</th>
-                                                <th style="width: 140px;">Importe</th>
-                                                <template if:true={showDiscountColumn}>
-                                                    <th style="width: 160px;">
-                                                        <div class="slds-grid slds-grid_vertical-align-center">
-                                                            <span class="slds-m-right_xx-small">Desc.</span>
-                                                            <lightning-button-group>
-                                                                <lightning-button label="$" variant={discountMontoVariant} onclick={handleDiscountTypeChange} value="monto" size="subatomic"></lightning-button>
-                                                                <lightning-button label="%" variant={discountPercentVariant} onclick={handleDiscountTypeChange} value="porcentaje" size="subatomic"></lightning-button>
-                                                            </lightning-button-group>
-                                                        </div>
-                                                    </th>
-                                                </template>
-                                                <th style="width: 140px; text-align: right;">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template for:each={modalTableData} for:item="row">
-                                                <tr key={row.id}>
-                                                    <td><lightning-input type="checkbox" checked={row.isSelected} data-id={row.id} onchange={handleSedeRowToggle} variant="label-hidden"></lightning-input></td>
-                                                    <td class="slds-text-title_bold">{row.sede}</td>
-                                                    <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden" disabled={row.isDisabled}></lightning-input></td>
-                                                    <td><lightning-input type="number" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden" disabled={row.isDisabled}></lightning-input></td>
-                                                    <template if:true={showDiscountColumn}><td><lightning-input type="number" value={row.descuento} data-id={row.id} data-field="descuento" onchange={handleModalInputChange} variant="label-hidden" disabled={row.isDisabled}></lightning-input></td></template>
-                                                    <td style="text-align: right;"><strong><lightning-formatted-number value={row.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                    <div class="slds-m-top_small"><lightning-button label="Habilitar Descuento" icon-name="utility:discount" variant="base" onclick={handleToggleDiscountColumn}></lightning-button></div>
-                                </div>
-                            </div>
-                            <!-- Columna Operativa (Solo Zonas) -->
-                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
-                                <div class="section-card slds-p-around_medium">
-                                    <div class="slds-m-bottom_medium">
-                                        <p class="slds-text-title_bold slds-m-bottom_small">Zonas / Indicaciones</p>
-                                        <div class="slds-p-around_small border-all radius-8 bg-light-gray">
-                                            <div class="slds-grid slds-wrap slds-m-bottom_x-small">
-                                                <template for:each={zonasAfectadas} for:item="z">
-                                                    <lightning-pill key={z} label={z} name={z} onremove={removeZona} class="slds-m-around_xx-small"></lightning-pill>
-                                                </template>
-                                            </div>
-                                            <lightning-input type="text" value={zonaInput} onchange={handleZonaInput} placeholder="Zona y coma..."></lightning-input>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- NUEVA SECCIÓN: DESCRIPCIÓN TÉCNICA ABAJO -->
-                        <div class="section-card slds-p-around_medium description-card">
-                            <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                                <p class="slds-text-title_bold">Descripción Técnica (PDF)</p>
-                                <lightning-button-menu label="Plantilla Técnica" variant="bare" onselect={handleApplyTemplate} data-field="modalDescription">
-                                    <template for:each={serviceTemplates} for:item="tpl"><lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item></template>
-                                </lightning-button-menu>
-                            </div>
-                            <lightning-input-rich-text value={modalDescription} onchange={handleModalDescriptionChange} variant="bottom-toolbar"></lightning-input-rich-text>
+                        <div class="section-card slds-p-around_medium">
+                            <table class="slds-table slds-table_bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Sede</th>
+                                        <th>Cant.</th>
+                                        <th>Importe</th>
+                                        <th style="text-align: right;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={modalTableData} for:item="row">
+                                        <tr key={row.id}>
+                                            <td class="slds-text-title_bold">{row.sede}</td>
+                                            <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            <td><lightning-input type="number" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
+                                            <td style="text-align: right;"><strong><lightning-formatted-number value={row.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     <footer class="slds-modal__footer">
@@ -460,129 +326,139 @@
             <div class="slds-backdrop slds-backdrop_open"></div>
         </template>
 
-        <!-- MODAL P&L -->
+        <!-- MODAL P&L PREMIUM (REDISEÑADO) -->
         <template if:true={showPLModal}>
             <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
-                <div class="slds-modal__container" style="max-width: 90%; width: 1000px;">
-                    <header class="slds-modal__header bg-blue-dark text-white">
-                        <h2 class="slds-text-heading_medium">Dashboard de Análisis de Rentabilidad</h2>
-                        <p class="slds-text-title">Estructura Global de Costos y Gastos</p>
+                <div class="slds-modal__container" style="max-width: 95%; width: 1150px;">
+                    <header class="slds-modal__header" style="background: linear-gradient(90deg, #001a33 0%, #004d99 100%); color: white; border-bottom: 4px solid #ffcc00; border-radius: 8px 8px 0 0;">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name="utility:calculator" variant="inverse" size="medium" class="slds-m-right_small"></lightning-icon>
+                            <div class="slds-text-align_left">
+                                <h2 class="slds-text-heading_medium slds-font-weight_bold">Dashboard Estratégico de Rentabilidad</h2>
+                                <p style="font-size: 0.85rem; opacity: 0.9;">Optimización de Costos y Simulación de Margen Real</p>
+                            </div>
+                        </div>
                     </header>
-                    <div class="slds-modal__content slds-p-around_none">
-                        <table class="pl-table slds-table slds-table_bordered slds-table_fixed-layout">
-                            <thead>
-                                <tr style="background: #f8f9fb;">
-                                    <th style="width: 250px; text-align: left; padding-left: 20px;">CONCEPTO / INDICADOR</th>
-                                    <th style="width: 180px; text-align: center; background: #eef4ff; color: #005fb2;">% / TASA (PROYECTO)</th>
-                                    <th style="text-align: right; padding-right: 20px;">SERV / AÑO 1 ($)</th>
-                                    <th style="text-align: right; padding-right: 20px;">SERV / AÑO 2 ($)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- GRUPO 1: ENTRADAS -->
-                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
-                                    <td colspan="4" class="slds-p-around_x-small">1. DATOS DE ENTRADA Y MARGEN</td>
-                                </tr>
-                                <tr>
-                                    <td>COSTO DIRECTO (Materiales + MO)</td>
-                                    <td style="text-align: center; background: #fdfdfd; color: #ccc;">---</td>
-                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.costo} data-field="costo" onchange={handlePL1Change} formatter="currency" step="0.01"></lightning-input></td>
-                                    <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.costo} data-field="costo" onchange={handlePL2Change} formatter="currency" step="0.01"></lightning-input></td>
-                                </tr>
-                                <tr>
-                                    <td>MARGEN ESPERADO (%)</td>
-                                    <td class="pl-input-cell" style="background: #eef4ff;">
-                                        <lightning-input type="number" variant="label-hidden" value={pl1.margen} data-field="margen" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small" style="font-weight: bold;">${res1.venta}</td>
-                                    <td class="slds-text-align_right slds-p-around_small" style="font-weight: bold;">${res2.venta}</td>
-                                </tr>
+                    <div class="slds-modal__content" style="background: #fdfdfd; border-radius: 0 0 8px 8px;">
+                        <div class="slds-p-around_medium">
+                            <table class="pl-table-professional slds-table slds-table_bordered slds-table_fixed-layout" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                <thead>
+                                    <tr style="background: #f8fafc;">
+                                        <th style="width: 28%; padding: 15px; color: #475569; font-weight: 800; border-bottom: 2px solid #e2e8f0;">INDICADOR ESTRATÉGICO</th>
+                                        <th style="width: 18%; text-align: center; background: #f0f9ff; color: #0369a1; border-left: 2px solid #bae6fd; border-bottom: 2px solid #bae6fd; font-weight: 800;">% / TASA GLOBAL</th>
+                                        <th style="width: 27%; text-align: right; padding-right: 30px; font-weight: 800; border-bottom: 2px solid #e2e8f0;">ESCENARIO AÑO 1 ($)</th>
+                                        <th style="width: 27%; text-align: right; padding-right: 30px; font-weight: 800; border-bottom: 2px solid #e2e8f0;">ESCENARIO AÑO 2 ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- GRUPO 1 -->
+                                    <tr style="background: #f1f5f9;">
+                                        <td colspan="4" style="color: #1e293b; font-size: 0.7rem; font-weight: 900; padding: 10px 15px; letter-spacing: 1px; text-transform: uppercase;">1. BASE DE INVERSIÓN Y VENTA</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large" style="font-weight: 600;">Inversión Directa (Servicios Agregados)</td>
+                                        <td style="text-align: center; color: #cbd5e1;">AUTO-SUMA</td>
+                                        <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.costo} data-field="costo" onchange={handlePL1Change} formatter="currency" step="0.01"></lightning-input></td>
+                                        <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.costo} data-field="costo" onchange={handlePL2Change} formatter="currency" step="0.01"></lightning-input></td>
+                                    </tr>
+                                    <tr style="background: #f0fdf4;">
+                                        <td class="slds-p-left_large slds-font-weight_bold" style="color: #166534;">Margen Bruto Objetivo (%)</td>
+                                        <td class="pl-input-cell" style="background: #dcfce7; border-left: 2px solid #86efac;">
+                                            <lightning-input type="number" variant="label-hidden" value={pl1.margen} data-field="margen" onchange={handleGlobalPLChange} step="0.01" class="pl-input-focus-green"></lightning-input>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 900; color: #166534; font-size: 1.15rem; padding-right: 30px;">${res1.venta}</td>
+                                        <td style="text-align: right; font-weight: 900; color: #166534; font-size: 1.15rem; padding-right: 30px;">${res2.venta}</td>
+                                    </tr>
 
-                                <!-- GRUPO 2: GASTOS -->
-                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
-                                    <td colspan="4" class="slds-p-around_x-small">2. GASTOS OPERATIVOS E INDIRECTOS</td>
-                                </tr>
-                                <tr>
-                                    <td>Indirecto (%)</td>
-                                    <td class="pl-input-cell" style="background: #eef4ff;">
-                                        <lightning-input type="number" variant="label-hidden" value={pl1.indirecto} data-field="indirecto" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.ind}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.ind}</td>
-                                </tr>
-                                <tr>
-                                    <td>Comisión Comercial (%)</td>
-                                    <td class="pl-input-cell" style="background: #eef4ff;">
-                                        <lightning-input type="number" variant="label-hidden" value={pl1.comision1} data-field="comision1" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.com1}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.com1}</td>
-                                </tr>
-                                <tr>
-                                    <td>Comisión 2 (%)</td>
-                                    <td class="pl-input-cell" style="background: #eef4ff;">
-                                        <lightning-input type="number" variant="label-hidden" value={pl1.comision2} data-field="comision2" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.com2}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.com2}</td>
-                                </tr>
-                                <tr>
-                                    <td>Regalía (%)</td>
-                                    <td class="pl-input-cell" style="background: #eef4ff;">
-                                        <lightning-input type="number" variant="label-hidden" value={pl1.regalia} data-field="regalia" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.reg}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.reg}</td>
-                                </tr>
-                                <tr>
-                                    <td>Financiamiento (Días)</td>
-                                    <td class="pl-input-cell" style="background: #eef4ff;">
-                                        <lightning-input type="number" variant="label-hidden" value={pl1.dias} data-field="dias" onchange={handleGlobalPLChange}></lightning-input>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.fin}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.fin}</td>
-                                </tr>
+                                    <!-- GRUPO 2 -->
+                                    <tr style="background: #f1f5f9;">
+                                        <td colspan="4" style="color: #1e293b; font-size: 0.7rem; font-weight: 900; padding: 10px 15px; letter-spacing: 1px; text-transform: uppercase;">2. DEDUCCIONES Y GASTOS OPERATIVOS</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large">Gastos Indirectos Corporativos (%)</td>
+                                        <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                            <lightning-input type="number" variant="label-hidden" value={pl1.indirecto} data-field="indirecto" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
+                                        </td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.ind}</td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.ind}</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large">Comisión Comercial Agente (%)</td>
+                                        <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                            <lightning-input type="number" variant="label-hidden" value={pl1.comision1} data-field="comision1" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
+                                        </td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.com1}</td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.com1}</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large">Comisiones Especiales / Otros (%)</td>
+                                        <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                            <lightning-input type="number" variant="label-hidden" value={pl1.comision2} data-field="comision2" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
+                                        </td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.com2}</td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.com2}</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large">Regalía por Uso de Marca / Franquicia (%)</td>
+                                        <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                            <lightning-input type="number" variant="label-hidden" value={pl1.regalia} data-field="regalia" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
+                                        </td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.reg}</td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.reg}</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large">Financiamiento (Días de Crédito)</td>
+                                        <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                            <lightning-input type="number" variant="label-hidden" value={pl1.dias} data-field="dias" onchange={handleGlobalPLChange}></lightning-input>
+                                        </td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.fin}</td>
+                                        <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.fin}</td>
+                                    </tr>
 
-                                <!-- GRUPO 3: IMPUESTOS -->
-                                <tr class="pl-section-header" style="background: #f3f3f3; font-weight: bold;">
-                                    <td colspan="4" class="slds-p-around_x-small">3. IMPUESTOS Y RESERVAS (FIJOS)</td>
-                                </tr>
-                                <tr>
-                                    <td>ISR s/ Utilidad Bruta</td>
-                                    <td style="text-align: center; background: #fdfdfd; font-weight: bold;">6%</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.isr}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.isr}</td>
-                                </tr>
-                                <tr>
-                                    <td>Reserva de Utilidad</td>
-                                    <td style="text-align: center; background: #fdfdfd; font-weight: bold;">5%</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res1.ru}</td>
-                                    <td class="slds-text-align_right slds-p-around_small">${res2.ru}</td>
-                                </tr>
-
-                                <!-- TOTALES FINALES -->
-                                <tr style="background: #333; color: white;">
-                                    <td class="slds-font-weight_bold" style="font-size: 1rem;">COSTO TOTAL DE OPERACIÓN</td>
-                                    <td style="background: #444;"></td>
-                                    <td class="slds-text-align_right slds-p-around_small" style="font-size: 1rem;">${res1.costoTotal}</td>
-                                    <td class="slds-text-align_right slds-p-around_small" style="font-size: 1rem;">${res2.costoTotal}</td>
-                                </tr>
-                                <tr style="background: #d4edda;">
-                                    <td class="slds-text-heading_small slds-font-weight_bold">UTILIDAD NETA (Margen Real)</td>
-                                    <td style="background: #c3e6cb;"></td>
-                                    <td class="slds-text-align_right slds-p-around_small">
-                                        <span style="font-size: 1.2rem; font-weight: bold; color: #155724;">${res1.resPesos}</span>
-                                        <div class="slds-text-title_bold">{res1.resPct}%</div>
-                                    </td>
-                                    <td class="slds-text-align_right slds-p-around_small">
-                                        <span style="font-size: 1.2rem; font-weight: bold; color: #155724;">${res2.resPesos}</span>
-                                        <div class="slds-text-title_bold">{res2.resPct}%</div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    <!-- GRUPO 3 -->
+                                    <tr style="background: #fff1f2;">
+                                        <td colspan="4" style="color: #9f1239; font-size: 0.7rem; font-weight: 900; padding: 10px 15px; letter-spacing: 1px; text-transform: uppercase;">3. OBLIGACIONES FISCALES Y RESERVAS (FIJOS)</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large" style="color: #9f1239;">ISR s/ Utilidad Bruta</td>
+                                        <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2; border-left: 2px solid #fecdd3;">6%</td>
+                                        <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res1.isr}</td>
+                                        <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res2.isr}</td>
+                                    </tr>
+                                    <tr class="pl-row-hover">
+                                        <td class="slds-p-left_large" style="color: #9f1239;">Reserva de Utilidad (RU)</td>
+                                        <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2; border-left: 2px solid #fecdd3;">5%</td>
+                                        <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res1.ru}</td>
+                                        <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res2.ru}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background: #0f172a; color: white;">
+                                        <td class="slds-p-left_large slds-font-weight_bold" style="padding: 15px;">EGRESO TOTAL DEL PROYECTO</td>
+                                        <td style="background: #020617; border-left: 2px solid #1e293b;"></td>
+                                        <td style="text-align: right; font-size: 1.1rem; font-weight: 800; color: #94a3b8; padding-right: 30px;">${res1.costoTotal}</td>
+                                        <td style="text-align: right; font-size: 1.1rem; font-weight: 800; color: #94a3b8; padding-right: 30px;">${res2.costoTotal}</td>
+                                    </tr>
+                                    <tr style="background: #f0fdf4; border-top: 4px solid #22c55e;">
+                                        <td style="padding: 20px 15px; font-size: 1.2rem; font-weight: 900; color: #166534;">MARGEN REAL (UTILIDAD NETA)</td>
+                                        <td style="background: #dcfce7; text-align: center; border-left: 2px solid #86efac;">
+                                            <div class="slds-text-heading_medium" style="font-weight: 900; color: #166534;">{res1.resPct}%</div>
+                                        </td>
+                                        <td style="text-align: right; padding-right: 30px;">
+                                            <span style="font-size: 1.6rem; font-weight: 900; color: #166534;">$ {res1.resPesos}</span>
+                                        </td>
+                                        <td style="text-align: right; padding-right: 30px;">
+                                            <span style="font-size: 1.6rem; font-weight: 900; color: #166534;">$ {res2.resPesos}</span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
-                    <footer class="slds-modal__footer"><lightning-button label="Cerrar" onclick={handleClosePLModal}></lightning-button></footer>
+                    <footer class="slds-modal__footer" style="background: #f1f5f9; padding: 15px 30px; border-top: 1px solid #e2e8f0;">
+                        <lightning-button label="Cerrar Dashboard" icon-name="utility:close" onclick={handleClosePLModal} class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Aplicar Cambios a Cotización" variant="brand" icon-name="utility:check" onclick={handleClosePLModal}></lightning-button>
+                    </footer>
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>

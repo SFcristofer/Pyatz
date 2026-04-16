@@ -102,6 +102,22 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
     @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
 
+    // Automatización: Sumar costos de servicios agregados
+    updatePLCostoFromServices() {
+        let totalCosto = 0;
+        if (this.serviciosData && this.serviciosData.length > 0) {
+            this.serviciosData.forEach(item => {
+                if (!item.isSeparator) {
+                    // Asumimos que el costo es el 60% del precio de venta si no viene explícito, 
+                    // o usamos el valor de totalSinImpuestos como base de inversión
+                    totalCosto += (item.totalSinImpuestos || 0);
+                }
+            });
+        }
+        this.pl1.costo = totalCosto;
+        this.pl2.costo = totalCosto;
+    }
+
     calculatePL(data) {
         const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
         const ind = venta * (data.indirecto / 100);
@@ -583,6 +599,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             }];
         });
         this.calculateTotals();
+        this.updatePLCostoFromServices(); // Automatización activada al guardar
         this.showModal = false;
         this.resetModal();
     }
@@ -605,6 +622,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         if (action === 'delete') {
             this.serviciosData = this.serviciosData.filter(item => item.id !== id);
             this.calculateTotals();
+            this.updatePLCostoFromServices(); // Automatización activada al borrar
         }
     }
 
@@ -668,7 +686,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.showSeparatorModal = false;
         this.separatorText = '';
     }
-    handleOpenPLModal() { this.showPLModal = true; }
+    handleOpenPLModal() { 
+        this.updatePLCostoFromServices();
+        this.showPLModal = true; 
+    }
     handleClosePLModal() { this.showPLModal = false; }
     handleLineChange(event) {
         const line = event.target.dataset.value;
