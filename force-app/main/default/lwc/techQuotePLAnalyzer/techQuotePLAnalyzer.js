@@ -1,123 +1,137 @@
 import { LightningElement, api, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getPLAnalysis from '@salesforce/apex/QuoteTechnicalController.getPLAnalysis';
 import savePLAnalysis from '@salesforce/apex/QuoteTechnicalController.savePLAnalysis';
+import getRelatedFiles from '@salesforce/apex/QuoteTechnicalController.getRelatedFiles';
 
-export default class TechQuotePLAnalyzer extends LightningElement {
+export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElement) {
     @api recordId;
-    @api costoBase = 0; // Costo que viene de los servicios agregados en el editor padre
-
+    @api costoBase;
+    
     @track isLoading = false;
-    @track pl1 = { costo: 0, margen: 25, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
-    @track pl2 = { costo: 0, margen: 41, indirecto: 15, comision1: 2, comision2: 0, regalia: 5, dias: 7 };
+    @track pl1 = { anio: 1, costo: 0, margen: 30, indirecto: 10, comision1: 3, comision2: 0, regalia: 5, dias: 30 };
+    @track pl2 = { anio: 2, costo: 0, margen: 30, indirecto: 10, comision1: 3, comision2: 0, regalia: 5, dias: 30 };
+    @track res1 = {};
+    @track res2 = {};
+    @track relatedFiles = [];
 
     connectedCallback() {
+        this.pl1.costo = parseFloat(this.costoBase || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        this.pl2.costo = parseFloat(this.costoBase || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         this.loadPLData();
+        this.loadFiles();
     }
 
-    // Si el costo base cambia en el padre, actualizamos los escenarios
-    @api
-    refreshCosto(nuevoCosto) {
-        this.pl1.costo = nuevoCosto;
-        this.pl2.costo = nuevoCosto;
+    loadFiles() {
+        getRelatedFiles({ recordId: this.recordId })
+            .then(result => { this.relatedFiles = result; })
+            .catch(error => { console.error('Error cargando archivos:', error); });
+    }
+
+    handleUploadFinished() {
+        this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Documento cargado', variant: 'success' }));
+        this.loadFiles();
+    }
+
+    handlePreviewFile(event) {
+        const docId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__namedPage',
+            attributes: { pageName: 'filePreview' },
+            state: { selectedRecordId: docId }
+        });
     }
 
     loadPLData() {
-        if (!this.recordId) return;
         this.isLoading = true;
         getPLAnalysis({ quoteId: this.recordId })
-            .then(plRecords => {
-                if (plRecords && plRecords.length > 0) {
-                    plRecords.forEach(rec => {
+            .then(result => {
+                if (result && result.length > 0) {
+                    result.forEach(rec => {
                         const data = {
+                            anio: rec.Anio__c,
                             costo: rec.Costo_Inversion__c || this.costoBase,
                             margen: rec.Margen_Esperado__c,
                             indirecto: rec.Gastos_Indirectos__c,
                             comision1: rec.Comision_Venta__c,
-                            comision2: 0,
+                            comision2: rec.Comision_Venta_2__c || 0,
                             regalia: rec.Regalias__c,
                             dias: rec.Dias_Financiamiento__c
                         };
                         if (rec.Anio__c === 1) this.pl1 = data;
-                        else if (rec.Anio__c === 2) this.pl2 = data;
+                        else this.pl2 = data;
                     });
-                } else {
-                    // Si no hay registros, usar el costo base que viene del padre
-                    this.pl1.costo = this.costoBase;
-                    this.pl2.costo = this.costoBase;
                 }
+                this.recalculateAll();
             })
-            .catch(err => console.error('Error cargando P&L:', err))
+            .catch(err => { console.error('Error P&L:', err); })
             .finally(() => { this.isLoading = false; });
     }
-
-    calculatePL(data) {
-        const venta = data.margen >= 100 ? 0 : (data.costo / (1 - (data.margen / 100)));
-        const ind = venta * (data.indirecto / 100);
-        const com1 = venta * (data.comision1 / 100);
-        const com2 = venta * (data.comision2 / 100);
-        const reg = venta * (data.regalia / 100);
-        const fin = venta * 0.000611 * data.dias;
-
-        const utilidadBruta = venta - data.costo - ind - com1 - com2 - reg - fin;
-        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
-        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
-
-        const costoTotal = parseFloat(data.costo) + ind + com1 + com2 + reg + fin + isr + ru;
-        const margenDolares = venta - costoTotal;
-        const margenPct = venta > 0 ? (margenDolares / venta) * 100 : 0;
-
-        return {
-            venta: venta.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            ind: ind.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            com1: com1.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            com2: com2.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            reg: reg.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            fin: fin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            isr: isr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            ru: ru.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            costoTotal: costoTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            resPesos: margenDolares.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            resPct: margenPct.toFixed(2)
-        };
-    }
-
-    get res1() { return this.calculatePL(this.pl1); }
-    get res2() { return this.calculatePL(this.pl2); }
 
     handleGlobalPLChange(event) {
         const field = event.target.dataset.field;
         const val = parseFloat(event.target.value) || 0;
         this.pl1 = { ...this.pl1, [field]: val };
         this.pl2 = { ...this.pl2, [field]: val };
+        this.recalculateAll();
     }
 
-    handlePL1Change(event) {
-        const field = event.target.dataset.field;
-        this.pl1 = { ...this.pl1, [field]: parseFloat(event.target.value) || 0 };
+    recalculateAll() {
+        this.res1 = this.calculatePL(this.pl1);
+        this.res2 = this.calculatePL(this.pl2);
     }
 
-    handlePL2Change(event) {
-        const field = event.target.dataset.field;
-        this.pl2 = { ...this.pl2, [field]: parseFloat(event.target.value) || 0 };
+    calculatePL(data) {
+        const costoVal = parseFloat(data.costo || 0);
+        const margenVal = parseFloat(data.margen || 0);
+        const indirectoVal = parseFloat(data.indirecto || 0);
+        const comision1Val = parseFloat(data.comision1 || 0);
+        const comision2Val = parseFloat(data.comision2 || 0);
+        const regaliaVal = parseFloat(data.regalia || 0);
+        const diasVal = parseFloat(data.dias || 0);
+
+        const venta = margenVal >= 100 ? 0 : (costoVal / (1 - (margenVal / 100)));
+        const ind = venta * (indirectoVal / 100);
+        const com1 = venta * (comision1Val / 100);
+        const com2 = venta * (comision2Val / 100);
+        const reg = venta * (regaliaVal / 100);
+        const fin = venta * 0.000611 * diasVal;
+
+        const utilidadBruta = venta - costoVal - ind - com1 - com2 - reg - fin;
+        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
+        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
+
+        const egresoTotal = costoVal + ind + com1 + com2 + reg + fin + isr + ru;
+        const utilidadNeta = venta - egresoTotal;
+        const margenRealPct = venta > 0 ? (utilidadNeta / venta) * 100 : 0;
+
+        const fmt = (val) => val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        return {
+            venta: fmt(venta),
+            ind: fmt(ind),
+            com1: fmt(com1),
+            com2: fmt(com2),
+            reg: fmt(reg),
+            fin: fmt(fin),
+            isr: fmt(isr),
+            ru: fmt(ru),
+            costoReal: fmt(egresoTotal),
+            utilidad: fmt(utilidadNeta),
+            margenReal: margenRealPct.toFixed(2)
+        };
     }
 
-    handleClose() {
-        this.dispatchEvent(new CustomEvent('close'));
-    }
+    handleCancel() { this.dispatchEvent(new CustomEvent('close')); }
 
     handleSave() {
-        if (!this.recordId) {
-            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Guarde el presupuesto antes de aplicar el P&L.', variant: 'warning' }));
-            return;
-        }
         this.isLoading = true;
-        const plData = [ { anio: 1, ...this.pl1 }, { anio: 2, ...this.pl2 } ];
-
+        const plData = [this.pl1, this.pl2];
         savePLAnalysis({ quoteId: this.recordId, plDataJson: JSON.stringify(plData) })
             .then(() => {
-                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Análisis P&L guardado y aplicado.', variant: 'success' }));
-                this.handleClose();
+                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Análisis guardado', variant: 'success' }));
+                this.handleCancel();
             })
             .catch(err => {
                 this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: err.body.message, variant: 'error' }));

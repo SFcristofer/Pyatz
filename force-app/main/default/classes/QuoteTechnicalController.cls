@@ -1,6 +1,27 @@
 public with sharing class QuoteTechnicalController {
     
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getRelatedFiles(Id recordId) {
+        List<Map<String, Object>> files = new List<Map<String, Object>>();
+        if (recordId == null) return files;
+
+        for (ContentDocumentLink link : [SELECT ContentDocumentId, ContentDocument.Title, ContentDocument.FileExtension, 
+                                                ContentDocument.LatestPublishedVersionId, ContentDocument.ContentSize
+                                         FROM ContentDocumentLink 
+                                         WHERE LinkedEntityId = :recordId 
+                                         AND ContentDocument.FileExtension = 'pdf']) {
+            Map<String, Object> f = new Map<String, Object>();
+            f.put('id', link.ContentDocumentId);
+            f.put('versionId', link.ContentDocument.LatestPublishedVersionId);
+            f.put('title', link.ContentDocument.Title);
+            f.put('extension', link.ContentDocument.FileExtension);
+            f.put('size', (link.ContentDocument.ContentSize / 1024) + ' KB');
+            files.add(f);
+        }
+        return files;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static Map<String, Object> getContractInitialData(Id oppId) {
         Map<String, Object> result = new Map<String, Object>();
         try {
@@ -119,10 +140,10 @@ public with sharing class QuoteTechnicalController {
      */
     @AuraEnabled(cacheable=true)
     public static List<Analisis_PL__c> getPLAnalysis(Id quoteId) {
-        return [SELECT Anio__c, Costo_Inversion__c, Margen_Esperado__c, Gastos_Indirectos__c, 
-                       Comision_Venta__c, Regalias__c, Dias_Financiamiento__c 
-                FROM Analisis_PL__c 
-                WHERE Presupuesto__c = :quoteId 
+        return [SELECT Anio__c, Costo_Inversion__c, Margen_Esperado__c, Gastos_Indirectos__c,
+                       Comision_Venta__c, Regalias__c, Dias_Financiamiento__c
+                FROM Analisis_PL__c
+                WHERE Presupuesto__c = :quoteId
                 ORDER BY Anio__c ASC];
     }
 
@@ -148,6 +169,7 @@ public with sharing class QuoteTechnicalController {
                 pl.Margen_Esperado__c = Decimal.valueOf(String.valueOf(row.get('margen')));
                 pl.Gastos_Indirectos__c = Decimal.valueOf(String.valueOf(row.get('indirecto')));
                 pl.Comision_Venta__c = Decimal.valueOf(String.valueOf(row.get('comision1')));
+                pl.Comision_Venta_2__c = Decimal.valueOf(String.valueOf(row.get('comision2')));
                 pl.Regalias__c = Decimal.valueOf(String.valueOf(row.get('regalia')));
                 pl.Dias_Financiamiento__c = Decimal.valueOf(String.valueOf(row.get('dias')));
                 

@@ -1,131 +1,176 @@
 <template>
     <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
         <div class="slds-modal__container" style="max-width: 95%; width: 1150px;">
-            <header class="slds-modal__header" style="background: linear-gradient(90deg, #001a33 0%, #004d99 100%); color: white; border-bottom: 4px solid #ffcc00; border-radius: 8px 8px 0 0;">
-                <div class="slds-grid slds-grid_vertical-align-center">
-                    <lightning-icon icon-name="utility:calculator" variant="inverse" size="medium" class="slds-m-right_small"></lightning-icon>
-                    <div class="slds-text-align_left">
-                        <h2 class="slds-text-heading_medium slds-font-weight_bold">Dashboard Estratégico de Rentabilidad</h2>
-                        <p style="font-size: 0.85rem; opacity: 0.9;">Optimización de Costos y Simulación de Margen Real</p>
-                    </div>
-                </div>
+            <header class="slds-modal__header" style="background: #001a33; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleCancel}>
+                    <lightning-icon icon-name="utility:close" alternative-text="Cerrar" size="small" variant="inverse"></lightning-icon>
+                </button>
+                <h2 class="slds-text-heading_medium slds-font-weight_bold">Dashboard de Rentabilidad Estratégica (P&L)</h2>
             </header>
 
-            <div class="slds-modal__content slds-is-relative" style="background: #fdfdfd; border-radius: 0 0 8px 8px;">
-                <template if:true={isLoading}>
-                    <lightning-spinner alternative-text="Cargando análisis..." size="medium"></lightning-spinner>
-                </template>
-
-                <div class="slds-p-around_medium">
-                    <table class="pl-table-professional slds-table slds-table_bordered slds-table_fixed-layout">
+            <div class="slds-modal__content slds-p-around_medium" style="background: #f1f5f9;">
+                <div class="slds-box slds-theme_default" style="padding: 0; overflow: hidden; border: 1px solid #e2e8f0;">
+                    <table class="pl-table slds-table_fixed-layout">
                         <thead>
-                            <tr style="background: #f8fafc;">
-                                <th style="width: 28%; padding: 15px; color: #475569; font-weight: 800; border-bottom: 2px solid #e2e8f0;">INDICADOR ESTRATÉGICO</th>
-                                <th style="width: 18%; text-align: center; background: #f0f9ff; color: #0369a1; border-left: 2px solid #bae6fd; border-bottom: 2px solid #bae6fd; font-weight: 800;">% / TASA GLOBAL</th>
-                                <th style="width: 27%; text-align: right; padding-right: 30px; font-weight: 800; border-bottom: 2px solid #e2e8f0;">ESCENARIO AÑO 1 ($)</th>
-                                <th style="width: 27%; text-align: right; padding-right: 30px; font-weight: 800; border-bottom: 2px solid #e2e8f0;">ESCENARIO AÑO 2 ($)</th>
+                            <tr>
+                                <th style="width: 40%; text-align: left; padding-left: 25px;">Indicador Financiero</th>
+                                <th style="width: 15%; text-align: center;">Variable %</th>
+                                <th style="width: 22.5%; text-align: right; padding-right: 30px;">Año 1 ($)</th>
+                                <th style="width: 22.5%; text-align: right; padding-right: 30px;">Año 2 ($)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- GRUPO 1 -->
-                            <tr style="background: #f1f5f9;">
-                                <td colspan="4" style="color: #1e293b; font-size: 0.7rem; font-weight: 900; padding: 10px 15px; letter-spacing: 1px; text-transform: uppercase;">1. BASE DE INVERSIÓN Y VENTA</td>
+                            <!-- GRUPO 1: INGRESOS -->
+                            <tr class="group-header">
+                                <td colspan="4">1. ANÁLISIS DE INVERSIÓN Y PRECIO DE VENTA</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large" style="font-weight: 600;">Inversión Directa (Servicios Agregados)</td>
-                                <td style="text-align: center; color: #cbd5e1;">AUTO-SUMA</td>
-                                <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl1.costo} data-field="costo" onchange={handlePL1Change} formatter="currency" step="0.01"></lightning-input></td>
-                                <td class="pl-input-cell"><lightning-input type="number" variant="label-hidden" value={pl2.costo} data-field="costo" onchange={handlePL2Change} formatter="currency" step="0.01"></lightning-input></td>
+                                <td class="slds-p-left_large">Costo de Inversión Base (Servicios/Equipos)</td>
+                                <td style="text-align: center; color: #94a3b8; font-size: 0.65rem;">SISTEMA</td>
+                                <td style="text-align: right; font-weight: 700; padding-right: 30px;">${pl1.costo}</td>
+                                <td style="text-align: right; font-weight: 700; padding-right: 30px;">${pl2.costo}</td>
                             </tr>
                             <tr style="background: #f0fdf4;">
                                 <td class="slds-p-left_large slds-font-weight_bold" style="color: #166534;">Margen Bruto Objetivo (%)</td>
-                                <td class="pl-input-cell" style="background: #dcfce7; border-left: 2px solid #86efac;">
-                                    <lightning-input type="number" variant="label-hidden" value={pl1.margen} data-field="margen" onchange={handleGlobalPLChange} step="0.01" class="pl-input-focus-green"></lightning-input>
+                                <td class="pl-input-cell">
+                                    <lightning-input type="number" variant="label-hidden" value={pl1.margen} data-field="margen" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
                                 </td>
-                                <td style="text-align: right; font-weight: 900; color: #166534; font-size: 1.15rem; padding-right: 30px;">${res1.venta}</td>
-                                <td style="text-align: right; font-weight: 900; color: #166534; font-size: 1.15rem; padding-right: 30px;">${res2.venta}</td>
+                                <td style="text-align: right; font-weight: 700; color: #166534; padding-right: 30px;">SIMULADO</td>
+                                <td style="text-align: right; font-weight: 700; color: #166534; padding-right: 30px;">SIMULADO</td>
+                            </tr>
+                            <tr style="background: #e0f2fe; border-bottom: 2px solid #bae6fd;">
+                                <td class="slds-p-left_large slds-font-weight_bold" style="color: #0369a1;">PRECIO DE VENTA SUGERIDO</td>
+                                <td style="text-align: center; color: #0369a1; font-weight: 800; font-size: 0.65rem;">VALOR CALC.</td>
+                                <td style="text-align: right; font-weight: 900; color: #0369a1; font-size: 1.3rem; padding-right: 30px;">${res1.venta}</td>
+                                <td style="text-align: right; font-weight: 900; color: #0369a1; font-size: 1.3rem; padding-right: 30px;">${res2.venta}</td>
                             </tr>
 
-                            <!-- GRUPO 2 -->
-                            <tr style="background: #f1f5f9;">
-                                <td colspan="4" style="color: #1e293b; font-size: 0.7rem; font-weight: 900; padding: 10px 15px; letter-spacing: 1px; text-transform: uppercase;">2. DEDUCCIONES Y GASTOS OPERATIVOS</td>
+                            <!-- GRUPO 2: COSTOS VARIABLES -->
+                            <tr class="group-header">
+                                <td colspan="4">2. DEDUCCIONES OPERATIVAS Y COMERCIALES</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large">Gastos Indirectos Corporativos (%)</td>
-                                <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                <td class="slds-p-left_large">Gastos Indirectos Operativos (%)</td>
+                                <td class="pl-input-cell">
                                     <lightning-input type="number" variant="label-hidden" value={pl1.indirecto} data-field="indirecto" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
                                 </td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.ind}</td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.ind}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.ind}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.ind}</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large">Comisión Comercial Agente (%)</td>
-                                <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                <td class="slds-p-left_large">Comisión Comercial Agente 1 (%)</td>
+                                <td class="pl-input-cell">
                                     <lightning-input type="number" variant="label-hidden" value={pl1.comision1} data-field="comision1" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
                                 </td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.com1}</td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.com1}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.com1}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.com1}</td>
+                            </tr>
+                            <tr class="pl-row-hover">
+                                <td class="slds-p-left_large">Comisión Comercial Agente 2 (%)</td>
+                                <td class="pl-input-cell">
+                                    <lightning-input type="number" variant="label-hidden" value={pl1.comision2} data-field="comision2" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
+                                </td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.com2}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.com2}</td>
                             </tr>
                             <tr class="pl-row-hover">
                                 <td class="slds-p-left_large">Regalía por Uso de Marca / Franquicia (%)</td>
-                                <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                <td class="pl-input-cell">
                                     <lightning-input type="number" variant="label-hidden" value={pl1.regalia} data-field="regalia" onchange={handleGlobalPLChange} step="0.01"></lightning-input>
                                 </td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.reg}</td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.reg}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.reg}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.reg}</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large">Financiamiento (Días de Crédito)</td>
-                                <td class="pl-input-cell" style="background: #f8fafc; border-left: 2px solid #e2e8f0;">
+                                <td class="slds-p-left_large">Días de Financiamiento (Plazo Cobro)</td>
+                                <td class="pl-input-cell">
                                     <lightning-input type="number" variant="label-hidden" value={pl1.dias} data-field="dias" onchange={handleGlobalPLChange}></lightning-input>
                                 </td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res1.fin}</td>
-                                <td style="text-align: right; color: #ef4444; font-weight: 600; padding-right: 30px;">- ${res2.fin}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px; font-size: 0.85rem;">Costo Fin: - ${res1.fin}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px; font-size: 0.85rem;">Costo Fin: - ${res2.fin}</td>
                             </tr>
 
-                            <!-- GRUPO 3 -->
-                            <tr style="background: #fff1f2;">
-                                <td colspan="4" style="color: #9f1239; font-size: 0.7rem; font-weight: 900; padding: 10px 15px; letter-spacing: 1px; text-transform: uppercase;">3. OBLIGACIONES FISCALES Y RESERVAS (FIJOS)</td>
+                            <!-- GRUPO 3: IMPUESTOS -->
+                            <tr class="group-header" style="background: #fff1f2;">
+                                <td colspan="4" style="color: #9f1239;">3. OBLIGACIONES FISCALES Y RESERVAS</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large" style="color: #9f1239;">ISR s/ Utilidad Bruta</td>
-                                <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2; border-left: 2px solid #fecdd3;">6%</td>
-                                <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res1.isr}</td>
-                                <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res2.isr}</td>
+                                <td class="slds-p-left_large" style="color: #9f1239;">ISR s/ Utilidad Bruta (Simulado 6%)</td>
+                                <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2;">6%</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.isr}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.isr}</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large" style="color: #9f1239;">Reserva de Utilidad (RU)</td>
-                                <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2; border-left: 2px solid #fecdd3;">5%</td>
-                                <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res1.ru}</td>
-                                <td style="text-align: right; color: #9f1239; font-weight: 600; padding-right: 30px;">- ${res2.ru}</td>
+                                <td class="slds-p-left_large" style="color: #9f1239;">Reserva de Utilidad (RU 5%)</td>
+                                <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2;">5%</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.ru}</td>
+                                <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.ru}</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr style="background: #0f172a; color: white;">
                                 <td class="slds-p-left_large slds-font-weight_bold" style="padding: 15px;">EGRESO TOTAL DEL PROYECTO</td>
-                                <td style="background: #020617; border-left: 2px solid #1e293b;"></td>
-                                <td style="text-align: right; font-size: 1.1rem; font-weight: 800; color: #94a3b8; padding-right: 30px;">{res1.costoTotal}</td>
-                                <td style="text-align: right; font-size: 1.1rem; font-weight: 800; color: #94a3b8; padding-right: 30px;">{res2.costoTotal}</td>
+                                <td style="background: #020617;"></td>
+                                <td style="text-align: right; font-size: 1.15rem; font-weight: 800; color: #94a3b8; padding-right: 30px;">$ {res1.costoReal}</td>
+                                <td style="text-align: right; font-size: 1.15rem; font-weight: 800; color: #94a3b8; padding-right: 30px;">$ {res2.costoReal}</td>
                             </tr>
                             <tr style="background: #f0fdf4; border-top: 4px solid #22c55e;">
-                                <td style="padding: 20px 15px; font-size: 1.2rem; font-weight: 900; color: #166534;">MARGEN REAL (UTILIDAD NETA)</td>
-                                <td style="background: #dcfce7; text-align: center; border-left: 2px solid #86efac;">
-                                    <div class="slds-text-heading_medium" style="font-weight: 900; color: #166534;">{res1.resPct}%</div>
+                                <td style="padding: 20px 15px; font-size: 1.25rem; font-weight: 900; color: #166534;">MARGEN REAL (UTILIDAD NETA)</td>
+                                <td style="background: #dcfce7; text-align: center;">
+                                    <div style="font-weight: 900; color: #166534; font-size: 1.4rem;">{res1.margenReal}%</div>
                                 </td>
                                 <td style="text-align: right; padding-right: 30px;">
-                                    <span style="font-size: 1.6rem; font-weight: 900; color: #166534;">$ {res1.resPesos}</span>
+                                    <span style="font-size: 1.8rem; font-weight: 900; color: #166534;">$ {res1.utilidad}</span>
                                 </td>
                                 <td style="text-align: right; padding-right: 30px;">
-                                    <span style="font-size: 1.6rem; font-weight: 900; color: #166534;">$ {res2.resPesos}</span>
+                                    <span style="font-size: 1.8rem; font-weight: 900; color: #166534;">$ {res2.utilidad}</span>
                                 </td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+
+                <!-- SECCIÓN DE DOCUMENTOS DE RESPALDO -->
+                <div class="slds-m-top_large slds-p-around_medium" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px;">
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name="doctype:pdf" size="small" class="slds-m-right_small"></lightning-icon>
+                            <h3 class="slds-text-title_bold" style="color: #475569;">Documentación de Respaldo (Fichas / Cotizaciones)</h3>
+                        </div>
+                        <lightning-file-upload
+                            label="Adjuntar PDF"
+                            name="fileUploader"
+                            accept=".pdf"
+                            record-id={recordId}
+                            onuploadfinished={handleUploadFinished}
+                            class="pl-file-uploader">
+                        </lightning-file-upload>
+                    </div>
+
+                    <template if:true={relatedFiles.length}>
+                        <div class="slds-grid slds-wrap slds-gutters_small">
+                            <template for:each={relatedFiles} for:item="file">
+                                <div key={file.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-bottom_small">
+                                    <div class="slds-box slds-box_x-small slds-theme_default slds-grid slds-grid_vertical-align-center file-card" 
+                                         onclick={handlePreviewFile} data-id={file.id} style="cursor: pointer; border-radius: 8px;">
+                                        <lightning-icon icon-name="doctype:pdf" size="small" class="slds-m-right_small"></lightning-icon>
+                                        <div class="slds-truncate">
+                                            <p class="slds-text-body_small slds-truncate slds-font-weight_bold" title={file.title}>{file.title}</p>
+                                            <p class="slds-text-color_weak" style="font-size: 0.65rem;">{file.size}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={relatedFiles.length}>
+                        <p class="slds-text-align_center slds-text-color_weak slds-p-vertical_small" style="font-style: italic;">No hay documentos adjuntos a este análisis.</p>
+                    </template>
+                </div>
             </div>
 
-            <footer class="slds-modal__footer" style="background: #f1f5f9; padding: 15px 30px; border-top: 1px solid #e2e8f0;">
-                <lightning-button label="Cancelar" icon-name="utility:close" onclick={handleClose} class="slds-m-right_small"></lightning-button>
+            <footer class="slds-modal__footer" style="background: #f1f5f9; padding: 15px 30px; border-top: 1px solid #e2e8f0; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <lightning-button label="Cancelar" icon-name="utility:close" onclick={handleCancel} class="slds-m-right_small"></lightning-button>
                 <lightning-button label="Guardar Análisis Estratégico" variant="brand" icon-name="utility:save" onclick={handleSave}></lightning-button>
             </footer>
         </div>

@@ -205,6 +205,20 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
     get technicalSedesString() { return this.selectedSedesObjects.map(s => s.Name).join(', '); }
 
+    // GETTER PARA P&L: Suma el costo base de todos los servicios
+    get costoTotalServicios() {
+        let total = 0;
+        if (this.serviciosData) {
+            this.serviciosData.forEach(item => {
+                if (!item.isSeparator) {
+                    total += parseFloat(item.totalSinImpuestos || 0);
+                }
+            });
+        }
+        console.log('--- Calculando Costo Base para P&L:', total);
+        return total;
+    }
+
     handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
     autoFillAsunto() {
         const folioDisplay = this.folio || 'POR GENERAR';

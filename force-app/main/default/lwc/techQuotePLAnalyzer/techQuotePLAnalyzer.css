@@ -1,37 +1,88 @@
-.pl-table-professional {
+/* ESTRUCTURA DE LA TABLA P&L */
+.pl-table {
+    width: 100%;
     border-collapse: separate;
     border-spacing: 0;
 }
 
-.pl-row-hover:hover {
-    background-color: #f1f5f9 !important;
-    transition: background-color 0.2s ease;
+.pl-table thead th {
+    background-color: #001a33;
+    color: #ffffff;
+    padding: 16px 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border: none;
 }
 
-.pl-input-cell {
-    padding: 2px 8px !important;
+.pl-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
 }
 
-.pl-input-focus-green :host {
-    --slds-c-input-color-border-focus: #22c55e;
-    --slds-c-input-shadow-focus: 0 0 0 1px #22c55e;
+/* ESTILOS DE FILAS */
+.group-header {
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 900;
+    padding: 10px 15px !important;
+    letter-spacing: 1px;
 }
 
-/* Estilos para inputs dentro de la tabla */
-lightning-input {
-    --slds-c-input-text-align: right;
-    --slds-c-input-spacing-padding-top: 4px;
-    --slds-c-input-spacing-padding-bottom: 4px;
+.pl-row-hover:hover {
+    background-color: #f1f5f9;
 }
 
-.pl-table-professional th {
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+/* INPUTS ESTILIZADOS */
+.pl-input-cell {
+    width: 120px;
+    padding: 4px 8px !important;
 }
 
-.pl-table-professional td {
-    padding: 10px 15px;
-    border-bottom: 1px solid #f1f5f9;
+.pl-input-focus-green {
+    --slds-c-input-shadow-focus: #22c55e;
+}
+
+.pl-input-focus-blue {
+    --slds-c-input-shadow-focus: #0070d2;
+}
+
+/* RESULTADOS DESTACADOS */
+.result-currency {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #334155;
+}
+
+.negative-value {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.positive-value {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+/* CARDS DE ARCHIVOS */
+.file-card {
+    border: 1px solid #e2e8f0;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.file-card:hover {
+    border-color: #001a33;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* MARGEN REAL DASHBOARD */
+.final-margin-box {
+    padding: 20px;
+    border-radius: 12px;
+    text-align: right;
 }
