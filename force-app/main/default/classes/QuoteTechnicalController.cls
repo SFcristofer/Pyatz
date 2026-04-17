@@ -1370,7 +1370,6 @@ public with sharing class QuoteTechnicalController {
 
     /**
      * Convierte los datos técnicos del JSON en registros de Zona de Servicio reales para trazabilidad.
-     * Soporta fragmentación por comas y garantiza unicidad por Servicio + Zona.
      */
     private static void syncServiceZones(Id quoteId, String markersBase64) {
         try {
@@ -1378,49 +1377,64 @@ public with sharing class QuoteTechnicalController {
             String jsonStr = EncodingUtil.urlDecode(EncodingUtil.base64Decode(markersBase64).toString(), 'UTF-8');
             Map<String, Object> markers = (Map<String, Object>)JSON.deserializeUntyped(jsonStr);
             
-            if (!markers.containsKey('surveyData')) return;
-            List<Object> rows = (List<Object>)markers.get('surveyData');
-            
-            // Detectar el tipo de servicio actual del bloque técnico
-            String serviceType = markers.containsKey('surveyType') ? (String)markers.get('surveyType') : 'General';
-            
             List<Zona_Servicio_Pyatz__c> zonesToUpsert = new List<Zona_Servicio_Pyatz__c>();
             
-            for (Object obj : rows) {
-                Map<String, Object> r = (Map<String, Object>)obj;
-                String rawZonaText = (String)r.get('zona');
-                if (String.isBlank(rawZonaText)) rawZonaText = (String)r.get('area'); 
-                
-                if (String.isNotBlank(rawZonaText)) {
-                    List<String> zonaNames = rawZonaText.split(',');
+            // INTENTO 1: Buscar en serviciosData (Estructura del Configurador Pro)
+            if (markers.containsKey('serviciosData')) {
+                List<Object> servicios = (List<Object>)markers.get('serviciosData');
+                for (Object obj : servicios) {
+                    Map<String, Object> s = (Map<String, Object>)obj;
+                    String areasText = (String)s.get('areas');
+                    String serviceName = (String)s.get('descripcion');
                     
-                    for (String name : zonaNames) {
-                        String cleanName = name.trim();
-                        if (String.isNotBlank(cleanName)) {
-                            Zona_Servicio_Pyatz__c zs = new Zona_Servicio_Pyatz__c();
-                            zs.Name = cleanName.length() > 80 ? cleanName.substring(0, 80) : cleanName;
-                            zs.Cuenta__c = q.AccountId;
-                            zs.Oportunidad__c = q.OpportunityId;
-                            zs.Cotizacion__c = quoteId;
-                            zs.Tipo_de_Servicio__c = serviceType;
-                            zs.Detalle_Tecnico__c = (String)r.get('obs');
-                            
-                            // CONTROL TOTAL: La clave ahora incluye el Servicio para evitar sobrescritura
-                            String normalizedName = cleanName.replaceAll('[^a-zA-Z0-9]', '_').toLowerCase();
-                            String normalizedService = serviceType.replaceAll('[^a-zA-Z0-9]', '_').toLowerCase();
-                            zs.Id_Unico_Zona__c = quoteId + '_' + normalizedService + '_' + normalizedName;
-                            
-                            zonesToUpsert.add(zs);
+                    if (String.isNotBlank(areasText)) {
+                        for (String name : areasText.split(',')) {
+                            String cleanName = name.trim();
+                            if (String.isNotBlank(cleanName)) {
+                                Zona_Servicio_Pyatz__c zs = new Zona_Servicio_Pyatz__c();
+                                zs.Name = cleanName.length() > 80 ? cleanName.substring(0, 80) : cleanName;
+                                zs.Cuenta__c = q.AccountId;
+                                zs.Oportunidad__c = q.OpportunityId;
+                                zs.Cotizacion__c = quoteId;
+                                zs.Tipo_de_Servicio__c = serviceName;
+                                zs.Detalle_Tecnico__c = (String)s.get('detalleTecnico');
+                                
+                                String normalizedName = cleanName.replaceAll('[^a-zA-Z0-9]', '_').toLowerCase();
+                                zs.Id_Unico_Zona__c = quoteId + '_' + normalizedName;
+                                zonesToUpsert.add(zs);
+                            }
                         }
                     }
                 }
             }
             
-            if (!zonesToUpsert.isEmpty()) {
-                upsert zonesToUpsert Id_Unico_Zona__c;
+            // INTENTO 2: Fallback a surveyData (Estructura de Encuestas)
+            if (zonesToUpsert.isEmpty() && markers.containsKey('surveyData')) {
+                List<Object> rows = (List<Object>)markers.get('surveyData');
+                String serviceType = markers.containsKey('surveyType') ? (String)markers.get('surveyType') : 'General';
+                for (Object obj : rows) {
+                    Map<String, Object> r = (Map<String, Object>)obj;
+                    String rawZonaText = (String)r.get('zona');
+                    if (String.isBlank(rawZonaText)) rawZonaText = (String)r.get('area'); 
+                    if (String.isNotBlank(rawZonaText)) {
+                        for (String name : rawZonaText.split(',')) {
+                            String cleanName = name.trim();
+                            if (String.isNotBlank(cleanName)) {
+                                Zona_Servicio_Pyatz__c zs = new Zona_Servicio_Pyatz__c();
+                                zs.Name = cleanName.length() > 80 ? cleanName.substring(0, 80) : cleanName;
+                                zs.Cuenta__c = q.AccountId;
+                                zs.Oportunidad__c = q.OpportunityId;
+                                zs.Cotizacion__c = quoteId;
+                                zs.Tipo_de_Servicio__c = serviceType;
+                                zs.Id_Unico_Zona__c = quoteId + '_' + serviceType + '_' + cleanName.replaceAll('[^a-zA-Z0-9]', '_').toLowerCase();
+                                zonesToUpsert.add(zs);
+                            }
+                        }
+                    }
+                }
             }
-        } catch (Exception e) {
-            System.debug('CRITICAL_ERROR_SYNC_ZONES: ' + e.getMessage());
-        }
+            
+            if (!zonesToUpsert.isEmpty()) upsert zonesToUpsert Id_Unico_Zona__c;
+        } catch (Exception e) { System.debug('ERROR_SYNC_ZONES: ' + e.getMessage()); }
     }
 }
