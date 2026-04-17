@@ -387,4 +387,35 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
     handleOpenPLModal() { this.showPLModal = true; }
     handleClosePLModal() { this.showPLModal = false; }
+
+    // --- LÓGICA DRAG & DROP ---
+    draggedIndex;
+
+    handleDragStart(event) {
+        this.draggedIndex = event.currentTarget.dataset.index;
+        event.dataTransfer.effectAllowed = 'move';
+        event.currentTarget.classList.add('dragging');
+    }
+
+    handleDragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
+        const dropIndex = event.currentTarget.dataset.index;
+        if (this.draggedIndex === dropIndex) return;
+
+        // Reordenar el array
+        let data = [...this.serviciosData];
+        const draggedItem = data.splice(this.draggedIndex, 1)[0];
+        data.splice(dropIndex, 0, draggedItem);
+
+        this.serviciosData = data;
+        this.draggedIndex = null;
+        
+        // Limpiar estilos visuales
+        this.template.querySelectorAll('tr').forEach(row => row.classList.remove('dragging'));
+    }
 }

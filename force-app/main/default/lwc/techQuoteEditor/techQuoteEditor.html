@@ -161,8 +161,11 @@
                             </thead>
                             <tbody>
                                 <template for:each={serviciosData} for:item="item" for:index="index">
-                                    <tr key={item.id} class={item.rowClass}>
-                                        <td class="drag-handle"><lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon></td>
+                                    <tr key={item.id} class={item.rowClass} draggable="true" 
+                                        ondragstart={handleDragStart} ondragover={handleDragOver} ondrop={handleDrop} data-index={index}>
+                                        <td class="drag-handle" style="cursor: grab;">
+                                            <lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon>
+                                        </td>
                                         <td>
                                             <div class="slds-text-title_bold">{item.descripcion}</div>
                                             <template if:true={item.areas}>
