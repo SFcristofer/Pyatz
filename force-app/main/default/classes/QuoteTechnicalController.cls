@@ -432,21 +432,85 @@ public with sharing class QuoteTechnicalController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static Map<String, Object> getProductInfoByPBE(Id pbeId) {
+        PricebookEntry pbe = [SELECT Id, Product2Id, UnitPrice, Product2.Name, Product2.Description, Product2.Family 
+                             FROM PricebookEntry WHERE Id = :pbeId LIMIT 1];
+        return new Map<String, Object>{
+            'productId' => pbe.Product2Id,
+            'name' => pbe.Product2.Name,
+            'unitPrice' => pbe.UnitPrice,
+            'description' => pbe.Product2.Description,
+            'family' => pbe.Product2.Family
+        };
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> searchProducts(String searchTerm, Id quoteId, List<String> businessLines, Boolean allowOtherLines) {
         List<Map<String, Object>> results = new List<Map<String, Object>>();
         Id pbId;
-        if (quoteId != null) {
-            String sType = quoteId.getSObjectType().getDescribe().getName();
-            if (sType == 'Quote') pbId = [SELECT Pricebook2Id FROM Quote WHERE Id = :quoteId].Pricebook2Id;
-            else if (sType == 'Opportunity') pbId = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :quoteId].Pricebook2Id;
-        }
-        if (pbId == null) pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1].Id;
+        List<String> linesToFilter = businessLines != null ? businessLines : new List<String>();
         
+        // 1. Obtener contexto de la Quote para priorizar precios
+        if (quoteId != null && quoteId.getSObjectType().getDescribe().getName() == 'Quote') {
+            Quote q = [SELECT Pricebook2Id, Business_Lines_Selected__c FROM Quote WHERE Id = :quoteId LIMIT 1];
+            pbId = q.Pricebook2Id;
+            if (linesToFilter.isEmpty() && q.Business_Lines_Selected__c != null) {
+                linesToFilter = q.Business_Lines_Selected__c.split(',');
+                for(Integer i=0; i<linesToFilter.size(); i++) linesToFilter[i] = linesToFilter[i].trim();
+            }
+        }
+
         String query = '%' + searchTerm + '%';
-        String soql = 'SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Product2.Description, UnitPrice FROM PricebookEntry WHERE Pricebook2Id = :pbId AND (Product2.Name LIKE :query OR Product2.ProductCode LIKE :query) AND IsActive = true ';
-        if (!allowOtherLines && businessLines != null && !businessLines.isEmpty()) soql += 'AND Product2.Family IN :businessLines ';
-        for (PricebookEntry pbe : Database.query(soql + ' LIMIT 15')) {
-            results.add(new Map<String, Object>{ 'id' => pbe.Id, 'productId' => pbe.Product2Id, 'name' => pbe.Product2.Name, 'sku' => pbe.Product2.ProductCode, 'description' => pbe.Product2.Description, 'unitPrice' => pbe.UnitPrice });
+        
+        // 2. BÚSQUEDA CENTRADA EN PRODUCTOS (Garantiza encontrar el ítem)
+        String productSoql = 'SELECT Id, Name, ProductCode, Description, Family FROM Product2 ' +
+                             'WHERE (Name LIKE :query OR ProductCode LIKE :query) AND IsActive = true ';
+        
+        // Aplicar filtro de familia SOLO si no se permite búsqueda global
+        if (!allowOtherLines && !linesToFilter.isEmpty()) {
+            productSoql += 'AND Family IN :linesToFilter ';
+        }
+        
+        List<Product2> products = Database.query(productSoql + ' ORDER BY Name ASC LIMIT 40');
+        if (products.isEmpty()) return results;
+        
+        Set<Id> prodIds = new Map<Id, Product2>(products).keySet();
+        
+        // 3. RECUPERAR PRECIOS DISPONIBLES PARA ESOS PRODUCTOS
+        List<PricebookEntry> allPbes = [SELECT Id, Product2Id, UnitPrice, Pricebook2Id, Pricebook2.Name, Pricebook2.IsStandard 
+                                        FROM PricebookEntry 
+                                        WHERE Product2Id IN :prodIds AND IsActive = true AND Pricebook2.IsActive = true];
+                                        
+        Map<Id, List<PricebookEntry>> prodToPbes = new Map<Id, List<PricebookEntry>>();
+        for (PricebookEntry pbe : allPbes) {
+            if (!prodToPbes.containsKey(pbe.Product2Id)) prodToPbes.put(pbe.Product2Id, new List<PricebookEntry>());
+            prodToPbes.get(pbe.Product2Id).add(pbe);
+        }
+
+        // 4. CONSTRUIR RESULTADOS CON EL MEJOR PRECIO ENCONTRADO
+        for (Product2 p : products) {
+            List<PricebookEntry> pbes = prodToPbes.get(p.Id);
+            if (pbes == null || pbes.isEmpty()) continue; // Omitir si no tiene precio activo en NINGUNA lista
+            
+            // Prioridad de Precio: 1. Lista del Presupuesto, 2. Lista Estándar, 3. Primera activa
+            PricebookEntry bestPbe = null;
+            for (PricebookEntry pbe : pbes) {
+                if (pbId != null && pbe.Pricebook2Id == pbId) { bestPbe = pbe; break; }
+            }
+            if (bestPbe == null) {
+                for (PricebookEntry pbe : pbes) { if (pbe.Pricebook2.IsStandard) { bestPbe = pbe; break; } }
+            }
+            if (bestPbe == null) bestPbe = pbes[0];
+
+            results.add(new Map<String, Object>{ 
+                'id' => bestPbe.Id, 
+                'productId' => p.Id, 
+                'name' => p.Name, 
+                'sku' => p.ProductCode, 
+                'description' => p.Description, 
+                'unitPrice' => bestPbe.UnitPrice,
+                'pricebookName' => bestPbe.Pricebook2.Name
+            });
         }
         return results;
     }

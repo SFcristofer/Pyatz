@@ -105,7 +105,8 @@
                             </div>
                         </div>
 
-                        <div class="section-card">                            <div class="section-header slds-grid slds-grid_align-spread">
+                        <div class="section-card">
+                            <div class="section-header slds-grid slds-grid_align-spread">
                                 <div class="slds-grid slds-grid_vertical-align-center">
                                     <lightning-icon icon-name="standard:location" size="small" class="slds-m-right_small"></lightning-icon>
                                     <h2 class="slds-text-heading_small">Selección de Sedes</h2>
@@ -175,6 +176,7 @@
                                         <td style="text-align: center;">{item.cantidad}</td>
                                         <td style="text-align: right;"><strong><lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
                                         <td class="slds-text-align_center">
+                                            <lightning-button-icon icon-name="utility:edit" variant="bare" onclick={handleRowAction} data-id={item.id} data-action="edit" class="slds-m-right_x-small"></lightning-button-icon>
                                             <lightning-button-icon icon-name="utility:delete" variant="bare-error" onclick={handleRowAction} data-id={item.id} data-action="delete"></lightning-button-icon>
                                         </td>
                                     </tr>
@@ -186,7 +188,6 @@
                                 <lightning-button label="+ Añadir servicios" variant="brand" class="slds-m-right_small" onclick={handleOpenModal}></lightning-button>
                                 <lightning-button label="+ Añadir Separador" variant="brand-outline" onclick={handleOpenSeparatorModal}></lightning-button>
                             </div>
-                            <!-- MEJORA: Botón P&L ahora más visible y profesional -->
                             <lightning-button label="Análisis Estratégico P&L" icon-name="utility:calculator" variant="brand-outline" onclick={handleOpenPLModal}></lightning-button>
                         </div>
                     </div>
@@ -224,7 +225,7 @@
                                 <lightning-input type="checkbox" label="Tarjeta" checked={pagoTarjeta} onchange={handlePagoTarjetaChange}></lightning-input>
 
                                 <p class="slds-text-title_bold slds-m-top_medium">TIPO DE TRABAJO:</p>
-                                <lightning-input type="checkbox" label="Trabajo único/puntual" checked={trabajoPuntual} onchange={handleTrabajoPuntualChange}></lightning-input>
+                                <lightning-input type="checkbox" label="Trabajo único/puntual" checked={trabajoPuntual} onchange={handlePagoTransferenciaChange}></lightning-input>
                                 <lightning-input type="checkbox" label="Venta producto" checked={ventaProducto} onchange={handleVentaProductoChange}></lightning-input>
                                 <lightning-input type="checkbox" label="Contrato de mantenimiento" checked={trabajoMantenimiento} onchange={handleTrabajoMantenimientoChange}></lightning-input>
                             </div>
@@ -242,7 +243,7 @@
                         </div>
                     </div>
                 </div>
-                </template>
+            </template>
 
             <!-- PASO 4: FINALIZAR -->
             <template if:true={isStep4}>
@@ -276,57 +277,20 @@
             </div>
         </div>
 
-        <!-- MODAL SERVICIO PRO -->
+        <!-- MODAL SERVICIO PRO (MODULARIZADO) -->
         <template if:true={showModal}>
-            <section role="dialog" class="slds-modal slds-fade-in-open slds-modal_large">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header"><h2>Configurador de Partida</h2></header>
-                    <div class="slds-modal__content slds-p-around_large">
-                        <div class="section-card slds-p-around_medium slds-m-bottom_medium overflow-visible">
-                            <lightning-input type="search" placeholder="Busque por nombre o SKU..." onchange={handleProductSearch} value={selectedProductName}></lightning-input>
-                            <template if:true={searchResults.length}>
-                                <div class="product-search-results">
-                                    <template for:each={searchResults} for:item="res">
-                                        <div key={res.id} class="product-result-item" onclick={handleProductSelect} data-id={res.id}>
-                                            <strong>{res.name}</strong>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                        <div class="section-card slds-p-around_medium">
-                            <table class="slds-table slds-table_bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Sede</th>
-                                        <th>Cant.</th>
-                                        <th>Importe</th>
-                                        <th style="text-align: right;">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={modalTableData} for:item="row">
-                                        <tr key={row.id}>
-                                            <td class="slds-text-title_bold">{row.sede}</td>
-                                            <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
-                                            <td><lightning-input type="number" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden"></lightning-input></td>
-                                            <td style="text-align: right;"><strong><lightning-formatted-number value={row.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <footer class="slds-modal__footer">
-                        <lightning-button label="Cancelar" onclick={handleCloseModal} class="slds-m-right_small"></lightning-button>
-                        <lightning-button label="Añadir al Presupuesto" variant="brand" onclick={handleSaveServiceLine}></lightning-button>
-                    </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
+            <c-tech-quote-item-configurator
+                record-id={recordId}
+                selected-sedes-objects={selectedSedesObjects}
+                selected-lines={selectedLines}
+                allow-other-lines={allowOtherLines}
+                edit-item={itemToEdit}
+                onclose={handleCloseModal}
+                onadd={handleAddServiceItems}>
+            </c-tech-quote-item-configurator>
         </template>
 
-        <!-- MODAL P&L INDEPENDIENTE (ARQUITECTURA DESACOPLADA 10/10) -->
+        <!-- MODAL P&L INDEPENDIENTE -->
         <template if:true={showPLModal}>
             <c-tech-quote-p-l-analyzer 
                 record-id={recordId} 

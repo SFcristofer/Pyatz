@@ -28,14 +28,14 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         }
     }
 
-    @track parentOpportunityId; // Variable interna persistente
+    @track parentOpportunityId;
     @track currentStep = '1';
     @track isLoading = false;
 
     // --- DATOS PRESUPUESTO ---
     @track folio = 'POR GENERAR';
     @track asunto = '';
-    @track opportunityName = ''; // Nuevo: Almacena el nombre de la oportunidad
+    @track opportunityName = ''; 
     @track introduccion = '';
     @track warranty = '';
     @track observacionesPago = '';
@@ -45,8 +45,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     // --- CONTACTOS ---
     @track contactOptions = [];
-    @track selectedContactIds = []; // Cambiado a Array para selección múltiple
-    @track selectedContactNames = ''; // Cadena con todos los nombres concatenados
+    @track selectedContactIds = []; 
+    @track selectedContactNames = ''; 
 
     // --- VARIABLES DE PAGO ---
     @track pagoTransferencia = false;
@@ -82,62 +82,9 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track lineaNegocioOptions = [];
     @track allowOtherLines = false;
     
-    // --- MODAL BUSCADOR PRO (LÓGICA V1) ---
-    @track searchResults = [];
-    @track selectedProductId = '';
-    @track selectedPbeId = ''; // Nuevo: Almacena el ID de la lista de precios
-    @track selectedProductName = '';
-    @track selectedProductPrice = 0;
-    @track productPriceOptions = [];
-    @track modalTableData = []; 
-    @track modalDescription = '';
-    @track isUnitario = true;
-    @track isTotal = false;
-    @track showDiscountColumn = false;
-    @track zonaInput = '';
-    @track zonasAfectadas = [];
-    @track showIndicaciones = false;
-
-    // Getter para calcular el costo base de inversión (suma de servicios agregados)
-    get costoTotalServicios() {
-        let total = 0;
-        if (this.serviciosData && this.serviciosData.length > 0) {
-            this.serviciosData.forEach(item => {
-                if (!item.isSeparator) {
-                    total += (item.totalSinImpuestos || 0);
-                }
-            });
-        }
-        return total;
-    }
-
-    handleDiscountTypeChange(event) {
-        this.discountType = event.target.value;
-        this.recalculateModalData();
-    }
-
-    handleSelectAllSedes(event) {
-        const checked = event.target.checked;
-        this.modalTableData = this.modalTableData.map(row => ({
-            ...row,
-            isSelected: checked,
-            isDisabled: !checked
-        }));
-        this.recalculateModalData();
-    }
-
-    get discountMontoVariant() { return this.discountType === 'monto' ? 'brand' : 'neutral'; }
-    get discountPercentVariant() { return this.discountType === 'porcentaje' ? 'brand' : 'neutral'; }
-
-    @track modalSedeSearchTerm = '';
-    
-    // --- CONFIGURACIÓN PDF ---
-    @track showTotal = true;
-    @track showTaxes = true;
-    @track showDescription = true;
-
     // --- MODALES ---
     @track showModal = false;
+    @track itemToEdit = null;
     @track showSeparatorModal = false;
     @track showPLModal = false;
     @track showPdfModal = false;
@@ -159,9 +106,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     ];
 
     connectedCallback() {
-        if (this.opportunityId) {
-            this.parentOpportunityId = this.opportunityId;
-        }
+        if (this.opportunityId) this.parentOpportunityId = this.opportunityId;
         this.loadInitialData();
         this.loadBusinessLines();
         this.loadTemplates();
@@ -170,12 +115,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     loadInitialData() {
         this.isLoading = true;
         const searchId = this.recordId ? this.recordId : this.opportunityId;
-
         getInitialData({ recordId: searchId })
             .then(result => {
                 if (result.agenteNombre) this.agenteNombre = result.agenteNombre;
                 if (result.opportunityName) this.opportunityName = result.opportunityName;
-
                 if (result.quote) {
                     const q = result.quote;
                     this.folio = q.QuoteNumber;
@@ -185,7 +128,6 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.accountId = q.AccountId;
                     this.parentOpportunityId = q.OpportunityId;
                     if (q.Account) this.clienteNombre = q.Account.Name;
-
                     if (q.Markers_Data__c) {
                         try {
                             const decoded = JSON.parse(decodeURIComponent(escape(window.atob(q.Markers_Data__c))));
@@ -199,24 +141,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                                 this.selectedLines = decoded.selectedLines;
                                 this.loadBusinessLines();
                             }
-                            
-                            // Persistencia de Opciones de Pago y Trabajo
                             if (decoded.pagoTransferencia !== undefined) this.pagoTransferencia = decoded.pagoTransferencia;
                             if (decoded.pagoTarjeta !== undefined) this.pagoTarjeta = decoded.pagoTarjeta;
                             if (decoded.trabajoPuntual !== undefined) this.trabajoPuntual = decoded.trabajoPuntual;
                             if (decoded.ventaProducto !== undefined) this.ventaProducto = decoded.ventaProducto;
                             if (decoded.trabajoMantenimiento !== undefined) this.trabajoMantenimiento = decoded.trabajoMantenimiento;
-
                             if (decoded.necesidadId) {
                                 this.necesidadId = decoded.necesidadId;
                                 this.necesidadNombre = decoded.necesidadNombre;
                                 this.necesidadSeleccionada = decoded.necesidadNombre;
                             }
                             this.calculateTotals();
-
-                            if (this.selectedSedesIds.length > 0) {
-                                this.fetchContacts(this.selectedSedesIds[0]);
-                            }
+                            if (this.selectedSedesIds.length > 0) this.fetchContacts(this.selectedSedesIds[0]);
                         } catch (e) { console.error('Error parse markers:', e); }
                     }
                 } else if (result.opportunity) {
@@ -248,13 +184,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione una Estrategia.', variant: 'warning' }));
             return;
         }
-
         if (this.currentStep !== '4') {
             this.handleSave('Borrador');
             const nextStepInt = parseInt(this.currentStep) + 1;
-            if (nextStepInt === 4) {
-                this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
-            }
+            if (nextStepInt === 4) this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
             this.currentStep = nextStepInt.toString();
         }
     }
@@ -294,14 +227,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         if (this.estrategiaVenta !== 'E5' && currentObjects.length > 1) currentObjects = [currentObjects[currentObjects.length - 1]];
         this.selectedSedesObjects = currentObjects;
         this.selectedSedesIds = currentObjects.map(s => s.Id);
-        
-        if (currentObjects.length > 0) {
-            this.fetchContacts(currentObjects[0].Id);
-        } else {
-            this.contactOptions = [];
-            this.selectedContactIds = [];
-            this.selectedContactNames = '';
-        }
+        if (currentObjects.length > 0) this.fetchContacts(currentObjects[0].Id);
+        else { this.contactOptions = []; this.selectedContactIds = []; this.selectedContactNames = ''; }
     }
 
     handleContactChange(event) {
@@ -311,73 +238,33 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             const names = selected.map(s => s.name);
             if (names.length === 1) this.selectedContactNames = names[0];
             else if (names.length === 2) this.selectedContactNames = `${names[0]} y ${names[1]}`;
-            else {
-                const last = names.pop();
-                this.selectedContactNames = `${names.join(', ')} y ${last}`;
-            }
+            else { const last = names.pop(); this.selectedContactNames = `${names.join(', ')} y ${last}`; }
             this.updateIntroWithContacts();
-        } else {
-            this.selectedContactNames = '';
-        }
+        } else this.selectedContactNames = '';
     }
 
     updateIntroWithContacts() {
         if (!this.introduccion) return;
-        
-        // Patrones reales detectados en las plantillas de Pyatz
-        const patterns = [
-            /\[\[ATENCION\]\]/g,
-            /Estimad@\s*,/g,
-            /Estimado\/a\s*,/g,
-            /Estimado\(a\)\s*,/g
-        ];
-
+        const patterns = [/\[\[ATENCION\]\]/g, /Estimad@\s*,/g, /Estimado\/a\s*,/g, /Estimado\(a\)\s*,/g];
         let newIntro = this.introduccion;
-        const greeting = this.selectedContactIds.length > 1 ? 'Estimados' : 'Estimado(a)';
         const displayNames = this.selectedContactNames || 'a quien corresponda';
-        
         let replaced = false;
         patterns.forEach(pattern => {
-            if (newIntro.match(pattern)) {
-                newIntro = newIntro.replace(pattern, `${this.selectedContactNames ? displayNames : 'a quien corresponda'}`);
-                replaced = true;
-            }
+            if (newIntro.match(pattern)) { newIntro = newIntro.replace(pattern, `${this.selectedContactNames ? displayNames : 'a quien corresponda'}`); replaced = true; }
         });
-
-        if (replaced) {
-            this.introduccion = newIntro;
-        }
+        if (replaced) this.introduccion = newIntro;
     }
 
     fetchContacts(sedeId) {
         getSedeContacts({ sedeId: sedeId })
-            .then(res => { 
-                this.contactOptions = res; 
-                if (this.selectedContactIds.length > 0) {
-                    this.handleContactChange({ detail: { value: this.selectedContactIds } });
-                }
-            })
+            .then(res => { this.contactOptions = res; if (this.selectedContactIds.length > 0) this.handleContactChange({ detail: { value: this.selectedContactIds } }); })
             .catch(err => console.error('Error contactos:', err));
-    }
-
-    fetchContactsBySedeName(sedeNames) {
-        if (!sedeNames) return;
-        const firstSede = sedeNames.split(',')[0].trim();
-        getFilteredSedes({ searchTerm: firstSede, parentAccountId: this.accountId, isGlobal: false })
-            .then(res => {
-                if (res && res.length > 0) this.fetchContacts(res[0].Id);
-            })
-            .catch(err => console.error(err));
     }
 
     handleRemoveSedePill(event) {
         this.selectedSedesObjects = this.selectedSedesObjects.filter(s => s.Id !== event.target.name);
         this.selectedSedesIds = this.selectedSedesObjects.map(s => s.Id);
-        if (this.selectedSedesObjects.length === 0) {
-            this.contactOptions = [];
-            this.selectedContactIds = [];
-            this.selectedContactNames = '';
-        }
+        if (this.selectedSedesObjects.length === 0) { this.contactOptions = []; this.selectedContactIds = []; this.selectedContactNames = ''; }
     }
 
     handleLineChange(event) {
@@ -389,164 +276,36 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleSave(status) {
         this.isLoading = true;
         const markers = { 
-            serviciosData: this.serviciosData, 
-            selectedSedesIds: this.selectedSedesIds, 
-            selectedSedesObjects: this.selectedSedesObjects, 
-            estrategiaVenta: this.estrategiaVenta, 
-            necesidadId: this.necesidadId, 
-            necesidadNombre: this.necesidadNombre, 
-            pagoTransferencia: this.pagoTransferencia, 
-            pagoTarjeta: this.pagoTarjeta, 
-            trabajoPuntual: this.trabajoPuntual, 
-            ventaProducto: this.ventaProducto, 
-            trabajoMantenimiento: this.trabajoMantenimiento, 
-            observacionesPago: this.observacionesPago,
-            selectedContactIds: this.selectedContactIds,
-            selectedContactNames: this.selectedContactNames
+            serviciosData: this.serviciosData, selectedSedesIds: this.selectedSedesIds, selectedSedesObjects: this.selectedSedesObjects, 
+            estrategiaVenta: this.estrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre, 
+            pagoTransferencia: this.pagoTransferencia, pagoTarjeta: this.pagoTarjeta, trabajoPuntual: this.trabajoPuntual, 
+            ventaProducto: this.ventaProducto, trabajoMantenimiento: this.trabajoMantenimiento, observacionesPago: this.observacionesPago,
+            selectedContactIds: this.selectedContactIds, selectedContactNames: this.selectedContactNames
         };
         const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
-        
         const payload = {
-            quoteId: this.recordId,
-            opportunityId: this.parentOpportunityId,
-            contactId: this.selectedContactIds.length > 0 ? this.selectedContactIds[0] : null,
-            name: this.asunto,
-            status: status,
-            intro: this.introduccion,
-            warranty: this.warranty,
-            observacionesPago: this.observacionesPago,
-            markersData: encoded,
-            technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
-            lineItems: JSON.stringify(this.serviciosData),
-            showIntro: true,
-            showWarranty: true
+            quoteId: this.recordId, opportunityId: this.parentOpportunityId, contactId: this.selectedContactIds.length > 0 ? this.selectedContactIds[0] : null,
+            name: this.asunto, status: status, intro: this.introduccion, warranty: this.warranty, observacionesPago: this.observacionesPago,
+            markersData: encoded, technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
+            lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true
         };
-
         saveTechnicalData({ data: payload })
-            .then(newId => {
-                if (newId) this.recordId = newId;
-                this.loadInitialData();
-                this.isLoading = false;
-                if (status === 'Approved') {
-                    this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Presupuesto finalizado', variant: 'success' }));
-                }
-            })
+            .then(newId => { if (newId) this.recordId = newId; this.loadInitialData(); this.isLoading = false; if (status === 'Approved') this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Presupuesto finalizado', variant: 'success' })); })
             .catch(error => { this.isLoading = false; console.error(error); });
     }
 
-    handleProductSearch(event) {
-        const term = event.target.value;
-        this.selectedProductName = term;
-        if (term.length >= 3) {
-            searchProducts({ searchTerm: term, quoteId: this.recordId, businessLines: this.selectedLines, allowOtherLines: this.allowOtherLines })
-                .then(res => { this.searchResults = res; })
-                .catch(err => console.error(err));
-        } else this.searchResults = [];
-    }
-
-    handleProductSelect(event) {
-        const selectedId = event.currentTarget.dataset.id;
-        const res = this.searchResults.find(x => x.id === selectedId);
-        if (res) {
-            this.selectedPbeId = selectedId;
-            this.selectedProductId = res.productId;
-            this.selectedProductName = res.name;
-            this.selectedProductPrice = res.unitPrice;
-            this.modalDescription = res.description ? res.description.replace(/\n/g, '<br>') : '';
-            this.searchResults = [];
-            this.loadProductPrices();
-            this.initModalTable();
-        }
-    }
-
-    loadProductPrices() {
-        getProductPrices({ product2Id: this.selectedProductId }).then(res => { 
-            this.productPriceOptions = res.map(opt => ({
-                ...opt,
-                className: opt.pbeId === this.selectedPbeId ? 'price-option-card selected' : 'price-option-card'
-            })); 
-        });
-    }
-
-    initModalTable() {
-        this.modalTableData = this.selectedSedesObjects.map(s => ({
-            id: s.Id, sede: s.Name, isSelected: true, cantidad: 1, importeTotal: this.selectedProductPrice, descuento: 0, tipoDescuento: 'monto', totalSinImpuestos: this.selectedProductPrice, impuestos: 16
-        }));
-    }
-
-    handlePriceOptionSelect(event) {
-        const pbeId = event.currentTarget.dataset.id;
-        const opt = this.productPriceOptions.find(o => o.pbeId === pbeId);
-        if (opt) {
-            this.selectedPbeId = pbeId;
-            this.selectedProductPrice = opt.unitPrice;
-            this.productPriceOptions = this.productPriceOptions.map(o => ({ ...o, className: o.pbeId === pbeId ? 'price-option-card selected' : 'price-option-card' }));
-            this.recalculateModalData();
-        }
-    }
-
-    handlePriceType(event) {
-        const type = event.target.value;
-        this.isUnitario = (type === 'UNITARIO');
-        this.isTotal = !this.isUnitario;
-        this.recalculateModalData();
-    }
-
-    handleZonaInput(event) {
-        const value = event.target.value;
-        if (value.includes(',')) {
-            const nuevasZonas = value.split(',').map(z => z.trim()).filter(z => z !== '');
-            this.zonasAfectadas = [...new Set([...this.zonasAfectadas, ...nuevasZonas])];
-            this.zonaInput = '';
+    handleAddServiceItems(event) {
+        const newItems = event.detail;
+        if (this.itemToEdit) {
+            // Reemplazar el item editado manteniendo su posición
+            this.serviciosData = this.serviciosData.map(item => item.id === this.itemToEdit.id ? newItems[0] : item);
         } else {
-            this.zonaInput = value;
+            // Añadir nuevos items
+            this.serviciosData = [...this.serviciosData, ...newItems];
         }
-    }
-
-    removeZona(event) {
-        const zona = event.target.name;
-        this.zonasAfectadas = this.zonasAfectadas.filter(z => z !== zona);
-    }
-
-    handleModalInputChange(event) {
-        const id = event.target.dataset.id;
-        const field = event.target.dataset.field;
-        const val = field === 'tipoDescuento' ? event.target.value : (parseFloat(event.target.value) || 0);
-        this.modalTableData = this.modalTableData.map(row => (row.id === id ? { ...row, [field]: val } : row));
-        this.recalculateModalData();
-    }
-
-    recalculateModalData() {
-        this.modalTableData = this.modalTableData.map(row => {
-            let base = this.isUnitario ? (this.selectedProductPrice * row.cantidad) : this.selectedProductPrice;
-            let finalDesc = this.discountType === 'porcentaje' ? (base * (row.descuento / 100)) : row.descuento;
-            return { ...row, totalSinImpuestos: base - finalDesc };
-        });
-    }
-
-    handleSaveServiceLine() {
-        const selectedRows = this.modalTableData.filter(r => r.isSelected);
-        selectedRows.forEach(row => {
-            this.serviciosData = [...this.serviciosData, {
-                id: Date.now().toString() + Math.random(),
-                pbeId: this.selectedPbeId,
-                descripcion: this.selectedProductName,
-                cantidad: row.cantidad,
-                totalSinImpuestos: row.totalSinImpuestos,
-                sedes: row.sede,
-                areas: this.zonasAfectadas.join(', '),
-                detalleTecnico: this.modalDescription,
-                rowClass: 'row-service'
-            }];
-        });
         this.calculateTotals();
         this.showModal = false;
-        this.resetModal();
-    }
-
-    resetModal() {
-        this.selectedProductId = ''; this.selectedProductName = ''; this.modalTableData = []; 
-        this.modalDescription = ''; this.zonasAfectadas = []; this.productPriceOptions = [];
+        this.itemToEdit = null;
     }
 
     calculateTotals() {
@@ -562,13 +321,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         if (action === 'delete') {
             this.serviciosData = this.serviciosData.filter(item => item.id !== id);
             this.calculateTotals();
+        } else if (action === 'edit') {
+            this.itemToEdit = this.serviciosData.find(item => item.id === id);
+            this.showModal = true;
         }
     }
+
+    handleOpenModal() { this.itemToEdit = null; this.showModal = true; }
+    handleCloseModal() { this.showModal = false; this.itemToEdit = null; }
 
     handleApplyTemplate(event) {
         const templateId = event.detail.value;
         const targetField = event.target.dataset.field || event.currentTarget.dataset.field;
-        
         if (!this.recordId) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Guarde el presupuesto antes para poder procesar la plantilla.', variant: 'warning' }));
             return;
@@ -579,39 +343,26 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 if (targetField === 'introduccion') this.introduccion = result;
                 else if (targetField === 'warranty') this.warranty = result;
                 else if (targetField === 'observacionesPago') this.observacionesPago = result;
-                else if (targetField === 'modalDescription') this.modalDescription = result;
                 this.isLoading = false;
             })
-            .catch(error => { 
-                this.isLoading = false; 
-                console.error('Error render:', error);
-            });
+            .catch(error => { this.isLoading = false; console.error('Error render:', error); });
     }
 
     handleFinalize() { this.handleSave('Approved'); }
     handleGoToContract() { this.dispatchEvent(new CustomEvent('viewcontract', { detail: this.recordId })); }
     handleCancel() { this.dispatchEvent(new CustomEvent('cancel')); }
-    handlePreviewPdf() {
-        this.handleSave('Borrador');
-        this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
-        this.showPdfModal = true;
-    }
+    handlePreviewPdf() { this.handleSave('Borrador'); this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`; this.showPdfModal = true; }
     handleClosePdfModal() { this.showPdfModal = false; this.pdfUrl = ''; }
     
     handleAsuntoChange(event) { this.asunto = event.target.value; }
     handleIntroChange(event) { this.introduccion = event.target.value; }
     handleWarrantyChange(event) { this.warranty = event.target.value; }
     handleObservacionesPagoChange(event) { this.observacionesPago = event.target.value; }
-    
     handlePagoTransferenciaChange(event) { this.pagoTransferencia = event.target.checked; }
     handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
-    
-    handleTrabajoPuntualChange(event) { this.trabajoPuntual = event.target.checked; }
     handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
     handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
 
-    handleOpenModal() { this.showModal = true; }
-    handleCloseModal() { this.showModal = false; this.resetModal(); }
     handleOpenSeparatorModal() { this.showSeparatorModal = true; }
     handleCloseSeparatorModal() { this.showSeparatorModal = false; }
     handleSeparatorTextChange(event) { this.separatorText = event.target.value; }
@@ -620,11 +371,6 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.showSeparatorModal = false;
         this.separatorText = '';
     }
-    
-    handleOpenPLModal() { 
-        this.showPLModal = true; 
-    }
-    handleClosePLModal() { 
-        this.showPLModal = false; 
-    }
+    handleOpenPLModal() { this.showPLModal = true; }
+    handleClosePLModal() { this.showPLModal = false; }
 }

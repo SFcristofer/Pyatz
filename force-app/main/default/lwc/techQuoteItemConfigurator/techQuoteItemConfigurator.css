@@ -1,0 +1,178 @@
+/* ESTRUCTURA DEL MODAL */
+.custom-modal-content {
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.slds-box {
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+    background: white !important;
+}
+
+/* BUSCADOR PROFESIONAL */
+.search-container-wrapper {
+    position: relative;
+    z-index: 100;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    margin-top: 8px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 99999;
+}
+
+.product-result-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.product-result-item:hover {
+    background-color: #f0f7ff;
+    border-left: 4px solid #001a33;
+    padding-left: 12px;
+}
+
+.product-name {
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.product-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sku-badge {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+}
+
+.price-tag {
+    color: #16a34a;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+/* TARJETAS DE PRECIO PREMIUM */
+.price-option-card {
+    width: 100%;
+    margin-bottom: 12px;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    background: white;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-option-card:hover {
+    border-color: #001a33;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.price-option-card.selected {
+    border-color: #001a33;
+    border-width: 2px;
+    background: #f0f9ff;
+    box-shadow: 0 4px 12px rgba(0, 26, 51, 0.15);
+}
+
+.price-option-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #001a33;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.price-card-label {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.price-card-value {
+    color: #15803d;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.price-card-currency {
+    font-size: 0.8rem;
+    margin-right: 2px;
+}
+
+/* ÁREA TÉCNICA */
+.slds-modal__content lightning-textarea textarea {
+    min-height: 950px !important;
+    border-radius: 8px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+    padding: 1.5rem !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+}
+
+.slds-modal__content lightning-textarea textarea:focus {
+    border-color: #001a33 !important;
+    box-shadow: 0 0 0 1px #001a33 !important;
+}
+
+/* TABLA DE SEDES */
+.slds-table {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+.slds-table thead th {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.7rem !important;
+    padding: 12px !important;
+}
+
+.slds-table tbody td {
+    padding: 12px !important;
+}
