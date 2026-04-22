@@ -1,11 +1,11 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
-import getEmailTemplatesByFolders from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolders';
-import getAvailableAttachments from '@salesforce/apex/QuoteTechnicalController.getAvailableAttachments';
-import sendEmailWithAttachments from '@salesforce/apex/QuoteTechnicalController.sendEmailWithAttachments';
-import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
-import getEmailEngagementDetails from '@salesforce/apex/QuoteTechnicalController.getEmailEngagementDetails';
+import getEmailTemplatesByFolders from '@salesforce/apex/CommunicationController.getEmailTemplatesByFolders';
+import getAvailableAttachments from '@salesforce/apex/CommunicationController.getAvailableAttachments';
+import sendEmailWithAttachments from '@salesforce/apex/CommunicationController.sendEmailWithAttachments';
+import renderTemplate from '@salesforce/apex/CommunicationController.renderTemplate';
+import getEmailEngagementDetails from '@salesforce/apex/CommunicationController.getEmailEngagementDetails';
 
 export default class TechCommunicationHub extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID

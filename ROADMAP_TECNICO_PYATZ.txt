@@ -1,0 +1,54 @@
+# ROADMAP TÉCNICO PROYECTO PYATZ 2026
+Objetivo: Transformar el sistema de un Monolito Potente a una Arquitectura Modular de Alto Rendimiento.
+
+---
+
+## 🚀 FASE 1: CIMENTACIÓN (Refactorización y Orden)
+*Meta: Reducir el riesgo de errores al modificar el código y limpiar la "Clase Dios".*
+
+| ID  | TAREA                     | DESCRIPCIÓN                                                                 | PRIORIDAD |
+|:---:|:--------------------------|:----------------------------------------------------------------------------|:---------:|
+| 1.1 | **LevantamientoService**  | Crear clase para mover la lógica pesada de Vactor, RME y Gestión Menstrual. | 🔥 CRÍTICA |
+| 1.2 | **QuoteEngineService**    | Mover lógica de borrado/recreación de partidas y sincronización con Opp.    | 🔥 CRÍTICA |
+| 1.3 | **QuoteSelector**         | Centralizar las 56 consultas SOQL para evitar límites de Salesforce.        | ALTA      |
+| 1.4 | **Lean Controller**       | Reducir QuoteTechnicalController a <300 líneas (solo como pasarela).       | MEDIA     |
+
+---
+
+## 📊 FASE 2: EVOLUCIÓN DEL DATO (Escalabilidad)
+*Meta: Asegurar que la información técnica sea reportable y no se pierda por límites de texto.*
+
+| ID  | TAREA                     | DESCRIPCIÓN                                                                 | PRIORIDAD |
+|:---:|:--------------------------|:----------------------------------------------------------------------------|:---------:|
+| 2.1 | **Relational Markers**    | Crear objeto 'Technical_Marker__c' para guardar puntos fuera del Base64.    | ALTA      |
+| 2.2 | **Error Framework**       | Implementar clase 'ErrorHandler' para mensajes amigables en el LWC.         | MEDIA     |
+| 2.3 | **Audit Log**             | Registrar quién y cuándo cambió la configuración técnica (History Tracking).| BAJA      |
+
+---
+
+## 🎨 FASE 3: NUEVAS FUNCIONALIDADES (Gaby, Irving, Abner)
+*Meta: Implementar los requerimientos del negocio sobre una base sólida.*
+
+| ID  | TAREA                     | DESCRIPCIÓN                                                                 | PRIORIDAD |
+|:---:|:--------------------------|:----------------------------------------------------------------------------|:---------:|
+| 3.1 | **UI Toggles Engine**     | Interruptores en techQuoteEditor para ocultar/mostrar secciones en el PDF.  | 🔥 URGENTE |
+| 3.2 | **Annual Plan Generator** | Selector de frecuencias (Mensual/Bimestral) y creación masiva de citas.     | ALTA      |
+| 3.3 | **Visual Canvas LWC**     | Componente de "Croquis" interactivo para marcar zonas en el mapa.           | ALTA      |
+| 3.4 | **Dynamic Annexes**       | Precarga de "Memorias Descriptivas" según el Producto seleccionado.         | MEDIA     |
+
+---
+
+## 🛠️ FASE 4: OPTIMIZACIÓN Y CIERRE (Calidad)
+*Meta: Velocidad, seguridad y facilidad de mantenimiento a largo plazo.*
+
+| ID  | TAREA                     | DESCRIPCIÓN                                                                 | PRIORIDAD |
+|:---:|:--------------------------|:----------------------------------------------------------------------------|:---------:|
+| 4.1 | **Unit Testing Pro**      | Cobertura del 85% en nuevos Servicios (Pruebas unitarias reales).           | ALTA      |
+| 4.2 | **Slack Hardening**       | Resiliencia de la integración con Slack ante caídas del servicio externo.   | MEDIA     |
+| 4.3 | **PDF Performance**       | Optimizar renderizado de imágenes para evitar PDFs pesados.                 | BAJA      |
+
+---
+
+## 💡 RECOMENDACIÓN INMEDIATA
+No agregar funcionalidades de la Fase 3 hasta completar los puntos 1.1 y 1.2. 
+Esto garantiza que el nuevo "Generador de Pólizas" no herede la deuda técnica actual.

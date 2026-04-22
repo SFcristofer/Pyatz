@@ -2,9 +2,9 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { refreshApex } from '@salesforce/apex';
-import saveNote from '@salesforce/apex/QuoteTechnicalController.saveNote';
-import getTacticalHistory from '@salesforce/apex/QuoteTechnicalController.getTacticalHistory';
-import updateTaskActivity from '@salesforce/apex/QuoteTechnicalController.updateTaskActivity';
+import saveNote from '@salesforce/apex/OperationsController.saveNote';
+import getTacticalHistory from '@salesforce/apex/OperationsController.getTacticalHistory';
+import updateTaskActivity from '@salesforce/apex/OperationsController.updateTaskActivity';
 
 export default class TechTacticalFollowUp extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID

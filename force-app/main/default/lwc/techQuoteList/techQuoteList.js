@@ -1,11 +1,11 @@
 import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
-import getQuotesList from '@salesforce/apex/QuoteTechnicalController.getQuotesList';
-import getQuoteStats from '@salesforce/apex/QuoteTechnicalController.getQuoteStats';
-import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
-import searchSedes from '@salesforce/apex/QuoteTechnicalController.searchSedes';
-import searchProspectos from '@salesforce/apex/QuoteTechnicalController.searchProspectos';
+import getQuotesList from '@salesforce/apex/QuoteController.getQuotesList';
+import getQuoteStats from '@salesforce/apex/QuoteController.getQuoteStats';
+import cloneQuote from '@salesforce/apex/QuoteController.cloneQuote';
+import searchSedes from '@salesforce/apex/QuoteController.searchSedes';
+import searchProspectos from '@salesforce/apex/QuoteController.searchProspectos';
 
 export default class TechQuoteList extends NavigationMixin(LightningElement) {
     @api opportunityId;

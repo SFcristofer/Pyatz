@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
-import searchProducts from '@salesforce/apex/QuoteTechnicalController.searchProducts';
-import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProductPrices';
-import getProductInfoByPBE from '@salesforce/apex/QuoteTechnicalController.getProductInfoByPBE';
+import searchProducts from '@salesforce/apex/QuoteController.searchProducts';
+import getProductPrices from '@salesforce/apex/QuoteController.getProductPrices';
+import getProductInfoByPBE from '@salesforce/apex/QuoteController.getProductInfoByPBE';
 
 export default class TechQuoteItemConfigurator extends LightningElement {
     @api recordId;

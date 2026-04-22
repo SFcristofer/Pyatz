@@ -1,7 +1,7 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import saveSurveyData from '@salesforce/apex/QuoteTechnicalController.saveSurveyData';
-import getLevantamientoDetails from '@salesforce/apex/QuoteTechnicalController.getLevantamientoDetails';
+import saveSurveyData from '@salesforce/apex/SurveyController.saveSurveyData';
+import getLevantamientoDetails from '@salesforce/apex/SurveyController.getLevantamientoDetails';
 
 export default class TechLevantamientoManager extends LightningElement {
     @api recordId;

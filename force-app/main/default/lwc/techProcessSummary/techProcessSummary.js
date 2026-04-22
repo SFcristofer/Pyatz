@@ -2,10 +2,10 @@ import { LightningElement, api, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
-import getProcessHistory from '@salesforce/apex/QuoteTechnicalController.getProcessHistory';
-import getOpenOpportunities from '@salesforce/apex/QuoteTechnicalController.getOpenOpportunities';
-import getEvidenceGallery from '@salesforce/apex/QuoteTechnicalController.getEvidenceGallery';
-import renameUploadedFile from '@salesforce/apex/QuoteTechnicalController.renameUploadedFile';
+import getProcessHistory from '@salesforce/apex/OperationsController.getProcessHistory';
+import getOpenOpportunities from '@salesforce/apex/OperationsController.getOpenOpportunities';
+import getEvidenceGallery from '@salesforce/apex/OperationsController.getEvidenceGallery';
+import renameUploadedFile from '@salesforce/apex/OperationsController.renameUploadedFile';
 
 export default class TechProcessSummary extends NavigationMixin(LightningElement) {
     @api recordId; // Oportunidad base

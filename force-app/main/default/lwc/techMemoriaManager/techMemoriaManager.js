@@ -1,9 +1,9 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getLevantamientoDetails from '@salesforce/apex/QuoteTechnicalController.getLevantamientoDetails';
-import getSoluciones from '@salesforce/apex/QuoteTechnicalController.getSoluciones';
-import saveSolucion from '@salesforce/apex/QuoteTechnicalController.saveSolucion';
-import deleteSolucion from '@salesforce/apex/QuoteTechnicalController.deleteSolucion';
+import getLevantamientoDetails from '@salesforce/apex/SurveyController.getLevantamientoDetails';
+import getSoluciones from '@salesforce/apex/SurveyController.getSoluciones';
+import saveSolucion from '@salesforce/apex/SurveyController.saveSolucion';
+import deleteSolucion from '@salesforce/apex/SurveyController.deleteSolucion';
 
 export default class TechMemoriaManager extends LightningElement {
     @api recordId;

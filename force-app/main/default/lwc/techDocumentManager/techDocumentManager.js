@@ -2,9 +2,9 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import LightningConfirm from 'lightning/confirm';
-import getDocumentStates from '@salesforce/apex/QuoteTechnicalController.getDocumentStates';
-import renameUploadedFile from '@salesforce/apex/QuoteTechnicalController.renameUploadedFile';
-import deleteDocument from '@salesforce/apex/QuoteTechnicalController.deleteDocument';
+import getDocumentStates from '@salesforce/apex/CommunicationController.getDocumentStates';
+import renameUploadedFile from '@salesforce/apex/CommunicationController.renameUploadedFile';
+import deleteDocument from '@salesforce/apex/CommunicationController.deleteDocument';
 import { refreshApex } from '@salesforce/apex';
 
 export default class TechDocumentManager extends NavigationMixin(LightningElement) {

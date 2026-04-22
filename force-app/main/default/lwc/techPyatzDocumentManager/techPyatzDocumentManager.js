@@ -1,7 +1,7 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getDocumentStates from '@salesforce/apex/QuoteTechnicalController.getDocumentStates';
-import renameUploadedFile from '@salesforce/apex/QuoteTechnicalController.renameUploadedFile';
+import getDocumentStates from '@salesforce/apex/CommunicationController.getDocumentStates';
+import renameUploadedFile from '@salesforce/apex/CommunicationController.renameUploadedFile';
 import { refreshApex } from '@salesforce/apex';
 import { NavigationMixin } from 'lightning/navigation';
 

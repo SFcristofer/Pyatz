@@ -1,9 +1,9 @@
 import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getPLAnalysis from '@salesforce/apex/QuoteTechnicalController.getPLAnalysis';
-import savePLAnalysis from '@salesforce/apex/QuoteTechnicalController.savePLAnalysis';
-import getRelatedFiles from '@salesforce/apex/QuoteTechnicalController.getRelatedFiles';
+import getPLAnalysis from '@salesforce/apex/QuoteController.getPLAnalysis';
+import savePLAnalysis from '@salesforce/apex/QuoteController.savePLAnalysis';
+import getRelatedFiles from '@salesforce/apex/QuoteController.getRelatedFiles';
 
 export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElement) {
     @api recordId;

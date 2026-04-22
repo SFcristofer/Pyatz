@@ -2,11 +2,11 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getQuoteLineItems from '@salesforce/apex/QuoteContractPDFController.getQuoteLineItems';
-import searchUsers from '@salesforce/apex/QuoteTechnicalController.searchUsers';
-import getContractInitialData from '@salesforce/apex/QuoteTechnicalController.getContractInitialData';
-import saveContractData from '@salesforce/apex/QuoteTechnicalController.saveContractData';
-import getEmailTemplatesByFolder from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolder';
-import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
+import searchUsers from '@salesforce/apex/QuoteController.searchUsers';
+import getContractInitialData from '@salesforce/apex/QuoteController.getContractInitialData';
+import saveContractData from '@salesforce/apex/QuoteController.saveContractData';
+import getEmailTemplatesByFolder from '@salesforce/apex/QuoteController.getEmailTemplatesByFolder';
+import renderTemplate from '@salesforce/apex/QuoteController.renderTemplate';
 
 export default class TechContractManager extends NavigationMixin(LightningElement) {
     @api recordId; // ID de la Oportunidad

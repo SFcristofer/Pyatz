@@ -1,5 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import getCalendarData from '@salesforce/apex/QuoteTechnicalController.getCalendarData';
+import getCalendarData from '@salesforce/apex/OperationsController.getCalendarData';
 
 export default class TechResourceCalendar extends LightningElement {
     @api recordId;

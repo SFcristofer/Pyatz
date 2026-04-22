@@ -1,19 +1,19 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getInitialData from '@salesforce/apex/QuoteTechnicalController.getInitialData';
-import saveTechnicalData from '@salesforce/apex/QuoteTechnicalController.saveTechnicalData';
-import searchProducts from '@salesforce/apex/QuoteTechnicalController.searchProducts';
-import getBusinessLineOptions from '@salesforce/apex/QuoteTechnicalController.getBusinessLineOptions';
-import searchNecesidades from '@salesforce/apex/QuoteTechnicalController.searchNecesidades';
-import getEmailTemplatesByFolder from '@salesforce/apex/QuoteTechnicalController.getEmailTemplatesByFolder';
-import renderTemplate from '@salesforce/apex/QuoteTechnicalController.renderTemplate';
-import getSedeContacts from '@salesforce/apex/QuoteTechnicalController.getSedeContacts';
-import validatePLPassword from '@salesforce/apex/QuoteTechnicalController.validatePLPassword';
-import getProductPrices from '@salesforce/apex/QuoteTechnicalController.getProductPrices';
-import getFilteredSedes from '@salesforce/apex/QuoteTechnicalController.getFilteredSedes';
-import searchParentAccounts from '@salesforce/apex/QuoteTechnicalController.searchParentAccounts';
-import cloneQuote from '@salesforce/apex/QuoteTechnicalController.cloneQuote';
+import getInitialData from '@salesforce/apex/QuoteController.getInitialData';
+import saveTechnicalData from '@salesforce/apex/QuoteController.saveTechnicalData';
+import searchProducts from '@salesforce/apex/QuoteController.searchProducts';
+import getBusinessLineOptions from '@salesforce/apex/QuoteController.getBusinessLineOptions';
+import searchNecesidades from '@salesforce/apex/QuoteController.searchNecesidades';
+import getEmailTemplatesByFolder from '@salesforce/apex/QuoteController.getEmailTemplatesByFolder';
+import renderTemplate from '@salesforce/apex/QuoteController.renderTemplate';
+import getSedeContacts from '@salesforce/apex/QuoteController.getSedeContacts';
+import validatePLPassword from '@salesforce/apex/QuoteController.validatePLPassword';
+import getProductPrices from '@salesforce/apex/QuoteController.getProductPrices';
+import getFilteredSedes from '@salesforce/apex/QuoteController.getFilteredSedes';
+import searchParentAccounts from '@salesforce/apex/QuoteController.searchParentAccounts';
+import cloneQuote from '@salesforce/apex/QuoteController.cloneQuote';
 
 export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @api recordId;

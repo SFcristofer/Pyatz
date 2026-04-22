@@ -8,11 +8,11 @@ import ID_FIELD from '@salesforce/schema/Opportunity.Id';
 import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
 import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
-import getOpportunitiesList from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesList';
-import getOpportunitiesByAccount from '@salesforce/apex/QuoteTechnicalController.getOpportunitiesByAccount';
-import saveStageTracking from '@salesforce/apex/QuoteTechnicalController.saveStageTracking';
-import saveTechnicalData from '@salesforce/apex/QuoteTechnicalController.saveTechnicalData';
-import getProcessHistory from '@salesforce/apex/QuoteTechnicalController.getProcessHistory';
+import getOpportunitiesList from '@salesforce/apex/OperationsController.getOpportunitiesList';
+import getOpportunitiesByAccount from '@salesforce/apex/OperationsController.getOpportunitiesByAccount';
+import saveStageTracking from '@salesforce/apex/OperationsController.saveStageTracking';
+import saveTechnicalData from '@salesforce/apex/OperationsController.saveTechnicalData';
+import getProcessHistory from '@salesforce/apex/OperationsController.getProcessHistory';
 import TechSlackModal from 'c/techSlackModal';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {

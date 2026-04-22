@@ -1,7 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getOpportunitySolutions from '@salesforce/apex/QuoteTechnicalController.getOpportunitySolutions';
-import saveSolucion from '@salesforce/apex/QuoteTechnicalController.saveSolucion';
+import getOpportunitySolutions from '@salesforce/apex/SurveyController.getOpportunitySolutions';
+import saveSolucion from '@salesforce/apex/SurveyController.saveSolucion';
 
 export default class TechSolutionCosting extends LightningElement {
     @api recordId; // Opportunity ID
