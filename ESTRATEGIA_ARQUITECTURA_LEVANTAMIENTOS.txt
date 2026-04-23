@@ -1,0 +1,38 @@
+PROPUESTA TÉCNICA: OPTIMIZACIÓN DE ARQUITECTURA PARA LEVANTAMIENTOS Y REPORTABILIDAD
+
+1. DIAGNÓSTICO ACTUAL
+El modelo actual registra cada fila de la tabla técnica como un registro independiente de "Levantamiento_Tecnico__c" colgado directamente de la Oportunidad. 
+- Riesgo: Los reportes de volumen muestran un conteo de filas, no de servicios integrales.
+- Limitación: Dificultad para realizar sumatorias automáticas (Roll-up) a nivel de "tabla completa".
+
+2. ESTRUCTURA PROPUESTA (MODELO MAESTRO-DETALLE)
+Para consolidar la información y profesionalizar la extracción de datos, se requiere la implementación de un nivel intermedio de agrupación.
+
+A. Objeto Maestro: Encabezado_Levantamiento__c
+   - Campos Clave:
+     * Nombre (Auto-número: LEV-{0000})
+     * Oportunidad (Lookup/Master-Detail)
+     * Tipo de Servicio (Picklist: Bio, Grasas, Vactor, etc.)
+     * Fecha de Levantamiento (Date)
+     * Estatus (Draft, Finalizado, Archivado)
+     * Total Unidades (Summary de las líneas)
+
+B. Objeto Detalle: Levantamiento_Tecnico__c (Actual)
+   - Ajuste: Cambiar relación de Oportunidad a Lookup del nuevo objeto "Encabezado_Levantamiento__c".
+
+3. LÓGICA DE IMPLEMENTACIÓN EN APEX
+Se debe ajustar el servicio "LevantamientoService.cls" para que el proceso de guardado sea atómico:
+
+Paso 1: Identificar o crear el Encabezado basado en el ID de la Oportunidad y el Tipo de Servicio enviado por el LWC.
+Paso 2: Vincular el ID del Encabezado a todas las líneas (filas) del JSON antes del Upsert.
+Paso 3: La limpieza de registros huérfanos se realizará por el ID del Encabezado, no por la Oportunidad, permitiendo múltiples versiones o servicios en la misma cuenta.
+
+4. BENEFICIOS PARA REPORTES Y DASHBOARDS
+- Conteo Real de Servicios: Los KPIs de gestión mostrarán el número exacto de visitas técnicas (registros de encabezado).
+- Análisis de Mix de Ventas: Reportes estandarizados de "Encabezados con Líneas" para ver qué sedes o tipos de negocio requieren más insumos.
+- Integridad Histórica: Al tener un encabezado con fecha, se pueden comparar levantamientos del mismo cliente a través del tiempo para detectar variaciones en sus necesidades técnicas.
+
+5. PRÓXIMOS PASOS
+1. Creación del objeto Encabezado y sus campos base.
+2. Migración de datos existentes (Script de vinculación masiva).
+3. Refactorización de los métodos saveSurveyData y getLevantamientoDetails para filtrar por el nuevo vínculo jerárquico.

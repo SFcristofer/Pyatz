@@ -6,6 +6,7 @@ import getLevantamientoDetails from '@salesforce/apex/SurveyController.getLevant
 import getAvailableFields from '@salesforce/apex/AdminController.getAvailableFields';
 import getTableConfigs from '@salesforce/apex/AdminController.getTableConfigs';
 import saveTableConfig from '@salesforce/apex/AdminController.saveTableConfig';
+import toggleTableStatus from '@salesforce/apex/AdminController.toggleTableStatus';
 
 export default class TechLevantamientoManager extends LightningElement {
     @api recordId;
@@ -259,6 +260,18 @@ export default class TechLevantamientoManager extends LightningElement {
         }
     }
 
+    async handleToggleStatus() {
+        if (!this.currentTableConfig) return;
+        this.isLoading = true;
+        try {
+            const newStatus = !this.currentTableConfig.active;
+            await toggleTableStatus({ label: this.surveyType, isActive: newStatus });
+            await refreshApex(this.wiredConfigsResult);
+            this.updateCurrentConfig();
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: `Tabla ${newStatus ? 'Activada' : 'Desactivada'}`, variant: 'info' }));
+        } catch (e) { console.error(e); } finally { this.isLoading = false; }
+    }
+
     async handleSave() {
         if (!this.recordId) return;
         this.isSaving = true;
@@ -288,13 +301,30 @@ export default class TechLevantamientoManager extends LightningElement {
             { label: 'Aromatizantes', value: 'AROMATIZANTES' },
             { label: 'Desazolve con Vactor', value: 'VACTOR' }
         ];
+        
         if (this.allTableConfigs) {
+            // Obtener los tipos que ya tienen datos en este registro
+            const existingTypes = new Set((this._rawResult || []).map(r => (r.Tipo_Servicio__c || '').toUpperCase()));
+
             this.allTableConfigs.forEach(conf => {
                 const val = (conf.label || '').toUpperCase();
-                if (!options.find(opt => opt.value === val)) options.push({ label: conf.label, value: val });
+                // Mostrar solo si está activa O si el registro actual ya tiene datos de ese tipo
+                if (conf.active || existingTypes.has(val)) {
+                    if (!options.find(opt => opt.value === val)) {
+                        options.push({ label: conf.label + (conf.active ? '' : ' (Archivada)'), value: val });
+                    }
+                }
             });
         }
         return options;
+    }
+
+    get currentStatusLabel() {
+        return this.currentTableConfig && this.currentTableConfig.active ? 'Desactivar Tabla' : 'Activar Tabla';
+    }
+
+    get currentStatusVariant() {
+        return this.currentTableConfig && this.currentTableConfig.active ? 'destructive-text' : 'success';
     }
 
     get surveyTotals() {
