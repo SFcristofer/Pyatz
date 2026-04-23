@@ -90,6 +90,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track showPdfModal = false;
     @track pdfUrl = '';
     @track separatorText = '';
+    @track separatorStyle = 'header';
 
     sedesColumns = [
         { label: 'Sede', fieldName: 'Name', type: 'text' },
@@ -420,10 +421,27 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleOpenSeparatorModal() { this.showSeparatorModal = true; }
     handleCloseSeparatorModal() { this.showSeparatorModal = false; }
     handleSeparatorTextChange(event) { this.separatorText = event.target.value; }
+    handleSeparatorStyleChange(event) { this.separatorStyle = event.target.value; }
+    
+    get separatorStyleOptions() {
+        return [
+            { label: 'Barra Sólida', value: 'header' },
+            { label: 'Línea con Texto', value: 'line' }
+        ];
+    }
+
     handleAddSeparator() {
-        this.serviciosData = [...this.serviciosData, { id: Date.now().toString(), isSeparator: true, descripcion: this.separatorText || 'SECCIÓN', rowClass: 'row-separator' }];
+        const styleClass = this.separatorStyle === 'header' ? 'row-separator-header' : 'row-separator-line';
+        this.serviciosData = [...this.serviciosData, { 
+            id: Date.now().toString(), 
+            isSeparator: true, 
+            descripcion: this.separatorText || '', 
+            style: this.separatorStyle,
+            rowClass: styleClass 
+        }];
         this.showSeparatorModal = false;
         this.separatorText = '';
+        this.separatorStyle = 'header';
     }
     handleOpenPLModal() { this.showPLModal = true; }
     handleClosePLModal() { this.showPLModal = false; }

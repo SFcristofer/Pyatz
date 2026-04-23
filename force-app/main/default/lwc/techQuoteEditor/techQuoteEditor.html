@@ -166,20 +166,34 @@
                                         <td class="drag-handle" style="cursor: grab;">
                                             <lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon>
                                         </td>
-                                        <td>
-                                            <div class="slds-text-title_bold">{item.descripcion}</div>
-                                            <template if:true={item.areas}>
-                                                <div class="slds-text-color_weak slds-text-body_small">
-                                                    <lightning-icon icon-name="utility:checkin" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                                    Áreas: {item.areas}
+                                        
+                                        <template if:true={item.isSeparator}>
+                                            <td colspan="4">
+                                                <div class="separator-container">
+                                                    <span class="separator-line-left"></span>
+                                                    <span class="separator-text">{item.descripcion}</span>
+                                                    <span class="separator-line-right"></span>
                                                 </div>
-                                            </template>
-                                        </td>
-                                        <td><div class="slds-truncate" title={item.sedes}>{item.sedes}</div></td>
-                                        <td style="text-align: center;">{item.cantidad}</td>
-                                        <td style="text-align: right;"><strong><lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
+                                            </td>
+                                        </template>
+
+                                        <template if:false={item.isSeparator}>
+                                            <td>
+                                                <div class="slds-text-title_bold">{item.descripcion}</div>
+                                                <template if:true={item.areas}>
+                                                    <div class="slds-text-color_weak slds-text-body_small">
+                                                        <lightning-icon icon-name="utility:checkin" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                        Áreas: {item.areas}
+                                                    </div>
+                                                </template>
+                                            </td>
+                                            <td><div class="slds-truncate" title={item.sedes}>{item.sedes}</div></td>
+                                            <td style="text-align: center;">{item.cantidad}</td>
+                                            <td style="text-align: right;"><strong><lightning-formatted-number value={item.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
+                                        </template>
+
                                         <td class="slds-text-align_center">
-                                            <lightning-button-icon icon-name="utility:edit" variant="bare" onclick={handleRowAction} data-id={item.id} data-action="edit" class="slds-m-right_x-small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:edit" variant="bare" onclick={handleRowAction} data-id={item.id} data-action="edit" class="slds-m-right_x-small" if:false={item.isSeparator}></lightning-button-icon>
                                             <lightning-button-icon icon-name="utility:delete" variant="bare-error" onclick={handleRowAction} data-id={item.id} data-action="delete"></lightning-button-icon>
                                         </td>
                                     </tr>
@@ -305,6 +319,48 @@
                 costo-base={costoTotalServicios} 
                 onclose={handleClosePLModal}>
             </c-tech-quote-p-l-analyzer>
+        </template>
+
+        <!-- MODAL SEPARADOR -->
+        <template if:true={showSeparatorModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header" style="background: #001a33; color: white;">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleCloseSeparatorModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Cerrar" size="small" variant="inverse"></lightning-icon>
+                        </button>
+                        <h2 class="slds-text-heading_medium">Añadir Separador de Sección</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input 
+                            label="Título del Separador" 
+                            placeholder="Ej: FASE 1, EQUIPAMIENTO, SITE..." 
+                            value={separatorText} 
+                            onchange={handleSeparatorTextChange}
+                            class="slds-m-bottom_medium"
+                            autofocus>
+                        </lightning-input>
+
+                        <lightning-radio-group 
+                            name="separatorStyle"
+                            label="Estilo Visual"
+                            options={separatorStyleOptions}
+                            value={separatorStyle}
+                            onchange={handleSeparatorStyleChange}
+                            type="button">
+                        </lightning-radio-group>
+
+                        <p class="slds-m-top_small slds-text-color_weak slds-text-body_small">
+                            El separador ayudará a organizar visualmente las partidas en el presupuesto final.
+                        </p>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancelar" onclick={handleCloseSeparatorModal} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Añadir Separador" variant="brand" onclick={handleAddSeparator} style="--slds-c-button-brand-color-background: #001a33;"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
         </template>
     </div>
 </template>
