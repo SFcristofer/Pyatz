@@ -176,3 +176,36 @@
 .slds-table tbody td {
     padding: 12px !important;
 }
+
+/* CONTENEDOR DE TABLA COMPACTO */
+.table-container-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+}
+
+/* ESTILO PARA EL SELECT NATIVO (SOLUCIÓN AL RECORTE) */
+.custom-select-native {
+    width: 100%;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: white;
+    color: #0f172a;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+}
+
+.custom-select-native:focus {
+    outline: none;
+    border-color: #001a33;
+    box-shadow: 0 0 0 1px #001a33;
+}

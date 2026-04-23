@@ -72,7 +72,7 @@
                                         onchange={handlePriceType} type="button" variant="label-hidden">
                                     </lightning-radio-group>
                                 </div>
-                                <div style="max-height: 250px; overflow-y: auto;">
+                                <div class="table-container-scroll">
                                     <table class="slds-table slds-table_bordered slds-table_fixed-layout">
                                         <thead>
                                             <tr style="background: #f8fafc;">
@@ -80,6 +80,8 @@
                                                 <th>Sede</th>
                                                 <th style="width: 5rem;">Cant.</th>
                                                 <th style="width: 8rem;">Importe</th>
+                                                <th style="width: 5rem;">Tipo</th>
+                                                <th style="width: 7rem;">Desc.</th>
                                                 <th style="text-align: right; width: 10rem;">Total Sin IVA</th>
                                             </tr>
                                         </thead>
@@ -92,6 +94,25 @@
                                                     <td class="slds-truncate slds-font-weight_bold">{row.sede}</td>
                                                     <td><lightning-input type="number" value={row.cantidad} data-id={row.id} data-field="cantidad" onchange={handleModalInputChange} variant="label-hidden" disabled={row.isDisabled}></lightning-input></td>
                                                     <td><lightning-input type="number" step="0.01" value={row.importeTotal} data-id={row.id} data-field="importeTotal" onchange={handleModalInputChange} variant="label-hidden" disabled={row.isDisabled}></lightning-input></td>
+                                                    <td>
+                                                        <select class="custom-select-native" data-id={row.id} data-field="tipoDescuento" onchange={handleModalInputChange}>
+                                                            <template for:each={discountOptions} for:item="opt">
+                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                            </template>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input 
+                                                            type="number" 
+                                                            step="0.01" 
+                                                            value={row.descuento} 
+                                                            data-id={row.id} 
+                                                            data-field="descuento" 
+                                                            onchange={handleModalInputChange} 
+                                                            variant="label-hidden" 
+                                                            disabled={row.isDisabled}>
+                                                        </lightning-input>
+                                                    </td>
                                                     <td style="text-align: right;"><strong><lightning-formatted-number value={row.totalSinImpuestos} format-style="currency"></lightning-formatted-number></strong></td>
                                                 </tr>
                                             </template>

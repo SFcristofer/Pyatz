@@ -56,6 +56,13 @@ export default class TechQuoteItemConfigurator extends LightningElement {
         return this._editItem ? 'Actualizar Partida' : 'Confirmar Partida';
     }
 
+    get discountOptions() {
+        return [
+            { label: '$', value: 'monto' },
+            { label: '%', value: 'porcentaje' }
+        ];
+    }
+
     // Función auxiliar para limpiar HTML y preservar saltos de línea reales
     formatDescription(text) {
         if (!text) return '';
@@ -175,6 +182,13 @@ export default class TechQuoteItemConfigurator extends LightningElement {
                 ...o, 
                 className: o.pbeId === pbeId ? 'price-option-card selected' : 'price-option-card' 
             }));
+            
+            // Sincronizar el nuevo precio con todas las filas de la tabla
+            this.modalTableData = this.modalTableData.map(row => ({
+                ...row,
+                importeTotal: opt.unitPrice
+            }));
+
             this.recalculateModalData();
         }
     }
@@ -214,8 +228,18 @@ export default class TechQuoteItemConfigurator extends LightningElement {
 
     recalculateModalData() {
         this.modalTableData = this.modalTableData.map(row => {
-            let base = this.isUnitario ? (this.selectedProductPrice * row.cantidad) : this.selectedProductPrice;
-            return { ...row, totalSinImpuestos: base - row.descuento };
+            // Modo Unitario: Multiplica | Modo Total: Divide Importe / Cantidad
+            let base = this.isUnitario ? 
+                (row.importeTotal * row.cantidad) : 
+                (row.cantidad !== 0 ? (row.importeTotal / row.cantidad) : 0);
+            
+            let finalTotal = base;
+            if (row.tipoDescuento === 'monto') {
+                finalTotal = base - (row.descuento || 0);
+            } else if (row.tipoDescuento === 'porcentaje') {
+                finalTotal = base * (1 - ((row.descuento || 0) / 100));
+            }
+            return { ...row, totalSinImpuestos: finalTotal };
         });
     }
 
