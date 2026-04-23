@@ -179,18 +179,38 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     get isStep3() { return this.currentStep === '3'; }
     get isStep4() { return this.currentStep === '4'; }
 
-    handleNext() { 
+    async handleNext() { 
         if (this.currentStep === '1' && !this.estrategiaVenta) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione una Estrategia.', variant: 'warning' }));
             return;
         }
+        
         if (this.currentStep !== '4') {
-            this.handleSave('Borrador');
-            const nextStepInt = parseInt(this.currentStep) + 1;
-            if (nextStepInt === 4) this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
-            this.currentStep = nextStepInt.toString();
+            this.isLoading = true;
+            try {
+                // Forzamos el guardado y esperamos que termine
+                const savedId = await this.handleSave('Borrador');
+                
+                if (savedId) {
+                    const nextStepInt = parseInt(this.currentStep) + 1;
+                    if (nextStepInt === 4) {
+                        this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
+                    }
+                    this.currentStep = nextStepInt.toString();
+                }
+            } catch (error) {
+                console.error('Error al avanzar de paso:', error);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error al guardar',
+                    message: 'No se pudo guardar la información del paso actual. Intente de nuevo.',
+                    variant: 'error'
+                }));
+            } finally {
+                this.isLoading = false;
+            }
         }
     }
+
     handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
 
     get estrategiaOptions() {
@@ -205,7 +225,6 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
     get technicalSedesString() { return this.selectedSedesObjects.map(s => s.Name).join(', '); }
 
-    // GETTER PARA P&L: Suma el costo base de todos los servicios
     get costoTotalServicios() {
         let total = 0;
         if (this.serviciosData) {
@@ -215,13 +234,12 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 }
             });
         }
-        console.log('--- Calculando Costo Base para P&L:', total);
         return total;
     }
 
     handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
     autoFillAsunto() {
-        const folioDisplay = this.folio || 'POR GENERAR';
+        const folioDisplay = (this.folio && this.folio !== 'POR GENERAR') ? this.folio : 'POR GENERAR';
         const oppName = this.opportunityName || 'Sin Oportunidad';
         this.asunto = `PYATZ - Ptto ${folioDisplay} - ${oppName}`;
     }
@@ -287,7 +305,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.selectedLines = this.lineaNegocioOptions.filter(opt => opt.checked).map(opt => opt.value);
     }
 
-    handleSave(status) {
+    async handleSave(status) {
         this.isLoading = true;
         const markers = { 
             serviciosData: this.serviciosData, selectedSedesIds: this.selectedSedesIds, selectedSedesObjects: this.selectedSedesObjects, 
@@ -303,18 +321,35 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             markersData: encoded, technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
             lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true
         };
-        saveTechnicalData({ data: payload })
-            .then(newId => { if (newId) this.recordId = newId; this.loadInitialData(); this.isLoading = false; if (status === 'Approved') this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Presupuesto finalizado', variant: 'success' })); })
-            .catch(error => { this.isLoading = false; console.error(error); });
+
+        try {
+            const newId = await saveTechnicalData({ data: payload });
+            if (newId) {
+                const isNew = !this.recordId;
+                this.recordId = newId;
+                if (isNew) {
+                    // Solo recargamos si es nuevo para obtener el Folio real
+                    await this.loadInitialData();
+                }
+            }
+            if (status === 'Approved') {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Presupuesto finalizado', variant: 'success' }));
+            }
+            return this.recordId;
+        } catch (error) {
+            console.error('Error en handleSave:', error);
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo guardar: ' + (error.body ? error.body.message : error.message), variant: 'error' }));
+            throw error;
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     handleAddServiceItems(event) {
         const newItems = event.detail;
         if (this.itemToEdit) {
-            // Reemplazar el item editado manteniendo su posición
             this.serviciosData = this.serviciosData.map(item => item.id === this.itemToEdit.id ? newItems[0] : item);
         } else {
-            // Añadir nuevos items
             this.serviciosData = [...this.serviciosData, ...newItems];
         }
         this.calculateTotals();
@@ -357,15 +392,20 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 if (targetField === 'introduccion') this.introduccion = result;
                 else if (targetField === 'warranty') this.warranty = result;
                 else if (targetField === 'observacionesPago') this.observacionesPago = result;
-                this.isLoading = false;
             })
-            .catch(error => { this.isLoading = false; console.error('Error render:', error); });
+            .catch(error => { console.error('Error render:', error); })
+            .finally(() => { this.isLoading = false; });
     }
 
     handleFinalize() { this.handleSave('Approved'); }
-    handleGoToContract() { this.dispatchEvent(new CustomEvent('viewcontract', { detail: this.recordId })); }
     handleCancel() { this.dispatchEvent(new CustomEvent('cancel')); }
-    handlePreviewPdf() { this.handleSave('Borrador'); this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`; this.showPdfModal = true; }
+    async handlePreviewPdf() { 
+        try {
+            await this.handleSave('Borrador'); 
+            this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`; 
+            this.showPdfModal = true; 
+        } catch (e) { console.error(e); }
+    }
     handleClosePdfModal() { this.showPdfModal = false; this.pdfUrl = ''; }
     
     handleAsuntoChange(event) { this.asunto = event.target.value; }
@@ -388,34 +428,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleOpenPLModal() { this.showPLModal = true; }
     handleClosePLModal() { this.showPLModal = false; }
 
-    // --- LÓGICA DRAG & DROP ---
     draggedIndex;
-
-    handleDragStart(event) {
-        this.draggedIndex = event.currentTarget.dataset.index;
-        event.dataTransfer.effectAllowed = 'move';
-        event.currentTarget.classList.add('dragging');
-    }
-
-    handleDragOver(event) {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-    }
-
+    handleDragStart(event) { this.draggedIndex = event.currentTarget.dataset.index; event.dataTransfer.effectAllowed = 'move'; event.currentTarget.classList.add('dragging'); }
+    handleDragOver(event) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }
     handleDrop(event) {
         event.preventDefault();
         const dropIndex = event.currentTarget.dataset.index;
         if (this.draggedIndex === dropIndex) return;
-
-        // Reordenar el array
         let data = [...this.serviciosData];
         const draggedItem = data.splice(this.draggedIndex, 1)[0];
         data.splice(dropIndex, 0, draggedItem);
-
         this.serviciosData = data;
         this.draggedIndex = null;
-        
-        // Limpiar estilos visuales
         this.template.querySelectorAll('tr').forEach(row => row.classList.remove('dragging'));
     }
 }

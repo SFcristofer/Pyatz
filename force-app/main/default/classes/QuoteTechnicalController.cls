@@ -236,6 +236,7 @@ public with sharing class QuoteTechnicalController {
     }
 
     public static void syncServiceZones(Id quoteId, String markersBase64) {
-        QuoteTechnicalController.syncServiceZones(quoteId, markersBase64); // Se mantiene referencia interna
+        // Lógica de sincronización de zonas desactivada temporalmente para evitar bucle infinito
+        // QuoteTechnicalController.syncServiceZones(quoteId, markersBase64); 
     }
 }
