@@ -1,5 +1,6 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
 import saveSurveyData from '@salesforce/apex/SurveyController.saveSurveyData';
 import getLevantamientoDetails from '@salesforce/apex/SurveyController.getLevantamientoDetails';
 import getAvailableFields from '@salesforce/apex/AdminController.getAvailableFields';
@@ -20,6 +21,7 @@ export default class TechLevantamientoManager extends LightningElement {
     @track allTableConfigs = [];
     @track currentTableConfig = null;
     @track _rawResult = []; 
+    wiredConfigsResult; // Para usar refreshApex
 
     // --- VARIABLES GESTIÓN MENSTRUAL ---
     @track gmUsuariasInt = 0; @track gmUsuariasExt = 0; @track gmFreqUso = '';
@@ -36,9 +38,10 @@ export default class TechLevantamientoManager extends LightningElement {
     }
 
     @wire(getTableConfigs)
-    wiredConfigs({ error, data }) {
-        if (data) {
-            this.allTableConfigs = data;
+    wiredConfigs(result) {
+        this.wiredConfigsResult = result;
+        if (result.data) {
+            this.allTableConfigs = result.data;
             this.updateCurrentConfig();
             if (this._rawResult && this._rawResult.length > 0) {
                 this.processSurveyData(this._rawResult);
@@ -77,7 +80,6 @@ export default class TechLevantamientoManager extends LightningElement {
     loadExistingData() {
         if (!this.recordId) return;
         this.isLoading = true;
-        this._rawResult = [];
         getLevantamientoDetails({ recordId: this.recordId })
             .then(result => {
                 this._rawResult = result;
@@ -151,8 +153,12 @@ export default class TechLevantamientoManager extends LightningElement {
 
     createBaseRow(num) {
         return { 
-            id: Date.now() + Math.random(), rowNumber: num, nivel: '', area: '', zona: '', obs: '', cells: [],
-            ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, st1: 0, ovalines: 0, sp: 0, ent: 0, tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, wc: 0, mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, largo: 0, ancho: 0, prof: 0
+            id: Date.now() + Math.random(), 
+            rowNumber: num, nivel: '', area: '', zona: '', obs: '', cells: [],
+            ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, 
+            coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, st1: 0, ovalines: 0, 
+            sp: 0, ent: 0, tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, 
+            wc: 0, mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, largo: 0, ancho: 0, prof: 0
         };
     }
 
@@ -193,6 +199,7 @@ export default class TechLevantamientoManager extends LightningElement {
         this.surveyData = [...this.surveyData];
     }
 
+    // --- CONFIGURACIÓN ---
     handleOpenConfig() {
         this.updateCurrentConfig();
         if (this.currentTableConfig) {
@@ -208,40 +215,92 @@ export default class TechLevantamientoManager extends LightningElement {
     handleCloseConfig() { this.isConfigModalOpen = false; }
     handleAddConfigColumn() { this.dynamicColumns = [...this.dynamicColumns, { id: Date.now(), order: this.dynamicColumns.length + 1, apiName: '', label: '' }]; }
     handleRemoveConfigColumn(event) { const idx = event.target.dataset.index; let cols = [...this.dynamicColumns]; cols.splice(idx, 1); this.dynamicColumns = cols.map((c, i) => ({ ...c, order: i + 1 })); }
-    handleConfigColumnChange(event) { const idx = event.target.dataset.index; const val = event.detail.value; this.dynamicColumns[idx].apiName = val; const f = this.availableFields.find(af => af.value === val); if (f) this.dynamicColumns[idx].label = f.label.toUpperCase(); this.dynamicColumns = [...this.dynamicColumns]; }
-    handleConfigLabelChange(event) { const idx = event.target.dataset.index; this.dynamicColumns[idx].label = event.detail.value; this.dynamicColumns = [...this.dynamicColumns]; }
+    
+    handleConfigColumnChange(event) { 
+        const idx = event.target.dataset.index; 
+        const val = event.detail.value; 
+        this.dynamicColumns[idx].apiName = val; 
+        const f = this.availableFields.find(af => af.value === val); 
+        if (f) this.dynamicColumns[idx].label = f.label.toUpperCase(); 
+        this.dynamicColumns = [...this.dynamicColumns]; 
+    }
+    
+    handleConfigLabelChange(event) { 
+        const idx = event.target.dataset.index; 
+        this.dynamicColumns[idx].label = event.detail.value; 
+        this.dynamicColumns = [...this.dynamicColumns]; 
+    }
+    
     handleSurveyTypeChangeInModal(event) { this.surveyType = event.detail.value; }
 
     async handleSaveConfig() {
         this.isLoading = true;
         try {
+            const newName = this.surveyType;
             const apiNames = this.dynamicColumns.map(c => c.apiName).join(',');
             const labels = this.dynamicColumns.map(c => c.label).join(',');
-            await saveTableConfig({ label: this.surveyType, apiNames: apiNames, columnLabels: labels });
-            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Diseño publicado.', variant: 'success' }));
+            await saveTableConfig({ label: newName, apiNames: apiNames, columnLabels: labels });
+            
+            // Refrescar la caché de configuraciones
+            await refreshApex(this.wiredConfigsResult);
+            
+            // Forzar la selección de la nueva tabla
+            this.surveyType = newName.toUpperCase();
+            this.updateCurrentConfig();
+            this.loadExistingData(); // Carga las filas (o inicializa una vacía)
+            
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Diseño publicado y seleccionado.', variant: 'success' }));
             this.isConfigModalOpen = false;
-        } catch (e) { console.error(e); } finally { this.isLoading = false; }
+        } catch (e) { 
+            console.error(e); 
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo guardar la configuración.', variant: 'error' }));
+        } finally { 
+            this.isLoading = false; 
+        }
     }
 
     async handleSave() {
         if (!this.recordId) return;
         this.isSaving = true;
         try {
-            const diagData = { gmUsuariasInt: this.gmUsuariasInt, gmUsuariasExt: this.gmUsuariasExt, gmFreqUso: this.gmFreqUso, gmSanitarios: this.gmSanitarios, gmCubiculos: this.gmCubiculos, gmContenedores: this.gmContenedores, gmFreqRecoleccion: this.gmFreqRecoleccion, gmDiasServicio: this.gmDiasServicio, gmHorario: this.gmHorario, gmPermisos: this.gmPermisos, gmConsideraciones: this.gmConsideraciones, gmCapacitacion: this.gmCapacitacion, gmPresupuesto: this.gmPresupuesto, gmMotivo: this.gmMotivo, gmPermiteLev: this.gmPermiteLev };
-            await saveSurveyData({ oppId: this.recordId, type: this.surveyType, surveyDataJson: JSON.stringify(this.surveyData), diagDataJson: JSON.stringify(diagData) });
+            const diagData = { 
+                gmUsuariasInt: this.gmUsuariasInt, gmUsuariasExt: this.gmUsuariasExt, gmFreqUso: this.gmFreqUso, 
+                gmSanitarios: this.gmSanitarios, gmCubiculos: this.gmCubiculos, gmContenedores: this.gmContenedores, 
+                gmFreqRecoleccion: this.gmFreqRecoleccion, gmDiasServicio: this.gmDiasServicio, gmHorario: this.gmHorario, 
+                gmPermisos: this.gmPermisos, gmConsideraciones: this.gmConsideraciones, gmCapacitacion: this.gmCapacitacion, 
+                gmPresupuesto: this.gmPresupuesto, gmMotivo: this.gmMotivo, gmPermiteLev: this.gmPermiteLev 
+            };
+            await saveSurveyData({ 
+                oppId: this.recordId, type: this.surveyType, 
+                surveyDataJson: JSON.stringify(this.surveyData), 
+                diagDataJson: JSON.stringify(diagData) 
+            });
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Levantamiento guardado.', variant: 'success' }));
         } catch (error) { console.error(error); } finally { this.isSaving = false; }
     }
 
     get surveyTypeOptions() {
-        let options = [{ label: 'Bioenzimático', value: 'BIOENZIMÁTICO' }, { label: 'Grasas / Trampas', value: 'GRASAS' }, { label: 'Gestión Menstrual (Íntima)', value: 'INTIMA' }, { label: 'Desazolve Mecánico', value: 'DESAZOLVE MECANICO' }, { label: 'Aromatizantes', value: 'AROMATIZANTES' }, { label: 'Desazolve con Vactor', value: 'VACTOR' }];
-        if (this.allTableConfigs) this.allTableConfigs.forEach(conf => { const val = (conf.label || '').toUpperCase(); if (!options.find(opt => opt.value === val)) options.push({ label: conf.label, value: val }); });
+        let options = [
+            { label: 'Bioenzimático', value: 'BIOENZIMÁTICO' },
+            { label: 'Grasas / Trampas', value: 'GRASAS' },
+            { label: 'Gestión Menstrual (Íntima)', value: 'INTIMA' },
+            { label: 'Desazolve Mecánico', value: 'DESAZOLVE MECANICO' },
+            { label: 'Aromatizantes', value: 'AROMATIZANTES' },
+            { label: 'Desazolve con Vactor', value: 'VACTOR' }
+        ];
+        if (this.allTableConfigs) {
+            this.allTableConfigs.forEach(conf => {
+                const val = (conf.label || '').toUpperCase();
+                if (!options.find(opt => opt.value === val)) options.push({ label: conf.label, value: val });
+            });
+        }
         return options;
     }
 
     get surveyTotals() {
         const type = (this.surveyType || '').toUpperCase();
         let t = { ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, st1: 0, ovalines: 0, sp: 0, ent: 0, tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, wc: 0, mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, largo: 0, ancho: 0, prof: 0, mtLinealVactor: 0 };
+        if (!this.surveyData) return t;
         this.surveyData.forEach(row => {
             if (!row) return;
             t.ve += Number(row.ve || 0); t.vp += Number(row.vp || 0); t.c10l += Number(row.c10l || 0); t.c20l += Number(row.c20l || 0); t.c25l += Number(row.c25l || 0); t.piso += Number(row.piso || 0); t.mueble += Number(row.mueble || 0); t.pared += Number(row.pared || 0); t.coladeras += Number(row.coladeras || 0); t.tapon += Number(row.tapon || 0); t.tarja += Number(row.tarja || 0); t.tinas += Number(row.tinas || 0); t.tgrasa += Number(row.tgrasa || 0); t.st1 += Number(row.st1 || 0); t.ovalines += Number(row.ovalines || 0);
@@ -251,12 +310,12 @@ export default class TechLevantamientoManager extends LightningElement {
         return t;
     }
 
-    get isBio() { return (this.surveyType || '').toUpperCase() === 'BIOENZIMÁTICO'; }
-    get isGrasas() { return (this.surveyType || '').toUpperCase() === 'GRASAS'; }
-    get isIntima() { return (this.surveyType || '').toUpperCase() === 'INTIMA'; }
-    get isDesazolveMec() { return (this.surveyType || '').toUpperCase() === 'DESAZOLVE MECANICO'; }
-    get isAromatizantes() { return (this.surveyType || '').toUpperCase() === 'AROMATIZANTES'; }
-    get isVactor() { return (this.surveyType || '').toUpperCase() === 'VACTOR'; }
+    get isBio() { return this.surveyType === 'BIOENZIMÁTICO'; }
+    get isGrasas() { return this.surveyType === 'GRASAS'; }
+    get isIntima() { return this.surveyType === 'INTIMA'; }
+    get isDesazolveMec() { return this.surveyType === 'DESAZOLVE MECANICO'; }
+    get isAromatizantes() { return this.surveyType === 'AROMATIZANTES'; }
+    get isVactor() { return this.surveyType === 'VACTOR'; }
     get isGmFreqLV() { return this.gmFreqUso === 'Lunes a viernes'; }
     get isGmFreqAlt() { return this.gmFreqUso === 'Días alternados (ej. home office)'; }
     get isGmRec7() { return this.gmFreqRecoleccion === '7 días'; }
