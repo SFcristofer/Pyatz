@@ -203,17 +203,22 @@
                     </div>
                 </div>
 
-                <template if:true={showDescription}>
-                    <div class="section-card slds-m-bottom_large">
-                        <div class="section-header slds-grid slds-grid_align-spread">
+                <div class="section-card slds-m-bottom_large">
+                    <div class="section-header slds-grid slds-grid_align-spread">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name="utility:结_anexo" size="small" class="slds-m-right_small"></lightning-icon>
                             <h2 class="slds-text-heading_small">Condiciones / Anexos</h2>
-                            <lightning-button-menu label="Usar Plantilla" onselect={handleApplyTemplate} data-field="warranty">
-                                <template for:each={warrantyTemplates} for:item="tpl"><lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item></template>
-                            </lightning-button-menu>
                         </div>
-                        <div class="slds-p-around_large"><lightning-input-rich-text value={warranty} onchange={handleWarrantyChange} variant="bottom-toolbar"></lightning-input-rich-text></div>
+                        <lightning-button-menu label="Usar Plantilla" onselect={handleApplyTemplate} data-field="warranty">
+                            <template for:each={warrantyTemplates} for:item="tpl">
+                                <lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item>
+                            </template>
+                        </lightning-button-menu>
                     </div>
-                </template>
+                    <div class="slds-p-around_large">
+                        <lightning-input-rich-text value={warranty} onchange={handleWarrantyChange} variant="bottom-toolbar"></lightning-input-rich-text>
+                    </div>
+                </div>
 
                 <div class="section-card slds-m-bottom_large">
                     <div class="section-header">

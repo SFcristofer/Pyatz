@@ -1,0 +1,32 @@
+ARQUITECTURA DE PERSISTENCIA HÍBRIDA - PROYECTO PYATZ
+
+El sistema de presupuestos de Pyatz utiliza un modelo de persistencia dual para equilibrar la flexibilidad de la interfaz de usuario con la robustez analítica de Salesforce. A continuación se detalla cómo conviven ambos métodos:
+
+1. EL CAMPO TÉCNICO: Markers_Data__c (EL "CEREBRO" DEL EDITOR)
+Este campo de tipo Texto Largo almacena un objeto JSON codificado en Base64 que contiene el estado completo de la interfaz al momento del guardado.
+- Función: Actúa como una "captura de pantalla de datos". Permite al componente Lightning (LWC) reconstruir configuraciones complejas que Salesforce no soporta de forma nativa.
+- Qué almacena: 
+  * El orden exacto de las partidas (incluyendo separadores de sección).
+  * Los metadatos de los contactos seleccionados y su formato de visualización.
+  * Lógica de UI específica (chips de áreas afectadas, estados de edición temporales).
+- Beneficio: Garantiza que, aunque se modifiquen los productos o maestros en el futuro, el presupuesto histórico se vuelva a cargar exactamente igual a como se diseñó.
+
+2. LOS CAMPOS PERSONALIZADOS __c (EL "ESQUELETO" DE REPORTABILIDAD)
+Campos como Introduction_Text__c, Technical_Sedes__c, Warranty_Text__c y Descripcion_Detallada__c.
+- Función: Almacenan la información en formato estructurado y legible para la plataforma.
+- Por qué se usan:
+  * Reportabilidad: Permiten filtrar, agrupar y sumar datos en Reportes y Dashboards estándar.
+  * PDF Nativo: La página Visualforce accede directamente a estos campos para imprimir el documento final sin necesidad de procesar JavaScript complejo.
+  * Visibilidad: Permiten que usuarios que no usan el editor técnico vean la información relevante directamente en el Page Layout de Salesforce.
+
+3. FLUJO DE SINCRONIZACIÓN (LA "MAGIA" DEL APEX)
+Cuando el usuario presiona "Guardar" en el editor, ocurre un proceso atómico en el servidor (QuoteEngineService.cls):
+A. Desempaquetado: El Apex recibe el JSON y lo desglosa.
+B. Distribución: Los valores legibles (textos de introducción, sedes, montos) se inyectan en los campos personalizados correspondientes.
+C. Preservación: El JSON íntegro se guarda en Markers_Data__c para futuras ediciones.
+
+CONCLUSIÓN
+Esta arquitectura de "Doble Capa" permite que Pyatz tenga:
+1. Una experiencia de usuario moderna y fluida (vía JSON).
+2. Datos 100% integrados y consultables para la toma de decisiones (vía Campos Personalizados).
+3. Integridad total del expediente comercial (Snapshot de estado).
