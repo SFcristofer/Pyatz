@@ -1,7 +1,8 @@
 public with sharing class QuoteTechnicalPDFController {
     public Quote technicalQuote {get; set;}
     public String versionId {get; set;}
-    public Map<Id, String> htmlDescriptions {get; set;} // Mapa de ID de partida -> HTML
+    public String signatureUrl {get; set;}
+    public Map<Id, String> htmlDescriptions {get; set;}
 
     public QuoteTechnicalPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
@@ -13,7 +14,7 @@ public with sharing class QuoteTechnicalPDFController {
                                      Show_Warranty__c, Warranty_Text__c, Markers_Data__c,
                                      Business_Lines_Selected__c, Technical_Sedes__c, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                      Subtotal, Tax, TotalPrice, Description,
-                                     (SELECT Id, Product2.Name, Description, Pyatz_Technical_Description__c, Descripcion_Detallada__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice 
+                                     (SELECT Id, Product2.Name, Product2.ProductCode, Description, Pyatz_Technical_Description__c, Descripcion_Detallada__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice
                                       FROM QuoteLineItems)
                               FROM Quote 
                               WHERE Id = :quoteId];
@@ -75,7 +76,10 @@ public with sharing class QuoteTechnicalPDFController {
             } catch (Exception e) { System.debug('Error recuperando HTML: ' + e.getMessage()); }
         }
         
-        // 3. Buscar documentos
+        // 3. Buscar firma del creador en static resources
+        this.signatureUrl = findSignatureUrl(this.technicalQuote.CreatedBy.Name);
+
+        // 4. Buscar documentos
         List<ContentDocumentLink> links = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :quoteId];
         if(!links.isEmpty()) {
             Set<Id> docIds = new Set<Id>();
@@ -90,5 +94,28 @@ public with sharing class QuoteTechnicalPDFController {
                 this.versionId = versions[0].Id;
             }
         }
+    }
+
+    private static String findSignatureUrl(String fullName) {
+        if (String.isBlank(fullName)) return null;
+        String normalized = fullName
+            .replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u')
+            .replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+            .replace('ñ','n').replace('Ñ','N').replace('ü','u').replace('Ü','U')
+            .toUpperCase().normalizeSpace();
+        List<String> words = normalized.split(' ');
+        List<StaticResource> srs = [SELECT Name, SystemModstamp FROM StaticResource
+                                     WHERE Name != 'HeaderPDF' AND Name != 'FooterPDF' AND Name != 'WatermarPDF'
+                                     ORDER BY Name];
+        for (StaticResource sr : srs) {
+            Boolean allMatch = true;
+            for (String word : words) {
+                if (!sr.Name.contains(word)) { allMatch = false; break; }
+            }
+            if (allMatch) {
+                return '/resource/' + sr.SystemModstamp.getTime() + '/' + sr.Name;
+            }
+        }
+        return null;
     }
 }

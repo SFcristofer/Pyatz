@@ -214,8 +214,13 @@
                                 <div class="sig-line">Firma del CLIENTE</div>
                             </td>
                             <td width="33%" align="center">
-                                <div style="height: 70pt; vertical-align: bottom; padding-bottom: 10pt;">
-                                    <div style="font-family: 'Courier New', monospace; font-size: 18pt; color: #0070d2;">{!technicalQuote.CreatedBy.Name}</div>
+                                <div style="height: 70pt; vertical-align: bottom; padding-bottom: 5pt;">
+                                    <apex:outputPanel rendered="{!NOT(ISBLANK(signatureUrl))}" layout="none">
+                                        <img src="{!signatureUrl}" style="height: 55pt; width: auto;" />
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!ISBLANK(signatureUrl)}" layout="none">
+                                        <div style="font-family: 'Courier New', monospace; font-size: 14pt; color: #0070d2;">{!technicalQuote.CreatedBy.Name}</div>
+                                    </apex:outputPanel>
                                 </div>
                                 <div class="sig-line">FIRMA AUTORIZADA PYATZ</div>
                             </td>
