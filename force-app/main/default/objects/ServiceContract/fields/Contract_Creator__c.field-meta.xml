@@ -3,7 +3,6 @@
     <fullName>Contract_Creator__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Usuario responsable de la creación del contrato.</description>
-    <externalId>false</externalId>
     <label>Creado por (Responsable)</label>
     <referenceTo>User</referenceTo>
     <relationshipName>CreatedServiceContracts</relationshipName>

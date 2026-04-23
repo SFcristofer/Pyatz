@@ -3,12 +3,12 @@
     <fullName>Oportunidad__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Negocio asociado a esta zona.</description>
-    <externalId>false</externalId>
     <label>Oportunidad</label>
     <referenceTo>Opportunity</referenceTo>
     <relationshipLabel>Zonas de Servicio Pyatz</relationshipLabel>
     <relationshipName>Zonas_de_Servicio_Pyatz</relationshipName>
     <required>false</required>
     <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

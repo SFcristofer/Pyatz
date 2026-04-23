@@ -5,6 +5,8 @@
     <label>GM Motivo de la Necesidad</label>
     <length>255</length>
     <required>false</required>
+    <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Text</type>
+    <unique>false</unique>
 </CustomField>

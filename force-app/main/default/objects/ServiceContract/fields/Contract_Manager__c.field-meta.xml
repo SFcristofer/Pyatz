@@ -3,7 +3,6 @@
     <fullName>Contract_Manager__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Usuario responsable de la gestión comercial del contrato.</description>
-    <externalId>false</externalId>
     <label>Gestionado por</label>
     <referenceTo>User</referenceTo>
     <relationshipName>ManagedServiceContracts</relationshipName>

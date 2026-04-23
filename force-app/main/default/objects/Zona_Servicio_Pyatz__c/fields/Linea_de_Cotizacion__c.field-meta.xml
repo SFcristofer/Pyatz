@@ -3,12 +3,12 @@
     <fullName>Linea_de_Cotizacion__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Partida del presupuesto vinculada a este servicio en zona.</description>
-    <externalId>false</externalId>
     <label>Línea de Cotización</label>
     <referenceTo>QuoteLineItem</referenceTo>
     <relationshipLabel>Zonas de Servicio Pyatz</relationshipLabel>
     <relationshipName>Zonas_de_Servicio_Pyatz</relationshipName>
     <required>false</required>
     <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

@@ -2,10 +2,10 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Detalle_Tecnico__c</fullName>
     <description>Especificaciones del servicio para esta zona específica.</description>
-    <externalId>false</externalId>
     <label>Detalle Técnico</label>
     <length>32768</length>
     <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
     <visibleLines>5</visibleLines>
 </CustomField>

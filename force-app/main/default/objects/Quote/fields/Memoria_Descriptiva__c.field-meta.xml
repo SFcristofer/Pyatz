@@ -5,6 +5,7 @@
     <inlineHelpText>Redacte aquí la descripción detallada de los hallazgos y la solución propuesta.</inlineHelpText>
     <label>Memoria Descriptiva</label>
     <length>32768</length>
+    <trackHistory>false</trackHistory>
     <type>Html</type>
     <visibleLines>25</visibleLines>
 </CustomField>

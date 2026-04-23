@@ -3,12 +3,11 @@
     <fullName>Quote_Source__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Presupuesto origen que generó este contrato de servicio.</description>
-    <externalId>false</externalId>
     <label>Presupuesto Origen</label>
     <referenceTo>Quote</referenceTo>
     <relationshipLabel>Contratos de Servicio</relationshipLabel>
     <relationshipName>ServiceContracts</relationshipName>
-    <required>false</externalId>
+    <required>false</required>
     <trackHistory>false</trackHistory>
     <type>Lookup</type>
 </CustomField>

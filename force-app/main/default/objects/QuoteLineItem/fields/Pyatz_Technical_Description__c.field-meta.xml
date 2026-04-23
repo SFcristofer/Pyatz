@@ -2,9 +2,9 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Pyatz_Technical_Description__c</fullName>
     <description>Campo creado específicamente para el proyecto Pyatz para almacenar descripciones técnicas largas que superan los 255 caracteres del estándar.</description>
-    <externalId>false</externalId>
     <label>Detalle Técnico Pyatz</label>
     <length>32768</length>
+    <trackHistory>false</trackHistory>
     <type>LongTextArea</type>
     <visibleLines>5</visibleLines>
 </CustomField>

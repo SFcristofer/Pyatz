@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Linea_de_negocio__c</fullName>
+    <label>Línea de negocio</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Ambiental</fullName>
+                <default>false</default>
+                <label>Ambiental</label>
+            </value>
+            <value>
+                <fullName>Hidrosanitario</fullName>
+                <default>false</default>
+                <label>Hidrosanitario</label>
+            </value>
+            <value>
+                <fullName>Higiene</fullName>
+                <default>false</default>
+                <label>Higiene</label>
+            </value>
+            <value>
+                <fullName>Retardante</fullName>
+                <default>false</default>
+                <label>Retardante</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

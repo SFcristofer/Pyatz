@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sublinea_de_negocio__c</fullName>
+    <label>Sublínea de negocio</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>BIOENZIMÁTICO</fullName>
+                <default>false</default>
+                <label>BIOENZIMÁTICO</label>
+            </value>
+            <value>
+                <fullName>GRASAS</fullName>
+                <default>false</default>
+                <label>GRASAS</label>
+            </value>
+            <value>
+                <fullName>INTIMA</fullName>
+                <default>false</default>
+                <label>INTIMA</label>
+            </value>
+            <value>
+                <fullName>AROMATIZANTES</fullName>
+                <default>false</default>
+                <label>AROMATIZANTES</label>
+            </value>
+            <value>
+                <fullName>RETENCIO SOLIDOS</fullName>
+                <default>false</default>
+                <label>RETENCIO SOLIDOS</label>
+            </value>
+            <value>
+                <fullName>SONDEO/DESAZOLVE MECANICO</fullName>
+                <default>false</default>
+                <label>SONDEO/DESAZOLVE MECANICO</label>
+            </value>
+            <value>
+                <fullName>SONDEO/DESAZOLVE VACTOR</fullName>
+                <default>false</default>
+                <label>SONDEO/DESAZOLVE VACTOR</label>
+            </value>
+            <value>
+                <fullName>PLOMERIA</fullName>
+                <default>false</default>
+                <label>PLOMERIA</label>
+            </value>
+            <value>
+                <fullName>OBRA CIVIL</fullName>
+                <default>false</default>
+                <label>OBRA CIVIL</label>
+            </value>
+            <value>
+                <fullName>LIMPIEZA</fullName>
+                <default>false</default>
+                <label>LIMPIEZA</label>
+            </value>
+            <value>
+                <fullName>ELCLA</fullName>
+                <default>false</default>
+                <label>ELCLA</label>
+            </value>
+            <value>
+                <fullName>EVITER</fullName>
+                <default>false</default>
+                <label>EVITER</label>
+            </value>
+            <value>
+                <fullName>RET. TEXTIL</fullName>
+                <default>false</default>
+                <label>RET. TEXTIL</label>
+            </value>
+            <value>
+                <fullName>RET MADERA</fullName>
+                <default>false</default>
+                <label>RET MADERA</label>
+            </value>
+            <value>
+                <fullName>RET. PALAPA</fullName>
+                <default>false</default>
+                <label>RET. PALAPA</label>
+            </value>
+            <value>
+                <fullName>APLIC.RETARDANTE</fullName>
+                <default>false</default>
+                <label>APLIC.RETARDANTE</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

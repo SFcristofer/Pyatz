@@ -4,6 +4,7 @@
     <description>Notas y observaciones específicas para el proceso de costeo y presupuesto.</description>
     <label>Observaciones de Costeo</label>
     <length>32768</length>
+    <trackTrending>false</trackTrending>
     <type>Html</type>
     <visibleLines>15</visibleLines>
 </CustomField>

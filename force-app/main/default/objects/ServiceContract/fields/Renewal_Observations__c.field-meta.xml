@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Renewal_Observations__c</fullName>
     <description>Observaciones específicas para el proceso de renovación.</description>
-    <externalId>false</externalId>
     <label>Observaciones de Renovación</label>
     <length>32768</length>
     <trackHistory>false</trackHistory>

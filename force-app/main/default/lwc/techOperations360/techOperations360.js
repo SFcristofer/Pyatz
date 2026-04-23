@@ -11,8 +11,8 @@ import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
 import getOpportunitiesList from '@salesforce/apex/OperationsController.getOpportunitiesList';
 import getOpportunitiesByAccount from '@salesforce/apex/OperationsController.getOpportunitiesByAccount';
 import saveStageTracking from '@salesforce/apex/OperationsController.saveStageTracking';
-import saveTechnicalData from '@salesforce/apex/OperationsController.saveTechnicalData';
 import getProcessHistory from '@salesforce/apex/OperationsController.getProcessHistory';
+import saveTechnicalData from '@salesforce/apex/QuoteController.saveTechnicalData';
 import TechSlackModal from 'c/techSlackModal';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
@@ -402,23 +402,35 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.isLoading = true;
         const targetId = this.effectiveRecordId;
         try {
+            // 1. Guardar el tracking de la etapa
+            await saveStageTracking({ 
+                opportunityId: targetId, 
+                stage: this.currentStep, 
+                subStage: this.subPhase, 
+                status: 'En proceso' 
+            });
+
+            // 2. Crear la cotización técnica
             const payload = {
                 opportunityId: targetId,
                 name: 'Nuevo Presupuesto Técnico',
                 status: 'Borrador',
                 lineItems: '[]'
             };
-            const newQuoteId = await saveStageTracking({ 
-                opportunityId: targetId, 
-                stage: this.currentStep, 
-                subStage: this.subPhase, 
-                status: 'En proceso' 
-            }).then(() => saveTechnicalData({ data: payload }));
+            const newQuoteId = await saveTechnicalData({ data: payload });
 
             this.selectedQuoteId = newQuoteId;
             this.quoteViewMode = 'edit';
+        } catch (error) {
+            console.error('Error creando cotización:', error);
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error',
+                message: 'No se pudo crear la cotización. Revise la consola.',
+                variant: 'error'
+            }));
+        } finally {
             this.isLoading = false;
-        } catch (error) { this.isLoading = false; }
+        }
     }
 
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }

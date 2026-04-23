@@ -3,6 +3,7 @@
     <fullName>Descripcion_Detallada__c</fullName>
     <label>Descripción Detallada</label>
     <length>32768</length>
+    <trackTrending>false</trackTrending>
     <type>Html</type>
     <visibleLines>20</visibleLines>
 </CustomField>

@@ -3,7 +3,6 @@
     <fullName>Client_Signer__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Contacto del cliente que firma el contrato legal.</description>
-    <externalId>false</externalId>
     <label>Firmante del Cliente</label>
     <referenceTo>Contact</referenceTo>
     <relationshipLabel>Contratos Firmados</relationshipLabel>
