@@ -121,25 +121,11 @@
                                 </div>
                             </div>
 
-                            <div class="slds-grid slds-gutters slds-m-bottom_small">
-                                <div class="slds-col slds-size_1-of-1">
-                                    <div class="slds-box slds-theme_default">
-                                        <p class="slds-text-title_bold slds-m-bottom_x-small">4. Zonas / Áreas de Aplicación</p>
-                                        <lightning-input type="text" placeholder="Zona + Coma (Ej: SITE, Cocina...)" value={zonaInput} onchange={handleZonaInput} variant="label-hidden"></lightning-input>
-                                        <div class="slds-m-top_x-small">
-                                            <template for:each={zonasAfectadas} for:item="zona">
-                                                <lightning-pill key={zona} label={zona} onremove={removeZona} name={zona} class="slds-m-right_xx-small slds-m-bottom_xx-small"></lightning-pill>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="slds-grid">
+                            <div class="slds-grid slds-m-bottom_small">
                                 <div class="slds-col slds-size_1-of-1">
                                     <div class="slds-box slds-theme_default">
                                         <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
-                                            <p class="slds-text-title_bold">5. Detalle Técnico Especializado</p>
+                                            <p class="slds-text-title_bold">4. Detalle Técnico Especializado</p>
                                             <span class="slds-text-color_weak slds-text-body_small">Este detalle aparecerá en el PDF final</span>
                                         </div>
                                         <lightning-textarea 
@@ -150,6 +136,20 @@
                                             rows="40"
                                             onchange={handleDescriptionChange}>
                                         </lightning-textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-1">
+                                    <div class="slds-box slds-theme_default">
+                                        <p class="slds-text-title_bold slds-m-bottom_x-small">5. Zonas / Áreas de Aplicación</p>
+                                        <lightning-input type="text" placeholder="Zona + Coma (Ej: SITE, Cocina...)" value={zonaInput} onchange={handleZonaInput} variant="label-hidden"></lightning-input>
+                                        <div class="slds-m-top_x-small">
+                                            <template for:each={zonasAfectadas} for:item="zona">
+                                                <lightning-pill key={zona} label={zona} onremove={removeZona} name={zona} class="slds-m-right_xx-small slds-m-bottom_xx-small"></lightning-pill>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
