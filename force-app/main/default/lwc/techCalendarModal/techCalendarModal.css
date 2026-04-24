@@ -1,0 +1,120 @@
+.agenda-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    background: #f4f6f9;
+    padding: 8px;
+    border-radius: 8px;
+    min-height: 400px;
+}
+
+.day-column {
+    background: white;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+}
+
+.day-column-today {
+    background: #f0f7ff;
+    border: 1px solid #0070d2;
+    box-shadow: 0 0 8px rgba(0, 112, 210, 0.2);
+}
+
+.day-header {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #edf2f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.day-label {
+    font-weight: bold;
+    font-size: 0.75rem;
+    color: #4a5568;
+    text-transform: uppercase;
+}
+
+.today-badge {
+    background: #0070d2;
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-top: 2px;
+}
+
+.day-content {
+    flex: 1;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+/* TARJETAS DE EVENTO */
+.event-call, .event-task, .event-meeting {
+    padding: 6px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.event-call:hover, .event-task:hover, .event-meeting:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.event-call { background: #0070d2; border-left: 3px solid #003a70; }
+.event-task { background: #4bca81; border-left: 3px solid #2e8a55; }
+.event-meeting { background: #f39e58; border-left: 3px solid #b96a24; }
+
+.event-time {
+    font-weight: bold;
+    opacity: 0.9;
+    font-size: 0.65rem;
+}
+
+.event-subject {
+    font-weight: 600;
+    margin: 2px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.event-footer {
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.event-type-label {
+    font-size: 0.6rem;
+    font-style: italic;
+}
+
+.empty-day {
+    color: #cbd5e0;
+    font-size: 0.65rem;
+    text-align: center;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+/* Scrollbar personalizado para el modal */
+.day-content::-webkit-scrollbar {
+    width: 4px;
+}
+.day-content::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}

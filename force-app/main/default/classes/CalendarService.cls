@@ -26,4 +26,50 @@ public with sharing class CalendarService {
         } catch (Exception e) { throw new AuraHandledException('Error en el motor de calendario: ' + e.getMessage()); }
         return result;
     }
+
+    /**
+     * Recupera y normaliza Actividades (Tareas, Llamadas y Eventos) para el Calendario 360.
+     */
+    @AuraEnabled
+    public static List<Map<String, Object>> getActionTimeline(Id opportunityId) {
+        List<Map<String, Object>> timeline = new List<Map<String, Object>>();
+        if (opportunityId == null) return timeline;
+
+        // 1. Recuperar Tareas y Llamadas
+        for (Task t : [SELECT Id, Subject, ActivityDate, Status, TaskSubtype, Description 
+                       FROM Task WHERE WhatId = :opportunityId 
+                       ORDER BY ActivityDate DESC LIMIT 100]) {
+            Map<String, Object> item = new Map<String, Object>();
+            String subType = t.TaskSubtype != null ? t.TaskSubtype : 'Task';
+            
+            item.put('id', t.Id);
+            item.put('title', t.Subject);
+            item.put('start', t.ActivityDate);
+            item.put('status', t.Status);
+            item.put('type', subType);
+            item.put('description', t.Description);
+            item.put('icon', subType == 'Call' ? 'standard:log_a_call' : 'standard:task');
+            item.put('colorClass', subType == 'Call' ? 'event-call' : 'event-task');
+            timeline.add(item);
+        }
+
+        // 2. Recuperar Eventos (Citas/Reuniones)
+        for (Event e : [SELECT Id, Subject, StartDateTime, EndDateTime, Location, Description 
+                        FROM Event WHERE WhatId = :opportunityId 
+                        ORDER BY StartDateTime DESC LIMIT 100]) {
+            Map<String, Object> item = new Map<String, Object>();
+            item.put('id', e.Id);
+            item.put('title', e.Subject);
+            item.put('start', e.StartDateTime);
+            item.put('end', e.EndDateTime);
+            item.put('type', 'Event');
+            item.put('location', e.Location);
+            item.put('description', e.Description);
+            item.put('icon', 'standard:event');
+            item.put('colorClass', 'event-meeting');
+            timeline.add(item);
+        }
+
+        return timeline;
+    }
 }

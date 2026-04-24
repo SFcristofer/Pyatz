@@ -1,0 +1,67 @@
+<template>
+    <lightning-modal-header label="Agenda Comercial 360"></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slds-p-around_small">
+            
+            <!-- CABECERA DE NAVEGACIÓN Y FILTROS -->
+            <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning-button-group class="slds-m-right_medium">
+                        <lightning-button-icon icon-name="utility:chevronleft" onclick={handlePrevWeek} variant="border-filled" tooltip="Semana anterior"></lightning-button-icon>
+                        <lightning-button label="Hoy" onclick={handleToday} variant="border-filled"></lightning-button>
+                        <lightning-button-icon icon-name="utility:chevronright" onclick={handleNextWeek} variant="border-filled" tooltip="Semana siguiente"></lightning-button-icon>
+                    </lightning-button-group>
+                    <lightning-radio-group name="filterGroup"
+                                          options={filterOptions}
+                                          value={currentView}
+                                          onchange={handleFilterChange}
+                                          type="button"
+                                          variant="label-hidden">
+                    </lightning-radio-group>
+                </div>
+                <lightning-button-icon icon-name="utility:refresh" variant="border-filled" onclick={loadData} tooltip="Sincronizar" disabled={isLoading}></lightning-button-icon>
+            </div>
+
+            <!-- SPINNER -->
+            <template if:true={isLoading}>
+                <div class="slds-is-relative slds-m-vertical_xx-large">
+                    <lightning-spinner alternative-text="Sincronizando agenda..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- VISTA DE AGENDA SEMANAL -->
+            <template if:false={isLoading}>
+                <div class="agenda-grid">
+                    <template for:each={weekDays} for:item="day">
+                        <div key={day.date} class={day.columnClass}>
+                            <div class="day-header">
+                                <span class="day-label">{day.label}</span>
+                                <template if:true={day.isToday}>
+                                    <span class="today-badge">HOY</span>
+                                </template>
+                            </div>
+                            <div class="day-content">
+                                <template for:each={day.events} for:item="event">
+                                    <div key={event.id} class={event.colorClass} title={event.description}>
+                                        <div class="event-time">{event.time}</div>
+                                        <div class="event-subject">{event.title}</div>
+                                        <div class="event-footer slds-grid slds-grid_align-spread">
+                                            <lightning-icon icon-name={event.icon} size="xx-small" variant="inverse"></lightning-icon>
+                                            <span class="event-type-label">{event.type}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template if:false={day.events.length}>
+                                    <div class="empty-day">Sin actividad</div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cerrar" onclick={handleClose} variant="neutral"></lightning-button>
+    </lightning-modal-footer>
+</template>

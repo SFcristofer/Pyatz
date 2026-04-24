@@ -14,6 +14,7 @@ import saveStageTracking from '@salesforce/apex/OperationsController.saveStageTr
 import getProcessHistory from '@salesforce/apex/OperationsController.getProcessHistory';
 import saveTechnicalData from '@salesforce/apex/QuoteController.saveTechnicalData';
 import TechSlackModal from 'c/techSlackModal';
+import TechCalendarModal from 'c/techCalendarModal';
 
 export default class TechOperations360 extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -51,6 +52,15 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             description: 'Modal de comunicación Slack 360',
             recordId: targetId,
             currentPhase: this.currentStage ? this.currentStage.label : 'General'
+        });
+    }
+
+    async handleOpenCalendar() {
+        const targetId = this.effectiveRecordId;
+        await TechCalendarModal.open({
+            size: 'medium',
+            description: 'Cronograma de Actividades 360',
+            recordId: targetId
         });
     }
 

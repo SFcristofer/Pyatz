@@ -56,6 +56,11 @@ public with sharing class OperationsController {
         OperationsService.saveStageTracking(opportunityId, stage, subStage, status);
     }
 
+    @AuraEnabled
+    public static List<Map<String, Object>> getActionTimeline(Id opportunityId) {
+        return CalendarService.getActionTimeline(opportunityId);
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<Seguimiento_Etapas_Pyatz__c> getProcessHistory(Id opportunityId) {
         return [SELECT Etapa__c, Subetapa__c, Estado__c, LastModifiedDate FROM Seguimiento_Etapas_Pyatz__c WHERE Oportunidad__c = :opportunityId ORDER BY CreatedDate ASC];
