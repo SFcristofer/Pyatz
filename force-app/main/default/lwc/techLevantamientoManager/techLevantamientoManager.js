@@ -317,7 +317,7 @@ export default class TechLevantamientoManager extends LightningElement {
             { label: 'Aromatizantes', value: 'AROMATIZANTES' },
             { label: 'Desazolve con Vactor', value: 'VACTOR' }
         ];
-        
+
         if (this.allTableConfigs) {
             // Obtener los tipos que ya tienen datos en este registro
             const existingTypes = new Set((this._rawResult || []).map(r => (r.Tipo_Servicio__c || '').toUpperCase()));
