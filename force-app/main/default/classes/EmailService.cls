@@ -47,7 +47,23 @@ public with sharing class EmailService {
         }
         Messaging.SingleEmailMessage rendered = Messaging.renderStoredEmailTemplate(templateId, conId, quoteId);
         String body = rendered.getHtmlBody() != null ? rendered.getHtmlBody() : rendered.getPlainTextBody();
-        if (body != null && body.contains('<body')) { body = body.substringAfter('>'); if (body.contains('</body>')) body = body.substringBeforeLast('</body>'); }
+        if (body != null) {
+            // Localizar el inicio real del contenido (después de <body...>) de forma precisa
+            String lowerBody = body.toLowerCase();
+            if (lowerBody.contains('<body')) {
+                Integer startIdx = lowerBody.indexOf('<body');
+                Integer endBracketIdx = body.indexOf('>', startIdx);
+                if (endBracketIdx != -1) body = body.substring(endBracketIdx + 1);
+            }
+            // Localizar el final real del contenido (antes de </body>)
+            lowerBody = body.toLowerCase();
+            if (lowerBody.contains('</body>')) {
+                Integer endIdx = lowerBody.lastIndexOf('</body>');
+                body = body.substring(0, endIdx);
+            }
+            // Eliminar bloques de estilo residuales (CSS) que Salesforce inyecta a veces al inicio del body
+            body = body.replaceAll('(?i)<style.*?>[\\s\\S]*?</style>', '');
+        }
         return body != null ? body.trim() : '';
     }
 
