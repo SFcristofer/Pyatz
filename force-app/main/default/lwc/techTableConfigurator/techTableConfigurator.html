@@ -1,0 +1,112 @@
+<template>
+    <lightning-card title="Configurador de Tablas Dinámicas Pyatz" icon-name="standard:custom_notification">
+        <div class="slds-p-around_medium">
+            <p class="slds-m-bottom_small">Seleccione una configuración existente o cree una nueva para definir las columnas de una tabla técnica.</p>
+            
+            <div class="slds-grid slds-gutters">
+                <!-- LISTA DE CONFIGURACIONES -->
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-combobox
+                        name="configSelector"
+                        label="Línea de Negocio"
+                        value={selectedConfigId}
+                        options={configOptions}
+                        onchange={handleConfigChange}>
+                    </lightning-combobox>
+                    
+                    <lightning-button 
+                        label="Nueva Configuración" 
+                        icon-name="utility:add" 
+                        variant="brand-outline"
+                        class="slds-m-top_medium slds-full-width"
+                        onclick={handleNewConfig}>
+                    </lightning-button>
+                </div>
+
+                <!-- EDITOR DE COLUMNAS -->
+                <div class="slds-col slds-size_2-of-3 border-left">
+                    <template if:true={isEditing}>
+                        <div class="slds-m-bottom_medium">
+                            <lightning-input 
+                                label="Nombre de la Tabla (Ej: Sanitización)" 
+                                value={currentConfig.label}
+                                onchange={handleLabelChange}
+                                required>
+                            </lightning-input>
+                        </div>
+
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">Orden</th>
+                                    <th scope="col">Campo en Salesforce</th>
+                                    <th scope="col">Etiqueta en Tabla</th>
+                                    <th scope="col">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={selectedColumns} for:item="col" for:index="index">
+                                    <tr key={col.id}>
+                                        <td>{col.order}</td>
+                                        <td>
+                                            <lightning-combobox
+                                                data-index={index}
+                                                data-field="apiName"
+                                                variant="label-hidden"
+                                                value={col.apiName}
+                                                options={availableFields}
+                                                onchange={handleColumnChange}>
+                                            </lightning-combobox>
+                                        </td>
+                                        <td>
+                                            <lightning-input 
+                                                data-index={index}
+                                                data-field="label"
+                                                variant="label-hidden"
+                                                value={col.label}
+                                                onchange={handleColumnChange}>
+                                            </lightning-input>
+                                        </td>
+                                        <td>
+                                            <lightning-button-icon 
+                                                icon-name="utility:delete" 
+                                                variant="error"
+                                                data-index={index}
+                                                onclick={handleRemoveColumn}>
+                                            </lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <div class="slds-m-top_medium">
+                            <lightning-button 
+                                label="Añadir Columna" 
+                                icon-name="utility:add" 
+                                onclick={handleAddColumn}>
+                            </lightning-button>
+                            
+                            <lightning-button 
+                                label="Guardar Configuración" 
+                                variant="brand" 
+                                class="slds-m-left_small"
+                                icon-name="utility:save"
+                                onclick={handleSave}>
+                            </lightning-button>
+                        </div>
+                    </template>
+                    <template if:false={isEditing}>
+                        <div class="slds-align_absolute-center slds-m-top_xx-large">
+                            <p class="slds-text-color_weak">Seleccione una línea de negocio para editar su tabla.</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Cargando"></lightning-spinner>
+        </template>
+    </lightning-card>
+</template>

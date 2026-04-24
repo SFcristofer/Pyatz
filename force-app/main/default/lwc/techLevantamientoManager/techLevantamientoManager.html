@@ -46,53 +46,44 @@
             </div>
         </div>
 
-        <!-- MODAL DE CONFIGURACIÓN ADMINISTRATIVA PREMIUM -->
+        <!-- MESA DE DISEÑO INTEGRADA (MODAL LARGE) -->
         <template if:true={isConfigModalOpen}>
-            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
                 <div class="slds-modal__container">
-                    <header class="slds-modal__header pyatz-modal-header">
+                    <header class="config-modal-header slds-modal__header">
                         <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleCloseConfig}>
                             <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
                         </button>
-                        <h2 class="slds-text-heading_medium">Arquitecto de Tablas Pyatz</h2>
-                        <p class="slds-m-top_xx-small">Personalice la experiencia de captura para sus técnicos</p>
-                    </header>
-                    
-                    <div class="slds-modal__content slds-p-around_large slds-scrollable_y" style="background-color: #f3f3f3;">
-                        <!-- PASO 1: IDENTIDAD -->
-                        <div class="config-card slds-m-bottom_large">
-                            <div class="slds-grid slds-grid_vertical-align-center">
-                                <div class="slds-col slds-size_1-of-12 slds-text-align_center">
-                                    <lightning-icon icon-name="standard:service_resource" size="medium"></lightning-icon>
-                                </div>
-                                <div class="slds-col slds-size_11-of-12">
-                                    <lightning-input 
-                                        label="Nombre de la Línea de Negocio" 
-                                        value={surveyType}
-                                        onchange={handleSurveyTypeChangeInModal}
-                                        placeholder="Ej: Sanitización, Control de Plagas..."
-                                        variant="label-hidden"
-                                        class="input-name-giant"
-                                        required>
-                                    </lightning-input>
-                                </div>
+                        <h2 class="slds-text-heading_medium">Diseñador de Tablas Pyatz</h2>
+                        <div class="slds-m-top_small slds-grid slds-grid_align-center">
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input 
+                                    label="Nombre del Servicio" 
+                                    value={surveyType}
+                                    onchange={handleSurveyTypeChangeInModal}
+                                    variant="label-hidden"
+                                    placeholder="Nombre de la nueva tabla..."
+                                    required>
+                                </lightning-input>
                             </div>
                         </div>
+                    </header>
+                    
+                    <div class="config-modal-body slds-modal__content slds-p-around_medium">
+                        <p class="slds-m-bottom_medium slds-text-align_center slds-text-color_weak">
+                            Configure las columnas de su tabla técnica. Los técnicos verán exactamente este orden y diseño.
+                        </p>
 
-                        <div class="slds-grid slds-gutters">
-                            <!-- PASO 2: COLUMNAS (LADO IZQUIERDO) -->
-                            <div class="slds-col slds-size_7-of-12">
-                                <h3 class="slds-text-title_caps slds-m-bottom_small">Columnas de la Tabla</h3>
-                                <div class="columns-scroll-area">
-                                    <template for:each={dynamicColumns} for:item="col" for:index="index">
-                                        <div key={col.id} class="column-card slds-m-bottom_small">
-                                            <div class="slds-grid slds-grid_vertical-align-center">
-                                                <div class="slds-col slds-no-flex slds-p-horizontal_small">
-                                                    <span class="order-badge">{col.order}</span>
-                                                </div>
-                                                <div class="slds-col">
+                        <div class="table-scroll-container">
+                            <table class="survey-table" style="width: auto; min-width: 100%;">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th style="width: 50px;">#</th>
+                                        <template for:each={dynamicColumns} for:item="col" for:index="index">
+                                            <th key={col.id} style="width: 220px; vertical-align: top;" class="slds-p-around_x-small">
+                                                <div class="config-column-card">
                                                     <lightning-combobox
-                                                        label="Campo en Salesforce"
+                                                        label="Campo Salesforce"
                                                         variant="label-hidden"
                                                         value={col.apiName}
                                                         options={availableFields}
@@ -104,66 +95,52 @@
                                                         label="Etiqueta"
                                                         variant="label-hidden"
                                                         value={col.label}
-                                                        placeholder="Nombre que verá el técnico"
+                                                        placeholder="Nombre columna"
                                                         data-index={index}
                                                         onchange={handleConfigLabelChange}>
                                                     </lightning-input>
+                                                    <div class="slds-text-align_right slds-m-top_xx-small">
+                                                        <lightning-button-icon 
+                                                            icon-name="utility:delete" 
+                                                            variant="error" 
+                                                            size="small"
+                                                            data-index={index} 
+                                                            onclick={handleRemoveConfigColumn}>
+                                                        </lightning-button-icon>
+                                                    </div>
                                                 </div>
-                                                <div class="slds-col slds-no-flex slds-p-horizontal_small">
-                                                    <lightning-button-icon 
-                                                        icon-name="utility:delete" 
-                                                        variant="error" 
-                                                        data-index={index} 
-                                                        onclick={handleRemoveConfigColumn}
-                                                        class="btn-delete-col">
-                                                    </lightning-button-icon>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                                <lightning-button 
-                                    label="Añadir Nueva Columna" 
-                                    icon-name="utility:add" 
-                                    onclick={handleAddConfigColumn} 
-                                    class="slds-m-top_small slds-full-width">
-                                </lightning-button>
-                            </div>
-
-                            <!-- PASO 3: VISTA PREVIA (LADO DERECHO) -->
-                            <div class="slds-col slds-size_5-of-12">
-                                <div class="preview-panel">
-                                    <h3 class="slds-text-title_caps slds-m-bottom_small slds-text-align_center">Vista Previa</h3>
-                                    <div class="preview-table-container">
-                                        <table class="preview-table">
-                                            <thead>
-                                                <tr>
-                                                    <template for:each={dynamicColumns} for:item="col">
-                                                        <th key={col.id}>{col.label}</th>
-                                                    </template>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <template for:each={dynamicColumns} for:item="col">
-                                                        <td key={col.id}><div class="preview-placeholder">...</div></td>
-                                                    </template>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="slds-m-top_medium slds-text-align_center slds-text-color_weak">
-                                        <p>Los técnicos verán exactamente este orden y nombres.</p>
-                                    </div>
-                                </div>
-                            </div>
+                                            </th>
+                                        </template>
+                                        <th style="width: 60px; vertical-align: middle;" class="slds-text-align_center">
+                                            <lightning-button-icon 
+                                                icon-name="utility:add" 
+                                                variant="brand" 
+                                                size="large"
+                                                title="Añadir Columna"
+                                                onclick={handleAddConfigColumn}>
+                                            </lightning-button-icon>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="slds-hint-parent">
+                                        <td>1</td>
+                                        <template for:each={dynamicColumns} for:item="col">
+                                            <td key={col.id}>
+                                                <div class="config-preview-placeholder">EJEMPLO DE DATO</div>
+                                            </td>
+                                        </template>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     
                     <footer class="slds-modal__footer pyatz-modal-footer">
                         <lightning-button label="Cancelar" onclick={handleCloseConfig} class="slds-m-right_x-small"></lightning-button>
                         <lightning-button 
-                            label="Publicar Diseño de Tabla" 
+                            label="Publicar y Activar Tabla" 
                             variant="success" 
                             icon-name="utility:cloud_upload"
                             onclick={handleSaveConfig}>
