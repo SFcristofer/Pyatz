@@ -36,6 +36,30 @@
 
                     <!-- 2. CUERPO DEL PANEL (SCROLL INDEPENDIENTE) -->
                     <div class="panel-body flex-grow scrollable-attachments">
+                        <!-- SECCIÓN: CONTACTOS DE LA SEDE -->
+                        <template if:true={sedeContacts.length}>
+                            <div class="slds-p-vertical_small border-bottom">
+                                <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
+                                    <lightning-icon icon-name="standard:contact" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    CONTACTOS DE LA SEDE:
+                                </div>
+                                <div class="slds-p-horizontal_x-small">
+                                    <template for:each={sedeContacts} for:item="con">
+                                        <div key={con.id} class="att-item slds-m-bottom_xx-small">
+                                            <lightning-input 
+                                                type="checkbox" 
+                                                label={con.name} 
+                                                title={con.email}
+                                                data-email={con.email} 
+                                                onchange={handleQuickAddContact}>
+                                            </lightning-input>
+                                            <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{con.sede}</div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
                         <div class="slds-p-vertical_small">
                             <p class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">DOCUMENTOS PDF:</p>
                             

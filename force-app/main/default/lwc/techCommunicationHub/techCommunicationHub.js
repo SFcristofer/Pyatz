@@ -6,6 +6,7 @@ import getAvailableAttachments from '@salesforce/apex/CommunicationController.ge
 import sendEmailWithAttachments from '@salesforce/apex/CommunicationController.sendEmailWithAttachments';
 import renderTemplate from '@salesforce/apex/CommunicationController.renderTemplate';
 import getEmailEngagementDetails from '@salesforce/apex/CommunicationController.getEmailEngagementDetails';
+import getContactsFromLatestQuoteSedes from '@salesforce/apex/CommunicationController.getContactsFromLatestQuoteSedes';
 
 export default class TechCommunicationHub extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
@@ -16,6 +17,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     @track templates = [];
     @track availableAttachments = { quotes: [], surveys: [], files: [] };
     @track selectedAttachments = [];
+    @track sedeContacts = [];
     
     @track toEmail = '';
     @track ccEmail = '';
@@ -127,6 +129,27 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
             console.error('Error loading attachments:', error);
             this.isLoadingAttachments = false;
         }
+    }
+
+    @wire(getContactsFromLatestQuoteSedes, { oppId: '$recordId' })
+    wiredSedeContacts({ error, data }) {
+        if (data) {
+            this.sedeContacts = data;
+        } else if (error) {
+            console.error('Error loading sede contacts:', error);
+        }
+    }
+
+    handleQuickAddContact(event) {
+        const email = event.target.dataset.email;
+        const checked = event.target.checked;
+        let currentEmails = this.toEmail ? this.toEmail.split(',').map(e => e.trim()).filter(e => e) : [];
+        if (checked) {
+            if (!currentEmails.includes(email)) currentEmails.push(email);
+        } else {
+            currentEmails = currentEmails.filter(e => e !== email);
+        }
+        this.toEmail = currentEmails.join(', ');
     }
 
     get filteredTemplates() {
