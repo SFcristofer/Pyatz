@@ -35,6 +35,36 @@ public with sharing class FileService {
     }
 
     /**
+     * Recupera el checklist dinámico basado en Metadatos y verifica existencia de archivos.
+     */
+    @AuraEnabled
+    public static List<Map<String, Object>> getChecklist(Id opportunityId, String category) {
+        List<Map<String, Object>> checklist = new List<Map<String, Object>>();
+        if (opportunityId == null) return checklist;
+
+        // 1. Obtener estados actuales de documentos vinculados
+        Map<String, String> currentFiles = getDocumentStates(opportunityId);
+
+        // 2. Consultar requisitos desde Metadatos (Escalabilidad Zero-Code)
+        for (Documento_Expediente__mdt req : [SELECT Label, Tag__c, Obligatorio__c 
+                                               FROM Documento_Expediente__mdt 
+                                               WHERE Categoria__c = :category 
+                                               ORDER BY Label ASC]) {
+            Map<String, Object> item = new Map<String, Object>();
+            Boolean isLoaded = currentFiles.containsKey(req.Tag__c.toUpperCase());
+            
+            item.put('label', req.Label);
+            item.put('tag', req.Tag__c);
+            item.put('required', req.Obligatorio__c);
+            item.put('status', isLoaded ? 'Cargado' : 'Pendiente');
+            item.put('isLoaded', isLoaded);
+            // IMPORTANTE: NO enviamos el ID del documento para cumplir con la confidencialidad "ciega"
+            checklist.add(item);
+        }
+        return checklist;
+    }
+
+    /**
      * Identifica el estado de documentos obligatorios basados en etiquetas [TAG].
      */
     public static Map<String, String> getDocumentStates(Id opportunityId) {

@@ -26,6 +26,11 @@ public with sharing class OperationsController {
         return QuoteEngineService.saveTechnicalData(data);
     }
 
+    @AuraEnabled
+    public static List<Map<String, Object>> getChecklist(Id opportunityId, String category) {
+        return FileService.getChecklist(opportunityId, category);
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getEvidenceGallery(Id opportunityId) {
         return FileService.getEvidenceGallery(opportunityId);

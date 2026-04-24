@@ -138,10 +138,10 @@
                     <c-tech-process-summary record-id={effectiveRecordId}></c-tech-process-summary>
                 </template>
                 <template if:true={isAltaCliente}>
-                    <c-tech-document-manager record-id={effectiveRecordId}></c-tech-document-manager>
+                    <c-tech-file-checklist record-id={effectiveRecordId} category="Alta Cliente"></c-tech-file-checklist>
                 </template>
                 <template if:true={isAltaPyatz}>
-                    <c-tech-pyatz-document-manager record-id={effectiveRecordId}></c-tech-pyatz-document-manager>
+                    <c-tech-file-checklist record-id={effectiveRecordId} category="Alta Pyatz"></c-tech-file-checklist>
                 </template>
                 <template if:true={isCalendarioPhase}>
                     <c-tech-resource-calendar record-id={effectiveRecordId}></c-tech-resource-calendar>

@@ -1,0 +1,26 @@
+.status-loaded {
+    --slds-c-icon-color-foreground: #4bca81;
+}
+
+.status-pending {
+    --slds-c-icon-color-foreground: #dddbda;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #f3f3f3;
+}
+
+.border-bottom:last-child {
+    border-bottom: none;
+}
+
+.compact-uploader {
+    --lwc-formLabelFontSize: 0.75rem;
+}
+
+.uploader-container {
+    background: #f4f6f9;
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px dashed #0070d2;
+}

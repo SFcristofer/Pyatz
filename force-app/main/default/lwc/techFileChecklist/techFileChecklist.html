@@ -1,0 +1,64 @@
+<template>
+    <div class="slds-box slds-theme_default">
+        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+            <h3 class="slds-text-heading_small slds-font-weight_bold">{category}</h3>
+            <lightning-button-icon icon-name="utility:refresh" variant="border-filled" onclick={loadChecklist} tooltip="Actualizar Checklist"></lightning-button-icon>
+        </div>
+
+        <template if:true={isLoading}>
+            <div class="slds-is-relative slds-p-around_large">
+                <lightning-spinner alternative-text="Procesando..." size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <div class="slds-grid slds-wrap">
+                <template for:each={items} for:item="item">
+                    <div key={item.tag} class="slds-col slds-size_1-of-1 slds-p-around_x-small border-bottom">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name={item.iconName} size="small" class={item.statusClass}></lightning-icon>
+                            
+                            <div class="slds-col slds-m-horizontal_small">
+                                <p class="slds-text-title_bold">{item.label}</p>
+                                <p class="slds-text-color_weak slds-text-body_small">
+                                    Tag: {item.tag} | <span if:true={item.required}>Obligatorio</span><span if:false={item.required}>Opcional</span>
+                                </p>
+                            </div>
+
+                            <div class="slds-col_bump-left">
+                                <template if:true={item.isUploading}>
+                                    <div class="uploader-container">
+                                        <lightning-file-upload
+                                            label="Seleccionar Archivo"
+                                            name="fileUploader"
+                                            accept=".pdf,.png,.jpg,.jpeg"
+                                            record-id={recordId}
+                                            onuploadfinished={handleUploadFinished}
+                                            data-tag={item.tag}
+                                            class="compact-uploader">
+                                        </lightning-file-upload>
+                                    </div>
+                                </template>
+                                <template if:false={item.isUploading}>
+                                    <template if:true={item.showUpload}>
+                                        <lightning-button 
+                                            label="Cargar" 
+                                            icon-name="utility:upload" 
+                                            onclick={handleUploadClick} 
+                                            data-tag={item.tag} 
+                                            data-label={item.label}
+                                            variant="neutral">
+                                        </lightning-button>
+                                    </template>
+                                    <template if:false={item.showUpload}>
+                                        <span class="slds-badge slds-theme_success">CONFIDENCIAL</span>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>
