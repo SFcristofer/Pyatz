@@ -459,7 +459,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     get overallProgress() {
-        if (!this.stages.length || !this.currentStep) return 0;
+        if (!this.stages || !this.stages.length || !this.currentStep) return 0;
         let totalSubStages = 0;
         let completedSubStages = 0;
         let foundCurrent = false;
@@ -469,7 +469,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
                 totalSubStages++;
                 if (!foundCurrent) {
                     if (stage.value === this.currentStep && sub.value === this.currentSubStep) {
-                        foundCurrent = true; completedSubStages++;
+                        foundCurrent = true; 
+                        completedSubStages++;
                     } else completedSubStages++;
                 }
             });
@@ -485,28 +486,50 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             return;
         }
 
-        if (this.isLevantamientoPhase) {
-            const surveyComp = this.template.querySelector('c-tech-levantamiento-manager');
-            if (surveyComp) {
-                const saved = await surveyComp.save();
-                if (!saved) return;
-            }
-        }
+        this.isLoading = true;
 
-        const maxSubSteps = this.currentSubStages.length;
-        let nextSub = parseInt(this.currentSubStep) + 1;
-
-        if (nextSub <= maxSubSteps) this.currentSubStep = nextSub.toString();
-        else {
-            const currentIndex = this.stages.findIndex(s => s.value === this.currentStep);
-            if (currentIndex < this.stages.length - 1) {
-                this.currentStep = this.stages[currentIndex + 1].value;
-                this.currentSubStep = '1';
+        try {
+            // 1. Guardar componentes específicos si es necesario
+            if (this.isLevantamientoPhase) {
+                const surveyComp = this.template.querySelector('c-tech-levantamiento-manager');
+                if (surveyComp) {
+                    const saved = await surveyComp.save();
+                    if (!saved) {
+                        this.isLoading = false;
+                        return;
+                    }
+                }
             }
+
+            // 2. Calcular siguiente paso
+            const maxSubSteps = this.currentSubStages.length;
+            let nextSub = parseInt(this.currentSubStep) + 1;
+
+            if (nextSub <= maxSubSteps) {
+                this.currentSubStep = nextSub.toString();
+            } else {
+                const currentIndex = this.stages.findIndex(s => s.value === this.currentStep);
+                if (currentIndex !== -1 && currentIndex < this.stages.length - 1) {
+                    this.currentStep = this.stages[currentIndex + 1].value;
+                    this.currentSubStep = '1';
+                }
+            }
+
+            // 3. Limpiar estado y sincronizar
+            this.currentStatus = '';
+            this.quoteViewMode = 'list';
+            await this.syncOpportunityStatus();
+
+        } catch (error) {
+            console.error('Error en navegación:', error);
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error',
+                message: 'Ocurrió un error al avanzar. Revise la consola.',
+                variant: 'error'
+            }));
+        } finally {
+            this.isLoading = false;
         }
-        this.currentStatus = '';
-        this.quoteViewMode = 'list';
-        this.syncOpportunityStatus();
     }
 
     handlePrev() {

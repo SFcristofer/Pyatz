@@ -272,8 +272,9 @@ export default class TechLevantamientoManager extends LightningElement {
         } catch (e) { console.error(e); } finally { this.isLoading = false; }
     }
 
-    async handleSave() {
-        if (!this.recordId) return;
+    @api
+    async save() {
+        if (!this.recordId) return true;
         this.isSaving = true;
         try {
             const diagData = { 
@@ -289,7 +290,22 @@ export default class TechLevantamientoManager extends LightningElement {
                 diagDataJson: JSON.stringify(diagData) 
             });
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Levantamiento guardado.', variant: 'success' }));
-        } catch (error) { console.error(error); } finally { this.isSaving = false; }
+            return true;
+        } catch (error) { 
+            console.error(error); 
+            this.dispatchEvent(new ShowToastEvent({ 
+                title: 'Error al guardar', 
+                message: 'No se pudo guardar el levantamiento. Por favor intente de nuevo.', 
+                variant: 'error' 
+            }));
+            return false;
+        } finally { 
+            this.isSaving = false; 
+        }
+    }
+
+    handleSave() {
+        this.save();
     }
 
     get surveyTypeOptions() {
