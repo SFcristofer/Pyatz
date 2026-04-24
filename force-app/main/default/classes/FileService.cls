@@ -1,6 +1,7 @@
 /**
  * Servicio encargado de la gestión de archivos, vinculación de documentos 
  * al Repositorio Maestro de Pyatz y mantenimiento de evidencias técnicas.
+ * Versión: Migración a Bibliotecas de Contenido (ContentWorkspace)
  */
 public with sharing class FileService {
 
@@ -42,10 +43,10 @@ public with sharing class FileService {
         List<Map<String, Object>> checklist = new List<Map<String, Object>>();
         if (opportunityId == null) return checklist;
 
-        // 1. Obtener estados actuales de documentos vinculados
+        // 1. Obtener estados actuales de documentos vinculados (Opp, Cuenta Cliente y Librería)
         Map<String, String> currentFiles = getDocumentStates(opportunityId);
 
-        // 2. Consultar requisitos desde Metadatos (Escalabilidad Zero-Code)
+        // 2. Consultar requisitos desde Metadatos
         for (Documento_Expediente__mdt req : [SELECT Label, Tag__c, Obligatorio__c 
                                                FROM Documento_Expediente__mdt 
                                                WHERE Categoria__c = :category 
@@ -58,7 +59,6 @@ public with sharing class FileService {
             item.put('required', req.Obligatorio__c);
             item.put('status', isLoaded ? 'Cargado' : 'Pendiente');
             item.put('isLoaded', isLoaded);
-            // IMPORTANTE: NO enviamos el ID del documento para cumplir con la confidencialidad "ciega"
             checklist.add(item);
         }
         return checklist;
@@ -66,12 +66,17 @@ public with sharing class FileService {
 
     /**
      * Identifica el estado de documentos obligatorios basados en etiquetas [TAG].
+     * Escanea Oportunidad, Cuenta de Cliente y la Biblioteca Maestra de Pyatz.
      */
     public static Map<String, String> getDocumentStates(Id opportunityId) {
         Map<String, String> states = new Map<String, String>();
         Opportunity opp = [SELECT AccountId FROM Opportunity WHERE Id = :opportunityId LIMIT 1];
-        Id pyatzMasterId = getOrCreatePyatzMasterAccount();
-        Set<Id> entities = new Set<Id>{opportunityId, opp.AccountId, pyatzMasterId};
+        
+        // Entidades a escanear
+        Set<Id> entities = new Set<Id>{opportunityId, opp.AccountId};
+        Id libraryId = getPyatzLibraryId();
+        if (libraryId != null) entities.add(libraryId);
+
         for (ContentDocumentLink l : [SELECT ContentDocumentId, ContentDocument.Title FROM ContentDocumentLink WHERE LinkedEntityId IN :entities]) {
             String title = l.ContentDocument.Title; 
             if (title.startsWith('[') && title.contains(']')) { 
@@ -104,14 +109,16 @@ public with sharing class FileService {
     }
 
     /**
-     * Renombra y vincula dinámicamente un archivo al Repositorio Maestro o a la Cuenta del Cliente.
+     * Renombra y vincula dinámicamente un archivo a la Biblioteca Maestra o a la Cuenta del Cliente.
      */
     public static void renameAndLinkFile(Id documentId, String docType) {
         ContentDocument doc = [SELECT Id, Title FROM ContentDocument WHERE Id = :documentId LIMIT 1];
         doc.Title = '[' + docType.toUpperCase() + '] - ' + doc.Title; 
         update doc;
+
         if (docType.toUpperCase().startsWith('PY_')) { 
-            linkDocumentToEntity(documentId, getOrCreatePyatzMasterAccount()); 
+            Id libraryId = getPyatzLibraryId();
+            if (libraryId != null) linkDocumentToEntity(documentId, libraryId);
         } else { 
             Id oppId = getOppIdFromDocument(documentId); 
             if (oppId != null) { 
@@ -127,12 +134,14 @@ public with sharing class FileService {
 
     // --- MÉTODOS PRIVADOS DE SOPORTE ---
     
-    private static Id getOrCreatePyatzMasterAccount() {
-        List<Account> accs = [SELECT Id FROM Account WHERE Name = 'Pyatz Corporativo' LIMIT 1];
-        if (!accs.isEmpty()) return accs[0].Id;
-        Account pyatz = new Account(Name = 'Pyatz Corporativo', Type = 'Other', Description = 'Repositorio Maestro'); 
-        insert pyatz; 
-        return pyatz.Id;
+    private static Id getPyatzLibraryId() {
+        // Busca la Biblioteca profesional creada por el administrador.
+        List<ContentWorkspace> libs = [SELECT Id FROM ContentWorkspace WHERE Name = 'Repositorio Maestro Pyatz' LIMIT 1];
+        if (!libs.isEmpty()) return libs[0].Id;
+        
+        // Si no existe, usa la Biblioteca de activos por defecto de la Org.
+        libs = [SELECT Id FROM ContentWorkspace WHERE Name = 'Asset Library' LIMIT 1];
+        return !libs.isEmpty() ? libs[0].Id : null;
     }
 
     private static Id getOppIdFromDocument(Id docId) {
@@ -144,7 +153,18 @@ public with sharing class FileService {
 
     private static void linkDocumentToEntity(Id docId, Id entityId) {
         if ([SELECT Id FROM ContentDocumentLink WHERE ContentDocumentId = :docId AND LinkedEntityId = :entityId].isEmpty()) {
-            insert new ContentDocumentLink(ContentDocumentId = docId, LinkedEntityId = entityId, ShareType = 'V', Visibility = 'AllUsers');
+            ContentDocumentLink cdl = new ContentDocumentLink();
+            cdl.ContentDocumentId = docId;
+            cdl.LinkedEntityId = entityId;
+            
+            // Si el ID empieza con '058', es una Biblioteca (ContentWorkspace)
+            if (String.valueOf(entityId).startsWith('058')) {
+                cdl.ShareType = 'I'; // Inferred: Requerido para Bibliotecas
+            } else {
+                cdl.ShareType = 'V'; // Viewer: Para Cuentas y Oportunidades
+                cdl.Visibility = 'AllUsers';
+            }
+            insert cdl;
         }
     }
 }

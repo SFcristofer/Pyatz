@@ -1,60 +1,50 @@
 ==========================================================================
-   LOGICA DE SEPARACION Y SEGURIDAD: BOVEDA 360 PYATZ
+   ARQUITECTURA DE ARCHIVOS PROFESIONAL: BOVEDA 360 PYATZ
 ==========================================================================
 
-Este documento detalla el funcionamiento tecnico del sistema de gestion 
-de archivos confidenciales y escalables.
+Este documento detalla el funcionamiento del Repositorio Maestro y la 
+Boveda Confidencial basada en Bibliotecas de Salesforce.
 
-1. EL CONCEPTO DEL [TAG] (El ADN del Archivo)
----------------------------------------------
-Cada requisito (ej. "Acta Constitutiva") tiene un identificador unico 
-llamado TAG (ej. CL_ACTA). 
+1. SEGMENTACION DE ALMACENAMIENTO (Seguridad Total)
+----------------------------------------------------
+El sistema diferencia automaticamente el destino de cada archivo 
+segun su categoria:
 
-- ¿Para que sirve?: Es el codigo que el sistema usa para saber que 
-  archivo es cual, sin importar como se llame el archivo original.
-- Independencia de Nombres: El Agente puede subir "archivo_1.pdf" y el 
-  sistema lo renombrara automaticamente a "[CL_ACTA] - ...".
-- Estabilidad: El Tag nunca cambia, aunque el Administrador corrija 
-  faltas de ortografia en el nombre visual del documento.
-
-2. PREVENCION DE ERRORES Y DUPLICADOS
---------------------------------------
-Para evitar que se marquen dos documentos al subir uno solo:
-
-- Unicidad de Tags: Cada documento debe tener un Tag distinto. 
-  (Ej: Se elimino CL_TARJETA para evitar conflicto con CL_PATRONAL).
-- Filtro por Oportunidad: El sistema solo busca archivos vinculados 
-  al ID del proyecto actual. El acta del Cliente A jamas aparecera 
-  marcada en el expediente del Cliente B.
-
-3. LOGICA DE ALMACENAMIENTO DIFERENCIADO
------------------------------------------
 A) ALTA CLIENTE (Lista 5):
-   - Los archivos se vinculan a la Oportunidad y a la Cuenta del Cliente.
-   - Son privados de ese proyecto especifico.
+   - Destino: Se vinculan a la CUENTA DEL CLIENTE y a la OPORTUNIDAD.
+   - Comparticion: Solo visible para proyectos del MISMO cliente.
+   - Privacidad: El Cliente B nunca podra ver documentos del Cliente A.
 
 B) ALTA PYATZ (Lista 6):
-   - Los archivos se vinculan a la Cuenta Maestra "Pyatz Corporativo".
-   - Funcionan como un "espejo global": si el Administrador sube el 
-     nuevo REPSE ahi, se marca como "Cargado" en todos los expedientes 
-     360 de la empresa automaticamente.
+   - Destino: BIBLIOTECA "Repositorio Maestro Pyatz".
+   - Comparticion: GLOBAL. Sirve para todas las oportunidades de la Org.
+   - Eficiencia: Se sube una vez (ej. el REPSE) y se marca como cargado
+     en todos los expedientes 360 de la empresa automaticamente.
 
-4. FLUJO DE CARGA CONFIDENCIAL
--------------------------------
-1. El Agente pulsa "Cargar".
-2. El sistema muestra una ADVERTENCIA DE SEGURIDAD obligatoria.
-3. Al aceptar, el boton se convierte en zona de carga.
-4. Tras subir el archivo, el sistema lo OCULTA inmediatamente.
-5. Aparece la etiqueta "CONFIDENCIAL" y el Agente ya no puede verlo.
+2. MECANICA TECNICA DE VINCULACION (Tags)
+------------------------------------------
+El sistema utiliza el TAG (ej. [CL_ACTA] o [PY_REPSE]) como ADN:
+- El Agente no necesita renombrar el archivo manualmente.
+- El servidor (Apex) detecta el tag y aplica las reglas de Salesforce 
+  para Bibliotecas (ShareType = 'I') o Cuentas (ShareType = 'V').
+- La busqueda es "Case-Insensitive" para evitar duplicados.
 
-5. ADMINISTRACION ESCALABLE (Zero Code)
-----------------------------------------
-El Administrador puede añadir mas requisitos desde:
-Configuracion -> Metadatos Personalizados -> Documento Expediente.
+3. CONFIDENCIALIDAD "CIEGA"
+----------------------------
+Una vez que el archivo es procesado por el sistema:
+1. El Agente pierde el acceso de previsualizacion.
+2. El boton de carga se bloquea.
+3. Aparece la etiqueta "CONFIDENCIAL".
+4. Solo el Administrador o Auditor puede ver el archivo real desde
+   la seccion estandar de "Notas y Adjuntos" o desde la Biblioteca.
 
-Al añadir una nueva fila, el Expediente 360 la mostrara de inmediato 
-sin necesidad de programar nuevo codigo.
+4. MANTENIMIENTO ESCALABLE (Zero Code)
+---------------------------------------
+Para añadir nuevos documentos, el Administrador solo debe:
+1. Ir a Metadatos Personalizados -> Documento Expediente.
+2. Crear un registro con el Tag y Categoria deseada.
+El Expediente 360 se actualizara en tiempo real para todos los usuarios.
 
 ==========================================================================
-PROYECTO PYATZ - CONFIDENCIALIDAD Y EFICIENCIA OPERATIVA
+PROYECTO PYATZ - ARQUITECTURA DE DATOS SEGURA Y ESCALABLE
 ==========================================================================
