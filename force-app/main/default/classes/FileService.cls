@@ -98,10 +98,14 @@ public with sharing class FileService {
             for (ContentVersion cv : [SELECT Id, Title, FileExtension, ContentDocumentId, CreatedDate FROM ContentVersion WHERE ContentDocumentId IN :docIds AND IsLatest = true ORDER BY CreatedDate DESC]) {
                 String title = cv.Title; 
                 if (title.startsWith('[') && title.contains(']')) {
-                    String tag = title.substringBetween('[', ']'); 
+                    String tag = title.substringBetween('[', ']').toUpperCase(); 
+                    
+                    // FILTRO: Excluir documentos administrativos de la galería técnica
+                    if (tag.startsWith('CL_') || tag.startsWith('PY_')) continue;
+
                     String ext = cv.FileExtension != null ? cv.FileExtension.toLowerCase() : '';
                     Boolean isImg = new Set<String>{'png', 'jpg', 'jpeg', 'gif'}.contains(ext);
-                    gallery.add(new Map<String, Object>{ 'id' => cv.ContentDocumentId, 'versionId' => cv.Id, 'tag' => tag.toUpperCase(), 'title' => title.substringAfter(']').replace('-', '').trim(), 'ext' => ext, 'isImage' => isImg, 'previewUrl' => isImg ? '/sfc/servlet.shepherd/version/download/' + cv.Id : null, 'date' => cv.CreatedDate });
+                    gallery.add(new Map<String, Object>{ 'id' => cv.ContentDocumentId, 'versionId' => cv.Id, 'tag' => tag, 'title' => title.substringAfter(']').replace('-', '').trim(), 'ext' => ext, 'isImage' => isImg, 'previewUrl' => isImg ? '/sfc/servlet.shepherd/version/download/' + cv.Id : null, 'date' => cv.CreatedDate });
                 }
             }
         }
