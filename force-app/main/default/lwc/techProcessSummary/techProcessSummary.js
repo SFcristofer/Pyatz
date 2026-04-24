@@ -11,7 +11,7 @@ export default class TechProcessSummary extends NavigationMixin(LightningElement
     @api recordId; // Oportunidad base
     @track displayRecordId; // ID que estamos visualizando actualmente
     @track openOppOptions = []; // Opciones para el dropdown de pipeline activo
-    @track isExpanded = true; // Variable de control para visibilidad de la tabla
+    @track isExpanded = false; // Variable de control para visibilidad de la tabla, inicia contraído
     
     // --- ESTADO GESTIÓN DE EVIDENCIAS ---
     @track docSearchTerm = '';
