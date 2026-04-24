@@ -26,7 +26,7 @@ export default class TechFileChecklist extends LightningElement {
                 ...item,
                 statusClass: item.isLoaded ? 'status-loaded' : 'status-pending',
                 iconName: item.isLoaded ? 'utility:check' : 'utility:clock',
-                showUpload: !item.isLoaded || this.category === 'Alta Pyatz' // Permitir actualizar Pyatz
+                showUpload: !item.isLoaded // Siempre ocultar si ya está cargado para confidencialidad
             }));
         } catch (error) {
             console.error('Error loading checklist:', error);
@@ -47,16 +47,11 @@ export default class TechFileChecklist extends LightningElement {
         });
 
         if (result) {
-            // Activar el input de archivo oculto o mostrar el componente de carga
-            const uploader = this.template.querySelector(`[data-id="${this.activeTag}"]`);
-            if (uploader) {
-                // En LWC nativo no podemos disparar el click del file upload por seguridad
-                // pero podemos mostrar un modal o un área de carga
-                this.items = this.items.map(item => ({
-                    ...item,
-                    isUploading: item.tag === this.activeTag
-                }));
-            }
+            // Marcar este item específico como en modo subida
+            this.items = this.items.map(item => ({
+                ...item,
+                isUploading: item.tag === this.activeTag
+            }));
         }
     }
 

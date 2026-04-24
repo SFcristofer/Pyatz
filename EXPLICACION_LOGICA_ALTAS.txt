@@ -1,0 +1,60 @@
+==========================================================================
+   LOGICA DE SEPARACION Y SEGURIDAD: BOVEDA 360 PYATZ
+==========================================================================
+
+Este documento detalla el funcionamiento tecnico del sistema de gestion 
+de archivos confidenciales y escalables.
+
+1. EL CONCEPTO DEL [TAG] (El ADN del Archivo)
+---------------------------------------------
+Cada requisito (ej. "Acta Constitutiva") tiene un identificador unico 
+llamado TAG (ej. CL_ACTA). 
+
+- ¿Para que sirve?: Es el codigo que el sistema usa para saber que 
+  archivo es cual, sin importar como se llame el archivo original.
+- Independencia de Nombres: El Agente puede subir "archivo_1.pdf" y el 
+  sistema lo renombrara automaticamente a "[CL_ACTA] - ...".
+- Estabilidad: El Tag nunca cambia, aunque el Administrador corrija 
+  faltas de ortografia en el nombre visual del documento.
+
+2. PREVENCION DE ERRORES Y DUPLICADOS
+--------------------------------------
+Para evitar que se marquen dos documentos al subir uno solo:
+
+- Unicidad de Tags: Cada documento debe tener un Tag distinto. 
+  (Ej: Se elimino CL_TARJETA para evitar conflicto con CL_PATRONAL).
+- Filtro por Oportunidad: El sistema solo busca archivos vinculados 
+  al ID del proyecto actual. El acta del Cliente A jamas aparecera 
+  marcada en el expediente del Cliente B.
+
+3. LOGICA DE ALMACENAMIENTO DIFERENCIADO
+-----------------------------------------
+A) ALTA CLIENTE (Lista 5):
+   - Los archivos se vinculan a la Oportunidad y a la Cuenta del Cliente.
+   - Son privados de ese proyecto especifico.
+
+B) ALTA PYATZ (Lista 6):
+   - Los archivos se vinculan a la Cuenta Maestra "Pyatz Corporativo".
+   - Funcionan como un "espejo global": si el Administrador sube el 
+     nuevo REPSE ahi, se marca como "Cargado" en todos los expedientes 
+     360 de la empresa automaticamente.
+
+4. FLUJO DE CARGA CONFIDENCIAL
+-------------------------------
+1. El Agente pulsa "Cargar".
+2. El sistema muestra una ADVERTENCIA DE SEGURIDAD obligatoria.
+3. Al aceptar, el boton se convierte en zona de carga.
+4. Tras subir el archivo, el sistema lo OCULTA inmediatamente.
+5. Aparece la etiqueta "CONFIDENCIAL" y el Agente ya no puede verlo.
+
+5. ADMINISTRACION ESCALABLE (Zero Code)
+----------------------------------------
+El Administrador puede añadir mas requisitos desde:
+Configuracion -> Metadatos Personalizados -> Documento Expediente.
+
+Al añadir una nueva fila, el Expediente 360 la mostrara de inmediato 
+sin necesidad de programar nuevo codigo.
+
+==========================================================================
+PROYECTO PYATZ - CONFIDENCIALIDAD Y EFICIENCIA OPERATIVA
+==========================================================================
