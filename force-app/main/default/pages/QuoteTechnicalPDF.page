@@ -116,12 +116,6 @@
                 <thead>
                     <!-- Identifica el Header fijo -->
                     <tr><td colspan="4" style="height:3.3cm;">&#160;</td></tr>
-                    <tr style="page-break-inside:avoid;">
-                        <th width="50%" style="text-align:left; padding-left:32pt;">Concepto / Servicio</th>
-                        <th width="10%">Cant</th>
-                        <th width="20%" style="text-align:right;">P. Unitario</th>
-                        <th width="20%" style="text-align:right; padding-right:32pt;">Importe</th>
-                    </tr>
                 </thead>
                 <tfoot>
                     <!-- Identifica el Footer fijo -->
@@ -135,6 +129,13 @@
                             </tr>
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
+                            <!-- Cabecera por Servicio (No se repite en salto de página mid-descripción) -->
+                            <tr style="page-break-inside:avoid;">
+                                <th width="50%" style="background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt 7pt 32pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; text-align:left;">Concepto / Servicio</th>
+                                <th width="10%" style="background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; text-align:center;">Cant</th>
+                                <th width="20%" style="background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; text-align:right;">P. Unitario</th>
+                                <th width="20%" style="background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 32pt 7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; text-align:right;">Importe</th>
+                            </tr>
                             <tr class="row-item">
                                 <td style="padding-left:32pt;"><strong>{!item.Product2.Name}</strong></td>
                                 <td style="text-align:center;">{!item.Quantity}</td>
