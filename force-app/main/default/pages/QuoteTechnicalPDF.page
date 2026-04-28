@@ -29,7 +29,7 @@
                 .intro-block     { margin-top:3pt; font-size:10pt; padding-left:10pt; padding-right:10pt; }
                 .intro-block img { max-width:100% !important; height:auto !important; }
 
-                .tbl-svc              { width:100%; border-collapse:collapse; margin-top:4pt; }
+                .tbl-svc              { width:100%; border-collapse:collapse; margin-top:4pt; -fs-table-paginate: paginate; }
                 .tbl-svc th           { background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; }
                 .row-sep td           { background-color:#eef2f9; color:#0070d2; font-weight:bold; font-size:9.5pt; padding:8pt; border-top:2pt solid #0070d2; }
                 .row-item td          { padding:7pt 6pt; font-size:10pt; border-bottom:0.5pt solid #f0f0f0; background-color:#fff; vertical-align:middle; }
@@ -67,21 +67,18 @@
             <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
             <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
 
-            <!-- ═══ SECCIÓN 1: INTRODUCCIÓN (Pág. 1) ══════════════════════════
-                 thead=3.3cm reserva espacio bajo el header fijo.
-                 tfoot=2.3cm reserva espacio sobre el footer fijo.            -->
+            <!-- ═══ SECCIÓN 1: INTRODUCCIÓN ════════════════════════════════ -->
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <tr><td style="height:3.3cm;">&#160;</td></tr>
                 </thead>
                 <tfoot>
-                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <tr><td style="height:2.3cm;">&#160;</td></tr>
                 </tfoot>
                 <tbody>
                     <tr>
                         <td style="padding:0; vertical-align:top;">
                             <div class="content-body">
-
                                 <table class="hdr-table">
                                     <tr>
                                         <td width="62%" style="vertical-align:top; padding:0;">
@@ -97,126 +94,88 @@
                                         </td>
                                     </tr>
                                 </table>
-
                                 <div class="asunto" style="font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt;"><strong>Asunto:&#160;{!technicalQuote.Name}</strong></div>
-
                                 <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Introduction_Text__c))}">
                                     <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin-top:3pt; font-size:10pt;">
-                                        <colgroup>
-                                            <col style="width:15pt;"/>
-                                            <col/>
-                                            <col style="width:15pt;"/>
-                                        </colgroup>
+                                        <colgroup><col style="width:15pt;"/><col/><col style="width:15pt;"/></colgroup>
                                         <tr>
                                             <td style="width:15pt;"></td>
-                                            <td>
-                                                <apex:outputText value="{!technicalQuote.Introduction_Text__c}" escape="false"/>
-                                            </td>
+                                            <td><apex:outputText value="{!technicalQuote.Introduction_Text__c}" escape="false"/></td>
                                             <td style="width:15pt;"></td>
                                         </tr>
                                     </table>
                                 </apex:outputPanel>
-
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <!-- ═══ SECCIÓN 2: TABLA DE SERVICIOS (Pág. 2+) ══════════════════ -->
-            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+            <!-- ═══ SECCIÓN 2: TABLA DE SERVICIOS (Auto-paginada) ════════════ -->
+            <table class="tbl-svc" style="width:100%; page-break-before:always;">
                 <thead>
-                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <!-- Identifica el Header fijo -->
+                    <tr><td colspan="4" style="height:3.3cm;">&#160;</td></tr>
+                    <tr style="page-break-inside:avoid;">
+                        <th width="50%" style="text-align:left; padding-left:32pt;">Concepto / Servicio</th>
+                        <th width="10%">Cant</th>
+                        <th width="20%" style="text-align:right;">P. Unitario</th>
+                        <th width="20%" style="text-align:right; padding-right:32pt;">Importe</th>
+                    </tr>
                 </thead>
                 <tfoot>
-                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <!-- Identifica el Footer fijo -->
+                    <tr><td colspan="4" style="height:2.3cm;">&#160;</td></tr>
                 </tfoot>
                 <tbody>
-                    <tr>
-                        <td style="padding:0; vertical-align:top;">
-                            <div class="content-body">
-
-                                <table class="tbl-svc">
-                                    <thead>
-                                        <tr>
-                                            <th width="50%" style="text-align:left; padding-left:8pt;">Concepto / Servicio</th>
-                                            <th width="10%">Cant</th>
-                                            <th width="20%" style="text-align:right;">P. Unitario</th>
-                                            <th width="20%" style="text-align:right; padding-right:8pt;">Importe</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
-                                                <tr class="row-sep">
-                                                    <td colspan="4">{!item.Product2.Name}</td>
-                                                </tr>
-                                            </apex:outputPanel>
-                                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
-                                                <tr class="row-item">
-                                                    <td style="padding-left:8pt;"><strong>{!item.Product2.Name}</strong></td>
-                                                    <td style="text-align:center;">{!item.Quantity}</td>
-                                                    <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
-                                                    <td style="text-align:right; padding-right:8pt;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
-                                                </tr>
-                                                <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
-                                                    <tr class="row-detail">
-                                                        <td colspan="4">
-                                                            <div class="detail-inner">
-                                                                <apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </apex:outputPanel>
-                                            </apex:outputPanel>
-                                        </apex:repeat>
-                                    </tbody>
-                                </table>
-
-
-                            </div>
-                        </td>
-                    </tr>
+                    <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
+                        <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
+                            <tr class="row-sep">
+                                <td colspan="4" style="padding:8pt 32pt;">{!item.Product2.Name}</td>
+                            </tr>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
+                            <tr class="row-item">
+                                <td style="padding-left:32pt;"><strong>{!item.Product2.Name}</strong></td>
+                                <td style="text-align:center;">{!item.Quantity}</td>
+                                <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
+                                <td style="text-align:right; padding-right:32pt;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
+                            </tr>
+                            <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
+                                <tr class="row-detail">
+                                    <td colspan="4" style="padding-left:32pt; padding-right:32pt;">
+                                        <div class="detail-inner">
+                                            <apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:repeat>
                 </tbody>
             </table>
 
-            <!-- ═══ SECCIÓN 2b: TOTALES + PAGO (continúa sin page-break forzado) ═══ -->
+            <!-- ═══ SECCIÓN 2b: TOTALES + PAGO ══════════════════════════════ -->
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <tr><td style="height:3.3cm;">&#160;</td></tr>
                 </thead>
                 <tfoot>
-                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <tr><td style="height:2.3cm;">&#160;</td></tr>
                 </tfoot>
                 <tbody>
                     <tr>
                         <td style="padding:0; vertical-align:top;">
                             <div class="content-body">
-
                                 <table class="tbl-totals">
-                                    <tr>
-                                        <td class="tot-lbl">SUBTOTAL</td>
-                                        <td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}"/></apex:outputText></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="tot-lbl">I.V.A. (16%)</td>
-                                        <td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}"/></apex:outputText></td>
-                                    </tr>
-                                    <tr class="row-grand">
-                                        <td class="tot-lbl">TOTAL</td>
-                                        <td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}"/></apex:outputText></td>
-                                    </tr>
+                                    <tr><td class="tot-lbl">SUBTOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}"/></apex:outputText></td></tr>
+                                    <tr><td class="tot-lbl">I.V.A. (16%)</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}"/></apex:outputText></td></tr>
+                                    <tr class="row-grand"><td class="tot-lbl">TOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}"/></apex:outputText></td></tr>
                                 </table>
-
-                                <!-- CONDICIONES DE PAGO -->
                                 <div class="payment-box">
                                     <div class="payment-title">Condiciones de Pago</div>
-                                    <div class="payment-body">
-                                        <strong>Transferencia / Dep&#243;sito</strong><br/>
-                                        <apex:outputText value="{!technicalQuote.Description}" escape="false"/>
-                                    </div>
+                                    <div class="payment-body"><strong>Transferencia / Dep&#243;sito</strong><br/><apex:outputText value="{!technicalQuote.Description}" escape="false"/></div>
                                 </div>
-
                             </div>
                         </td>
                     </tr>
@@ -226,59 +185,41 @@
             <!-- ═══ SECCIÓN 3: CLÁUSULAS Y FIRMAS ════════════════════════════ -->
             <table style="width:100%; border-collapse:collapse; page-break-before:always;">
                 <thead>
-                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <tr><td style="height:3.3cm;">&#160;</td></tr>
                 </thead>
                 <tfoot>
-                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                    <tr><td style="height:2.3cm;">&#160;</td></tr>
                 </tfoot>
                 <tbody>
                     <tr>
                         <td style="padding:0; vertical-align:top;">
                             <div class="content-body">
-
                                 <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Warranty_Text__c))}">
                                     <div class="warranty-block">
                                         <div class="warranty-title">Condiciones / Anexos / Cl&#225;usulas</div>
-                                        <div class="warranty-content">
-                                            <apex:outputText escape="false" value="{!technicalQuote.Warranty_Text__c}"/>
-                                        </div>
+                                        <div class="warranty-content"><apex:outputText escape="false" value="{!technicalQuote.Warranty_Text__c}"/></div>
                                     </div>
                                 </apex:outputPanel>
-
                                 <div class="sig-section">
                                     <table class="tbl-sig">
                                         <tr>
-                                            <td>
-                                                <div class="sig-space"></div>
-                                                <div class="sig-line">Firma del CLIENTE</div>
-                                            </td>
+                                            <td><div class="sig-space"></div><div class="sig-line">Firma del CLIENTE</div></td>
                                             <td>
                                                 <div class="sig-space">
-                                                    <apex:outputPanel rendered="{!NOT(ISBLANK(signatureUrl))}" layout="none">
-                                                        <img src="{!signatureUrl}" style="height:55pt; width:auto;"/>
-                                                    </apex:outputPanel>
-                                                    <apex:outputPanel rendered="{!ISBLANK(signatureUrl)}" layout="none">
-                                                        <div style="font-family:'Courier New',monospace; font-size:13pt; color:#0070d2;">{!technicalQuote.CreatedBy.Name}</div>
-                                                    </apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!NOT(ISBLANK(signatureUrl))}" layout="none"><img src="{!signatureUrl}" style="height:55pt; width:auto;"/></apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!ISBLANK(signatureUrl)}" layout="none"><div style="font-family:'Courier New',monospace; font-size:13pt; color:#0070d2;">{!technicalQuote.CreatedBy.Name}</div></apex:outputPanel>
                                                 </div>
                                                 <div class="sig-line">FIRMA AUTORIZADA PYATZ</div>
                                             </td>
-                                            <td>
-                                                <div class="sig-space" style="text-align:center;">
-                                                    <img src="{!$Resource.sello}" style="height:60pt; width:auto;"/>
-                                                </div>
-                                                <div class="sig-line">Sello de la Empresa</div>
-                                            </td>
+                                            <td><div class="sig-space" style="text-align:center;"><img src="{!$Resource.sello}" style="height:60pt; width:auto;"/></div><div class="sig-line">Sello de la Empresa</div></td>
                                         </tr>
                                     </table>
                                 </div>
-
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
-
             <img src="{!$Resource.FooterPDF}" class="footer-img"/>
         </body>
     </html>
