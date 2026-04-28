@@ -2,6 +2,8 @@ public with sharing class QuoteTechnicalPDFController {
     public Quote technicalQuote {get; set;}
     public String versionId {get; set;}
     public String signatureUrl {get; set;}
+    public String quoteNumberShort {get; set;}
+    public String atencionNames {get; set;}
     public Map<Id, String> htmlDescriptions {get; set;}
 
     public QuoteTechnicalPDFController(ApexPages.StandardController stdController) {
@@ -18,6 +20,13 @@ public with sharing class QuoteTechnicalPDFController {
                                       FROM QuoteLineItems)
                               FROM Quote 
                               WHERE Id = :quoteId];
+
+        // Folio sin ceros iniciales
+        if (String.isNotBlank(this.technicalQuote.QuoteNumber)) {
+            String digits = this.technicalQuote.QuoteNumber.replaceAll('[^0-9]', '');
+            String prefix = this.technicalQuote.QuoteNumber.replaceAll('[0-9]', '');
+            this.quoteNumberShort = (String.isNotBlank(digits) ? prefix + String.valueOf(Integer.valueOf(digits)) : this.technicalQuote.QuoteNumber);
+        }
 
         // 1.1. Procesar etiquetas dinámicas (Lazy Loading)
         if (this.technicalQuote.Introduction_Text__c != null) {
@@ -48,6 +57,7 @@ public with sharing class QuoteTechnicalPDFController {
                 } else if (this.technicalQuote.ContactId != null) {
                     atencionNames = this.technicalQuote.Contact.Name;
                 }
+                this.atencionNames = atencionNames; // ASIGNACIÓN CLAVE
 
                 if (this.technicalQuote.Introduction_Text__c != null) {
                     this.technicalQuote.Introduction_Text__c = this.technicalQuote.Introduction_Text__c.replace('[[ATENCION]]', atencionNames);

@@ -6,7 +6,9 @@
                     size: letter;
                     margin: 0;
                 }
-                body { font-family:'Helvetica','Arial',sans-serif; font-size:10pt; color:#333; line-height:1.4; margin:0; padding:0; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
+                body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:10pt; color:#333; line-height:1.4; margin:0; padding:0; }
 
                 .header-img   { width:100%; display:block; position:fixed; top:0; left:0; z-index:1000; }
                 .footer-img   { width:100%; display:block; position:fixed; bottom:0; left:0; height:1.5cm; z-index:1000; }
@@ -18,10 +20,11 @@
                 .content-body { padding:0 32pt; }
 
                 .hdr-table      { width:100%; border-collapse:collapse; }
-                .quote-number   { font-size:21pt; font-weight:bold; }
+                .quote-number   { font-size:11pt; font-weight:bold; }
                 .business-lines { font-size:12pt; color:#0070d2; font-weight:bold; margin-top:3pt; }
-                .sede-title     { font-size:15pt; font-weight:bold; margin-top:10pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
-                .asunto         { margin-top:5pt; font-size:11pt; }
+                .nombre-comercial { font-size:11pt; font-weight:bold; margin-top:4pt; }
+                .asunto         { margin-top:5pt; font-size:11pt; font-weight:bold; }
+                .sede-title     { font-size:13pt; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
 
                 .intro-block     { margin-top:3pt; font-size:10pt; padding-left:10pt; padding-right:10pt; }
                 .intro-block img { max-width:100% !important; height:auto !important; }
@@ -82,18 +85,20 @@
                                 <table class="hdr-table">
                                     <tr>
                                         <td width="62%" style="vertical-align:top; padding:0;">
-                                            <div class="quote-number">PRESUPUESTO No. {!technicalQuote.QuoteNumber}</div>
+                                            <div class="nombre-comercial">{!technicalQuote.Account.Name}</div>
                                             <div class="business-lines">{!technicalQuote.Business_Lines_Selected__c}</div>
+                                            <div style="font-size:11pt; font-weight:bold; margin-top:2pt;">{!technicalQuote.Technical_Sedes__c}</div>
+                                            <div class="asunto"><strong>Asunto:&#160;{!technicalQuote.Name}</strong></div>
                                         </td>
                                         <td width="38%" style="vertical-align:top; text-align:right; font-size:10pt; padding:2pt 0 0 0;">
                                             <div><strong>Fecha:</strong>&#160;<apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!technicalQuote.CreatedDate}"/></apex:outputText></div>
                                             <div><strong>Agente:</strong>&#160;{!technicalQuote.CreatedBy.Name}</div>
+                                            <div class="quote-number" style="margin-top:2pt;">Presupuesto No. {!quoteNumberShort}</div>
                                         </td>
                                     </tr>
                                 </table>
 
-                                <div class="sede-title">{!technicalQuote.Technical_Sedes__c}</div>
-                                <div class="asunto"><strong>Asunto:</strong>&#160;{!technicalQuote.Name}</div>
+                                <div class="sede-title" style="font-size:11pt;">Atenci&#243;n: {!atencionNames}</div>
 
                                 <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Introduction_Text__c))}">
                                     <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin-top:3pt; font-size:10pt;">
