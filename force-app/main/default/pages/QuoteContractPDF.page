@@ -1,290 +1,491 @@
-<apex:page standardController="Quote" extensions="QuoteContractPDFController" renderAs="pdf" showHeader="false" sidebar="false"
-    standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" cache="false">
+<apex:page standardController="Quote" extensions="QuoteContractPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" cache="false">
     <html>
+        <head>
+            <style type="text/css">
+                @page {
+                    size: letter;
+                    margin: 0;
+                }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
+                body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:10pt; color:#333; line-height:1.4; margin:0; padding:0; }
+                
+                .header-img   { width:100%; display:block; position:fixed; top:0; left:0; z-index:1000; }
+                .footer-img   { width:100%; display:block; position:fixed; bottom:0; left:0; height:1.5cm; z-index:1000; }
+                .watermark    { position:fixed; top:30%; width:100%; z-index:-1; }
+                .page-counter { position:fixed; top:0.4cm; right:15pt; font-size:7.5pt; color:#fff; z-index:1001; }
+                .pgNum:before   { content: counter(page); }
+                .pgCount:before { content: counter(pages); }
 
-    <head>
-        <style type="text/css">
-            @page {
-                size: letter;
-                margin: 0cm 0 0cm 0;
+                .content-body { padding:0 32pt; }
 
-                /* @bottom-right {
-                    content: "Página " counter(page) " de " counter(pages);
-                    font-family: 'Helvetica', 'Arial', sans-serif;
-                    font-size: 8pt;
-                    color: #666;
-                    padding-right: 20pt;
-                    vertical-align: top;
-                    padding-top: 10pt;
-                }  */
-            }
+                .hdr-table      { width:100%; border-collapse:collapse; }
+                .quote-number   { font-size:16pt; font-weight:bold; }
+                .business-lines { font-size:12pt; color:#0070d2; font-weight:bold; margin-top:3pt; }
+                .nombre-comercial { font-size:11pt; font-weight:bold; margin-top:4pt; }
+                .asunto         { margin-top:4pt; font-size:10pt; }
+                .sede-title     { font-size:13pt; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
 
-            body {
-                font-family: 'Helvetica', 'Arial', sans-serif;
-                font-size: 10pt;
-                color: #333;
-                line-height: 1.3;
-                margin: 0;
-                padding: 0;
-                text-align: justify;
-            }
+                .intro-block     { margin-top:3pt; font-size:10pt; padding-left:10pt; padding-right:10pt; }
+                .intro-block img { max-width:100% !important; height:auto !important; }
 
-            .header-img {
-                width: 100%;
-                margin-bottom: 10pt;
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                z-index: 1000;
-            }
+                .tbl-svc              { width:100%; border-collapse:collapse; margin-top:4pt; }
+                .tbl-svc th           { background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; }
+                .row-sep td           { background-color:#eef2f9; color:#0070d2; font-weight:bold; font-size:9.5pt; padding:8pt; border-top:2pt solid #0070d2; }
+                .row-item td          { padding:7pt 6pt; font-size:10pt; border-bottom:0.5pt solid #f0f0f0; background-color:#fff; vertical-align:middle; }
+                .row-detail td        { padding:3pt 32pt 10pt 16pt; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.5; }
+                .detail-inner         { border-left:2pt solid #dde; padding-left:10pt; }
+                .detail-inner img     { max-width:100% !important; height:auto !important; }
 
-            .footer-img {
-                width: 100%;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                display: block;
-                height: 1.5cm;
-                z-index: 1000;
-                pointer-events: none;
-            }
+                .tbl-totals           { width:210pt; border-collapse:collapse; margin-left:auto; margin-top:14pt; }
+                .tbl-totals td        { padding:4pt 6pt; font-size:9.5pt; }
+                .tot-lbl              { font-weight:bold; color:#555; text-align:right; }
+                .tot-val              { text-align:right; border-bottom:0.5pt solid #ddd; width:85pt; }
+                .row-grand td         { border-top:1.5pt solid #0070d2; padding-top:8pt; }
+                .row-grand .tot-lbl   { font-size:13pt; color:#0070d2; font-weight:bold; }
+                .row-grand .tot-val   { font-size:13pt; color:#0070d2; font-weight:bold; border-bottom:none; }
 
-            .watermark {
-                position: fixed;
-                top: 30%;
-                /* left: 20%; */
-                /* transform: translate(-50%, -50%); */
-                width: 100%;
-                height: auto;
-                /* opacity: 0.1; */
-                z-index: -1;
-                pointer-events: none;
-            }
+                .payment-box   { margin-top:22pt; border:1pt solid #ccc; page-break-inside:avoid; }
+                .payment-title { background-color:#0070d2; color:#fff; padding:6pt 8pt; text-align:center; font-weight:bold; text-transform:uppercase; font-size:9.5pt; }
+                .payment-body  { padding:10pt 12pt; font-size:9pt; text-align:justify; }
 
-            .content-body {
-                padding: 2cm 20pt 2cm 20pt;
-                margin-top: 1.5cm;
-                margin-bottom: 1.5cm;
-            }
+                .warranty-block   { margin-top:24pt; border-top:1.5pt solid #0070d2; padding-top:10pt; }
+                .warranty-title   { font-weight:bold; font-size:11pt; margin-bottom:6pt; text-transform:uppercase; }
+                .warranty-content { font-size:9.5pt; text-align:justify; }
+                .warranty-content img { max-width:100% !important; height:auto !important; }
 
-            .title-contract {
-                font-size: 16pt;
-                font-weight: bold;
-                margin-bottom: 2pt;
-                color: #000;
-                text-transform: uppercase;
-            }
+                .sig-section  { margin-top:40pt; width:100%; page-break-inside:avoid; }
+                .tbl-sig      { width:100%; border-collapse:collapse; }
+                .tbl-sig td   { text-align:center; vertical-align:bottom; width:33.33%; padding:0 10pt; }
+                .sig-space    { height:65pt; display:block; }
+                .sig-line     { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; margin:0 8pt; }
+                .sig-stamp    { border:1pt solid #ccc; width:55pt; height:55pt; margin:0 auto 8pt auto; font-size:8pt; color:#bbb; line-height:55pt; }
+            </style>
+        </head>
+        <body>
+            <img src="{!$Resource.HeaderPDF}" class="header-img"/>
+            <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
+            <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
 
-            .line-business {
-                font-size: 11pt;
-                color: #333;
-                margin-bottom: 12pt;
-                font-weight: normal;
-            }
-
-            /* TABLA CON DISEÑO FIJO */
-            .table-services {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 15pt;
-                table-layout: fixed;
-            }
-
-            .table-services th {
-                background-color: #D4EDDA;
-                color: #333;
-                padding: 8pt;
-                border: 0.5pt solid #fff;
-                text-align: center;
-                font-size: 9pt;
-            }
-
-            .table-services td {
-                padding: 8pt;
-                border-bottom: 0.5pt solid #eee;
-                vertical-align: top;
-                word-wrap: break-word;
-                overflow: hidden;
-                text-align: justify;
-            }
-
-            .totals-box {
-                width: 300pt;
-                float: right;
-                margin-top: 10pt;
-                page-break-inside: avoid;
-            }
-
-            .grand-total {
-                font-size: 12pt;
-                color: #0070d2;
-                border-bottom: 2pt solid #0070d2;
-                font-weight: bold;
-            }
-
-            .signature-section {
-                margin-top: 50pt;
-                width: 100%;
-                page-break-inside: avoid;
-            }
-
-            .sig-box {
-                width: 45%;
-                text-align: center;
-                display: inline-block;
-                vertical-align: bottom;
-            }
-
-            .sig-line {
-                border-top: 1px solid #333;
-                margin: 0 20pt;
-                padding-top: 5pt;
-                font-size: 9pt;
-            }
-
-            .spacer {
-                width: 8%;
-                display: inline-block;
-            }
-
-            .intro-text {
-                margin-top: 20pt;
-                text-align: justify;
-                white-space: pre-wrap;
-                display: block;
-                line-height: 1.5;
-            }
-        </style>
-    </head>
-
-    <body>
-        <img src="{!$Resource.WatermarPDF}" class="watermark" />
-        <img src="{!$Resource.HeaderPDF}" class="header-img" />
-
-        <div class="content-body">
-            <div class="title-contract">CONTRATO DE SERVICIOS No. {!quoteRecord.QuoteNumber}</div>
-            <div class="line-business">{!quoteRecord.Business_Lines_Selected__c}</div>
-
-            <div style="margin-top: 5pt; font-size: 10pt;">
-                <div><strong>Agente Responsable:</strong> {!firmanteNombre}</div>
-                <div><strong>Fecha:</strong> {!fechaHoy}</div>
-            </div>
-
-            <div style="font-size: 14pt; font-weight: bold; margin-top: 15pt;">{!quoteRecord.Account.Name}</div>
-            <div style="font-size: 11pt; margin-top: 5pt;"><strong>Sede:</strong> {!quoteRecord.Technical_Sedes__c}</div>
-
-            <div class="intro-text">
-                <apex:outputText value="{!IF(NOT(ISBLANK(quoteRecord.Introduction_Text__c)), quoteRecord.Introduction_Text__c, quoteRecord.Description)}"
-                    escape="false" />
-            </div>
-
-            <div style="font-size: 12pt; font-weight: bold; margin-top: 20pt; color: #0070d2;">Servicios Contratados</div>
-
-            <table class="table-services">
+            <!-- ═══ SECCIÓN 4: CONTRATO REPSE ════════════════════════════ -->
+            <table style="width:100%; border-collapse:collapse;">
                 <thead>
-                    <tr>
-                        <th width="{!IF(config['show_line_prices'], '45%', '85%')}">CONCEPTO / DESCRIPCIÓN</th>
-                        <th width="15%">CANTIDAD</th>
-                        <apex:outputPanel rendered="{!config['show_line_prices']}" layout="none">
-                            <th width="20%">P. UNITARIO</th>
-                            <th width="20%">IMPORTE (C/IVA)</th>
-                        </apex:outputPanel>
-                    </tr>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
                 </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
                 <tbody>
-                    <apex:repeat value="{!selectedLineItems}" var="item">
-                        <tr>
-                            <td>
-                                <strong>{!item.Product2.Name}</strong><br />
-                                <span style="font-size: 8pt; color: #666; display: block; margin-top: 3pt;">
-                                    <apex:outputText value="{!item.Description}" escape="false" />
-                                </span>
-                            </td>
-                            <td align="center" style="vertical-align: middle;">{!item.Quantity}</td>
-                            <apex:outputPanel rendered="{!config['show_line_prices']}" layout="none">
-                                <td align="right" style="vertical-align: middle;">
-                                    <apex:outputText value="{0, number, currency}">
-                                        <apex:param value="{!item.UnitPrice}" />
-                                    </apex:outputText>
-                                </td>
-                                <td align="right" style="vertical-align: middle;">
-                                    <strong>
-                                        <apex:outputText value="{0, number, currency}">
-                                            <apex:param value="{!item.TotalPrice * 1.16}" />
-                                        </apex:outputText>
-                                    </strong>
-                                </td>
-                            </apex:outputPanel>
-                        </tr>
-                    </apex:repeat>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body" style="font-size:9pt; line-height:1.6; text-align:justify;">
+
+                                <p>CONTRATO DE PRESTACI&#211;N DE SERVICIOS ESPECIALIZADO QUE CELEBRAN, POR UNA PARTE, PYATZ INGENIER&#205;A BIOTECNOL&#211;GICA S.A. DE C.V. REPRESENTADA POR GABRIELA GARC&#205;A DE ALBA GUTI&#201;RREZ A QUIEN EN LO SUCESIVO SE DENOMINAR&#193; &#8220;EL PRESTADOR&#8221; Y POR OTRA PARTE LA EMPRESA <strong>{!quoteRecord.Account.Name}</strong>, REPRESENTADO POR <strong>{!quoteRecord.Account.Nombre_RL__c}</strong>, A QUIEN EN LO SUCESIVO SE DENOMINAR&#193; &#8220;EL CLIENTE&#8221;, Y CONJUNTAMENTE &#8220;LAS PARTES&#8221;, CONFORME A LAS SIGUIENTES DECLARACIONES Y CL&#193;USULAS:</p>
+
+                                <p style="text-align:center; font-weight:bold;">D E C L A R A C I O N E S</p>
+
+                                <p>DECLARA EL PRESTADOR A TRAV&#201;S DE SU REPRESENTANTE LEGAL QUE:</p>
+                                <p>1.1. ES UNA SOCIEDAD MERCANTIL DEBIDAMENTE CONSTITUIDA CONFORME A LAS LEYES MEXICANAS SEG&#218;N CONSTA EN LA ESCRITURA P&#218;BLICA N&#218;MERO 65,559 DE FECHA 15 DE MAYO DE 2015 PASADA ANTE LA FE DEL LICENCIADO H&#201;CTOR GUILLERMO GALEANO INCL&#193;N NOTARIO P&#218;BLICO N&#218;MERO 133 DEL ENTONCES DISTRITO FEDERAL, AHORA CIUDAD DE M&#201;XICO, MISMA QUE SE ENCUENTRA DEBIDAMENTE INSCRITA EN EL REGISTRO P&#218;BLICO DE COMERCIO BAJO EL FOLIO MERCANTIL N&#218;MERO 212496, DE FECHA 18 DE AGOSTO DE 2015, AS&#205; COMO SU &#218;LTIMA ACTA DE ASAMBLEA GENERAL EXTRAORDINARIA DE ACCIONISTAS DE FECHA 24 DE JUNIO DEL 2021 PROTOCOLIZADA MEDIANTE ESCRITURA 36,194 LIBRO 852 ANTE EL LICENCIADO MARIO FERNANDO P&#201;REZ SALINAS Y RAM&#205;REZ TITULAR DE LA NOTAR&#205;A N&#218;MERO 76 DE LA CIUDAD DE M&#201;XICO.</p>
+                                <p>1.2. QUE EST&#193; DEBIDAMENTE REGISTRADA ANTE LA SECRETAR&#205;A DE HACIENDA Y CR&#201;DITO P&#218;BLICO CON N&#218;MERO DE REGISTRO FEDERAL DE CONTRIBUYENTES N&#218;MERO ZDE930908QG7 COMO SE DESPRENDE DE SU CONSTANCIA FISCAL Y CON N&#218;MERO DE REGISTRO ANTE EL IMSS Y6219189104.</p>
+                                <p>1.3. QUE SU DOMICILIO FISCAL ES EL UBICADO EN CALLEJ&#211;N GENERAL ANAYA #11 COL: SAN DIEGO CHURUBUSCO, CP 04120, CIUDAD DE M&#201;XICO; CORREO ELECTR&#211;NICO g.garciadealba@pyatz.com.mx. Y TEL&#201;FONO DE CONTACTO 5556878837.</p>
+                                <p>1.4. QUE CUENTA CON EL REGISTRO ANTE EL PADR&#211;N P&#218;BLICO DE PRESTADORAS DE SERVICIOS ESPECIALIZADOS U OBRAS ESPECIALIZADAS (REPSE) DE LA SECRETAR&#205;A DE TRABAJO Y PREVISI&#211;N SOCIAL, CONFORME A LO ESTIPULADO EN LOS ART&#205;CULOS 15, 16 Y 17 DE LA LEY FEDERAL DEL TRABAJO VIGENTE, AS&#205; COMO, A LAS DISPOSICIONES DE CAR&#193;CTER GENERAL PARA EL REGISTRO DE PERSONAS F&#205;SICAS O MORALES QUE PRESTEN SERVICIOS ESPECIALIZADOS O EJECUTEN OBRAS ESPECIALIZADAS A QUE SE REFIERE EL ART&#205;CULO 15 DE LA LEY FEDERAL DEL TRABAJO, BAJO EL N&#218;MERO DE REGISTRO ARR12816/2024 Y EL (LOS) SIGUIENTE(S) FOLIO(S) DE LA(S) ACTIVIDAD(ES) ESPECIALIZADA(S) A7D72A48-1524-4EBD-A807-8B77C2C160E9, BD3522E7-9EDE-4430-B010-B57C18CF6286, 0D88539B-5A6A-48A8-A31D-0D328BB27E25, 4DC35099-49DC-452A-9BEF-3B03C52959F6, 85204EF5-A620-4FA3-8DC9-DAD566B966AE, 473DA2AE-55EC-43FA-9DF3-B6D69F5F3E5A.</p>
+                                <p>1.5. QUE SU REPRESENTANTE LEGAL CUENTA CON LAS FACULTADES NECESARIAS PARA CELEBRAR ESTE CONTRATO Y OBLIGAR A SU REPRESENTADA EN T&#201;RMINOS DEL MISMO, SEG&#218;N CONSTA EN LA ESCRITURA P&#218;BLICA N&#218;MERO 65,559 DE FECHA 15 DE MAYO DE 2015 PASADA ANTE LA FE DEL LICENCIADO H&#201;CTOR GUILLERMO GALEANO INCL&#193;N NOTARIO P&#218;BLICO N&#218;MERO 133 DEL ENTONCES DISTRITO FEDERAL, AHORA CIUDAD DE M&#201;XICO, Y DE SU &#218;LTIMA ACTA DE ASAMBLEA GENERAL EXTRAORDINARIA DE ACCIONISTAS DE FECHA 24 DE JUNIO DEL 2021 PROTOCOLIZADA MEDIANTE ESCRITURA 36,194 LIBRO 852 ANTE EL LICENCIADO MARIO FERNANDO P&#201;REZ SALINAS Y RAM&#205;REZ TITULAR DE LA NOTAR&#205;A N&#218;MERO 76 DE LA CIUDAD DE M&#201;XICO; FACULTADES QUE NO LE HAN SIDO REVOCADAS NI LIMITADAS EN FORMA ALGUNA A LA FECHA DEL PRESENTE CONTRATO.</p>
+                                <p>1.6. QUE DENTRO DE SU OBJETO SOCIAL SE ENCUENTRA EL DE PRESTAR TODO TIPO DE SERVICIOS DE PRETRATAMIENTO DE AGUAS RESIDUALES, SERVICIOS PREVENTIVOS Y CORRECTIVOS PARA INSTALACIONES HIDROSANITARIAS, LIMPIEZAS ESPECIALIZADAS DE COCINAS Y SANITARIOS, APLICACI&#211;N DE RETARDANTES DE FUEGO, INSTALACI&#211;N DE EQUIPOS DESCALCIFICADORES, DESINFECCI&#211;N DE ESPACIOS; Y, QUE CUENTA CON TODOS LOS CONOCIMIENTOS, CAPACIDAD, ORGANIZACI&#211;N, EXPERIENCIA PROFESIONAL, RECURSOS T&#201;CNICOS, RECURSOS ECON&#211;MICOS PARA EJECUTAR ESTE TIPO DE TRABAJO; Y QUE, LOS TRABAJOS OBJETO DE ESTE CONTRATO, SER&#193;N EJECUTADOS CON ELEMENTOS Y TRABAJADORES PROPIOS Y NO DE TERCEROS, QUE ESTAR&#193;N, EN TODO MOMENTO A SU DISPOSICI&#211;N Y BAJO SU SUPERVISI&#211;N, VIGILANCIA, DIRECCI&#211;N, SUBORDINACI&#211;N Y DEPENDENCIA. QUE CUENTA CON RECURSOS Y ELEMENTOS PROPIOS SUFICIENTES PARA CUMPLIR LAS OBLIGACIONES QUE LE DERIVAN DE LAS RELACIONES CON SUS TRABAJADORES.</p>
+                                <p>1.7. QUE PRESTA SERVICIOS SIMILARES A LOS QUE SON OBJETO DE ESTE CONTRATO, A DISTINTAS PERSONAS AJENAS Y DISTINTAS A EL CLIENTE, POR LO QUE SUS INGRESOS PROVIENEN PERMANENTEMENTE DE DISTINTAS PERSONAS, NO SIENDO EL CLIENTE SU &#218;NICO NI DE SUS PRINCIPALES CLIENTES.</p>
+                                <p>1.8 CONOCE PERFECTAMENTE EL ALCANCE DE LOS SERVICIOS QUE PRESTAR&#193; A EL CLIENTE, MANIFESTANDO QUE NO TIENE ALG&#218;N TIPO DE PROBLEMA PARA LA CORRECTA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS Y REALIZACI&#211;N DE LA ACTIVIDAD QUE POR VIRTUD DEL PRESENTE CONTRATO SE LE ENCOMIENDAN.</p>
+
+                                <p>II.- DECLARA EL CLIENTE A TRAV&#201;S DE SU REPRESENTANTE LEGAL QUE:</p>
+                                <p>2.1. ES UNA SOCIEDAD MERCANTIL DEBIDAMENTE CONSTITUIDA CONFORME A LAS LEYES MEXICANAS SEG&#218;N CONSTA EN LA ESCRITURA P&#218;BLICA <strong>{!quoteRecord.Account.Escritura_Publica__c}</strong> DE FECHA <strong>{!quoteRecord.Account.Dia_Esc_Pub__c}</strong> DE <strong>{!quoteRecord.Account.Mes_Esc_Pub__c}</strong> DEL <strong>{!quoteRecord.Account.Ano_Esc_Pub__c}</strong>, PASADA ANTE LA FE DEL NOTARIO N&#218;MERO <strong>{!quoteRecord.Account.Notaria__c}</strong> DE LA CIUDAD DE <strong>{!quoteRecord.Account.Ciudad_Notaria__c}</strong> MISMA QUE SE ENCUENTRA REGISTRADA ANTE EL REGISTRO P&#218;BLICO DE COMERCIO BAJO EL FOLIO MERCANTIL N&#218;MERO <strong>{!quoteRecord.Account.Folio_Mercantil__c}</strong> DE FECHA <strong>{!quoteRecord.Account.Dia_Folio_Merc__c}</strong> DE <strong>{!quoteRecord.Account.Mes_Folio_Merc__c}</strong> DEL <strong>{!quoteRecord.Account.Ano_Folio_Merc__c}</strong></p>
+                                <p>2.2. QUE EST&#193; DEBIDAMENTE REGISTRADA ANTE LA SECRETAR&#205;A DE HACIENDA Y CR&#201;DITO P&#218;BLICO CON N&#218;MERO DE REGISTRO FEDERAL DE CONTRIBUYENTES: <strong>{!quoteRecord.Account.RFC__c}</strong> COMO SE DESPRENDE DE SU CONSTANCIA FISCAL Y N&#218;MERO DE REGISTRO ANTE EL IMSS <strong>{!quoteRecord.Account.Registro_IMSS__c}</strong>.</p>
+                                <p>2.3. QUE TIENE COMO DOMICILIO FISCAL EL UBICADO EN CALLE <strong>{!quoteRecord.Account.Calle_de_envio__c}</strong> # EXT <strong>{!quoteRecord.Account.No_Ext__c}</strong> # INT <strong>{!quoteRecord.Account.No_Int__c}</strong> COLONIA. <strong>{!quoteRecord.Account.Colonia__c}</strong> ALCALD&#205;A <strong>{!quoteRecord.Account.Ciudad_de_envio__c}</strong> C.P. <strong>{!quoteRecord.Account.Codigo_postal_de_envio__c}</strong>, CIUDAD <strong>{!quoteRecord.Account.Estado_o_provincia_de_envio__c}</strong>, <strong>{!quoteRecord.Account.Pais_de_envio__c}</strong>. CORREO ELECTR&#211;NICO <strong>{!quoteRecord.Account.Correo_electronico_RL__c}</strong> Y TEL&#201;FONO DE CONTACTO <strong>{!quoteRecord.Account.Phone}</strong> EXT. <strong>{!quoteRecord.Account.Extension__c}</strong></p>
+                                <p>2.4. QUE SU REPRESENTANTE LEGAL CUENTA CON LAS FACULTADES NECESARIAS PARA CELEBRAR ESTE CONTRATO Y OBLIGAR A SU REPRESENTADA EN T&#201;RMINOS DE ESTE, SEG&#218;N CONSTA EN LA ESCRITURA P&#218;BLICA <strong>{!quoteRecord.Account.Escritura_Publica__c}</strong> DE FECHA <strong>{!quoteRecord.Account.Dia_Esc_Pub__c}</strong> DE <strong>{!quoteRecord.Account.Mes_Esc_Pub__c}</strong> DEL <strong>{!quoteRecord.Account.Ano_Esc_Pub__c}</strong> PASADA ANTE LA FE DEL NOTARIO N&#218;MERO <strong>{!quoteRecord.Account.Notaria__c}</strong> DE LA CIUDAD <strong>{!quoteRecord.Account.Ciudad_Notaria__c}</strong>. Y QUE LAS MISMAS NO LE HAN SIDO REVOCADAS NI LIMITADAS EN FORMA ALGUNA A LA FECHA DEL PRESENTE CONTRATO.</p>
+                                <p>2.5. QUE CUENTA CON SU PERMISO DE GENERADOR O PLAN DE MANEJO DE RESIDUOS OTORGADO POR SEDEMA CON N&#218;MERO <strong>{!quoteRecord.Account.Plan_Generador__c}</strong> O PERMISO DE LA ENTIDAD CORRESPONDIENTE N&#218;MERO <strong>{!quoteRecord.Account.Permiso_Entidad__c}</strong></p>
+                                <p>2.6. QUE LOS SERVICIOS ESPECIALIZADOS OBJETO DEL PRESENTE CONTRATO NO FORMAN PARTE DE SU OBJETO SOCIAL NI DE SU ACTIVIDAD ECON&#211;MICA PREPONDERANTE, AS&#205; MISMO DECLARA QUE NO CUENTA CON LA INFRAESTRUCTURA, PERSONAL, EXPERIENCIA NI ESPECIALIZACI&#211;N NECESARIA PARA EJECUTAR EL OBJETO DEL PRESENTE CONTRATO, POR LO TANTO, TIENE LA NECESIDAD DE CONTRATAR LOS SERVICIOS ESPECIALIZADOS DE EL PRESTADOR.</p>
+                                <p>2.7. ES SU DESEO CONTRATAR A EL PRESTADOR POR SER ESPECIALISTA EN DOSIFICACI&#211;N MEDIANTE EQUIPOS AUTOMATIZADOS DE PRODUCTOS BIOENZIMATICOS Y/O BIOQU&#205;MICOS PARA EL PRETRATAMIENTO DE AGUAS RESIDUALES, CON EL FIN DE ACELERAR LA DEGRADACI&#211;N DE GRASAS Y ACEITES, Y REDUCIR SU CAPACIDAD DE INCRUSTACI&#211;N EN TUBER&#205;AS Y LIMPIEZA DE TRAMPA DE GRASA, RECOLECCI&#211;N, RETIRO Y DISPOSICI&#211;N DE GRASAS Y RESIDUOS ORG&#193;NICOS DE ACUERDO CON LA INFORMACI&#211;N PROPORCIONADA POR ESTE &#218;LTIMO, QUE RE&#218;NE TODAS LAS CARACTER&#205;STICAS Y CONDICIONES NECESARIAS, ADEM&#193;S DE CONTAR CON SU REGISTRO DE REPSE.</p>
+
+                                <p>III.- DECLARAN AMBAS PARTES QUE:</p>
+                                <p>EN VIRTUD DEL PRESENTE CONTRATO Y DURANTE LA VIGENCIA DE ESTE, LAS PARTES CONVIENEN EN ESTABLECER LOS T&#201;RMINOS Y CONDICIONES EN LOS QUE EL PRESTADOR PODR&#193; LLEVAR A CABO A FAVOR DE EL CLIENTE LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS.</p>
+                                <p>CON BASE A LO DECLARADO POR LAS PARTES Y LO CONTENIDO EN LAS DECLARACIONES ANTERIORES, LAS PARTES EST&#193;N DE ACUERDO CON SOMETERSE A LAS SIGUIENTES CL&#193;USULAS:</p>
+
+                                <p style="text-align:center; font-weight:bold;">C L &#193; U S U L A S</p>
+
+                                <p><strong>PRIMERA. OBJETO</strong></p>
+                                <p>EL PRESTADOR SE OBLIGA A PROPORCIONAR EL SERVICIO ESPECIALIZADO EN DOSIFICACI&#211;N MEDIANTE EQUIPOS AUTOMATIZADOS DE PRODUCTOS BIOENZIMATICOS Y/O BIOQU&#205;MICOS PARA EL PRETRATAMIENTO DE AGUAS RESIDUALES, CON EL FIN DE ACELERAR LA DEGRADACI&#211;N DE GRASAS Y ACEITES, Y REDUCIR SU CAPACIDAD DE INCRUSTACI&#211;N EN TUBER&#205;AS Y LIMPIEZA DE TRAMPA DE GRASA, RECOLECCI&#211;N, RETIRO Y DISPOSICI&#211;N DE GRASAS Y RESIDUOS ORG&#193;NICOS A EL CLIENTE, BAJO LAS ESPECIFICACIONES DETALLADAS EN EL ANEXO 1 / PRESUPUESTO QUE FORMA PARTE INTEGRANTE DE ESTE CONTRATO.</p>
+                                <p>LOS SERVICIOS SER&#193;N PRESTADOS DE ACUERDO CON LO SE&#209;ALADO EN LAS DECLARACIONES DEL PRESTADOR EN ESTE CONTRATO, ESTABLECI&#201;NDOSE QUE LOS SERVICIOS SOLO SER&#193;N PRESTADOS CON LOS TRABAJADORES Y ELEMENTOS DEL MISMO PRESTADOR SUFICIENTES Y CAPACES PARA CUMPLIR CON LAS OBLIGACIONES QUE LE DERIVAN DE LAS RELACIONES CON ELLOS.</p>
+                                <p>PARA EL CASO DE QUE EL CLIENTE LLEGARA A REQUERIR ALG&#218;N SERVICIO EXTRAORDINARIO QUE NO EST&#201; ESTIPULADO EXPRESAMENTE EN ESTE CONTRATO O EN EL ANEXO 1 / PRESUPUESTO, LAS PARTES SE COMPROMETEN A CELEBRAR Y FIRMAR UN NUEVO CONTRATO Y/O ADENDUM MODIFICATORIO SEG&#218;N SEA EL CASO.</p>
+
+                                <p><strong>SEGUNDA. VIGENCIA Y TERMINACI&#211;N</strong></p>
+                                <p>LA VIGENCIA DEL PRESENTE CONTRATO SER&#193; POR <strong>12</strong> MESES A PARTIR DE LA FIRMA DEL PRESENTE INSTRUMENTO, MISMA QUE TAMBI&#201;N SE ENCUENTRA ESTIPULADA EN EL ANEXO 1 / PRESUPUESTO DEL PRESENTE CONTRATO.</p>
+
+                                <p><strong>TERCERA. CONTRAPRESTACI&#211;N POR LOS SERVICIOS Y FACTURACI&#211;N</strong></p>
+                                <p>EL CLIENTE PAGAR&#193; A EL PRESTADOR COMO CONTRAPRESTACI&#211;N POR LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS CONTRATADOS, DE ACUERDO CON LO ESTIPULADO EN EL ANEXO 1 / PRESUPUESTO DE ESTE INSTRUMENTO.</p>
+                                <p>PARA LO CUAL LAS PARTES ACUERDAN QUE LOS PRECIOS ESTABLECIDOS EN EL ANEXO 1 / PRESUPUESTO, TENDR&#193;N UN AUMENTO CON BASE EN EL INCREMENTO PORCENTUAL DEL SALARIO M&#205;NIMO, POR LO QUE DICHO ANEXO SE ACTUALIZAR&#193; ANUALMENTE.</p>
+                                <p>EL PRESTADOR PARA QUE LE SEAN PAGADOS SUS SERVICIOS DEL PRESENTE CONTRATO, SE OBLIGA A PRESENTAR LAS FACTURAS O COMPROBANTES FISCALES A EL CLIENTE, EN LOS TIEMPOS ESPECIFICADOS EN EL ANEXO 1 / PRESUPUESTO.</p>
+                                <p>LAS PARTES ACUERDAN QUE PARA EL CASO DE QUE EL CLIENTE DEJE DE PAGAR <strong>{!quoteRecord.Account.Facturas_sin_pago_para_sancion__c}</strong> FACTURAS DE FORMA CONSECUTIVA PRESENTADAS POR EL PRESTADOR, &#201;STE TENDR&#193; LA FACULTAD DE SUSPENDER LA PRESTACI&#211;N DE LOS SERVICIOS MENCIONADOS EN ESTE CONTRATO.</p>
+                                <p>AMBAS PARTES SE COMPROMETEN A CUMPLIR CON TODAS LAS OBLIGACIONES LEGALES ESTABLECIDAS EN MATERIA DE SERVICIOS ESPECIALIZADOS (REPSE).</p>
+
+                                <p><strong>CUARTA. TERMINACI&#211;N ANTICIPADA.</strong></p>
+                                <p>EL PRESTADOR PODR&#193; DAR POR TERMINADO EL PRESENTE CONTRATO CONJUNTAMENTE CON SU ANEXO 1 / PRESUPUESTO, DANDO AVISO POR ESCRITO A EL CLIENTE CON UN M&#205;NIMO DE TREINTA D&#205;AS DE ANTICIPACI&#211;N A LA FECHA DE TERMINACI&#211;N DESEADA.</p>
+                                <p>POR OTRA PARTE, EL CLIENTE PODR&#193; DAR POR TERMINADO EL PRESENTE CONTRATO EN CUALQUIER MOMENTO SIN RESPONSABILIDAD ALGUNA Y SIN NECESIDAD DE DECLARACI&#211;N Y/O RESOLUCI&#211;N JUDICIAL PREVIA, DANDO AVISO POR ESCRITO A LA OTRA PARTE CON UN M&#205;NIMO DE TREINTA D&#205;AS DE ANTICIPACI&#211;N A LA FECHA DE TERMINACI&#211;N DESEADA.</p>
+                                <p>UN EVENTO DE FUERZA MAYOR NO PODR&#193;, POR CUALQUIER MOTIVO O CIRCUNSTANCIA, AFECTAR LOS DERECHOS DE LAS PARTES DE TERMINAR EL CONTRATO CONFORME A LOS T&#201;RMINOS DE ESTE.</p>
+
+                                <p><strong>QUINTA. LICENCIAS, PERMISOS Y/O AUTORIZACIONES.</strong></p>
+                                <p>EN CASO DE QUE EL PRESTADOR REQUIERA LA TRAMITACI&#211;N DE ALGUNA LICENCIA, AUTORIZACI&#211;N O PERMISO PARA LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS OBJETO DE ESTE CONTRATO, &#201;STE SE OBLIGA A OBTENERLOS POR SU CUENTA Y COSTO.</p>
+                                <p>POR SU PARTE, EL CLIENTE SE OBLIGA A MANTENER VIGENTE SU PERMISO DE GENERADOR O PLAN DE MANEJO DE RESIDUOS OTORGADO POR SEDEMA O PERMISO DE LA ENTIDAD CORRESPONDIENTE.</p>
+
+                                <p><strong>SEXTA. OBLIGACIONES Y RESPONSABILIDAD LABORAL</strong></p>
+                                <p>EL PRESTADOR SER&#193; QUIEN FIJE LAS TAREAS A DESARROLLAR EN LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS ESTIPULADOS EN ESTE CONTRATO Y ESTAR&#193; A SU CARGO LA EJECUCI&#211;N DE ESTOS; SERVICIOS QUE SER&#193;N PRESTADOS CON SUS TRABAJADORES QUE ESTAR&#193;N EN TODO MOMENTO A SU DISPOSICI&#211;N Y/O BAJO SU SUPERVISI&#211;N, VIGILANCIA, DIRECCI&#211;N, SUBORDINACI&#211;N Y DEPENDENCIA.</p>
+                                <p>EL PRESTADOR MANIFIESTA QUE CUENTA CON TODOS LOS ELEMENTOS PROPIOS Y SUFICIENTES PARA HACER FRENTE A TODAS SUS OBLIGACIONES LABORALES CON SUS TRABAJADORES; TENIENDO EN TODO MOMENTO EL CAR&#193;CTER DE PATR&#211;N &#218;NICO RESPECTO AL PERSONAL QUE DESIGNE EN LA PRESTACI&#211;N DE LOS SERVICIOS PRESTADOS EN ESTE CONTRATO.</p>
+                                <p>EL PRESTADOR DEJA LIBRE Y A SALVO A EL CLIENTE DE LAS RELACIONES LABORALES U OBRERAS PATRONALES QUE EXISTEN ENTRE EL PRESTADOR Y SUS TRABAJADORES DESIGNADOS PARA LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS DE ESTE CONTRATO.</p>
+                                <p>EL PRESTADOR SE OBLIGA A PROPORCIONAR A EL CLIENTE CUANDO &#201;STE LO SOLICITE EN UN PLAZO M&#193;XIMO DE TREINTA D&#205;AS TODA LA INFORMACI&#211;N Y DOCUMENTOS QUE ACREDITEN EL CABAL CUMPLIMIENTO A TODAS LAS OBLIGACIONES LABORALES EN RELACI&#211;N CON SUS TRABAJADORES QUE PRESTAN EL SERVICIO DE ESTE CONTRATO.</p>
+
+                                <p><strong>S&#201;PTIMA. SUBCONTRATACI&#211;N DE SERVICIOS</strong></p>
+                                <p>PARA LOS EFECTOS DEL PRESENTE CONTRATO, EL PRESTADOR NO PODR&#193; SUBCONTRATAR EN TODO O EN PARTE, LOS SERVICIOS PRESTADOS ESPECIALIZADOS OBJETO DE ESTE CONTRATO Y ANEXO 1 / PRESUPUESTO.</p>
+
+                                <p><strong>OCTAVA. OBLIGACIONES FISCALES</strong></p>
+                                <p>CADA UNA DE LAS PARTES SER&#193; RESPONSABLE DEL PAGO DE TODAS Y CADA UNA DE LAS CONTRIBUCIONES, IMPUESTOS Y DEM&#193;S CARGAS FISCALES QUE CONFORME A LAS LEYES FEDERALES, ESTATALES Y MUNICIPALES DE LOS ESTADOS UNIDOS MEXICANOS TENGAN LA OBLIGACI&#211;N DE CUBRIR DURANTE EL PLAZO, EJECUCI&#211;N Y CUMPLIMIENTO DEL CONTRATO.</p>
+
+                                <p><strong>NOVENA. SEGUROS</strong></p>
+                                <p>EL PRESTADOR CUENTA CON UNA P&#211;LIZA VIGENTE DE SEGURO DE NEGOCIO PROTEGIDO CON LA ASEGURADORA GRUPO NACIONAL PROVINCIAL N&#218;MERO 583174859, CON DIVERSAS COBERTURAS CONTRATADAS ENTRE ELLAS LA DE RESPONSABILIDAD CIVIL CON UNA SUMA ASEGURADA L&#205;MITE &#218;NICO Y COMBINADO DE $8,040,573.45 (OCHO MILLONES CUARENTA MIL QUINIENTOS SETENTA Y TRES PESOS 45/100 M.N.).</p>
+
+                                <p><strong>D&#201;CIMA. SOBRE EL REPSE Y EL RAMIR</strong></p>
+                                <p>EL PRESTADOR SE OBLIGA A MANTENER VIGENTE SU REGISTRO REPSE ANTE EL PADR&#211;N P&#218;BLICO DE PRESTADORAS DE SERVICIOS U OBRAS ESPECIALIZADAS (REPSE) DE LA SECRETAR&#205;A DE TRABAJO Y PREVISI&#211;N SOCIAL, AS&#205; COMO EL RAMIR (REGISTRO Y AUTORIZACI&#211;N PARA EL MANEJO INTEGRAL DE LOS RESIDUOS) DE LA SECRETAR&#205;A DEL MEDIO AMBIENTE DEL GOBIERNO DE LA CIUDAD DE M&#201;XICO.</p>
+
+                                <p><strong>D&#201;CIMA PRIMERA. DEL MANEJO DE DATOS PERSONALES</strong></p>
+                                <p>LAS PARTES RECONOCEN Y SE OBLIGAN A QUE TODA LA INFORMACI&#211;N PERSONAL QUE LLEGUEN A CONOCER CON MOTIVO DEL PRESENTE CONTRATO, CADA UNA DEBER&#193; CUMPLIR CON DAR EL DEBIDO TRATAMIENTO A LA MISMA DE CONFORMIDAD A LA NUEVA LEY DE TRANSPARENCIA SOBRE LA TUTELA DEL DERECHO DE ACCESO A LA INFORMACI&#211;N P&#218;BLICA.</p>
+
+                                <p><strong>D&#201;CIMA SEGUNDA. LA CONFIDENCIALIDAD</strong></p>
+                                <p>LAS PARTES EN ESTE ACTO ACUERDAN QUE SE ENTIENDE POR INFORMACI&#211;N CONFIDENCIAL, TODA LA INFORMACI&#211;N DE CUALQUIER &#205;NDOLE O NATURALEZA, MARCADA O NO COMO CONFIDENCIAL, PROPIEDAD EXCLUSIVA DE CADA UNA DE ELLAS, QUE SEA FACILITADA, ENVIADA O DE CUALQUIER OTRA FORMA REVELADA, POR CUALQUIER OTRO MEDIO PARA O EN RELACI&#211;N CON LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS OBJETO DEL PRESENTE CONTRATO.</p>
+                                <p>LAS OBLIGACIONES DE CONFIDENCIALIDAD CONTENIDAS EN LA PRESENTE CL&#193;USULA SUBSISTIR&#193;N EN LOS T&#201;RMINOS ANTES CONVENIDOS A&#218;N DESPU&#201;S DE TERMINADO O VENCIDO EL PLAZO DEL PRESENTE CONTRATO POR UN PLAZO DE UN A&#209;O SIGUIENTES A DICHA TERMINACI&#211;N.</p>
+
+                                <p><strong>D&#201;CIMA TERCERA. PROPIEDAD INDUSTRIAL Y DERECHOS DE AUTOR</strong></p>
+                                <p>EL CLIENTE RECONOCE QUE EL PRESTADOR ES EL TITULAR, ENTRE OTROS DE LOS DERECHOS SOBRE LA MARCA Y SLOGAN REGISTRADOS QUE LLEVEN EL NOMBRE DE PYATZ, AS&#205; COMO DE LAS MARCAS Y LOS DISE&#209;OS.</p>
+
+                                <p><strong>D&#201;CIMA CUARTA. CESI&#211;N DE DERECHOS</strong></p>
+                                <p>LAS PARTES EXPRESAMENTE CONVIENEN QUE EST&#193; PROHIBIDO A EL PRESTADOR CEDER PARCIAL O TOTALMENTE LOS DERECHOS Y OBLIGACIONES CONTENIDAS EN EL PRESENTE CONTRATO, SALVO AUTORIZACI&#211;N POR ESCRITO DE EL CLIENTE.</p>
+
+                                <p><strong>D&#201;CIMA QUINTA. RESCISI&#211;N</strong></p>
+                                <p>EL CLIENTE PODR&#193; RESCINDIR EL PRESENTE CONTRATO SIN NECESIDAD DE PREVIO REQUERIMIENTO O DECLARACI&#211;N Y/O RESOLUCI&#211;N JUDICIAL Y SIN NINGUNA RESPONSABILIDAD DE SU PARTE CUANDO EL PRESTADOR INCUMPLA CON CUALQUIERA DE SUS OBLIGACIONES DERIVADAS DEL PRESENTE CONTRATO O T&#201;RMINOS DEL ANEXO 1 / PRESUPUESTO, Y POR LOS SIGUIENTES SUPUESTOS:<br/>
+                                A) SI EL PRESTADOR NO CUMPLE OPORTUNA Y ADECUADAMENTE CON SUS OBLIGACIONES QUE COMO &#218;NICO PATR&#211;N LE CORRESPONDEN RESPECTO DE SUS EMPLEADOS O TRABAJADORES,<br/>
+                                B) CUANDO EL PRESTADOR SE ENCUENTRE SUJETO A UN PROCEDIMIENTO LEGAL QUE LE IMPIDA CONTINUAR PRESTANDO LOS SERVICIOS,<br/>
+                                C) CUANDO EL PRESTADOR EST&#201; EN DISOLUCI&#211;N O LIQUIDACI&#211;N DE SU SOCIEDAD,<br/>
+                                D) CUANDO OCURRA UN PARO DE LABORES EN LAS INSTALACIONES DE EL PRESTADOR,<br/>
+                                E) INCUMPLA CON LOS PLAZOS Y CALENDARIO DE ACTIVIDADES ESTABLECIDOS PARA LA PRESTACI&#211;N DE LOS SERVICIOS ESPECIALIZADOS,<br/>
+                                F) CUANDO NO PUEDA CONTINUAR CON LA PRESTACI&#211;N DE SERVICIOS ESPECIALIZADOS POR LA FALTA DE UN PERMISO, LICENCIA O AUTORIZACI&#211;N,<br/>
+                                G) SUSPENDA INJUSTIFICADAMENTE LA PRESTACI&#211;N DE LOS SERVICIOS,<br/>
+                                H) CEDA O TRANSFIERA DE CUALQUIER FORMA LAS OBLIGACIONES Y DERECHOS DEL CONTRATO SIN CONTAR CON EL CONSENTIMIENTO DE EL CLIENTE,<br/>
+                                I) SE LE REVOQUE O CANCELE DE MANERA DEFINITIVA CUALQUIER PERMISO O AUTORIZACI&#211;N NECESARIA PARA EL CUMPLIMIENTO DE SUS OBLIGACIONES BAJO EL CONTRATO, INCLUYENDO SU REGISTRO DEL REPSE Y/O RAMIR,<br/>
+                                J) SI DECLARA CON FALSEDAD U OMITE PROPORCIONAR INFORMACI&#211;N IMPORTANTE PARA CELEBRACI&#211;N Y EJECUCI&#211;N DEL CONTRATO,<br/>
+                                K) CUANDO INCUMPLA LOS T&#201;RMINOS, PLAZOS Y CONDICIONES ESTABLECIDAS EN EL ANEXO 1 / PRESUPUESTO,<br/>
+                                L) EN INCUMPLIMIENTO A CUALQUIERA DE LAS OBLIGACIONES ESTABLECIDAS EN EL CONTRATO Y SU ANEXO 1 / PRESUPUESTO.</p>
+
+                                <p><strong>D&#201;CIMA SEXTA. ACTA CIRCUNSTANCIADA Y FINIQUITO</strong></p>
+                                <p>UNA VEZ COMUNICADA LA TERMINACI&#211;N ANTICIPADA, LAS PARTES LEVANTAR&#193;N EL ACTA CIRCUNSTANCIADA DEL ESTATUS EN QUE SE ENCUENTRA EL CONTRATO.</p>
+
+                                <p><strong>D&#201;CIMA S&#201;PTIMA. COMUNICACIONES DE LAS PARTES</strong></p>
+                                <p>EL PRESTADOR: CALLEJ&#211;N GENERAL ANAYA #11 COL. SAN DIEGO CHURUBUSCO CP: 04120 M&#201;XICO; CORREO ELECTR&#211;NICO g.garciadealba@pyatz.com.mx</p>
+                                <p>EL CLIENTE: CALLE <strong>{!quoteRecord.Account.Calle_Notificacion__c}</strong> # EXT <strong>{!quoteRecord.Account.Ext_Notificacion__c}</strong> # INT <strong>{!quoteRecord.Account.Int_Notificacion__c}</strong> COLONIA. <strong>{!quoteRecord.Account.Colonia_Notificacion__c}</strong> ALCALD&#205;A <strong>{!quoteRecord.Account.Alcaldia_Notificacion__c}</strong> C.P. <strong>{!quoteRecord.Account.CP_Notificacion__c}</strong>, CIUDAD <strong>{!quoteRecord.Account.CD_Notificacion__c}</strong>, <strong>{!quoteRecord.Account.Pais_Notificacion__c}</strong>. CORREO ELECTR&#211;NICO <strong>{!quoteRecord.Account.Correo_Notificacion__c}</strong> Y TEL&#201;FONO DE CONTACTO <strong>{!quoteRecord.Account.Tel_Notificacion__c}</strong>.</p>
+
+                                <p><strong>D&#201;CIMA OCTAVA. EL USO DE FIRMAS ELECTR&#211;NICAS</strong></p>
+                                <p>LAS PARTES ACUERDAN Y ACEPTAN QUE EL PRESENTE DOCUMENTO SER&#193; FIRMADO F&#205;SICAMENTE POR SUS REPRESENTANTES LEGALES, Y S&#211;LO DE COM&#218;N ACUERDO PODR&#193; SER FIRMADO ELECTR&#211;NICAMENTE, UTILIZANDO UNA PLATAFORMA O SOFTWARE QUE CUMPLA CON LA NORMA MEXICANA NOM151.</p>
+
+                                <p><strong>D&#201;CIMA NOVENA. DE LAS MODIFICACIONES AL CONTRATO Y/O ANEXO</strong></p>
+                                <p>LAS PARTES ACUERDAN QUE TODAS LAS MODIFICACIONES QUE SE HAGAN A ESTE CONTRATO DEBER&#193;N CONSTAR POR ESCRITO FIRMADO POR AMBAS PARTES PARA QUE TENGAN VALIDEZ.</p>
+
+                                <p><strong>VIG&#201;SIMA. JURISDICCI&#211;N Y COMPETENCIA</strong></p>
+                                <p>PARA TODO LO RELATIVO A LA INTERPRETACI&#211;N, CUMPLIMIENTO Y EJECUCI&#211;N DEL PRESENTE CONTRATO, LAS PARTES SE SOMETEN EXPRESAMENTE A LA JURISDICCI&#211;N Y COMPETENCIA DE LAS LEYES Y TRIBUNALES DE LA CIUDAD DE M&#201;XICO.</p>
+
+                                <p>DIGITAL EN LA CIUDAD DE M&#201;XICO, EL <strong>{!fechaContrato}</strong>.</p>
+
+                                <div class="sig-section" style="margin-top:50pt;">
+                                    <table class="tbl-sig">
+                                        <tr>
+                                            <td>
+                                                <div class="sig-space">
+                                                    <apex:outputPanel rendered="{!NOT(ISBLANK(signatureUrl))}" layout="none">
+                                                        <img src="{!signatureUrl}" style="height:55pt; width:auto;"/>
+                                                    </apex:outputPanel>
+                                                </div>
+                                                <div class="sig-line">
+                                                    <strong>&#8220;EL PRESTADOR&#8221;</strong><br/>
+                                                    PYATZ INGENIER&#205;A BIOTECNOL&#211;GICA S.A. DE C.V.<br/>
+                                                    {!firmanteNombre}<br/>
+                                                    REPRESENTANTE LEGAL
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="sig-space"></div>
+                                                <div class="sig-line">
+                                                    <strong>&#8220;EL CLIENTE&#8221;</strong><br/>
+                                                    <strong>{!quoteRecord.Account.Name}</strong><br/>
+                                                    {!quoteRecord.Account.Nombre_RL__c}<br/>
+                                                    REPRESENTANTE LEGAL
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="sig-space" style="text-align:center;">
+                                                    <img src="{!$Resource.sello}" style="height:60pt; width:auto;"/>
+                                                </div>
+                                                <div class="sig-line">Sello de la Empresa</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <div style="margin-top:30pt; border-top:1.5pt solid #0070d2; padding-top:10pt;">
+                                    <p style="text-align:center; font-weight:bold; font-size:10pt;">A N E X O 1 / P R E S U P U E S T O</p>
+                                    <p>LIBERACI&#211;N DE PEDIDOS: <strong>{!quoteRecord.Account.Proceso_liberacion_pedidos__c}</strong></p>
+                                    <p>INGRESO DE FACTURAS: <strong>{!quoteRecord.Account.Proceso_ingreso_de_facturas__c}</strong></p>
+                                    <p>PLAZOS PARA REALIZAR LOS PAGOS DE LOS SERVICIOS: INDICADO EN LA TABLA DE IMPORTES.</p>
+                                </div>
+
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
-            <apex:outputPanel rendered="{!config['show_total']}">
-                <div class="totals-box">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 3pt 0; text-align: left; color: #666; font-size: 9pt;">SUBTOTAL</td>
-                            <td style="padding: 3pt 0; text-align: right; font-weight: bold; width: 80pt;">
-                                <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!quoteRecord.Subtotal}" />
-                                </apex:outputText>
-                            </td>
-                        </tr>
-                        <apex:outputPanel rendered="{!NOT(ISNULL(quoteRecord.Discount)) && quoteRecord.Discount > 0}" layout="none">
-                            <tr>
-                                <td style="padding: 3pt 0; text-align: left; color: #d8000c; font-size: 9pt;">DESCUENTO</td>
-                                <td style="padding: 3pt 0; text-align: right; font-weight: bold; color: #d8000c;">
-                                    - <apex:outputText value="{0, number, currency}">
-                                        <apex:param value="{!quoteRecord.Discount}" />
-                                    </apex:outputText>
-                                </td>
-                            </tr>
-                        </apex:outputPanel>
-                        <tr>
-                            <td style="padding: 3pt 0; text-align: left; color: #666; font-size: 9pt;">I.V.A. (16%)</td>
-                            <td style="padding: 3pt 0; text-align: right; font-weight: bold;">
-                                <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!totalContrato - (quoteRecord.Subtotal - IF(ISNULL(quoteRecord.Discount), 0, quoteRecord.Discount))}" />
-                                </apex:outputText>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8pt 0; text-align: left; font-size: 12pt; font-weight: bold; color: #0070d2;">TOTAL DEL CONTRATO</td>
-                            <td style="padding: 8pt 0; text-align: right; font-size: 12pt; font-weight: bold; color: #0070d2; border-bottom: 2pt solid #0070d2;">
-                                <apex:outputText value="{0, number, currency}">
-                                    <apex:param value="{!totalContrato}" />
-                                </apex:outputText>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </apex:outputPanel>
+            <!-- ═══ SECCIÓN 1: INTRODUCCIÓN ════════════════════════════
+                 thead=3.3cm reserva espacio bajo el header fijo.
+                 tfoot=2.3cm reserva espacio sobre el footer fijo.            -->
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body">
 
-            <div style="clear: both;"></div>
+                                <table class="hdr-table">
+                                    <tr>
+                                        <td width="62%" style="vertical-align:top; padding:0;">
+                                            <div class="quote-number">CONTRATO No. {!quoteNumberShort}</div>
+                                            <div class="business-lines">{!quoteRecord.Business_Lines_Selected__c}</div>
+                                            <div class="nombre-comercial">{!quoteRecord.Account.Name}</div>
+                                            <div class="asunto"><strong>Asunto:</strong>&#160;{!quoteRecord.Name}</div>
+                                        </td>
+                                        <td width="38%" style="vertical-align:top; text-align:right; font-size:10pt; padding:2pt 0 0 0;">
+                                            <div><strong>Fecha:</strong>&#160;{!fechaHoy}</div>
+                                            <div><strong>Agente:</strong>&#160;{!firmanteNombre}</div>
+                                        </td>
+                                    </tr>
+                                </table>
 
-            <div class="signature-section">
-                <div class="sig-box">
-                    <div class="sig-line">EL CLIENTE (FIRMA)</div>
-                    <div style="font-size: 8pt; margin-top: 5pt; font-weight: bold; text-transform: uppercase;">{!firmanteCliente}</div>
-                </div>
-                <div class="spacer"></div>
-                <div class="sig-box">
-                    <div style="margin-bottom: 10pt;">
-                        <div style="font-family: cursive; font-size: 18pt; color: #0070d2;">{!firmanteNombre}</div>
-                    </div>
-                    <div class="sig-line">
-                        POR PYATZ: {!firmanteNombre}<br />
-                        {!firmanteCargo}
-                    </div>
-                </div>
-            </div>
-            <img src="{!$Resource.FooterPDF}" class="footer-img" />
-        </div>
+                                <div class="sede-title">{!quoteRecord.Technical_Sedes__c}</div>
 
-        
-    </body>
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(quoteRecord.Introduction_Text__c))}">
+                                    <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin-top:3pt; font-size:10pt;">
+                                        <colgroup>
+                                            <col style="width:15pt;"/>
+                                            <col/>
+                                            <col style="width:15pt;"/>
+                                        </colgroup>
+                                        <tr>
+                                            <td style="width:15pt;"></td>
+                                            <td>
+                                                <apex:outputText value="{!quoteRecord.Introduction_Text__c}" escape="false"/>
+                                            </td>
+                                            <td style="width:15pt;"></td>
+                                        </tr>
+                                    </table>
+                                </apex:outputPanel>
 
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ═══ SECCIÓN 2: TABLA DE SERVICIOS (Pág. 2+) ══════════════════ -->
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body">
+
+                                <table class="tbl-svc">
+                                    <thead>
+                                        <tr>
+                                            <th width="50%" style="text-align:left; padding-left:8pt;">Concepto / Servicio</th>
+                                            <th width="10%">Cant</th>
+                                            <apex:outputPanel rendered="{!config['show_line_prices']}" layout="none">
+                                                <th width="20%" style="text-align:right;">P. Unitario</th>
+                                                <th width="20%" style="text-align:right; padding-right:8pt;">Importe</th>
+                                            </apex:outputPanel>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <apex:repeat value="{!selectedLineItems}" var="item">
+                                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
+                                                <tr class="row-sep">
+                                                    <td colspan="4">{!item.Product2.Name}</td>
+                                                </tr>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
+                                                <tr class="row-item">
+                                                    <td style="padding-left:8pt;"><strong>{!item.Product2.Name}</strong></td>
+                                                    <td style="text-align:center;">{!item.Quantity}</td>
+                                                    <apex:outputPanel rendered="{!config['show_line_prices']}" layout="none">
+                                                        <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
+                                                        <td style="text-align:right; padding-right:8pt;"><strong><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></strong></td>
+                                                    </apex:outputPanel>
+                                                </tr>
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
+                                                    <tr class="row-detail">
+                                                        <td colspan="4">
+                                                            <div class="detail-inner">
+                                                                <apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </apex:outputPanel>
+                                            </apex:outputPanel>
+                                        </apex:repeat>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ═══ SECCIÓN 2b: TOTALES + CONDICIONES (continúa sin page-break forzado) ═══ -->
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body">
+
+                                <apex:outputPanel rendered="{!config['show_total']}">
+                                    <table class="tbl-totals">
+                                        <tr>
+                                            <td class="tot-lbl">SUBTOTAL</td>
+                                            <td class="tot-val">
+                                                <apex:outputText value="{0, number, currency}">
+                                                    <apex:param value="{!BLANKVALUE(quoteRecord.Subtotal, 0)}"/>
+                                                </apex:outputText>
+                                            </td>
+                                        </tr>
+                                        <apex:outputPanel rendered="{!NOT(ISNULL(quoteRecord.Discount)) && quoteRecord.Discount > 0}" layout="none">
+                                            <tr>
+                                                <td class="tot-lbl" style="color:#d8000c;">DESCUENTO</td>
+                                                <td class="tot-val" style="color:#d8000c;">
+                                                    - <apex:outputText value="{0, number, currency}">
+                                                        <apex:param value="{!quoteRecord.Discount}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
+                                        <tr>
+                                            <td class="tot-lbl">I.V.A. (16%)</td>
+                                            <td class="tot-val">
+                                                <apex:outputText value="{0, number, currency}">
+                                                    <apex:param value="{!BLANKVALUE(quoteRecord.Tax, 0)}"/>
+                                                </apex:outputText>
+                                            </td>
+                                        </tr>
+                                        <tr class="row-grand">
+                                            <td class="tot-lbl">TOTAL</td>
+                                            <td class="tot-val">
+                                                <apex:outputText value="{0, number, currency}">
+                                                    <apex:param value="{!BLANKVALUE(totalContrato, 0)}"/>
+                                                </apex:outputText>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </apex:outputPanel>
+
+                                <!-- CONDICIONES DE PAGO -->
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(quoteRecord.Description))}">
+                                    <div class="payment-box">
+                                        <div class="payment-title">Condiciones de Pago</div>
+                                        <div class="payment-body">
+                                            <apex:outputText value="{!quoteRecord.Description}" escape="false"/>
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ═══ SECCIÓN 3: CLÁUSULAS Y FIRMAS ════════════════════════════ -->
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body">
+
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(quoteRecord.Warranty_Text__c))}">
+                                    <div class="warranty-block">
+                                        <div class="warranty-title">Condiciones / Anexos / Cl&#225;usulas</div>
+                                        <div class="warranty-content">
+                                            <apex:outputText escape="false" value="{!quoteRecord.Warranty_Text__c}"/>
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+
+                                <div class="sig-section">
+                                    <table class="tbl-sig">
+                                        <tr>
+                                            <td>
+                                                <div class="sig-space"></div>
+                                                <div class="sig-line">Firma del CLIENTE</div>
+                                            </td>
+                                            <td>
+                                                <div class="sig-space">
+                                                    <apex:outputPanel rendered="{!NOT(ISBLANK(signatureUrl))}" layout="none">
+                                                        <img src="{!signatureUrl}" style="height:55pt; width:auto;"/>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!ISBLANK(signatureUrl)}" layout="none">
+                                                        <div style="font-family:'Courier New',monospace; font-size:13pt; color:#0070d2;">{!firmanteNombre}</div>
+                                                    </apex:outputPanel>
+                                                </div>
+                                                <div class="sig-line">FIRMA AUTORIZADA PYATZ</div>
+                                            </td>
+                                            <td>
+                                                <div class="sig-space" style="text-align:center;">
+                                                    <img src="{!$Resource.sello}" style="height:60pt; width:auto;"/>
+                                                </div>
+                                                <div class="sig-line">Sello de la Empresa</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <img src="{!$Resource.FooterPDF}" class="footer-img"/>
+        </body>
     </html>
 </apex:page>
