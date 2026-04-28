@@ -17,8 +17,8 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
     @track relatedFiles = [];
 
     connectedCallback() {
-        this.pl1.costo = parseFloat(this.costoBase || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        this.pl2.costo = parseFloat(this.costoBase || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        this.pl1.costo = parseFloat(this.costoBase || 0);
+        this.pl2.costo = parseFloat(this.costoBase || 0);
         this.loadPLData();
         this.loadFiles();
     }
@@ -51,7 +51,7 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
                     result.forEach(rec => {
                         const data = {
                             anio: rec.Anio__c,
-                            costo: rec.Costo_Inversion__c || this.costoBase,
+                            costo: parseFloat(rec.Costo_Inversion__c || this.costoBase),
                             margen: rec.Margen_Esperado__c,
                             indirecto: rec.Gastos_Indirectos__c,
                             comision1: rec.Comision_Venta__c,
@@ -72,8 +72,18 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
     handleGlobalPLChange(event) {
         const field = event.target.dataset.field;
         const val = parseFloat(event.target.value) || 0;
-        this.pl1 = { ...this.pl1, [field]: val };
-        this.pl2 = { ...this.pl2, [field]: val };
+        const year = event.target.dataset.year;
+
+        if (year === "1") {
+            this.pl1 = { ...this.pl1, [field]: val };
+        } else if (year === "2") {
+            this.pl2 = { ...this.pl2, [field]: val };
+        } else {
+            // Cambio Global (Columna central)
+            this.pl1 = { ...this.pl1, [field]: val };
+            this.pl2 = { ...this.pl2, [field]: val };
+        }
+        
         this.recalculateAll();
     }
 
@@ -106,7 +116,7 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
         const utilidadNeta = venta - egresoTotal;
         const margenRealPct = venta > 0 ? (utilidadNeta / venta) * 100 : 0;
 
-        const fmt = (val) => val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fmt = (val) => val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
         return {
             venta: fmt(venta),
