@@ -4,6 +4,9 @@ public with sharing class QuoteTechnicalPDFController {
     public String signatureUrl {get; set;}
     public String quoteNumberShort {get; set;}
     public String atencionNames {get; set;}
+    public String metodoPago {get; set;}
+    public String tipoTrabajo {get; set;}
+    public String descripcionPago {get; set;}
     public Map<Id, String> htmlDescriptions {get; set;}
 
     public QuoteTechnicalPDFController(ApexPages.StandardController stdController) {
@@ -58,6 +61,25 @@ public with sharing class QuoteTechnicalPDFController {
                     atencionNames = this.technicalQuote.Contact.Name;
                 }
                 this.atencionNames = atencionNames; // ASIGNACIÓN CLAVE
+
+                // --- PROCESAR DATOS DE PAGO ---
+                List<String> metodos = new List<String>();
+                if (fullState.containsKey('pagoTransferencia') && (Boolean)fullState.get('pagoTransferencia')) metodos.add('Transferencia');
+                if (fullState.containsKey('pagoTarjeta') && (Boolean)fullState.get('pagoTarjeta')) metodos.add('Tarjeta');
+                this.metodoPago = metodos.isEmpty() ? 'A convenir' : String.join(metodos, ' / ');
+
+                List<String> tipos = new List<String>();
+                if (fullState.containsKey('trabajoPuntual') && (Boolean)fullState.get('trabajoPuntual')) tipos.add('Trabajo Puntual');
+                if (fullState.containsKey('ventaProducto') && (Boolean)fullState.get('ventaProducto')) tipos.add('Venta de Producto');
+                if (fullState.containsKey('trabajoMantenimiento') && (Boolean)fullState.get('trabajoMantenimiento')) tipos.add('Mantenimiento');
+                this.tipoTrabajo = tipos.isEmpty() ? 'N/A' : String.join(tipos, ' / ');
+
+                if (fullState.containsKey('observacionesPago')) {
+                    this.descripcionPago = (String)fullState.get('observacionesPago');
+                } else {
+                    this.descripcionPago = this.technicalQuote.Description;
+                }
+                // ------------------------------
 
                 if (this.technicalQuote.Introduction_Text__c != null) {
                     this.technicalQuote.Introduction_Text__c = this.technicalQuote.Introduction_Text__c.replace('[[ATENCION]]', atencionNames);
