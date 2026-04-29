@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estrategia_Venta__c</fullName>
+    <description>Estrategia de venta seleccionada durante la creación del presupuesto técnico.</description>
+    <externalId>false</externalId>
+    <label>Estrategia de Venta</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>E1</fullName>
+                <default>false</default>
+                <label>E1 - Póliza Anual</label>
+            </value>
+            <value>
+                <fullName>E2</fullName>
+                <default>false</default>
+                <label>E2 - Extraordinario</label>
+            </value>
+            <value>
+                <fullName>E3</fullName>
+                <default>false</default>
+                <label>E3 - Cliente Nuevo</label>
+            </value>
+            <value>
+                <fullName>E4</fullName>
+                <default>false</default>
+                <label>E4 - Retardantes</label>
+            </value>
+            <value>
+                <fullName>E5</fullName>
+                <default>false</default>
+                <label>E5 - Cedis</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

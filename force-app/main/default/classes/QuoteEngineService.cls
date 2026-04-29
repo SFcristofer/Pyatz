@@ -23,13 +23,14 @@ public with sharing class QuoteEngineService {
                 q.Introduction_Text__c = (String)p.get('intro'); q.Warranty_Text__c = (String)p.get('warranty');
                 q.Markers_Data__c = (String)p.get('markersData'); q.Technical_Sedes__c = (String)p.get('technicalSedes');
                 q.Description = (String)p.get('observacionesPago');
+                q.Estrategia_Venta__c = (String)p.get('estrategiaVenta');
                 update q;
             } else {
                 if (oppId == null && rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') oppId = rid;
                 Id pbId;
                 if (oppId != null) { List<Opportunity> opps = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1]; if (!opps.isEmpty()) pbId = opps[0].Pricebook2Id; }
                 if (pbId == null) pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id;
-                q = new Quote(Name = (String)p.get('name'), OpportunityId = oppId, Pricebook2Id = pbId, Status = status, ContactId = contactId, Introduction_Text__c = (String)p.get('intro'), Warranty_Text__c = (String)p.get('warranty'), Markers_Data__c = (String)p.get('markersData'), Technical_Sedes__c = (String)p.get('technicalSedes'), Description = (String)p.get('observacionesPago'), ExpirationDate = Date.today().addDays(30));
+                q = new Quote(Name = (String)p.get('name'), OpportunityId = oppId, Pricebook2Id = pbId, Status = status, ContactId = contactId, Introduction_Text__c = (String)p.get('intro'), Warranty_Text__c = (String)p.get('warranty'), Markers_Data__c = (String)p.get('markersData'), Technical_Sedes__c = (String)p.get('technicalSedes'), Description = (String)p.get('observacionesPago'), Estrategia_Venta__c = (String)p.get('estrategiaVenta'), ExpirationDate = Date.today().addDays(30));
                 insert q; rid = q.Id;
             }
 

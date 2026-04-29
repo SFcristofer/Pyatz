@@ -320,7 +320,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             quoteId: this.recordId, opportunityId: this.parentOpportunityId, contactId: this.selectedContactIds.length > 0 ? this.selectedContactIds[0] : null,
             name: this.asunto, status: status, intro: this.introduccion, warranty: this.warranty, observacionesPago: this.observacionesPago,
             markersData: encoded, technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
-            lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true
+            lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true,
+            estrategiaVenta: this.estrategiaVenta
         };
 
         try {
