@@ -5,11 +5,16 @@ public with sharing class TechWorkOrderController {
         Map<String, Object> result = new Map<String, Object>();
         try {
             if (serviceContractId != null) {
-                ServiceContract sc = [SELECT Id, Name, StartDate, EndDate, Account.Name, Quote_Source__r.QuoteNumber FROM ServiceContract WHERE Id = :serviceContractId LIMIT 1];
+                ServiceContract sc = [SELECT Id, Name, StartDate, EndDate, Account.Name, 
+                                            Quote_Source__r.QuoteNumber, Quote_Source__r.Business_Lines_Selected__c, 
+                                            Quote_Source__r.Technical_Sedes__c 
+                                     FROM ServiceContract WHERE Id = :serviceContractId LIMIT 1];
                 result.put('quoteId', sc.Quote_Source__c);
                 result.put('accountId', sc.AccountId);
                 result.put('folio', sc.Quote_Source__r != null ? sc.Quote_Source__r.QuoteNumber : sc.Name);
                 result.put('cliente', sc.Account.Name);
+                result.put('lineaNegocio', sc.Quote_Source__r != null ? sc.Quote_Source__r.Business_Lines_Selected__c : '---');
+                result.put('sedes', sc.Quote_Source__r != null ? sc.Quote_Source__r.Technical_Sedes__c : '---');
                 result.put('fechaInicio', sc.StartDate != null ? sc.StartDate.format() : '---');
                 result.put('fechaFin', sc.EndDate != null ? sc.EndDate.format() : '---');
                 List<ContractLineItem> clis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
@@ -32,9 +37,13 @@ public with sharing class TechWorkOrderController {
 
             Quote targetQuote;
             if (quoteId != null) {
-                targetQuote = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId FROM Quote WHERE Id = :quoteId LIMIT 1];
+                targetQuote = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId, 
+                                     Business_Lines_Selected__c, Technical_Sedes__c 
+                              FROM Quote WHERE Id = :quoteId LIMIT 1];
             } else {
-                List<Quote> syncingQuotes = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId FROM Quote WHERE OpportunityId = :oppId AND IsSyncing = true LIMIT 1];
+                List<Quote> syncingQuotes = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId,
+                                                   Business_Lines_Selected__c, Technical_Sedes__c
+                                            FROM Quote WHERE OpportunityId = :oppId AND IsSyncing = true LIMIT 1];
                 if (syncingQuotes.isEmpty()) throw new AuraHandledException('No hay un presupuesto sincronizado.');
                 targetQuote = syncingQuotes[0];
             }
@@ -44,6 +53,8 @@ public with sharing class TechWorkOrderController {
             result.put('accountId', targetQuote.AccountId);
             result.put('folio', targetQuote.QuoteNumber);
             result.put('cliente', targetQuote.Account.Name);
+            result.put('lineaNegocio', targetQuote.Business_Lines_Selected__c != null ? targetQuote.Business_Lines_Selected__c : '---');
+            result.put('sedes', targetQuote.Technical_Sedes__c != null ? targetQuote.Technical_Sedes__c : '---');
             result.put('fechaInicio', targetQuote.CreatedDate.format('dd-MMM-yyyy'));
             result.put('fechaFin', targetQuote.ExpirationDate != null ? targetQuote.ExpirationDate.format() : 'No definida');
             
