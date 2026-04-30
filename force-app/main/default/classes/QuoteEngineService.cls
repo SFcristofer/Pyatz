@@ -17,6 +17,7 @@ public with sharing class QuoteEngineService {
             String status = (String)p.get('status');
             
             Quote q;
+            String businessLines = (String)p.get('businessLines');
             if (rid != null && rid.getSObjectType().getDescribe().getName() == 'Quote') {
                 q = [SELECT Id, Pricebook2Id FROM Quote WHERE Id = :rid LIMIT 1 FOR UPDATE];
                 q.Name = (String)p.get('name'); q.Status = status; q.ContactId = contactId;
@@ -24,13 +25,14 @@ public with sharing class QuoteEngineService {
                 q.Markers_Data__c = (String)p.get('markersData'); q.Technical_Sedes__c = (String)p.get('technicalSedes');
                 q.Description = (String)p.get('observacionesPago');
                 q.Estrategia_Venta__c = (String)p.get('estrategiaVenta');
+                q.Business_Lines_Selected__c = businessLines;
                 update q;
             } else {
                 if (oppId == null && rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') oppId = rid;
                 Id pbId;
                 if (oppId != null) { List<Opportunity> opps = [SELECT Pricebook2Id FROM Opportunity WHERE Id = :oppId LIMIT 1]; if (!opps.isEmpty()) pbId = opps[0].Pricebook2Id; }
                 if (pbId == null) pbId = [SELECT Id FROM Pricebook2 WHERE IsStandard = true AND IsActive = true LIMIT 1].Id;
-                q = new Quote(Name = (String)p.get('name'), OpportunityId = oppId, Pricebook2Id = pbId, Status = status, ContactId = contactId, Introduction_Text__c = (String)p.get('intro'), Warranty_Text__c = (String)p.get('warranty'), Markers_Data__c = (String)p.get('markersData'), Technical_Sedes__c = (String)p.get('technicalSedes'), Description = (String)p.get('observacionesPago'), Estrategia_Venta__c = (String)p.get('estrategiaVenta'), ExpirationDate = Date.today().addDays(30));
+                q = new Quote(Name = (String)p.get('name'), OpportunityId = oppId, Pricebook2Id = pbId, Status = status, ContactId = contactId, Introduction_Text__c = (String)p.get('intro'), Warranty_Text__c = (String)p.get('warranty'), Markers_Data__c = (String)p.get('markersData'), Technical_Sedes__c = (String)p.get('technicalSedes'), Description = (String)p.get('observacionesPago'), Estrategia_Venta__c = (String)p.get('estrategiaVenta'), Business_Lines_Selected__c = businessLines, ExpirationDate = Date.today().addDays(30));
                 insert q; rid = q.Id;
             }
 
@@ -55,7 +57,18 @@ public with sharing class QuoteEngineService {
                 }
                 if (!qlis.isEmpty()) insert qlis;
             }
-            if (oppId != null && rid != null) update new Opportunity(Id = oppId, SyncedQuoteId = rid);
+            if (oppId != null && rid != null) {
+                Opportunity opp = new Opportunity(Id = oppId, SyncedQuoteId = rid);
+                if (businessLines != null) opp.Linea_de_negocio__c = businessLines;
+                if (q.Estrategia_Venta__c != null) {
+                    Map<String, String> strategyLabels = new Map<String, String>{
+                        'E1' => 'E1 - Póliza Anual', 'E2' => 'E2 - Extraordinario',
+                        'E3' => 'E3 - Cliente Nuevo', 'E4' => 'E4 - Retardantes', 'E5' => 'E5 - Cedis'
+                    };
+                    opp.Tipo_de_venta__c = strategyLabels.containsKey(q.Estrategia_Venta__c) ? strategyLabels.get(q.Estrategia_Venta__c) : q.Estrategia_Venta__c;
+                }
+                update opp;
+            }
             return rid;
         } catch (Exception e) { throw new AuraHandledException('Error técnico: ' + e.getMessage()); }
     }

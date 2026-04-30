@@ -30,6 +30,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         'Name', 
         'StageName', 
         'Amount', 
+        'Linea_de_negocio__c',
+        'Tipo_de_venta__c',
         'Subetapa__c', 
         'Auxiliar_oportunidad__c', 
         'Estado_Subetapa__c'

@@ -1,6 +1,7 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecordNotifyChange } from 'lightning/uiRecordApi';
 import getInitialData from '@salesforce/apex/QuoteController.getInitialData';
 import saveTechnicalData from '@salesforce/apex/QuoteController.saveTechnicalData';
 import searchProducts from '@salesforce/apex/QuoteController.searchProducts';
@@ -313,7 +314,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             estrategiaVenta: this.estrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre, 
             pagoTransferencia: this.pagoTransferencia, pagoTarjeta: this.pagoTarjeta, trabajoPuntual: this.trabajoPuntual, 
             ventaProducto: this.ventaProducto, trabajoMantenimiento: this.trabajoMantenimiento, observacionesPago: this.observacionesPago,
-            selectedContactIds: this.selectedContactIds, selectedContactNames: this.selectedContactNames
+            selectedContactIds: this.selectedContactIds, selectedContactNames: this.selectedContactNames,
+            selectedLines: this.selectedLines
         };
         const encoded = btoa(encodeURIComponent(JSON.stringify(markers)).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         const payload = {
@@ -321,7 +323,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             name: this.asunto, status: status, intro: this.introduccion, warranty: this.warranty, observacionesPago: this.observacionesPago,
             markersData: encoded, technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
             lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true,
-            estrategiaVenta: this.estrategiaVenta
+            estrategiaVenta: this.estrategiaVenta,
+            businessLines: this.selectedLines.join(', ')
         };
 
         try {
@@ -329,6 +332,12 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             if (newId) {
                 const isNew = !this.recordId;
                 this.recordId = newId;
+                
+                // NOTIFICAR CAMBIO PARA REFRESCAR LA OPORTUNIDAD EN LA UI (360)
+                if (this.parentOpportunityId) {
+                    getRecordNotifyChange([{ recordId: this.parentOpportunityId }]);
+                }
+
                 if (isNew) {
                     // Solo recargamos si es nuevo para obtener el Folio real
                     await this.loadInitialData();
