@@ -1,6 +1,9 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecord } from 'lightning/uiRecordApi';
+import USER_ID from '@salesforce/user/Id';
+import NAME_FIELD from '@salesforce/schema/User.Name';
 import getQuoteLineItems from '@salesforce/apex/QuoteContractPDFController.getQuoteLineItems';
 import searchUsers from '@salesforce/apex/QuoteController.searchUsers';
 import getContractInitialData from '@salesforce/apex/QuoteController.getContractInitialData';
@@ -33,6 +36,20 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track userResultsManager = [];
     @track selectedCreator = { id: '', name: '' };
     @track selectedManager = { id: '', name: '' };
+
+    // --- MEJORA: AUTOCOMPLETAR USUARIO ACTUAL ---
+    @wire(getRecord, { recordId: USER_ID, fields: [NAME_FIELD] })
+    wiredUser({ error, data }) {
+        if (data) {
+            const userName = data.fields.Name.value;
+            // Solo autocompletar si no se ha seleccionado nada manualmente todavía
+            if (!this.selectedCreator.id) {
+                this.selectedCreator = { id: USER_ID, name: userName };
+            }
+        } else if (error) {
+            console.error('Error obteniendo usuario actual:', error);
+        }
+    }
 
     // Firmante del Cliente
     @track selectedClientSigner = '';
