@@ -196,9 +196,39 @@ public with sharing class QuoteController {
         try {
             Quote q = QuoteSelector.getQuoteById(quoteId);
             String scName = 'Contrato: ' + q.QuoteNumber + ' - ' + q.Name;
-            ServiceContract sc = new ServiceContract(Name = scName, AccountId = q.AccountId, Pricebook2Id = q.Pricebook2Id);
+            
+            ServiceContract sc = new ServiceContract(
+                Name = scName, 
+                AccountId = q.AccountId, 
+                Pricebook2Id = q.Pricebook2Id,
+                Quote_Source__c = quoteId
+            );
             if (contractData.containsKey('fechaInicioContrato')) sc.StartDate = Date.valueOf((String)contractData.get('fechaInicioContrato'));
-            insert sc; update new Quote(Id = quoteId, Status = 'In Review'); return sc.Id;
+            if (contractData.containsKey('fechaVencimiento')) sc.EndDate = Date.valueOf((String)contractData.get('fechaVencimiento'));
+            if (contractData.containsKey('contenidoLegal')) sc.Legal_Content__c = (String)contractData.get('contenidoLegal');
+            insert sc;
+
+            // CREACIÓN DE PARTIDAS DE CONTRATO (MATERIALIDAD)
+            if (contractData.containsKey('lineItemsJson')) {
+                List<Object> items = (List<Object>)JSON.deserializeUntyped((String)contractData.get('lineItemsJson'));
+                List<ContractLineItem> clis = new List<ContractLineItem>();
+                for (Object obj : items) {
+                    Map<String, Object> item = (Map<String, Object>)obj;
+                    if (item.get('isSelected') == true) {
+                        clis.add(new ContractLineItem(
+                            ServiceContractId = sc.Id,
+                            PricebookEntryId = (Id)item.get('PricebookEntryId'),
+                            Quantity = Decimal.valueOf(String.valueOf(item.get('Quantity'))),
+                            UnitPrice = Decimal.valueOf(String.valueOf(item.get('UnitPrice'))),
+                            Description = (String)item.get('Description')
+                        ));
+                    }
+                }
+                if (!clis.isEmpty()) insert clis;
+            }
+
+            update new Quote(Id = quoteId, Status = 'In Review'); 
+            return sc.Id;
         } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 

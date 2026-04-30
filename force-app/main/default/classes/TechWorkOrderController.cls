@@ -14,9 +14,18 @@ public with sharing class TechWorkOrderController {
                 result.put('fechaFin', sc.EndDate != null ? sc.EndDate.format() : '---');
                 List<ContractLineItem> clis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
                 List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
-                for (ContractLineItem cli : clis) {
-                    tratamientos.add(new Map<String, Object>{'id' => cli.Id, 'name' => cli.Product2.Name, 'quantity' => cli.Quantity, 'zonas' => cli.Description});
+                
+                if (!clis.isEmpty()) {
+                    for (ContractLineItem cli : clis) {
+                        tratamientos.add(new Map<String, Object>{'id' => cli.Id, 'name' => cli.Product2.Name, 'quantity' => cli.Quantity, 'zonas' => cli.Description});
+                    }
+                } else if (sc.Quote_Source__c != null) {
+                    // FALLBACK: Si el contrato no tiene partidas, buscamos en la cotización de origen
+                    for (QuoteLineItem qli : [SELECT Id, Product2.Name, Quantity, Description FROM QuoteLineItem WHERE QuoteId = :sc.Quote_Source__c]) {
+                        tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => qli.Description});
+                    }
                 }
+                
                 result.put('tratamientos', tratamientos);
                 return result;
             }
