@@ -18,9 +18,7 @@
 
                 .hdr-table      { width:100%; border-collapse:collapse; }
                 .quote-number   { font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; }
-                .business-lines { font-size:12pt; color:#0070d2; font-weight:normal; margin-top:3pt; }
-                .nombre-comercial { font-size:11pt; font-weight:normal; margin-top:4pt; }
-                .asunto         { margin-top:5pt; font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
+                .nombre-comercial { font-size:11pt; font-weight:normal; margin-top:4pt; }                .asunto         { margin-top:5pt; font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
                 .sede-title     { font-size:13pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
 
                 .tbl-svc              { width:100%; border-collapse:collapse; margin-top:4pt; -fs-table-paginate: paginate; }
@@ -53,7 +51,7 @@
         <body>
             <img src="{!$Resource.HeaderPDF}" class="header-img"/>
             <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
-            <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
+            <img src="{!$Resource.Watermark}" class="watermark"/>
 
             <!-- SECCIÓN 1: INTRODUCCIÓN -->
             <table style="width:100%; border-collapse:collapse;">
@@ -66,7 +64,6 @@
                                 <tr>
                                     <td width="62%" style="vertical-align:top; padding:0;">
                                         <div class="nombre-comercial">{!technicalQuote.Account.Name}</div>
-                                        <div class="business-lines">{!technicalQuote.Business_Lines_Selected__c}</div>
                                         <div style="font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; margin-top:2pt;">{!technicalQuote.Technical_Sedes__c}</div>
                                         <div style="font-size:11pt; margin-top:2pt;">Atenci&#243;n:&#160;{!atencionNames}</div>
                                     </td>

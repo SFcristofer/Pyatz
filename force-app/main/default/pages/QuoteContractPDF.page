@@ -21,7 +21,6 @@
 
                 .hdr-table      { width:100%; border-collapse:collapse; }
                 .quote-number   { font-size:16pt; font-weight:bold; }
-                .business-lines { font-size:12pt; color:#0070d2; font-weight:bold; margin-top:3pt; }
                 .nombre-comercial { font-size:11pt; font-weight:bold; margin-top:4pt; }
                 .asunto         { margin-top:4pt; font-size:10pt; }
                 .sede-title     { font-size:13pt; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
@@ -65,7 +64,7 @@
         <body>
             <img src="{!$Resource.HeaderPDF}" class="header-img"/>
             <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
-            <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
+            <img src="{!$Resource.Watermark}" class="watermark"/>
 
             <!-- ═══ SECCIÓN 4: CONTRATO REPSE ════════════════════════════ -->
             <table style="width:100%; border-collapse:collapse;">
@@ -263,12 +262,10 @@
                                 <table class="hdr-table">
                                     <tr>
                                         <td width="62%" style="vertical-align:top; padding:0;">
-                                            <div class="quote-number">CONTRATO No. {!quoteNumberShort}</div>
-                                            <div class="business-lines">{!quoteRecord.Business_Lines_Selected__c}</div>
+                                            <div class="quote-number">CONTRATO No. {!quoteNumberShort}</div>  
                                             <div class="nombre-comercial">{!quoteRecord.Account.Name}</div>
                                             <div class="asunto"><strong>Asunto:</strong>&#160;{!quoteRecord.Name}</div>
-                                        </td>
-                                        <td width="38%" style="vertical-align:top; text-align:right; font-size:10pt; padding:2pt 0 0 0;">
+                                        </td>                                        <td width="38%" style="vertical-align:top; text-align:right; font-size:10pt; padding:2pt 0 0 0;">
                                             <div><strong>Fecha:</strong>&#160;{!fechaHoy}</div>
                                             <div><strong>Agente:</strong>&#160;{!firmanteNombre}</div>
                                         </td>
