@@ -290,8 +290,7 @@
 
         <!-- FOOTER STICKY -->
         <div class="sticky-footer slds-p-around_medium bg-white border-top">
-            <div class="slds-grid slds-grid_align-spread">
-                <lightning-button label="Regresar al Inicio" icon-name="utility:back" onclick={handleCancel}></lightning-button>
+            <div class="slds-grid slds-grid_align-end">
                 <div class="slds-grid">
                     <template if:false={isStep1}><lightning-button label="Anterior" onclick={handleBack} class="slds-m-right_small"></lightning-button></template>
                     <template if:false={isStep4}><lightning-button label="Siguiente" variant="brand" onclick={handleNext}></lightning-button></template>

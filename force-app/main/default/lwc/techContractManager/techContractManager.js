@@ -99,10 +99,15 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                     }));
                 }
 
-                // Si hay una cotización sincronizada, seleccionarla automáticamente
+                // --- LÓGICA LINEAL QUIRÚRGICA ---
                 if (this.syncedQuoteId) {
+                    // 1. Prioridad: El que está sincronizado oficialmente
                     this.selectQuote(this.syncedQuoteId);
+                } else if (this.availableQuotes.length > 0) {
+                    // 2. Fallback: El más reciente (para no detener el flujo lineal)
+                    this.selectQuote(this.availableQuotes[0].Id);
                 } else {
+                    // 3. Caso sin presupuestos: Mostrar error o advertencia
                     this.isLoading = false;
                 }
                 

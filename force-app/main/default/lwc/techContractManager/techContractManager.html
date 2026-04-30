@@ -39,8 +39,10 @@
 
                         <template if:false={availableQuotes.length}>
                             <div class="slds-text-align_center slds-p-around_large border-dashed">
-                                <p>No hay presupuestos generados para esta oportunidad.</p>
-                                <lightning-button label="Ir a Presupuestos" variant="brand-outline" class="slds-m-top_small" onclick={handleGoToQuotes}></lightning-button>
+                                <lightning-icon icon-name="utility:warning" size="medium" variant="warning" class="slds-m-bottom_small"></lightning-icon>
+                                <p class="slds-text-heading_small">No se detectó un Presupuesto Técnico</p>
+                                <p class="slds-text-color_weak slds-m-bottom_medium">Para generar un contrato, primero debe crear y finalizar el presupuesto en la etapa anterior.</p>
+                                <lightning-button label="Ir a Presupuestos ahora" variant="brand" icon-name="utility:back" class="slds-m-top_small" onclick={handleGoToQuotes}></lightning-button>
                             </div>
                         </template>
                     </div>

@@ -13,6 +13,7 @@ import getOpportunitiesByAccount from '@salesforce/apex/OperationsController.get
 import saveStageTracking from '@salesforce/apex/OperationsController.saveStageTracking';
 import getProcessHistory from '@salesforce/apex/OperationsController.getProcessHistory';
 import saveTechnicalData from '@salesforce/apex/QuoteController.saveTechnicalData';
+import getQuotesList from '@salesforce/apex/QuoteController.getQuotesList';
 import TechSlackModal from 'c/techSlackModal';
 import TechCalendarModal from 'c/techCalendarModal';
 
@@ -461,6 +462,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.currentStatus = ''; 
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
+        if (this.isPresupuestoPhase) this.autoNavigateQuote();
     }
 
     handleSubStepClick(event) {
@@ -468,6 +470,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.currentStatus = ''; 
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
+        if (this.isPresupuestoPhase) this.autoNavigateQuote();
     }
 
     get overallProgress() {
@@ -532,6 +535,11 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             this.quoteViewMode = 'list';
             await this.syncOpportunityStatus();
 
+            // Auto-navegación si entramos a presupuesto
+            if (this.isPresupuestoPhase) {
+                await this.autoNavigateQuote();
+            }
+
         } catch (error) {
             console.error('Error en navegación:', error);
             this.dispatchEvent(new ShowToastEvent({
@@ -558,5 +566,28 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.currentStatus = '';
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
+    }
+
+    async autoNavigateQuote() {
+        const targetId = this.effectiveRecordId;
+        if (!targetId) return;
+
+        this.isLoading = true;
+        try {
+            const result = await getQuotesList({ opportunityId: targetId });
+            if (result && result.length > 0) {
+                // Caso Lineal/Existente: Tomamos el último (o sincronizado) y entramos al editor
+                this.selectedQuoteId = result[0].id;
+                this.quoteViewMode = 'edit';
+            } else {
+                // Caso Inicial: No hay nada, creamos el primer presupuesto automáticamente
+                await this.handleCreateNewQuote();
+            }
+        } catch (error) {
+            console.error('Error en auto-navegación de presupuesto:', error);
+            this.quoteViewMode = 'list'; // Fallback a la lista si algo falla
+        } finally {
+            this.isLoading = false;
+        }
     }
 }
