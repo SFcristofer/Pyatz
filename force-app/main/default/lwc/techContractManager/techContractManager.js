@@ -150,9 +150,13 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         // Cargar las partidas del presupuesto seleccionado
         this.fetchLineItems(quoteId);
         
-        // Cargar datos específicos del presupuesto (Introducción, etc.)
-        const qData = this.availableQuotes.find(q => q.Id === quoteId);
-        // Aquí podrías cargar más datos si fuera necesario
+        // MEJORA: Cargar automáticamente la introducción desde el presupuesto
+        if (quote && quote.Introduction_Text__c) {
+            this.introduccionPresupuesto = quote.Introduction_Text__c;
+        } else {
+            this.introduccionPresupuesto = '';
+        }
+
         this.isLoading = false;
     }
 
@@ -239,14 +243,46 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
 
     handleDateChange(event) {
         const id = event.target.dataset.id;
-        if (id === 'primerServicio') this.fechaPrimerServicio = event.target.value;
-        else this.fechaLimiteServicio = event.target.value;
+        const val = event.target.value;
+        if (id === 'primerServicio') {
+            this.fechaPrimerServicio = val;
+            // MEJORA: Sincronizar con inicio de contrato si está vacío
+            if (!this.fechaInicioContrato && val) {
+                this.fechaInicioContrato = val;
+                this.autoCalculateEndDate(val);
+            }
+        } else {
+            this.fechaLimiteServicio = val;
+        }
     }
 
     handleVigenciaChange(event) {
         const id = event.target.dataset.id;
-        if (id === 'inicio') this.fechaInicioContrato = event.target.value;
-        else this.fechaFinContrato = event.target.value;
+        const val = event.target.value;
+        if (id === 'inicio') {
+            this.fechaInicioContrato = val;
+            this.autoCalculateEndDate(val);
+        } else {
+            this.fechaFinContrato = val;
+        }
+    }
+
+    autoCalculateEndDate(startDateStr) {
+        if (!startDateStr) return;
+        try {
+            const parts = startDateStr.split('-');
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            d.setFullYear(d.getFullYear() + 1);
+            d.setDate(d.getDate() - 1);
+            
+            // Formatear a YYYY-MM-DD
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            this.fechaFinContrato = `${year}-${month}-${day}`;
+        } catch (e) {
+            console.error('Error calculando fecha fin:', e);
+        }
     }
 
     handleObsChange(event) {
@@ -328,7 +364,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     }
 
     handleSaveDraft() {
-        if (!this.selectedQuoteId) return;
+        if (!this.selectedQuoteId) return Promise.reject('No quote selected');
 
         const data = {
             fechaInicioContrato: this.fechaInicioContrato,
@@ -347,7 +383,7 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         };
 
         this.isLoading = true;
-        saveContractData({ quoteId: this.selectedQuoteId, contractData: data })
+        return saveContractData({ quoteId: this.selectedQuoteId, contractData: data })
             .then(scId => {
                 this.isLoading = false;
                 this.dispatchEvent(new ShowToastEvent({ 
@@ -358,15 +394,17 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                 
                 // NOTIFICAR AL DASHBOARD DEL NUEVO CONTRATO
                 this.dispatchEvent(new CustomEvent('contractgenerated', { detail: scId }));
+                return scId;
             })
             .catch(error => {
                 this.isLoading = false;
                 console.error('Error guardando contrato:', error);
                 this.dispatchEvent(new ShowToastEvent({ 
                     title: 'Error', 
-                    message: error.body.message, 
+                    message: error.body ? error.body.message : error, 
                     variant: 'error' 
                 }));
+                throw error;
             });
     }
 
@@ -376,16 +414,23 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             return;
         }
 
-        // Primero guardar
-        this.handleSaveDraft();
+        // Primero guardar y luego procesar navegación
+        this.handleSaveDraft()
+            .then(scId => {
+                const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
+                let url = `/apex/QuoteContractPDF?id=${this.selectedQuoteId}&selectedItems=${selectedIds.join(',')}`;
+                url += `&show_total=${this.selections.show_total}&show_line_prices=${this.selections.show_line_prices}`;
+                url += `&createdBy=${this.selectedCreator.id}&managedBy=${this.selectedManager.id}&sigSource=${this.signatureSource}`;
+                url += `&clientSigner=${encodeURIComponent(this.selectedClientSigner)}`;
 
-        const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
-        let url = `/apex/QuoteContractPDF?id=${this.selectedQuoteId}&selectedItems=${selectedIds.join(',')}`;
-        url += `&show_total=${this.selections.show_total}&show_line_prices=${this.selections.show_line_prices}`;
-        url += `&createdBy=${this.selectedCreator.id}&managedBy=${this.selectedManager.id}&sigSource=${this.signatureSource}`;
-        url += `&clientSigner=${encodeURIComponent(this.selectedClientSigner)}`;
+                window.open(url, '_blank');
 
-        window.open(url, '_blank');
+                // NOTIFICAR FINALIZACIÓN PARA AUTO-NAVEGACIÓN
+                this.dispatchEvent(new CustomEvent('contractfinalized', { detail: scId }));
+            })
+            .catch(error => {
+                console.error('Error al finalizar contrato:', error);
+            });
     }
 
     handleGoToQuotes() {

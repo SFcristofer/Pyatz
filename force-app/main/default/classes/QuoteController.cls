@@ -185,7 +185,7 @@ public with sharing class QuoteController {
         Map<String, Object> result = new Map<String, Object>();
         Opportunity opp = QuoteSelector.getOpportunityById(oppId);
         result.put('opportunity', opp);
-        result.put('quotes', [SELECT Id, QuoteNumber, Name, GrandTotal, Status, CreatedDate FROM Quote WHERE OpportunityId = :oppId ORDER BY CreatedDate DESC]);
+        result.put('quotes', [SELECT Id, QuoteNumber, Name, GrandTotal, Status, CreatedDate, Introduction_Text__c FROM Quote WHERE OpportunityId = :oppId ORDER BY CreatedDate DESC]);
         result.put('syncedQuoteId', opp.SyncedQuoteId);
         if (opp.SyncedQuoteId != null) result.put('selectedQuote', QuoteSelector.getQuoteById(opp.SyncedQuoteId));
         return result;

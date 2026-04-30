@@ -128,7 +128,7 @@
                     <c-tech-tactical-follow-up record-id={effectiveRecordId}></c-tech-tactical-follow-up>
                 </template>
                 <template if:true={isContratoPhase}>
-                    <c-tech-contract-manager record-id={effectiveRecordId} oncontractgenerated={handleContractGenerated}></c-tech-contract-manager>
+                    <c-tech-contract-manager record-id={effectiveRecordId} oncontractgenerated={handleContractGenerated} oncontractfinalized={handleContractFinalized}></c-tech-contract-manager>
                 </template>
                 <template if:true={isWorkOrderPhase}>
                     <c-tech-work-order-console record-id={effectiveRecordId} quote-id={selectedQuoteId} service-contract-id={selectedContractId}></c-tech-work-order-console>

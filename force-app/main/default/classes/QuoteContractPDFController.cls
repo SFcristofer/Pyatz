@@ -61,7 +61,7 @@ public with sharing class QuoteContractPDFController {
         String selectedIdsParam = params.get('selectedItems');
         if (String.isNotBlank(selectedIdsParam)) {
             this.selectedLineItems = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
-                                             Discount, Description FROM QuoteLineItem 
+                                             Discount, Description, Descripcion_Detallada__c FROM QuoteLineItem 
                                       WHERE QuoteId = :quoteId AND Id IN :selectedIdsParam.split(',')];
             for(QuoteLineItem item : this.selectedLineItems) {
                 this.totalContrato += (item.TotalPrice != null ? item.TotalPrice : 0) * 1.16;
@@ -174,7 +174,7 @@ public with sharing class QuoteContractPDFController {
             .toUpperCase().normalizeSpace();
         List<String> words = normalized.split(' ');
         List<StaticResource> srs = [SELECT Name, SystemModstamp FROM StaticResource
-                                     WHERE Name != 'HeaderPDF' AND Name != 'FooterPDF' AND Name != 'WatermarPDF'
+                                     WHERE Name != 'HeaderPDF' AND Name != 'FooterPDF' AND Name != 'Watermark' AND Name != 'WatermarkPDF'
                                      ORDER BY Name];
         for (StaticResource sr : srs) {
             Boolean allMatch = true;
@@ -191,7 +191,7 @@ public with sharing class QuoteContractPDFController {
     @AuraEnabled(cacheable=true)
     public static List<QuoteLineItem> getQuoteLineItems(Id quoteId) {
         return [SELECT Id, PricebookEntryId, Product2Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
-                       ListPrice, Description, Discount, Quote.Technical_Sedes__c
+                       ListPrice, Description, Discount, Descripcion_Detallada__c, Quote.Technical_Sedes__c
                 FROM QuoteLineItem WHERE QuoteId = :quoteId ORDER BY CreatedDate ASC];
     }
 }

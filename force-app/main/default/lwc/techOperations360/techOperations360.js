@@ -449,6 +449,17 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
     handleContractGenerated(event) { this.selectedContractId = event.detail; }
 
+    /**
+     * MEJORA: Navegación Automática tras Finalizar Contrato
+     * Marca el estado como 'Realizado' y salta a la subetapa 3 (ODTs)
+     */
+    async handleContractFinalized(event) {
+        this.selectedContractId = event.detail;
+        this.currentStatus = 'Realizado';
+        this.currentSubStep = '3'; // Salto a Creación ODT's
+        await this.syncOpportunityStatus();
+    }
+
     get isFirstStep() { return this.isDefinicion && this.currentSubStep === '1'; }
     get isLastStep() { 
         if (!this.stages || this.stages.length === 0) return false;
