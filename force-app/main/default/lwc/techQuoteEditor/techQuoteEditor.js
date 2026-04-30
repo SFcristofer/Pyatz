@@ -123,7 +123,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                 if (result.opportunityName) this.opportunityName = result.opportunityName;
                 if (result.quote) {
                     const q = result.quote;
-                    this.folio = q.QuoteNumber;
+                    // Limpieza de ceros a la izquierda para visualización (igual que el PDF)
+                    this.folio = (q.QuoteNumber) ? q.QuoteNumber.replace(/^0+/, '') : 'POR GENERAR';
                     this.asunto = q.Name;
                     this.introduccion = q.Introduction_Text__c;
                     this.warranty = q.Warranty_Text__c;
