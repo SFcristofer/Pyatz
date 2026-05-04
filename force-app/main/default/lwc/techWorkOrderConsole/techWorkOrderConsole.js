@@ -128,6 +128,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             rows.push({
                 label: `${i}º Fecha`,
                 date: nextDate.toISOString().split('T')[0],
+                startTime: '08:00:00.000',
                 locked: false,
                 duration: 60,
                 executed: false,

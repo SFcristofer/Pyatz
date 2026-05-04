@@ -141,6 +141,8 @@ public with sharing class TechWorkOrderController {
                     for (Object rowObj : (List<Object>) tra.get('schedulingRows')) {
                         Map<String, Object> row = (Map<String, Object>) rowObj;
                         Date d = Date.valueOf((String) row.get('date'));
+                        String rowStartTimeStr = (String) row.get('startTime');
+
                         ServiceAppointment sa = new ServiceAppointment(ParentRecordId = wolisToInsert[woliIndex].Id, Subject = 'Servicio: ' + (String) tra.get('name'));
                         sa.Street = wo.Street; sa.City = wo.City; sa.State = wo.State; sa.PostalCode = wo.PostalCode; sa.Country = wo.Country;
                         sa.EarliestStartTime = Datetime.newInstance(d, Time.newInstance(0, 0, 0, 0));
@@ -150,8 +152,10 @@ public with sharing class TechWorkOrderController {
                         sa.Status = 'None';
                         
                         Integer h = 8, m = 0;
-                        if (String.isNotBlank(startTimeStr)) {
-                            List<String> pts = startTimeStr.substringBefore('.').split(':');
+                        String finalStartTime = String.isNotBlank(rowStartTimeStr) ? rowStartTimeStr : startTimeStr;
+                        
+                        if (String.isNotBlank(finalStartTime)) {
+                            List<String> pts = finalStartTime.substringBefore('.').split(':');
                             if (pts.size() >= 2) { h = Integer.valueOf(pts[0]); m = Integer.valueOf(pts[1]); }
                         }
                         sa.SchedStartTime = Datetime.newInstance(d, Time.newInstance(h, m, 0, 0));

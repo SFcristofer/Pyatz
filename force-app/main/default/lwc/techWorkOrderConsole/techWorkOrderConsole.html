@@ -233,15 +233,17 @@
                                                             <div class="slds-col slds-size_2-of-12">
                                                                 <lightning-input type="date" variant="label-hidden" value={row.date} data-field="date" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
                                                             </div>
-                                                            <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center">
-                                                                <lightning-input type="checkbox" label="BLOQUEAR FECHA" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox"></lightning-input>
-                                                                <lightning-icon icon-name="utility:lock" size="xx-small" class="slds-m-left_xx-small"></lightning-icon>
+                                                            <div class="slds-col slds-size_2-of-12">
+                                                                <lightning-input type="time" variant="label-hidden" value={row.startTime} data-field="startTime" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
+                                                            </div>
+                                                            <div class="slds-col slds-size_1-of-12 slds-grid slds-grid_align-center">
+                                                                <lightning-input type="checkbox" label="BLOQUEO" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox"></lightning-input>
                                                             </div>
                                                             <div class="slds-col slds-size_2-of-12">
-                                                                <span class="compact-text">DURACIÓN:</span>
+                                                                <span class="compact-text">DUR:</span>
                                                                 <lightning-input type="number" variant="label-hidden" value={row.duration} data-field="duration" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="input-tiny"></lightning-input>
                                                             </div>
-                                                            <div class="slds-col slds-size_5-of-12 slds-grid slds-grid_align-end">
+                                                            <div class="slds-col slds-size_4-of-12 slds-grid slds-grid_align-end">
                                                                 <lightning-input type="checkbox" label="YA EJECUTADA" checked={row.executed} data-field="executed" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox slds-m-right_small"></lightning-input>
                                                                 <lightning-input type="checkbox" label="Indicaciones" checked={row.showNotes} data-field="showNotes" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox"></lightning-input>
                                                             </div>
