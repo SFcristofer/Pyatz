@@ -78,30 +78,34 @@
     background: #334155; 
 }
 
-/* FILAS DE DATOS: ALTURA GARANTIZADA */
+/* FILAS DE DATOS: ALTURA FLEXIBLE PARA SOPORTAR RENGLONES */
 .survey-table tbody tr td { 
     border-bottom: 1px solid var(--slate-200); 
     border-right: 1px solid var(--slate-100); 
-    padding: 0 !important; /* El padding lo da el input interno */
-    vertical-align: middle; 
-    height: 55px !important; /* Altura generosa para que no se vea cortada */
+    padding: 0 !important;
+    vertical-align: top; 
     background: white;
+    min-height: 55px;
 }
 
 .survey-table tbody tr:hover td { 
     background-color: var(--slate-50); 
 }
 
-/* Inputs Estilo Excel */
+/* Inputs y Textareas Estilo Excel */
 .cell-input { 
     width: 100%; 
-    height: 100%;
+    min-height: 55px;
     border: none; 
     padding: 12px 8px; 
     font-size: 0.85rem; 
     background: transparent; 
     color: var(--slate-700); 
-    text-align: center; 
+    text-align: left; 
+    resize: none;
+    display: block;
+    line-height: 1.4;
+    font-family: inherit;
 }
 
 .cell-input:focus { 

@@ -180,13 +180,11 @@
                                     <td><div class="cell-input">{row.rowNumber}</div></td>
                                     <template for:each={row.cells} for:item="cell">
                                         <td key={cell.field}>
-                                            <input 
-                                                type="text" 
+                                            <textarea 
                                                 class="cell-input" 
-                                                value={cell.value} 
                                                 data-row-index={rowIndex}
                                                 data-field={cell.field}
-                                                onchange={handleDynamicChange}>
+                                                onchange={handleDynamicChange}>{cell.value}</textarea>
                                         </td>
                                     </template>
                                     <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={rowIndex} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
@@ -246,9 +244,9 @@
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
                                     <td><div class="cell-input">{row.rowNumber}</div></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ve" value={row.ve} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="vp" value={row.vp} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="c10l" value={row.c10l} onchange={handleSurveyChange}></td>
@@ -257,7 +255,7 @@
                                     <td><input type="number" class="cell-input" data-index={index} data-field="piso" value={row.piso} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="mueble" value={row.mueble} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="pared" value={row.pared} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="foto" value={row.foto} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="foto" onchange={handleSurveyChange}>{row.foto}</textarea></td>
                                     <td>
                                         <select class="cell-select" data-index={index} data-field="residuos" value={row.residuos} onchange={handleSurveyChange}>
                                             <option value="">-</option>
@@ -290,13 +288,13 @@
                                             <option value="1 sem">1 sem</option>
                                         </select>
                                     </td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="obs" value={row.obs} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="obs" onchange={handleSurveyChange}>{row.obs}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="coladeras" value={row.coladeras} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="tapon" value={row.tapon} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="tarja" value={row.tarja} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="tinas" value={row.tinas} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="tgrasa" value={row.tgrasa} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="modelo" value={row.modelo} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="modelo" onchange={handleSurveyChange}>{row.modelo}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="st1" value={row.st1} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ovalines" value={row.ovalines} onchange={handleSurveyChange}></td>
                                     <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
@@ -351,9 +349,9 @@
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
                                     <td><div class="cell-input">{row.rowNumber}</div></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="sp" value={row.sp} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ent" value={row.ent} onchange={handleSurveyChange}></td>
                                     <td>
@@ -376,7 +374,7 @@
                                     <td><input type="number" class="cell-input" data-index={index} data-field="mampara" value={row.mampara} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="canastilla" value={row.canastilla} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="retSalida" value={row.retSalida} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="foto" value={row.foto} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="foto" onchange={handleSurveyChange}>{row.foto}</textarea></td>
                                     <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
@@ -430,7 +428,7 @@
                                 <option value="Sábado o domingo" selected={isGmDiasFin}>Sábado o domingo</option>
                             </select>
                         </td></tr>
-                        <tr><td class="diag-label">Horario de Servicio</td><td><input type="text" class="cell-input" data-field="gmHorario" value={gmHorario} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Horario de Servicio</td><td><textarea class="cell-input" data-field="gmHorario" onchange={handleGmChange}>{gmHorario}</textarea></td></tr>
                         <tr><td class="diag-label">Permisos de Acceso</td><td>
                             <select class="cell-select" data-field="gmPermisos" onchange={handleGmChange}>
                                 <option value="">-</option>
@@ -438,7 +436,7 @@
                                 <option value="No" selected={isGmPermNo}>No</option>
                             </select>
                         </td></tr>
-                        <tr><td class="diag-label">Consideraciones Especiales</td><td><input type="text" class="cell-input" data-field="gmConsideraciones" value={gmConsideraciones} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Consideraciones Especiales</td><td><textarea class="cell-input" data-field="gmConsideraciones" onchange={handleGmChange}>{gmConsideraciones}</textarea></td></tr>
                         <tr><td class="diag-label">Requiere Capacitación</td><td>
                             <select class="cell-select" data-field="gmCapacitacion" onchange={handleGmChange}>
                                 <option value="">-</option>
@@ -446,8 +444,8 @@
                                 <option value="No" selected={isGmPermNo}>No</option>
                             </select>
                         </td></tr>
-                        <tr><td class="diag-label">Presupuesto Asignado</td><td><input type="text" class="cell-input" data-field="gmPresupuesto" value={gmPresupuesto} onchange={handleGmChange}></td></tr>
-                        <tr><td class="diag-label">Motivo de la Necesidad</td><td><input type="text" class="cell-input" data-field="gmMotivo" value={gmMotivo} onchange={handleGmChange}></td></tr>
+                        <tr><td class="diag-label">Presupuesto Asignado</td><td><textarea class="cell-input" data-field="gmPresupuesto" onchange={handleGmChange}>{gmPresupuesto}</textarea></td></tr>
+                        <tr><td class="diag-label">Motivo de la Necesidad</td><td><textarea class="cell-input" data-field="gmMotivo" onchange={handleGmChange}>{gmMotivo}</textarea></td></tr>
                         <tr><td class="diag-label">Permite Levantamiento Fotográfico</td><td>
                             <select class="cell-select" data-field="gmPermiteLev" onchange={handleGmChange}>
                                 <option value="">-</option>
@@ -477,12 +475,12 @@
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
                                     <td><div class="cell-input">{row.rowNumber}</div></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="wc" value={row.wc} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="frecuencia" value={row.frecuencia} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="dias" value={row.dias} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="frecuencia" onchange={handleSurveyChange}>{row.frecuencia}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="dias" onchange={handleSurveyChange}>{row.dias}</textarea></td>
                                     <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
@@ -517,9 +515,9 @@
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
                                     <td><div class="cell-input">{row.rowNumber}</div></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ovalines" value={row.ovalines} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="coladeras" value={row.coladeras} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="tapon" value={row.tapon} onchange={handleSurveyChange}></td>
@@ -554,9 +552,9 @@
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
                                     <td><div class="cell-input">{row.rowNumber}</div></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="nivel" value={row.nivel} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="area" value={row.area} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="zona" value={row.zona} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="arm" value={row.arm} onchange={handleSurveyChange}></td>
                                     <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
@@ -595,18 +593,18 @@
                                             <option value="">-</option><option value='1"'>1"</option><option value='4"'>4"</option>
                                         </select>
                                     </td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="material" value={row.material} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="servicio" value={row.servicio} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="material" onchange={handleSurveyChange}>{row.material}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="servicio" onchange={handleSurveyChange}>{row.servicio}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="largo" value={row.largo} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ancho" value={row.ancho} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="prof" value={row.prof} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="mtLineal" value={row.mtLineal} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="distancia" value={row.distancia} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="permDelegacion" value={row.permDelegacion} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="permPlaza" value={row.permPlaza} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="dificultad" value={row.dificultad} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="alcance" value={row.alcance} onchange={handleSurveyChange}></td>
-                                    <td><input type="text" class="cell-input" data-index={index} data-field="obs" value={row.obs} onchange={handleSurveyChange}></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="distancia" onchange={handleSurveyChange}>{row.distancia}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="permDelegacion" onchange={handleSurveyChange}>{row.permDelegacion}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="permPlaza" onchange={handleSurveyChange}>{row.permPlaza}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="dificultad" onchange={handleSurveyChange}>{row.dificultad}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="alcance" onchange={handleSurveyChange}>{row.alcance}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="obs" onchange={handleSurveyChange}>{row.obs}</textarea></td>
                                     <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
