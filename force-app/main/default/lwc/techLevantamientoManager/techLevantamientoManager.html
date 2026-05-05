@@ -177,7 +177,7 @@
                         <tbody>
                             <template for:each={surveyData} for:item="row" for:index="rowIndex">
                                 <tr key={row.id}>
-                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td class="row-number-cell">{row.rowNumber}</td>
                                     <template for:each={row.cells} for:item="cell">
                                         <td key={cell.field}>
                                             <textarea 
@@ -187,7 +187,7 @@
                                                 onchange={handleDynamicChange}>{cell.value}</textarea>
                                         </td>
                                     </template>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={rowIndex} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={rowIndex} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -243,7 +243,7 @@
                         <tbody>
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
-                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td class="row-number-cell">{row.rowNumber}</td>
                                     <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
@@ -297,7 +297,7 @@
                                     <td><textarea class="cell-input" data-index={index} data-field="modelo" onchange={handleSurveyChange}>{row.modelo}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="st1" value={row.st1} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ovalines" value={row.ovalines} onchange={handleSurveyChange}></td>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                             <tr class="survey-row-totals">
@@ -348,7 +348,7 @@
                         <tbody>
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
-                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td class="row-number-cell">{row.rowNumber}</td>
                                     <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
@@ -375,7 +375,7 @@
                                     <td><input type="number" class="cell-input" data-index={index} data-field="canastilla" value={row.canastilla} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="retSalida" value={row.retSalida} onchange={handleSurveyChange}></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="foto" onchange={handleSurveyChange}>{row.foto}</textarea></td>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                             <tr class="survey-row-totals">
@@ -474,14 +474,14 @@
                         <tbody>
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
-                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td class="row-number-cell">{row.rowNumber}</td>
                                     <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="wc" value={row.wc} onchange={handleSurveyChange}></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="frecuencia" onchange={handleSurveyChange}>{row.frecuencia}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="dias" onchange={handleSurveyChange}>{row.dias}</textarea></td>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                             <tr class="survey-row-totals">
@@ -514,7 +514,7 @@
                         <tbody>
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
-                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td class="row-number-cell">{row.rowNumber}</td>
                                     <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
@@ -526,7 +526,7 @@
                                     <td><input type="number" class="cell-input" data-index={index} data-field="mtLineal" value={row.mtLineal} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="tarjas" value={row.tarjas} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="cuartoHumado" value={row.cuartoHumado} onchange={handleSurveyChange}></td>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                             <tr class="survey-row-totals">
@@ -551,12 +551,12 @@
                         <tbody>
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
-                                    <td><div class="cell-input">{row.rowNumber}</div></td>
+                                    <td class="row-number-cell">{row.rowNumber}</td>
                                     <td><textarea class="cell-input" data-index={index} data-field="nivel" onchange={handleSurveyChange}>{row.nivel}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="area" onchange={handleSurveyChange}>{row.area}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="zona" onchange={handleSurveyChange}>{row.zona}</textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="arm" value={row.arm} onchange={handleSurveyChange}></td>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                             <tr class="survey-row-totals">
@@ -605,7 +605,7 @@
                                     <td><textarea class="cell-input" data-index={index} data-field="dificultad" onchange={handleSurveyChange}>{row.dificultad}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="alcance" onchange={handleSurveyChange}>{row.alcance}</textarea></td>
                                     <td><textarea class="cell-input" data-index={index} data-field="obs" onchange={handleSurveyChange}>{row.obs}</textarea></td>
-                                    <td><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
+                                    <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>
                             <tr class="survey-row-totals">

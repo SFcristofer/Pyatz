@@ -108,6 +108,23 @@
     font-family: inherit;
 }
 
+/* CELDAS ESPECIALES: CENTRADO DE ICONOS Y NÚMEROS */
+.action-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+    width: 50px;
+    padding: 4px !important;
+}
+
+.row-number-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-weight: 700;
+    color: var(--slate-600);
+    background: var(--slate-50) !important;
+    width: 45px;
+}
+
 .cell-input:focus { 
     outline: 2px solid var(--indigo-600); 
     outline-offset: -2px; 
