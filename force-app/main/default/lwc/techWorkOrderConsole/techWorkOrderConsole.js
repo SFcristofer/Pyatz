@@ -50,6 +50,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @track recentWorkOrders = [];
     @track selectedTemplateId = '';
     @track templateStatus = ''; // Feedback visual
+    @track ganttView = 'months'; // 'days', 'weeks', 'months'
 
     @wire(getServiceResources)
     wiredResources({ error, data }) {
@@ -58,6 +59,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         } else if (error) {
             console.error('Error cargando recursos de servicio:', error);
         }
+    }
+
+    handleGanttViewChange(event) {
+        this.ganttView = event.target.value;
     }
 
     // Transformamos las opciones de técnicos para que cada tratamiento sepa cuáles están seleccionados
@@ -372,4 +377,104 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     get remainingChars() {
         return 2048 - (this.woNotes ? this.woNotes.length : 0);
     }
-}
+
+    get daysVariant() { return this.ganttView === 'days' ? 'brand' : 'neutral'; }
+    get weeksVariant() { return this.ganttView === 'weeks' ? 'brand' : 'neutral'; }
+    get monthsVariant() { return this.ganttView === 'months' ? 'brand' : 'neutral'; }
+
+    // LÓGICA DINÁMICA PARA EL GANTT PROFESIONAL
+    get ganttAxisLabels() {
+        const result = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        
+        if (this.ganttView === 'months') {
+            const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+                result.push({ 
+                    id: i, 
+                    label: months[d.getMonth()], 
+                    subLabel: d.getFullYear(),
+                    style: `left: ${(i / 6) * 100}%` 
+                });
+            }
+        } else if (this.ganttView === 'weeks') {
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + (i * 7));
+                result.push({ 
+                    id: i, 
+                    label: `Sem ${i + 1}`, 
+                    subLabel: `${d.getDate()}/${d.getMonth() + 1}`,
+                    style: `left: ${(i / 12) * 100}%`
+                });
+            }
+        } else { // 'days' view
+            for (let i = 0; i < 31; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                if (i % 2 === 0 || i === 0) { // Mostrar cada 2 días para no saturar
+                    result.push({ 
+                        id: i, 
+                        label: dayNames[d.getDay()], 
+                        subLabel: d.getDate(),
+                        style: `left: ${(i / 30) * 100}%`
+                    });
+                }
+            }
+        }
+        return result;
+    }
+
+    get todayMarkerStyle() {
+        return `left: 0%; border-left: 2px dashed #f56565; height: 100%; position: absolute; z-index: 10; top: 0;`;
+    }
+
+    get ganttItems() {
+        const items = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        let startGantt = new Date(today);
+        let endGantt = new Date(today);
+
+        if (this.ganttView === 'months') endGantt.setMonth(today.getMonth() + 6);
+        else if (this.ganttView === 'weeks') endGantt.setDate(today.getDate() + (7 * 12));
+        else endGantt.setDate(today.getDate() + 30);
+
+        const totalMs = endGantt.getTime() - startGantt.getTime();
+
+        this.sedesList.forEach(sede => {
+            sede.tratamientos.forEach(tra => {
+                const techNames = (tra.tecnicosIds || []).map(id => {
+                    const opt = this.tecnicosOptions.find(o => o.value === id);
+                    return opt ? opt.label : '...';
+                }).join(', ');
+
+                tra.schedulingRows.forEach((row, idx) => {
+                    const rowDate = new Date(row.date + 'T00:00:00');
+                    if (rowDate >= startGantt && rowDate <= endGantt) {
+                        const offsetMs = rowDate.getTime() - startGantt.getTime();
+                        const leftPercent = (offsetMs / totalMs) * 100;
+
+                        const colors = ['#4299e1', '#48bb78', '#ed8936', '#9f7aea', '#f56565'];
+                        const color = colors[Math.abs(tra.name.length) % colors.length];
+
+                        items.push({
+                            id: `${tra.id}-${idx}`,
+                            name: tra.name,
+                            techs: techNames || 'Sin asignar',
+                            area: tra.zonas || 'Sede Principal',
+                            dateStr: row.date,
+                            style: `left: ${leftPercent}%; top: ${(idx % 5) * 50}px; border-left: 4px solid ${color};`,
+                            fullLabel: `${tra.name} - ${row.date}`
+                        });
+                    }
+                });
+            });
+        });
+        return items;
+    }
+    }
