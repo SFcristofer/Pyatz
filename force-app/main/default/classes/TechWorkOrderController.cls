@@ -26,8 +26,9 @@ public with sharing class TechWorkOrderController {
                     }
                 } else if (sc.Quote_Source__c != null) {
                     // FALLBACK: Si el contrato no tiene partidas, buscamos en la cotización de origen
-                    for (QuoteLineItem qli : [SELECT Id, Product2.Name, Quantity, Description FROM QuoteLineItem WHERE QuoteId = :sc.Quote_Source__c]) {
-                        tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => qli.Description});
+                    for (QuoteLineItem qli : [SELECT Id, Product2.Name, Quantity, Description, Zonas_a_Tratar__c FROM QuoteLineItem WHERE QuoteId = :sc.Quote_Source__c]) {
+                        String zonas = String.isNotBlank(qli.Zonas_a_Tratar__c) ? qli.Zonas_a_Tratar__c : qli.Description;
+                        tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => zonas});
                     }
                 }
                 
@@ -58,10 +59,11 @@ public with sharing class TechWorkOrderController {
             result.put('fechaInicio', targetQuote.CreatedDate.format('dd-MMM-yyyy'));
             result.put('fechaFin', targetQuote.ExpirationDate != null ? targetQuote.ExpirationDate.format() : 'No definida');
             
-            List<QuoteLineItem> qlis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
+            List<QuoteLineItem> qlis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description, Zonas_a_Tratar__c FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
             List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
             for (QuoteLineItem qli : qlis) {
-                tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => qli.Description});
+                String zonas = String.isNotBlank(qli.Zonas_a_Tratar__c) ? qli.Zonas_a_Tratar__c : qli.Description;
+                tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => zonas});
             }
             result.put('tratamientos', tratamientos);
             return result;
@@ -76,6 +78,68 @@ public with sharing class TechWorkOrderController {
             for (ServiceResource sr : resources) results.add(new Map<String, String>{'id' => sr.Id, 'name' => sr.Name});
         } catch (Exception e) { }
         return results;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getRecentWorkOrders(Id accountId) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        try {
+            for (WorkOrder wo : [SELECT Id, WorkOrderNumber, Subject, CreatedDate FROM WorkOrder WHERE AccountId = :accountId ORDER BY CreatedDate DESC LIMIT 10]) {
+                results.add(new Map<String, String>{
+                    'id' => wo.Id, 
+                    'name' => wo.WorkOrderNumber + ' - ' + wo.Subject + ' (' + wo.CreatedDate.format('dd/MM/yyyy') + ')'
+                });
+            }
+        } catch (Exception e) { }
+        return results;
+    }
+
+    @AuraEnabled
+    public static Map<String, Object> getWorkOrderTemplateData(Id workOrderId) {
+        try {
+            WorkOrder wo = [SELECT Id, Description, (SELECT Id, PricebookEntryId, PricebookEntry.Product2.Name, Quantity, Description FROM WorkOrderLineItems) 
+                           FROM WorkOrder WHERE Id = :workOrderId LIMIT 1];
+            
+            List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
+            Map<Id, List<String>> woliToTechs = new Map<Id, List<String>>();
+            
+            // Buscar técnicos asignados a los SAs de estos WOLIs
+            Set<Id> woliIds = new Set<Id>();
+            for (WorkOrderLineItem woli : wo.WorkOrderLineItems) woliIds.add(woli.Id);
+            
+            List<ServiceAppointment> sas = [SELECT Id, ParentRecordId, Duration, (SELECT ServiceResourceId FROM ServiceResources) 
+                                           FROM ServiceAppointment WHERE ParentRecordId IN :woliIds];
+            
+            Map<Id, List<Map<String, Object>>> woliToScheduling = new Map<Id, List<Map<String, Object>>>();
+            for (ServiceAppointment sa : sas) {
+                if (!woliToScheduling.containsKey(sa.ParentRecordId)) woliToScheduling.put(sa.ParentRecordId, new List<Map<String, Object>>());
+                
+                List<String> techIds = new List<String>();
+                for (AssignedResource ar : sa.ServiceResources) techIds.add(ar.ServiceResourceId);
+                if (!woliToTechs.containsKey(sa.ParentRecordId)) woliToTechs.put(sa.ParentRecordId, techIds);
+
+                woliToScheduling.get(sa.ParentRecordId).add(new Map<String, Object>{
+                    'duration' => sa.Duration,
+                    'notes' => 'Clonado de ODT anterior'
+                });
+            }
+
+            for (WorkOrderLineItem woli : wo.WorkOrderLineItems) {
+                tratamientos.add(new Map<String, Object>{
+                    'id' => woli.PricebookEntryId, // Usamos el PBE Id como referencia para que el LWC lo identifique
+                    'name' => woli.PricebookEntry.Product2.Name,
+                    'quantity' => woli.Quantity,
+                    'zonas' => woli.Description,
+                    'tecnicosIds' => woliToTechs.containsKey(woli.Id) ? woliToTechs.get(woli.Id) : new List<String>(),
+                    'schedulingRows' => woliToScheduling.containsKey(woli.Id) ? woliToScheduling.get(woli.Id) : new List<Map<String, Object>>()
+                });
+            }
+
+            return new Map<String, Object>{
+                'notes' => wo.Description,
+                'tratamientos' => tratamientos
+            };
+        } catch (Exception e) { throw new AuraHandledException('Error cargando plantilla: ' + e.getMessage()); }
     }
 
     @AuraEnabled

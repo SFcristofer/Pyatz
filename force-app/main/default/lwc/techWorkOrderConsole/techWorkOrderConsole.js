@@ -2,6 +2,8 @@ import { LightningElement, track, api, wire } from 'lwc';
 import getInitialWorkOrderData from '@salesforce/apex/TechWorkOrderController.getInitialWorkOrderData';
 import saveWorkOrders from '@salesforce/apex/TechWorkOrderController.saveWorkOrders';
 import getServiceResources from '@salesforce/apex/TechWorkOrderController.getServiceResources';
+import getRecentWorkOrders from '@salesforce/apex/TechWorkOrderController.getRecentWorkOrders';
+import getWorkOrderTemplateData from '@salesforce/apex/TechWorkOrderController.getWorkOrderTemplateData';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
@@ -9,7 +11,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @api recordId; // Opportunity ID
     @api quoteId;  // Quote ID específico
     @api serviceContractId; // ID del contrato formal nativo
-    
+
     @track isLoading = true;
     @track isSaving = false;
 
@@ -35,7 +37,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @track woNotes = '';
     @track startDate = '';
     @track endDate = '';
-    @track showSchedulingSection = true; // CAMBIO: Visible por defecto para evitar que "desaparezca"
+    @track showSchedulingSection = true; 
 
     @track daysOfWeek = [
         { label: 'Lunes', checked: true }, { label: 'Martes', checked: true }, 
@@ -45,6 +47,9 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     ];
 
     @track tecnicosOptions = [];
+    @track recentWorkOrders = [];
+    @track selectedTemplateId = '';
+    @track templateStatus = ''; // Feedback visual
 
     @wire(getServiceResources)
     wiredResources({ error, data }) {
@@ -55,10 +60,29 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }
     }
 
+    // Transformamos las opciones de técnicos para que cada tratamiento sepa cuáles están seleccionados
+    get treatmentsWithTechOptions() {
+        return this.sedesList.flatMap(sede => 
+            sede.tratamientos.map(tra => {
+                const options = this.tecnicosOptions.map(opt => ({
+                    ...opt,
+                    selected: tra.tecnicosIds ? tra.tecnicosIds.includes(opt.value) : false
+                }));
+                return { ...tra, options };
+            })
+        );
+    }
+
+    @wire(getRecentWorkOrders, { accountId: '$accountId' })
+    wiredRecentWOs({ error, data }) {
+        if (data) {
+            this.recentWorkOrders = data.map(wo => ({ label: wo.name, value: wo.id }));
+        }
+    }
+
     @wire(getInitialWorkOrderData, { oppId: '$recordId', quoteId: '$quoteId', serviceContractId: '$serviceContractId' })
     wiredData({ error, data }) {
         if (data) {
-            // Evitar procesar si los datos son los mismos (comparación de Folio)
             if (this.contractFolio === data.folio && this.sedesList.length > 0) {
                 this.isLoading = false;
                 return;
@@ -69,19 +93,16 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             this.oppId = data.oppId;
             this.internalQuoteId = data.quoteId;
             this.internalServiceContractId = this.serviceContractId || data.serviceContractId;
-            
+
             this.contractData = {
                 cliente: data.cliente || 'Sin cliente',
                 lineaNegocio: data.lineaNegocio || 'No definida',
                 sedes: data.sedes || 'Sin sedes asignadas',
                 sedeSeleccionada: data.sedes ? data.sedes.split(',')[0] : 'Sede Principal',
-                
-                // NUEVOS CAMPOS OPERATIVOS (MAPEADOS DE FORMA SEGURA)
                 folioSede: data.folio ? 'S-' + data.folio : 'Pendiente',
                 direccionSede: data.direccion || 'Consultar en el expediente del Cliente',
                 contactoPerson: data.contacto || 'Responsable de Sede',
-                prioridad: 'Media', // Valor inicial seguro
-                
+                prioridad: 'Media', 
                 fechaInicio: data.fechaInicio || 'N/A',
                 fechaFin: data.fechaFin || 'N/A',
                 fechaPrimerTratamiento: data.fechaPrimerTratamiento || 'Pendiente',
@@ -139,6 +160,62 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         return rows;
     }
 
+    // CLONACIÓN / PLANTILLA
+    handleTemplateChange(event) {
+        this.selectedTemplateId = event.detail.value;
+    }
+
+    handleLoadTemplate() {
+        if (!this.selectedTemplateId) return;
+        this.isLoading = true;
+        
+        // Buscar el nombre de la ODT seleccionada para el status
+        const selectedWO = this.recentWorkOrders.find(wo => wo.value === this.selectedTemplateId);
+        const woName = selectedWO ? selectedWO.label.split(' - ')[0] : 'ODT';
+
+        getWorkOrderTemplateData({ workOrderId: this.selectedTemplateId })
+            .then(data => {
+                this.woNotes = data.notes;
+                this.templateStatus = `Configuración cargada desde: ${woName}`;
+
+                // Mapear tratamientos de la plantilla a la sedesList actual
+                // Solo mapeamos si el nombre coincide para seguridad
+                this.sedesList = this.sedesList.map(sede => {
+                    const updatedTratamientos = sede.tratamientos.map(tra => {
+                        const templateTra = data.tratamientos.find(t => t.name === tra.name);
+                        if (templateTra) {
+                            return {
+                                ...tra,
+                                numTecnicos: templateTra.tecnicosIds.length || 1,
+                                tecnicosIds: templateTra.tecnicosIds,
+                                numTecnicosSeleccionados: templateTra.tecnicosIds.length,
+                                durationHours: Math.floor((templateTra.schedulingRows[0]?.duration || 60) / 60),
+                                durationMinutes: (templateTra.schedulingRows[0]?.duration || 60) % 60,
+                                // Regenerar filas pero con la duración de la plantilla
+                                schedulingRows: tra.schedulingRows.map(row => ({
+                                    ...row,
+                                    duration: templateTra.schedulingRows[0]?.duration || 60
+                                }))
+                            };
+                        }
+                        return tra;
+                    });
+                    return { ...sede, tratamientos: updatedTratamientos };
+                });
+
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Éxito',
+                    message: 'Configuración cargada desde ODT anterior.',
+                    variant: 'success'
+                }));
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.isLoading = false;
+                console.error('Error cargando plantilla:', error);
+            });
+    }
+
     // MANEJADORES DE INTERFAZ
     handleSedeChange(event) {
         const field = event.target.dataset.field;
@@ -168,7 +245,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     handleTecnicoChange(event) {
         const traId = event.target.dataset.traId;
         const selectedOptions = Array.from(event.target.selectedOptions).map(option => option.value);
-        
+
         this.sedesList = this.sedesList.map(sede => ({
             ...sede,
             tratamientos: sede.tratamientos.map(tra => {
@@ -207,7 +284,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     handleBackToContract() { this.dispatchEvent(new CustomEvent('back')); }
     handleViewQuote() { /* Lógica para abrir PDF */ }
     handleAddCandidateDates() { this.showSchedulingSection = !this.showSchedulingSection; }
-    
+
     toggleAccordion(event) {
         const accordionBody = event.currentTarget.nextElementSibling;
         accordionBody.style.display = accordionBody.style.display === 'none' ? 'block' : 'none';

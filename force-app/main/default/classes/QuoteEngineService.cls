@@ -52,7 +52,14 @@ public with sharing class QuoteEngineService {
                     try {
                         Decimal can = Decimal.valueOf(String.valueOf(it.get('cantidad') != null ? it.get('cantidad') : 1));
                         Decimal tot = Decimal.valueOf(String.valueOf(it.get('totalSinImpuestos') != null ? it.get('totalSinImpuestos') : 0));
-                        qlis.add(new QuoteLineItem(QuoteId = rid, PricebookEntryId = (Id)pbeIdStr, Quantity = (can > 0 ? can : 1), UnitPrice = (can > 0 ? (tot/can) : tot), Descripcion_Detallada__c = (String)it.get('detalleTecnico')));
+                        qlis.add(new QuoteLineItem(
+                            QuoteId = rid, 
+                            PricebookEntryId = (Id)pbeIdStr, 
+                            Quantity = (can > 0 ? can : 1), 
+                            UnitPrice = (can > 0 ? (tot/can) : tot), 
+                            Descripcion_Detallada__c = (String)it.get('detalleTecnico'),
+                            Zonas_a_Tratar__c = (String)it.get('areas')
+                        ));
                     } catch (Exception e) {}
                 }
                 if (!qlis.isEmpty()) insert qlis;

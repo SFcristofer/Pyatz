@@ -102,6 +102,23 @@
     border-radius: 4px;
 }
 
+/* ESTILOS CLONACIÓN */
+.general-config-area .slds-box {
+    border-left: 4px solid var(--pyatz-purple);
+}
+
+.slds-combobox_container {
+    --slds-c-combobox-input-font-size: 0.85rem;
+}
+
+.template-status-label {
+    font-size: 0.75rem;
+    color: #38a169;
+    font-weight: 600;
+    font-style: italic;
+    margin-top: 4px;
+}
+
 .treatment-header {
     padding: 0.75rem 1rem;
     display: flex;

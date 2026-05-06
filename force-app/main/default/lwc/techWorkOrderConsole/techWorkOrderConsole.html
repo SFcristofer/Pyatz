@@ -64,10 +64,33 @@
                 </div>
             </div>
 
-            <!-- 3. DATOS GENERALES -->
+            <!-- 3. DATOS GENERALES Y CLONACIÓN -->
             <div class="general-config-area">
                 <div class="slds-box slds-theme_shade slds-m-bottom_medium">
-                    <h2 class="slds-text-heading_small slds-m-bottom_small">Datos Generales para las Órdenes de Trabajo propuestas</h2>
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                        <h2 class="slds-text-heading_small">Datos Generales para las Órdenes de Trabajo propuestas</h2>
+                        
+                        <!-- SECCIÓN DE CLONACIÓN -->
+                        <div class="slds-grid slds-grid_vertical-align-end">
+                            <lightning-combobox
+                                label="Cargar desde ODT anterior"
+                                placeholder="Seleccionar ODT base..."
+                                value={selectedTemplateId}
+                                options={recentWorkOrders}
+                                onchange={handleTemplateChange}
+                                variant="label-hidden"
+                                class="slds-m-right_small"
+                                style="width: 300px;">
+                            </lightning-combobox>
+                            <lightning-button 
+                                label="Cargar Configuración" 
+                                variant="brand-outline" 
+                                icon-name="utility:copy"
+                                onclick={handleLoadTemplate}
+                                disabled={isLoading}>
+                            </lightning-button>
+                        </div>
+                    </div>
                     
                     <div class="textarea-container">
                         <lightning-textarea label="Notas para las Órdenes de Trabajo" 
@@ -76,7 +99,10 @@
                             placeholder="Escriba aquí indicaciones generales para todas las OT..."
                             max-length="2048">
                         </lightning-textarea>
-                        <span class="char-counter">{remainingChars} caracteres restantes</span>
+                        <div class="slds-grid slds-grid_align-spread">
+                            <span class="template-status-label">{templateStatus}</span>
+                            <span class="char-counter">{remainingChars} caracteres restantes</span>
+                        </div>
                     </div>
 
                     <div class="slds-grid slds-gutters slds-m-top_medium">
@@ -174,7 +200,7 @@
                         </div>
 
                         <!-- 5. DETALLE DEL TRATAMIENTO -->
-                        <template for:each={sede.tratamientos} for:item="tra">
+                        <template for:each={treatmentsWithTechOptions} for:item="tra">
                             <div key={tra.id} class="treatment-accordion">
                                 <div class="treatment-header" onclick={toggleAccordion}>
                                     <div class="slds-grid slds-grid_vertical-align-center">
@@ -213,7 +239,7 @@
                                         <label class="slds-form-element__label">SELECCIÓN DE PERSONAL: TÉCNICOS: {tra.numTecnicosSeleccionados}</label>
                                         <select multiple class="custom-multi-select slds-select" style="height: 100px;" 
                                             data-tra-id={tra.id} onchange={handleTecnicoChange}>
-                                            <template for:each={tecnicosOptions} for:item="opt">
+                                            <template for:each={tra.options} for:item="opt">
                                                 <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
                                             </template>
                                         </select>
