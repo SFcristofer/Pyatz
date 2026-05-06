@@ -145,9 +145,13 @@
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
                         <div class="slds-form-element slds-m-bottom_small">
                             <span class="slds-text-title_bold" style="color: #4a5568;">Prioridad de Atención:</span>
-                            <p>
-                                <span class="slds-badge slds-theme_warning" style="font-weight: bold;">{contractData.prioridad}</span>
-                            </p>
+                            <lightning-combobox
+                                label="Prioridad"
+                                variant="label-hidden"
+                                value={contractData.prioridad}
+                                options={priorityOptions}
+                                onchange={handlePriorityChange}>
+                            </lightning-combobox>
                         </div>
                     </div>
                 </div>

@@ -13,15 +13,18 @@ public with sharing class TechWorkOrderController {
 
             if (existingWO != null) {
                 // CARGAR DATOS DE ODT EXISTENTE (MODO VISOR/EDITOR)
-                Map<String, Object> templateData = getWorkOrderTemplateData(existingWO.Id);
-                result.put('existingWorkOrderId', existingWO.Id);
+                WorkOrder fullWO = [SELECT Id, Priority, Description FROM WorkOrder WHERE Id = :existingWO.Id LIMIT 1];
+                Map<String, Object> templateData = getWorkOrderTemplateData(fullWO.Id);
+                result.put('existingWorkOrderId', fullWO.Id);
                 result.put('isUpdateMode', true);
                 result.put('notes', templateData.get('notes'));
+                result.put('prioridad', fullWO.Priority != null ? fullWO.Priority : 'Medium');
                 result.put('tratamientosExistentes', templateData.get('tratamientos'));
             }
 
             if (serviceContractId != null) {
                 ServiceContract sc = [SELECT Id, Name, StartDate, EndDate, Account.Name, AccountId,
+                                            Account.BillingStreet, Account.BillingCity, Account.BillingState, Account.BillingPostalCode,
                                             Quote_Source__c, Quote_Source__r.QuoteNumber, Quote_Source__r.Business_Lines_Selected__c, 
                                             Quote_Source__r.Technical_Sedes__c 
                                      FROM ServiceContract WHERE Id = :serviceContractId LIMIT 1];
@@ -29,10 +32,16 @@ public with sharing class TechWorkOrderController {
                 result.put('accountId', sc.AccountId);
                 result.put('folio', sc.Quote_Source__r != null ? sc.Quote_Source__r.QuoteNumber : sc.Name);
                 result.put('cliente', sc.Account.Name);
+                result.put('direccion', sc.Account.BillingStreet + ', ' + sc.Account.BillingCity);
                 result.put('lineaNegocio', sc.Quote_Source__r != null ? sc.Quote_Source__r.Business_Lines_Selected__c : '---');
                 result.put('sedes', sc.Quote_Source__r != null ? sc.Quote_Source__r.Technical_Sedes__c : '---');
                 result.put('fechaInicio', sc.StartDate != null ? sc.StartDate.format() : '---');
                 result.put('fechaFin', sc.EndDate != null ? sc.EndDate.format() : '---');
+                
+                // Buscar contacto principal
+                List<AccountContactRelation> acrs = [SELECT Contact.Name FROM AccountContactRelation WHERE AccountId = :sc.AccountId AND IsDirect = true LIMIT 1];
+                if (!acrs.isEmpty()) result.put('contacto', acrs[0].Contact.Name);
+
                 List<ContractLineItem> clis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
                 List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
                 
@@ -55,10 +64,12 @@ public with sharing class TechWorkOrderController {
             Quote targetQuote;
             if (quoteId != null) {
                 targetQuote = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId, 
+                                     Account.BillingStreet, Account.BillingCity, Account.BillingState, Account.BillingPostalCode,
                                      Business_Lines_Selected__c, Technical_Sedes__c 
                               FROM Quote WHERE Id = :quoteId LIMIT 1];
             } else {
                 List<Quote> syncingQuotes = [SELECT Id, QuoteNumber, Name, GrandTotal, ExpirationDate, CreatedDate, AccountId, Account.Name, OpportunityId,
+                                                   Account.BillingStreet, Account.BillingCity, Account.BillingState, Account.BillingPostalCode,
                                                    Business_Lines_Selected__c, Technical_Sedes__c
                                             FROM Quote WHERE OpportunityId = :oppId AND IsSyncing = true LIMIT 1];
                 if (syncingQuotes.isEmpty()) throw new AuraHandledException('No hay un presupuesto sincronizado.');
@@ -70,10 +81,15 @@ public with sharing class TechWorkOrderController {
             result.put('accountId', targetQuote.AccountId);
             result.put('folio', targetQuote.QuoteNumber);
             result.put('cliente', targetQuote.Account.Name);
+            result.put('direccion', targetQuote.Account.BillingStreet + ', ' + targetQuote.Account.BillingCity);
             result.put('lineaNegocio', targetQuote.Business_Lines_Selected__c != null ? targetQuote.Business_Lines_Selected__c : '---');
             result.put('sedes', targetQuote.Technical_Sedes__c != null ? targetQuote.Technical_Sedes__c : '---');
             result.put('fechaInicio', targetQuote.CreatedDate.format('dd-MMM-yyyy'));
             result.put('fechaFin', targetQuote.ExpirationDate != null ? targetQuote.ExpirationDate.format() : 'No definida');
+            
+            // Buscar contacto principal
+            List<AccountContactRelation> acrsOpp = [SELECT Contact.Name FROM AccountContactRelation WHERE AccountId = :targetQuote.AccountId AND IsDirect = true LIMIT 1];
+            if (!acrsOpp.isEmpty()) result.put('contacto', acrsOpp[0].Contact.Name);
             
             List<QuoteLineItem> qlis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description, Zonas_a_Tratar__c FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
             List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
@@ -158,6 +174,17 @@ public with sharing class TechWorkOrderController {
         } catch (Exception e) { throw new AuraHandledException('Error cargando plantilla: ' + e.getMessage()); }
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getPriorityOptions() {
+        List<Map<String, String>> options = new List<Map<String, String>>();
+        Schema.DescribeFieldResult fieldResult = WorkOrder.Priority.getDescribe();
+        List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+        for(Schema.PicklistEntry entry : ple) {
+            options.add(new Map<String, String>{'label' => entry.getLabel(), 'value' => entry.getValue()});
+        }
+        return options;
+    }
+
     @AuraEnabled
     public static String saveWorkOrders(String payloadJson) {
         try {
@@ -176,6 +203,9 @@ public with sharing class TechWorkOrderController {
 
             String notes = (String) payload.get('notes');
             String folio = (String) payload.get('folio');
+            String priority = (String) payload.get('priority');
+            String executionAddress = (String) payload.get('executionAddress'); // Mapeado a Street por simplicidad en este ejemplo
+            String contactPerson = (String) payload.get('contactPerson');
             List<Object> sedesPayload = (List<Object>) payload.get('sedesList');
 
             Account acc = [SELECT BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry FROM Account WHERE Id = :accountId LIMIT 1];
@@ -200,12 +230,24 @@ public with sharing class TechWorkOrderController {
             wo.ServiceContractId = serviceContractId; 
             wo.Pricebook2Id = pricebookId;
             wo.Status = 'New';
-            wo.Street = acc.BillingStreet;
-            wo.City = acc.BillingCity;
-            wo.State = acc.BillingState;
-            wo.PostalCode = acc.BillingPostalCode;
-            wo.Country = acc.BillingCountry;
-            wo.Description = 'Generada desde 360 Pyatz.\nNotas:\n' + notes;
+            wo.Priority = String.isNotBlank(priority) ? priority : 'Medium';
+            
+            // MAPEO DE DIRECCIÓN DE EJECUCIÓN
+            if (String.isNotBlank(executionAddress)) {
+                wo.Street = executionAddress; // En un caso real, se segmentaría en Street, City, etc.
+                wo.City = acc.BillingCity;
+                wo.State = acc.BillingState;
+                wo.PostalCode = acc.BillingPostalCode;
+                wo.Country = acc.BillingCountry;
+            } else {
+                wo.Street = acc.BillingStreet;
+                wo.City = acc.BillingCity;
+                wo.State = acc.BillingState;
+                wo.PostalCode = acc.BillingPostalCode;
+                wo.Country = acc.BillingCountry;
+            }
+            
+            wo.Description = 'Generada desde 360 Pyatz.\nContacto en Sede: ' + contactPerson + '\nNotas:\n' + notes;
             upsert wo;
 
             // 2. Crear Work Order Line Items

@@ -4,6 +4,10 @@ import saveWorkOrders from '@salesforce/apex/TechWorkOrderController.saveWorkOrd
 import getServiceResources from '@salesforce/apex/TechWorkOrderController.getServiceResources';
 import getRecentWorkOrders from '@salesforce/apex/TechWorkOrderController.getRecentWorkOrders';
 import getWorkOrderTemplateData from '@salesforce/apex/TechWorkOrderController.getWorkOrderTemplateData';
+import { getPicklistValues } from 'lightning/uiObjectInfoApi';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import WORK_ORDER_OBJECT from '@salesforce/schema/WorkOrder';
+import PRIORITY_FIELD from '@salesforce/schema/WorkOrder.Priority';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
@@ -32,7 +36,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         fechaPrimerTratamiento: '---',
         tratamientos: '---',
         fechaFin: '---',
-        fechaLimiteServicios: '---'
+        fechaLimiteServicios: '---',
+        prioridad: 'Medium',
+        direccionSede: '',
+        contactoPerson: ''
     };
 
     @track sedesList = [];
@@ -49,6 +56,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     ];
 
     @track tecnicosOptions = [];
+    @track priorityOptions = [];
     @track recentWorkOrders = [];
     @track selectedTemplateId = '';
     @track templateStatus = ''; // Feedback visual
@@ -61,6 +69,23 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         } else if (error) {
             console.error('Error cargando recursos de servicio:', error);
         }
+    }
+
+    @wire(getObjectInfo, { objectApiName: WORK_ORDER_OBJECT })
+    workOrderInfo;
+
+    @wire(getPicklistValues, { recordTypeId: '012000000000000AAA', fieldApiName: PRIORITY_FIELD })
+    wiredPriority({ error, data }) {
+        if (data) {
+            console.log('Prioridades cargadas:', data.values);
+            this.priorityOptions = data.values;
+        } else if (error) {
+            console.error('Error cargando prioridades:', error);
+        }
+    }
+
+    handlePriorityChange(event) {
+        this.contractData.prioridad = event.detail.value;
     }
 
     handleGanttViewChange(event) {
@@ -111,7 +136,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 folioSede: data.folio ? 'S-' + data.folio : 'Pendiente',
                 direccionSede: data.direccion || 'Consultar en el expediente del Cliente',
                 contactoPerson: data.contacto || 'Responsable de Sede',
-                prioridad: 'Media', 
+                prioridad: data.prioridad || 'Medium', 
                 fechaInicio: data.fechaInicio || 'N/A',
                 fechaFin: data.fechaFin || 'N/A',
                 fechaPrimerTratamiento: data.fechaPrimerTratamiento || 'Pendiente',
@@ -386,6 +411,9 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             accountId: this.accountId,
             folio: this.contractFolio,
             notes: this.woNotes,
+            priority: this.contractData.prioridad,
+            executionAddress: this.contractData.direccionSede,
+            contactPerson: this.contractData.contactoPerson,
             sedesList: this.sedesList,
             daysAllowed: this.daysOfWeek.filter(d => d.checked).map(d => d.label)
         };
@@ -548,4 +576,4 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         });
         return items;
     }
-    }
+}
