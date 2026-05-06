@@ -285,12 +285,14 @@ public with sharing class TechWorkOrderController {
                 String startTimeStr = (String) sede.get('startTime');
                 for (Object traObj : (List<Object>) sede.get('tratamientos')) {
                     Map<String, Object> tra = (Map<String, Object>) traObj;
-                    List<String> techIds = new List<String>();
-                    if (tra.containsKey('tecnicosIds')) for (Object tId : (List<Object>) tra.get('tecnicosIds')) techIds.add((String) tId);
+                    List<String> techIdsTratamiento = new List<String>();
+                    if (tra.containsKey('tecnicosIds')) for (Object tId : (List<Object>) tra.get('tecnicosIds')) techIdsTratamiento.add((String) tId);
+                    
                     for (Object rowObj : (List<Object>) tra.get('schedulingRows')) {
                         Map<String, Object> row = (Map<String, Object>) rowObj;
                         Date d = Date.valueOf((String) row.get('date'));
                         String rowStartTimeStr = (String) row.get('startTime');
+                        String rowTecnicoId = (String) row.get('tecnicoId');
 
                         ServiceAppointment sa = new ServiceAppointment(ParentRecordId = wolisToInsert[woliIndex].Id, Subject = 'Servicio: ' + (String) tra.get('name'));
                         sa.Street = wo.Street; sa.City = wo.City; sa.State = wo.State; sa.PostalCode = wo.PostalCode; sa.Country = wo.Country;
@@ -313,7 +315,13 @@ public with sharing class TechWorkOrderController {
                         if ((Boolean) row.get('locked')) sa.FSL__Pinned__c = true;
                         if (String.isNotBlank((String) row.get('notes'))) sa.ServiceNote = (String) row.get('notes');
                         sasToInsert.add(sa);
-                        techniciansPerSA.add(techIds);
+                        
+                        // PRIORIZAR TÉCNICO DE FILA SOBRE TÉCNICOS DE TRATAMIENTO
+                        if (String.isNotBlank(rowTecnicoId)) {
+                            techniciansPerSA.add(new List<String>{rowTecnicoId});
+                        } else {
+                            techniciansPerSA.add(techIdsTratamiento);
+                        }
                     }
                     woliIndex++;
                 }

@@ -220,6 +220,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 startTime: '08:00:00.000',
                 locked: false,
                 duration: 60,
+                tecnicoId: '',
                 executed: false,
                 showNotes: false,
                 notes: ''
@@ -260,9 +261,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                                 durationHours: Math.floor((templateTra.schedulingRows[0]?.duration || 60) / 60),
                                 durationMinutes: (templateTra.schedulingRows[0]?.duration || 60) % 60,
                                 // Regenerar filas pero con la duración de la plantilla
-                                schedulingRows: tra.schedulingRows.map(row => ({
+                                schedulingRows: tra.schedulingRows.map((row, idx) => ({
                                     ...row,
-                                    duration: templateTra.schedulingRows[0]?.duration || 60
+                                    duration: templateTra.schedulingRows[0]?.duration || 60,
+                                    tecnicoId: templateTra.schedulingRows[idx] ? templateTra.schedulingRows[idx].tecnicoId : ''
                                 }))
                             };
                         }
@@ -336,6 +338,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             ...row, 
                             startTime: firstRow.startTime, 
                             duration: firstRow.duration,
+                            tecnicoId: firstRow.tecnicoId,
                             notes: firstRow.notes 
                         };
                     });
