@@ -1,0 +1,62 @@
+==========================================================================
+        ROADMAP: AUDITORÍA TÉCNICA DIGITAL PYATZ (SFS MOBILE)
+==========================================================================
+
+Este documento detalla la estrategia para digitalizar la Matriz de Inspección
+Técnica de Pyatz, integrándola con Salesforce Field Service Mobile para
+lograr reportes automáticos, evidencias fotográficas y firmas digitales.
+
+--------------------------------------------------------------------------
+FASE 1: ARQUITECTURA Y MODELADO DE DATOS (EL CEREBRO)
+--------------------------------------------------------------------------
+1.1 Carga de Metadatos Maestros: Crear Custom Metadata para almacenar la 
+    matriz de Excel (Servicio, Pregunta, Respuestas y Deficiencias).
+1.2 Objeto de Inspección Técnica: Crear 'Inspeccion_Tecnica__c' vinculado 
+    a la Cita de Servicio (Service Appointment).
+1.3 Vínculo de Productos: Mapear cada Producto de Salesforce con su 
+    plantilla de inspección correspondiente (ej. Bioenzimático -> Matriz 1).
+
+--------------------------------------------------------------------------
+FASE 2: AUTOMATIZACIÓN EN LA CONSOLA ODT (LA INYECCIÓN)
+--------------------------------------------------------------------------
+2.1 Generación Automática: Modificar 'saveWorkOrders' para que al crear 
+    cada SA, genere los registros de preguntas vacías automáticamente.
+2.2 Herencia de Contexto: Inyectar datos de Sede, Folio y Contacto en el 
+    reporte para evitar doble captura por parte del técnico.
+
+--------------------------------------------------------------------------
+FASE 3: INTERFAZ MOBILE READY (LA HERRAMIENTA DEL TÉCNICO)
+--------------------------------------------------------------------------
+3.1 LWC Auditor de Campo: Evolucionar 'techSurveyManager' para SFS Mobile.
+    - Módulo "Antes": Captura obligatoria de fotos del estado inicial.
+    - Módulo "Checklist": Respuestas dinámicas con sugerencia automática 
+      de "Áreas de Oportunidad" según la matriz.
+    - Módulo "Después": Captura de fotos del trabajo terminado.
+3.2 Integración de Firma: Incorporar el componente de Firma Digital para 
+    la validación del cliente al finalizar.
+
+--------------------------------------------------------------------------
+FASE 4: INTELIGENCIA DE DOCUMENTOS (EL ENTREGABLE)
+--------------------------------------------------------------------------
+4.1 Motor de Generación PDF: Apex Service para ensamblar respuestas, 
+    deficiencias, fotos (Antes/Después) y firma en un PDF profesional.
+4.2 Lógica de Hallazgos: Resaltar automáticamente las deficiencias para 
+    facilitar la venta de servicios correctivos.
+
+--------------------------------------------------------------------------
+FASE 5: REPORTEABILIDAD Y DASHBOARDS (LA VISIÓN DE NEGOCIO)
+--------------------------------------------------------------------------
+5.1 Dashboards de Calidad: Tableros con KPI's de incidencias por sede, 
+    cumplimiento de consumos y productividad técnica.
+5.2 Historial por Cliente: Capacidad de ver la evolución de deficiencias 
+    en una sede a través del tiempo.
+
+--------------------------------------------------------------------------
+FASE 6: VALIDACIÓN Y DESPLIEGUE
+--------------------------------------------------------------------------
+6.1 UAT (Pruebas): Validación del flujo completo con técnicos en Sandbox.
+6.2 Go-Live: Despliegue a producción y respaldo final en GitHub.
+
+==========================================================================
+PROYECTO PYATZ - CALIDAD Y TECNOLOGÍA EN CAMPO
+==========================================================================
