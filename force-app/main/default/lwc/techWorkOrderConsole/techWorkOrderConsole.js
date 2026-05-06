@@ -4,6 +4,7 @@ import saveWorkOrders from '@salesforce/apex/TechWorkOrderController.saveWorkOrd
 import getServiceResources from '@salesforce/apex/TechWorkOrderController.getServiceResources';
 import getRecentWorkOrders from '@salesforce/apex/TechWorkOrderController.getRecentWorkOrders';
 import getWorkOrderTemplateData from '@salesforce/apex/TechWorkOrderController.getWorkOrderTemplateData';
+import getServiceTerritories from '@salesforce/apex/TechWorkOrderController.getServiceTerritories';
 import { getPicklistValues } from 'lightning/uiObjectInfoApi';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import WORK_ORDER_OBJECT from '@salesforce/schema/WorkOrder';
@@ -38,6 +39,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         fechaFin: '---',
         fechaLimiteServicios: '---',
         prioridad: 'Medium',
+        territoryId: '0HhV9000000EWODKA4',
         direccionSede: '',
         contactoPerson: ''
     };
@@ -57,6 +59,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
     @track tecnicosOptions = [];
     @track priorityOptions = [];
+    @track territoryOptions = [];
     @track recentWorkOrders = [];
     @track selectedTemplateId = '';
     @track templateStatus = ''; // Feedback visual
@@ -68,6 +71,15 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             this.tecnicosOptions = data.map(sr => ({ label: sr.name, value: sr.id }));
         } else if (error) {
             console.error('Error cargando recursos de servicio:', error);
+        }
+    }
+
+    @wire(getServiceTerritories)
+    wiredTerritories({ error, data }) {
+        if (data) {
+            this.territoryOptions = data;
+        } else if (error) {
+            console.error('Error cargando territorios:', error);
         }
     }
 
@@ -86,6 +98,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
     handlePriorityChange(event) {
         this.contractData.prioridad = event.detail.value;
+    }
+
+    handleTerritoryChange(event) {
+        this.contractData.territoryId = event.detail.value;
     }
 
     handleGanttViewChange(event) {
@@ -137,6 +153,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 direccionSede: data.direccion || 'Consultar en el expediente del Cliente',
                 contactoPerson: data.contacto || 'Responsable de Sede',
                 prioridad: data.prioridad || 'Medium', 
+                territoryId: this.contractData.territoryId,
                 fechaInicio: data.fechaInicio || 'N/A',
                 fechaFin: data.fechaFin || 'N/A',
                 fechaPrimerTratamiento: data.fechaPrimerTratamiento || 'Pendiente',
@@ -172,6 +189,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             startTime: row.startTime || '08:00:00.000',
                             locked: false,
                             duration: row.duration || 60,
+                            arrivalMargin: row.arrivalMargin || 0,
+                            tecnicoId: row.tecnicoId || '',
                             executed: false,
                             showNotes: false,
                             notes: row.notes || ''
@@ -220,6 +239,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 startTime: '08:00:00.000',
                 locked: false,
                 duration: 60,
+                arrivalMargin: 0,
                 tecnicoId: '',
                 executed: false,
                 showNotes: false,
@@ -247,8 +267,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 this.woNotes = data.notes;
                 this.templateStatus = `Configuración cargada desde: ${woName}`;
 
-                // Mapear tratamientos de la plantilla a la sedesList actual
-                // Solo mapeamos si el nombre coincide para seguridad
                 this.sedesList = this.sedesList.map(sede => {
                     const updatedTratamientos = sede.tratamientos.map(tra => {
                         const templateTra = data.tratamientos.find(t => t.name === tra.name);
@@ -260,11 +278,11 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                                 numTecnicosSeleccionados: templateTra.tecnicosIds.length,
                                 durationHours: Math.floor((templateTra.schedulingRows[0]?.duration || 60) / 60),
                                 durationMinutes: (templateTra.schedulingRows[0]?.duration || 60) % 60,
-                                // Regenerar filas pero con la duración de la plantilla
                                 schedulingRows: tra.schedulingRows.map((row, idx) => ({
                                     ...row,
                                     duration: templateTra.schedulingRows[0]?.duration || 60,
-                                    tecnicoId: templateTra.schedulingRows[idx] ? templateTra.schedulingRows[idx].tecnicoId : ''
+                                    tecnicoId: templateTra.schedulingRows[idx] ? templateTra.schedulingRows[idx].tecnicoId : '',
+                                    arrivalMargin: templateTra.schedulingRows[idx] ? templateTra.schedulingRows[idx].arrivalMargin || 0 : 0
                                 }))
                             };
                         }
@@ -310,7 +328,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 if (tra.id === traId) {
                     const updatedTra = { ...tra, [field]: val };
                     
-                    // LÓGICA DE CASCADA: Si cambia duración, propagar a filas no bloqueadas
                     if (field === 'durationHours' || field === 'durationMinutes') {
                         const totalMinutes = (parseInt(updatedTra.durationHours) || 0) * 60 + (parseInt(updatedTra.durationMinutes) || 0);
                         updatedTra.schedulingRows = updatedTra.schedulingRows.map(row => {
@@ -338,6 +355,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             ...row, 
                             startTime: firstRow.startTime, 
                             duration: firstRow.duration,
+                            arrivalMargin: firstRow.arrivalMargin,
                             tecnicoId: firstRow.tecnicoId,
                             notes: firstRow.notes 
                         };
@@ -415,6 +433,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             folio: this.contractFolio,
             notes: this.woNotes,
             priority: this.contractData.prioridad,
+            territoryId: this.contractData.territoryId,
             executionAddress: this.contractData.direccionSede,
             contactPerson: this.contractData.contactoPerson,
             sedesList: this.sedesList,
@@ -456,7 +475,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     get weeksVariant() { return this.ganttView === 'weeks' ? 'brand' : 'neutral'; }
     get monthsVariant() { return this.ganttView === 'months' ? 'brand' : 'neutral'; }
 
-    // HELPER PARA CALCULAR EL RANGO UNIFICADO (ALINEACIÓN PERFECTA)
     getGanttRange() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -465,17 +483,17 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         let units = 0;
 
         if (this.ganttView === 'months') {
-            start = new Date(today.getFullYear(), today.getMonth(), 1); // Inicio de mes
+            start = new Date(today.getFullYear(), today.getMonth(), 1);
             end = new Date(start);
             end.setMonth(start.getMonth() + 12);
             units = 12;
         } else if (this.ganttView === 'weeks') {
             const day = today.getDay();
-            start.setDate(today.getDate() - day); // Inicio de semana (Domingo)
+            start.setDate(today.getDate() - day);
             end = new Date(start);
             end.setDate(start.getDate() + (7 * 24));
             units = 24;
-        } else { // days
+        } else {
             start = new Date(today);
             end = new Date(start);
             end.setDate(start.getDate() + 60);
@@ -485,7 +503,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         return { start, end, total: end.getTime() - start.getTime(), units };
     }
 
-    // LÓGICA DINÁMICA PARA EL GANTT PROFESIONAL CON ALINEACIÓN CORREGIDA
     get ganttAxisLabels() {
         const { start, total, units } = this.getGanttRange();
         const result = [];
@@ -515,7 +532,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                     style: `left: ${(offsetMs / total) * 100}%`
                 });
             }
-        } else { // 'days' view
+        } else {
             for (let i = 0; i <= units; i++) {
                 const d = new Date(start);
                 d.setDate(start.getDate() + i);
@@ -554,7 +571,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
                 tra.schedulingRows.forEach((row, idx) => {
                     const rowDate = new Date(row.date + 'T00:00:00');
-                    // Solo incluimos si está dentro del rango visible
                     const { end } = this.getGanttRange();
                     if (rowDate >= start && rowDate <= end) {
                         const offsetMs = rowDate.getTime() - start.getTime();

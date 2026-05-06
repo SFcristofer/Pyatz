@@ -185,6 +185,17 @@ public with sharing class TechWorkOrderController {
         return options;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getServiceTerritories() {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        try {
+            for (ServiceTerritory st : [SELECT Id, Name FROM ServiceTerritory WHERE IsActive = true ORDER BY Name ASC]) {
+                results.add(new Map<String, String>{'label' => st.Name, 'value' => st.Id});
+            }
+        } catch (Exception e) { }
+        return results;
+    }
+
     @AuraEnabled
     public static String saveWorkOrders(String payloadJson) {
         try {
@@ -195,6 +206,7 @@ public with sharing class TechWorkOrderController {
             String qIdStr = (String) payload.get('quoteId');
             String scIdStr = (String) payload.get('serviceContractId');
             String accIdStr = (String) payload.get('accountId');
+            String territoryId = (String) payload.get('territoryId');
 
             Id existingWorkOrderId = String.isNotBlank(eWoIdStr) ? (Id) eWoIdStr : null;
             Id quoteId = String.isNotBlank(qIdStr) ? (Id) qIdStr : null;
@@ -231,6 +243,7 @@ public with sharing class TechWorkOrderController {
             wo.Pricebook2Id = pricebookId;
             wo.Status = 'New';
             wo.Priority = String.isNotBlank(priority) ? priority : 'Medium';
+            wo.ServiceTerritoryId = String.isNotBlank(territoryId) ? (Id) territoryId : null;
             
             // MAPEO DE DIRECCIÓN DE EJECUCIÓN
             if (String.isNotBlank(executionAddress)) {
@@ -293,14 +306,16 @@ public with sharing class TechWorkOrderController {
                         Date d = Date.valueOf((String) row.get('date'));
                         String rowStartTimeStr = (String) row.get('startTime');
                         String rowTecnicoId = (String) row.get('tecnicoId');
+                        Integer arrivalMargin = row.containsKey('arrivalMargin') ? Integer.valueOf(row.get('arrivalMargin')) : 0;
 
                         ServiceAppointment sa = new ServiceAppointment(ParentRecordId = wolisToInsert[woliIndex].Id, Subject = 'Servicio: ' + (String) tra.get('name'));
                         sa.Street = wo.Street; sa.City = wo.City; sa.State = wo.State; sa.PostalCode = wo.PostalCode; sa.Country = wo.Country;
+                        sa.ServiceTerritoryId = wo.ServiceTerritoryId;
                         sa.EarliestStartTime = Datetime.newInstance(d, Time.newInstance(0, 0, 0, 0));
                         sa.DueDate = sa.EarliestStartTime.addDays(1);
                         sa.Duration = (Decimal) row.get('duration');
                         sa.DurationType = 'Minutes';
-                        sa.Status = 'None';
+                        sa.Status = 'Ninguno';
                         
                         Integer h = 8, m = 0;
                         String finalStartTime = String.isNotBlank(rowStartTimeStr) ? rowStartTimeStr : startTimeStr;
@@ -309,8 +324,22 @@ public with sharing class TechWorkOrderController {
                             List<String> pts = finalStartTime.substringBefore('.').split(':');
                             if (pts.size() >= 2) { h = Integer.valueOf(pts[0]); m = Integer.valueOf(pts[1]); }
                         }
-                        sa.SchedStartTime = Datetime.newInstance(d, Time.newInstance(h, m, 0, 0));
+                        
+                        // CÁLCULO DE TIEMPOS PROFESIONAL (VENTANA DE TOLERANCIA)
+                        Datetime scheduledStart = Datetime.newInstance(d, Time.newInstance(h, m, 0, 0));
+                        
+                        sa.SchedStartTime = scheduledStart;
                         sa.SchedEndTime = sa.SchedStartTime.addMinutes(Integer.valueOf(sa.Duration));
+                        
+                        // Inicio más temprano = Programado - Margen
+                        sa.EarliestStartTime = scheduledStart.addMinutes(-arrivalMargin);
+                        
+                        // Vencimiento = Final del día (23:59:59)
+                        sa.DueDate = Datetime.newInstance(d, Time.newInstance(23, 59, 59, 0));
+                        
+                        // Ventana de llegada (Promesa al cliente)
+                        sa.ArrivalWindowStartTime = scheduledStart;
+                        sa.ArrivalWindowEndTime = scheduledStart.addMinutes(arrivalMargin);
                         
                         if ((Boolean) row.get('locked')) sa.FSL__Pinned__c = true;
                         if (String.isNotBlank((String) row.get('notes'))) sa.ServiceNote = (String) row.get('notes');
@@ -328,6 +357,13 @@ public with sharing class TechWorkOrderController {
             }
             if (!sasToInsert.isEmpty()) {
                 insert sasToInsert;
+                
+                // ACTUALIZACIÓN INMEDIATA A PROGRAMADO PARA SALTAR REGLA DE VALIDACIÓN
+                List<ServiceAppointment> sasToUpdate = new List<ServiceAppointment>();
+                for(ServiceAppointment sa : sasToInsert) {
+                    sasToUpdate.add(new ServiceAppointment(Id = sa.Id, Status = 'Programado'));
+                }
+                update sasToUpdate;
                 
                 // 4. Intentar Asignar Técnicos (SILENCIOSO PARA EVITAR EL ERROR DE TERRITORIO)
                 List<AssignedResource> arsToInsert = new List<AssignedResource>();
