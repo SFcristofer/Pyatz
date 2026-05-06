@@ -67,4 +67,28 @@ public with sharing class SurveyService {
             return result;
         } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
+
+    @AuraEnabled
+    public static void tagLatestPhotos(Id recordId, String tag) {
+        try {
+            // Buscamos archivos subidos en los últimos 5 minutos a este registro
+            Datetime window = Datetime.now().addMinutes(-5);
+            List<ContentDocumentLink> links = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :recordId];
+            if (links.isEmpty()) return;
+            
+            Set<Id> docIds = new Set<Id>();
+            for(ContentDocumentLink l : links) docIds.add(l.ContentDocumentId);
+            
+            List<ContentVersion> cvs = [SELECT Id, Title FROM ContentVersion WHERE ContentDocumentId IN :docIds AND CreatedDate >= :window AND IsLatest = true];
+            List<ContentVersion> toUpdate = new List<ContentVersion>();
+            
+            for(ContentVersion cv : cvs) {
+                if(!cv.Title.startsWith('[') ) {
+                    cv.Title = '[' + tag.toUpperCase() + '] ' + cv.Title;
+                    toUpdate.add(cv);
+                }
+            }
+            if(!toUpdate.isEmpty()) update toUpdate;
+        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+    }
 }

@@ -2,6 +2,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import getInspectionData from '@salesforce/apex/SurveyService.getInspectionData';
 import getInspectionQuestions from '@salesforce/apex/SurveyService.getInspectionQuestions';
 import saveInspectionResult from '@salesforce/apex/SurveyService.saveInspectionResult';
+import tagLatestPhotos from '@salesforce/apex/SurveyService.tagLatestPhotos';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class TechMobileAuditor extends LightningElement {
@@ -21,18 +22,12 @@ export default class TechMobileAuditor extends LightningElement {
     @wire(getInspectionData, { saId: '$recordId' })
     wiredSA({ error, data }) {
         if (data) {
-            console.log('Datos de inspección recibidos:', data);
             this.saNumber = data.saNumber;
             this.reportTitle = data.saSubject;
             this.reportType = data.reportType;
-            
-            if (this.reportType) {
-                this.loadQuestions();
-            } else {
-                this.isLoading = false;
-            }
+            if (this.reportType) this.loadQuestions();
+            else this.isLoading = false;
         } else if (error) {
-            console.error('Error cargando datos de la cita:', error);
             this.isLoading = false;
         }
     }
@@ -50,7 +45,6 @@ export default class TechMobileAuditor extends LightningElement {
                 this.isLoading = false;
             })
             .catch(error => {
-                console.error('Error cargando preguntas:', error);
                 this.isLoading = false;
             });
     }
@@ -58,7 +52,6 @@ export default class TechMobileAuditor extends LightningElement {
     handleAnswer(event) {
         const idx = event.target.dataset.index;
         const val = event.target.dataset.val;
-        
         this.questions = this.questions.map((q, i) => {
             if (i == idx) {
                 const isCorrect = (val === q.expected);
@@ -74,14 +67,25 @@ export default class TechMobileAuditor extends LightningElement {
         });
     }
 
-    handleNext() { if (this.currentStep < 4) this.currentStep++; }
+    async handleNext() {
+        if (this.currentStep === 1) await this.tagPhotos('ANTES');
+        if (this.currentStep === 3) await this.tagPhotos('DESPUES');
+        if (this.currentStep < 4) this.currentStep++;
+    }
+
+    async tagPhotos(tag) {
+        try {
+            await tagLatestPhotos({ recordId: this.recordId, tag: tag });
+        } catch (e) { console.error('Error etiquetando fotos:', e); }
+    }
+
     handlePrev() { if (this.currentStep > 1) this.currentStep--; }
 
     handleSaveAll() {
         this.isSaving = true;
         const deficiencies = this.questions
             .filter(q => q.showDeficiency)
-            .map(q => q.deficiency)
+            .map(q => `[${this.reportType}] ${q.deficiency}`)
             .join('\n\n');
 
         saveInspectionResult({
@@ -99,7 +103,6 @@ export default class TechMobileAuditor extends LightningElement {
         })
         .catch(error => {
             this.isSaving = false;
-            console.error('Error al guardar:', error);
         });
     }
 

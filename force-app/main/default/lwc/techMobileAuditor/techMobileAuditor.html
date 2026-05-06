@@ -33,12 +33,12 @@
                         <p class="step-desc">Documente el estado inicial del área antes de comenzar.</p>
                     </div>
                     
-                    <div class="camera-section slds-m-vertical_medium slds-text-align_center">
-                        <c-tech-process-summary record-id={recordId} mode="mobile-camera" tag="[ANTES]"></c-tech-process-summary>
+                    <div class="camera-integration slds-m-vertical_medium">
+                        <c-geo-photo-capture record-id={recordId} object-api-name="ServiceAppointment"></c-geo-photo-capture>
                     </div>
 
                     <div class="footer-actions">
-                        <lightning-button label="SIGUIENTE: CHECKLIST" variant="brand" class="full-width" onclick={handleNext}></lightning-button>
+                        <lightning-button label="SIGUIENTE: CHECKLIST" variant="brand" icon-name="utility:forward" class="full-width" onclick={handleNext}></lightning-button>
                     </div>
                 </div>
             </template>
@@ -48,7 +48,7 @@
                 <div class="step-content animate-in">
                     <div class="step-header">
                         <h2 class="step-title">Inspección: {reportType}</h2>
-                        <p class="step-desc">Realice la auditoría técnica según el protocolo.</p>
+                        <p class="step-desc">Responda basándose en los hallazgos en sitio.</p>
                     </div>
                     
                     <div class="checklist-container">
@@ -77,12 +77,11 @@
                                     </lightning-button-group>
                                 </div>
 
-                                <!-- Sugerencia de Deficiencia Dinámica -->
                                 <template if:true={q.showDeficiency}>
                                     <div class="deficiency-alert animate-in">
                                         <p class="deficiency-text">
                                             <lightning-icon icon-name="utility:warning" size="xx-small" variant="error" class="slds-m-right_xx-small"></lightning-icon>
-                                            <strong>Hallazgo Pyatz:</strong><br/>{q.deficiency}
+                                            <strong>Área de Oportunidad:</strong><br/>{q.deficiency}
                                         </p>
                                     </div>
                                 </template>
@@ -92,7 +91,7 @@
 
                     <div class="footer-actions">
                         <lightning-button label="ATRÁS" variant="neutral" class="full-width" onclick={handlePrev}></lightning-button>
-                        <lightning-button label="SIGUIENTE: DESPUÉS" variant="brand" class="full-width" onclick={handleNext}></lightning-button>
+                        <lightning-button label="SIGUIENTE: RESULTADO" variant="brand" icon-name="utility:forward" class="full-width" onclick={handleNext}></lightning-button>
                     </div>
                 </div>
             </template>
@@ -101,17 +100,17 @@
             <template if:true={isStepAfter}>
                 <div class="step-content animate-in">
                     <div class="step-header">
-                        <h2 class="step-title">Evidencia de Resultado</h2>
-                        <p class="step-desc">Documente el trabajo concluido y la limpieza final.</p>
+                        <h2 class="step-title">Resultado Final</h2>
+                        <p class="step-desc">Capture fotos de los trabajos concluidos.</p>
                     </div>
                     
-                    <div class="camera-section slds-m-vertical_medium slds-text-align_center">
-                        <c-tech-process-summary record-id={recordId} mode="mobile-camera" tag="[DESPUES]"></c-tech-process-summary>
+                    <div class="camera-integration slds-m-vertical_medium">
+                        <c-geo-photo-capture record-id={recordId} object-api-name="ServiceAppointment"></c-geo-photo-capture>
                     </div>
 
                     <div class="footer-actions">
                         <lightning-button label="ATRÁS" variant="neutral" class="full-width" onclick={handlePrev}></lightning-button>
-                        <lightning-button label="SIGUIENTE: FIRMA" variant="brand" class="full-width" onclick={handleNext}></lightning-button>
+                        <lightning-button label="SIGUIENTE: FIRMA" variant="brand" icon-name="utility:forward" class="full-width" onclick={handleNext}></lightning-button>
                     </div>
                 </div>
             </template>
@@ -120,17 +119,17 @@
             <template if:true={isStepSignature}>
                 <div class="step-content animate-in">
                     <div class="step-header">
-                        <h2 class="step-title">Conformidad y Firma</h2>
-                        <p class="step-desc">Validación del servicio por parte del cliente.</p>
+                        <h2 class="step-title">Validación Pyatz</h2>
+                        <p class="step-desc">Firma de conformidad del cliente.</p>
                     </div>
                     
-                    <div class="signature-section slds-m-vertical_medium slds-box bg-white">
-                        <c-tech-contract-manager record-id={recordId} mode="mobile-signature"></c-tech-contract-manager>
+                    <div class="signature-integration slds-m-vertical_medium">
+                        <c-client-signature record-id={recordId} object-api-name="ServiceAppointment"></c-client-signature>
                     </div>
 
                     <div class="footer-actions">
                         <lightning-button label="ATRÁS" variant="neutral" class="full-width" onclick={handlePrev}></lightning-button>
-                        <lightning-button label="FINALIZAR Y GUARDAR" variant="success" class="full-width" onclick={handleSaveAll} disabled={isSaving}></lightning-button>
+                        <lightning-button label="FINALIZAR REPORTE" variant="success" icon-name="utility:check" class="full-width" onclick={handleSaveAll} disabled={isSaving}></lightning-button>
                     </div>
                 </div>
             </template>
