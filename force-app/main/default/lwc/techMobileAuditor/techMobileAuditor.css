@@ -1,0 +1,185 @@
+:host {
+    --pyatz-primary: #0070d2;
+    --pyatz-primary-dark: #005fb2;
+    --pyatz-success: #2e7d32;
+    --pyatz-error: #d32f2f;
+    --pyatz-surface: #ffffff;
+    --pyatz-bg: #f3f6f9;
+    --pyatz-border: #d8dde6;
+    --pyatz-text-main: #16325c;
+    --pyatz-text-soft: #3e3e3c;
+    
+    /* Fluid Typography */
+    --font-size-h1: clamp(1.1rem, 2vw + 0.8rem, 1.4rem);
+    --font-size-h2: clamp(1rem, 1.5vw + 0.7rem, 1.2rem);
+    --font-size-base: clamp(0.875rem, 0.5vw + 0.8rem, 1rem);
+    --font-size-small: 0.8rem;
+
+    display: block;
+    width: 100%;
+    color: var(--pyatz-text-main);
+}
+
+.mobile-container {
+    background: var(--pyatz-bg);
+    min-height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--pyatz-border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Header Refinement */
+.mobile-header {
+    background: linear-gradient(135deg, var(--pyatz-primary), var(--pyatz-primary-dark));
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-header h1 {
+    font-size: var(--font-size-h1);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+/* Step Indicator Evolution */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    background: var(--pyatz-surface);
+    padding: 1rem;
+    border-bottom: 1px solid var(--pyatz-border);
+}
+
+.step {
+    flex: 1;
+    max-width: 80px;
+    height: 6px;
+    background: #e0e5ee;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.step.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: var(--pyatz-primary);
+    animation: progressFill 0.5s ease-out forwards;
+}
+
+@keyframes progressFill {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+/* Content Proportions */
+.content-area {
+    padding: clamp(1rem, 3vw, 2rem);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.step-header {
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--pyatz-border);
+    padding-bottom: 0.75rem;
+}
+
+.step-title {
+    font-size: var(--font-size-h2);
+    font-weight: 700;
+    color: var(--pyatz-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.step-desc {
+    color: var(--pyatz-text-soft);
+    font-size: var(--font-size-base);
+    margin-top: 0.25rem;
+}
+
+/* Question Card Aesthetics */
+.question-card {
+    background: var(--pyatz-surface);
+    border: 1px solid var(--pyatz-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.question-card:hover {
+    border-color: var(--pyatz-primary);
+    transform: translateY(-2px);
+}
+
+.question-text {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.deficiency-alert {
+    background: #fff5f5;
+    border: 1px solid #feb2b2;
+    border-left: 4px solid var(--pyatz-error);
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 8px;
+}
+
+.deficiency-text {
+    color: #9b2c2c;
+    font-size: var(--font-size-small);
+    line-height: 1.6;
+}
+
+/* Responsive Footer Actions */
+.footer-actions {
+    margin-top: 2rem;
+    padding: 1.5rem 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 600px) {
+    .footer-actions {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        justify-content: center;
+    }
+}
+
+.animate-in {
+    animation: fadeInScale 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.98) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Camera & Signature Placeholders */
+.camera-section, .signature-section {
+    background: white;
+    border: 2px dashed var(--pyatz-border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: border-color 0.3s ease;
+}
+
+.camera-section:hover {
+    border-color: var(--pyatz-primary);
+}

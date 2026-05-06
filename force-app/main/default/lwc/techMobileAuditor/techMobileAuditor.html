@@ -1,0 +1,140 @@
+<template>
+    <div class="mobile-container slds-is-relative">
+        <!-- PANTALLA DE CARGA -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Cargando reporte..." size="medium" variant="brand"></lightning-spinner>
+        </template>
+
+        <!-- HEADER INTEGRADO -->
+        <header class="mobile-header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <div class="slds-truncate">
+                <h1 class="step-title slds-text-inverse slds-truncate" title={reportTitle}>{reportTitle}</h1>
+                <p class="slds-text-body_small slds-text-inverse">{saNumber}</p>
+            </div>
+            <lightning-icon icon-name="standard:service_appointment" size="small" variant="inverse" class="slds-m-left_small"></lightning-icon>
+        </header>
+
+        <!-- INDICADOR DE PASOS -->
+        <div class="step-indicator">
+            <div class={step1Class}></div>
+            <div class={step2Class}></div>
+            <div class={step3Class}></div>
+            <div class={step4Class}></div>
+        </div>
+
+        <!-- CONTENIDO DINÁMICO POR PASO -->
+        <div class="content-area">
+            
+            <!-- PASO 1: EVIDENCIA ANTES -->
+            <template if:true={isStepBefore}>
+                <div class="step-content animate-in">
+                    <div class="step-header">
+                        <h2 class="step-title">Evidencia de Arribo</h2>
+                        <p class="step-desc">Documente el estado inicial del área antes de comenzar.</p>
+                    </div>
+                    
+                    <div class="camera-section slds-m-vertical_medium slds-text-align_center">
+                        <c-tech-process-summary record-id={recordId} mode="mobile-camera" tag="[ANTES]"></c-tech-process-summary>
+                    </div>
+
+                    <div class="footer-actions">
+                        <lightning-button label="SIGUIENTE: CHECKLIST" variant="brand" class="full-width" onclick={handleNext}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- PASO 2: CHECKLIST DINÁMICO -->
+            <template if:true={isStepChecklist}>
+                <div class="step-content animate-in">
+                    <div class="step-header">
+                        <h2 class="step-title">Inspección: {reportType}</h2>
+                        <p class="step-desc">Realice la auditoría técnica según el protocolo.</p>
+                    </div>
+                    
+                    <div class="checklist-container">
+                        <template for:each={questions} for:item="q" for:index="idx">
+                            <div key={q.question} class="question-card slds-m-bottom_small">
+                                <p class="question-text">{q.order}. {q.question}</p>
+                                
+                                <div class="slds-grid slds-grid_align-spread slds-m-top_small">
+                                    <lightning-button-group>
+                                        <lightning-button 
+                                            label="SÍ" 
+                                            variant={q.yesVariant} 
+                                            data-index={idx} 
+                                            data-val="Si" 
+                                            onclick={handleAnswer}
+                                            class="btn-large">
+                                        </lightning-button>
+                                        <lightning-button 
+                                            label="NO" 
+                                            variant={q.noVariant} 
+                                            data-index={idx} 
+                                            data-val="No" 
+                                            onclick={handleAnswer}
+                                            class="btn-large">
+                                        </lightning-button>
+                                    </lightning-button-group>
+                                </div>
+
+                                <!-- Sugerencia de Deficiencia Dinámica -->
+                                <template if:true={q.showDeficiency}>
+                                    <div class="deficiency-alert animate-in">
+                                        <p class="deficiency-text">
+                                            <lightning-icon icon-name="utility:warning" size="xx-small" variant="error" class="slds-m-right_xx-small"></lightning-icon>
+                                            <strong>Hallazgo Pyatz:</strong><br/>{q.deficiency}
+                                        </p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="footer-actions">
+                        <lightning-button label="ATRÁS" variant="neutral" class="full-width" onclick={handlePrev}></lightning-button>
+                        <lightning-button label="SIGUIENTE: DESPUÉS" variant="brand" class="full-width" onclick={handleNext}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- PASO 3: EVIDENCIA DESPUÉS -->
+            <template if:true={isStepAfter}>
+                <div class="step-content animate-in">
+                    <div class="step-header">
+                        <h2 class="step-title">Evidencia de Resultado</h2>
+                        <p class="step-desc">Documente el trabajo concluido y la limpieza final.</p>
+                    </div>
+                    
+                    <div class="camera-section slds-m-vertical_medium slds-text-align_center">
+                        <c-tech-process-summary record-id={recordId} mode="mobile-camera" tag="[DESPUES]"></c-tech-process-summary>
+                    </div>
+
+                    <div class="footer-actions">
+                        <lightning-button label="ATRÁS" variant="neutral" class="full-width" onclick={handlePrev}></lightning-button>
+                        <lightning-button label="SIGUIENTE: FIRMA" variant="brand" class="full-width" onclick={handleNext}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- PASO 4: FIRMA -->
+            <template if:true={isStepSignature}>
+                <div class="step-content animate-in">
+                    <div class="step-header">
+                        <h2 class="step-title">Conformidad y Firma</h2>
+                        <p class="step-desc">Validación del servicio por parte del cliente.</p>
+                    </div>
+                    
+                    <div class="signature-section slds-m-vertical_medium slds-box bg-white">
+                        <c-tech-contract-manager record-id={recordId} mode="mobile-signature"></c-tech-contract-manager>
+                    </div>
+
+                    <div class="footer-actions">
+                        <lightning-button label="ATRÁS" variant="neutral" class="full-width" onclick={handlePrev}></lightning-button>
+                        <lightning-button label="FINALIZAR Y GUARDAR" variant="success" class="full-width" onclick={handleSaveAll} disabled={isSaving}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+    </div>
+</template>

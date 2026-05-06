@@ -1,0 +1,202 @@
+<template>
+<div class="cs-root">
+
+    <!-- ══ ESTADO: NOMBRE + GALERÍA ══════════════════════════════════════ -->
+    <template if:true={stateIdle}>
+
+        <div class="cs-hero">
+            <div class="cs-hero__icon">
+                <lightning-icon icon-name="utility:signature" size="large"></lightning-icon>
+            </div>
+            <p class="cs-hero__title">Firma del cliente</p>
+            <p class="cs-hero__sub">Ingresa el nombre antes de firmar</p>
+        </div>
+
+        <div class="cs-name-wrap">
+            <label class="cs-label">Nombre del firmante</label>
+            <input
+                type="text"
+                class="cs-name-input"
+                placeholder="Ej. Juan López"
+                value={signerName}
+                onchange={handleNameChange} />
+        </div>
+
+        <div class="cs-action-wrap">
+            <button class="cs-btn cs-btn--primary" onclick={handleGoSign} disabled={nameEmpty}>
+                <lightning-icon icon-name="utility:edit" size="small" class="slds-m-right_x-small"></lightning-icon>
+                Solicitar Firma
+            </button>
+        </div>
+
+        <!-- Galería de firmas -->
+        <div class="cs-gallery-section">
+            <div class="cs-gallery-header">
+                <span class="cs-gallery-title">Firmas guardadas</span>
+                <template if:true={hasSignatures}>
+                    <span class="cs-gallery-badge">{signatureCount}</span>
+                </template>
+            </div>
+
+            <template if:true={loadingSignatures}>
+                <div class="cs-loading">
+                    <lightning-spinner size="small" alternative-text="Cargando"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={loadingSignatures}>
+                <template if:true={hasSignatures}>
+                    <div class="cs-gallery-grid">
+                        <template for:each={signatures} for:item="sig">
+                            <button key={sig.id} class="cs-thumb-btn" data-id={sig.id} onclick={handleSigClick}>
+                                <template if:true={sig.thumbSrc}>
+                                    <img src={sig.thumbSrc} alt={sig.title} class="cs-thumb-img" />
+                                </template>
+                                <template if:false={sig.thumbSrc}>
+                                    <div class="cs-thumb-placeholder">
+                                        <lightning-icon icon-name="utility:signature" size="medium"></lightning-icon>
+                                    </div>
+                                </template>
+                                <span class="cs-thumb-label">{sig.signerName}</span>
+                                <span class="cs-thumb-date">{sig.createdDate}</span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasSignatures}>
+                    <div class="cs-empty">
+                        <lightning-icon icon-name="utility:signature" size="medium"></lightning-icon>
+                        <p class="cs-empty__text">Aún no hay firmas guardadas</p>
+                    </div>
+                </template>
+            </template>
+        </div>
+
+    </template>
+
+    <!-- ══ ESTADO: PAD DE FIRMA ══════════════════════════════════════════ -->
+    <template if:true={stateSigning}>
+
+        <div class="cs-pad-header">
+            <button class="cs-back-btn" onclick={handleBackToIdle}>
+                <lightning-icon icon-name="utility:chevronleft" size="small"></lightning-icon>
+            </button>
+            <div class="cs-pad-signer">
+                <span class="cs-pad-signer__label">Firmante</span>
+                <span class="cs-pad-signer__name">{signerName}</span>
+            </div>
+            <button class="cs-clear-btn" onclick={handleClear}>Limpiar</button>
+        </div>
+
+        <!-- GPS status bar -->
+        <div class={gpsStatusClass}>
+            <template if:true={gpsReady}>
+                <div class="gps-dot gps-dot--ok"></div>
+            </template>
+            <template if:false={gpsReady}>
+                <lightning-spinner size="x-small" alternative-text="GPS" variant="inverse"></lightning-spinner>
+            </template>
+            <span class="gps-pill__text">{gpsLabel}</span>
+        </div>
+
+        <div class="cs-pad-wrap">
+            <p class="cs-pad-hint">Firme aquí con su dedo</p>
+            <canvas data-id="signCanvas" class="cs-canvas"></canvas>
+            <div class="cs-pad-line"></div>
+        </div>
+
+        <div class="cs-action-wrap cs-action-wrap--dark">
+            <button class="cs-btn cs-btn--confirm" onclick={handleConfirmSign} disabled={canvasEmpty}>
+                <lightning-icon icon-name="utility:check" size="small" class="slds-m-right_x-small"></lightning-icon>
+                Confirmar Firma
+            </button>
+        </div>
+
+    </template>
+
+    <!-- ══ ESTADO: PREVIEW ═══════════════════════════════════════════════ -->
+    <template if:true={statePreview}>
+
+        <div class="cs-preview-wrap">
+            <canvas data-id="previewCanvas" class="cs-preview-canvas"></canvas>
+        </div>
+
+        <div class="cs-action-wrap">
+            <button class="cs-btn cs-btn--secondary" onclick={handleRetry} disabled={saving}>
+                <lightning-icon icon-name="utility:refresh" size="small" class="slds-m-right_x-small"></lightning-icon>
+                Repetir
+            </button>
+            <button class="cs-btn cs-btn--primary" onclick={handleSave} disabled={saving}>
+                <template if:true={saving}>
+                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                </template>
+                <template if:false={saving}>
+                    <lightning-icon icon-name="utility:save" size="small" class="slds-m-right_x-small"></lightning-icon>
+                </template>
+                {saveLabel}
+            </button>
+        </div>
+
+    </template>
+
+</div>
+
+<!-- ══ MODAL FIRMA AMPLIADA ══════════════════════════════════════════════ -->
+<template if:true={showModal}>
+    <div class="modal-overlay" onclick={handleCloseModal}></div>
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+
+        <div class="modal-img-wrap">
+            <template if:true={loadingFullSig}>
+                <lightning-spinner size="medium" alternative-text="Cargando"></lightning-spinner>
+            </template>
+            <template if:false={loadingFullSig}>
+                <img src={selectedSig.fullSrc} alt={selectedSig.title} class="modal-img" />
+            </template>
+        </div>
+
+        <div class="modal-meta">
+            <p class="modal-meta__name">{selectedSig.signerName}</p>
+            <p class="modal-meta__date">{selectedSig.createdDate}</p>
+        </div>
+
+        <template if:false={confirmDelete}>
+            <!-- Descargas -->
+            <div class="modal-downloads">
+                <button class="modal-download-row" onclick={handleDownload} disabled={loadingFullSig}>
+                    <div class="modal-download-row__info">
+                        <span class="modal-download-row__label">Con información</span>
+                        <span class="modal-download-row__sub">Fecha, GPS, orden y cliente</span>
+                    </div>
+                    <lightning-icon icon-name="utility:download" size="small"></lightning-icon>
+                </button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn--delete" onclick={handleDeleteClick}>
+                    <lightning-icon icon-name="utility:delete" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    Eliminar ambas
+                </button>
+            </div>
+            <button class="modal-close-pill" onclick={handleCloseModal}>Cerrar</button>
+        </template>
+
+        <template if:true={confirmDelete}>
+            <div class="modal-confirm">
+                <p class="modal-confirm__text">¿Eliminar esta firma permanentemente?</p>
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn--cancel" onclick={handleDeleteCancel} disabled={deleting}>Cancelar</button>
+                    <button class="modal-btn modal-btn--confirm-delete" onclick={handleDeleteConfirm} disabled={deleting}>
+                        <template if:true={deleting}>
+                            <lightning-spinner size="x-small" alternative-text="Eliminando" variant="inverse"></lightning-spinner>
+                        </template>
+                        {deleteLabel}
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>
+
+</template>

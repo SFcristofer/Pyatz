@@ -20,7 +20,51 @@ public with sharing class SurveyService {
         upsert sol; return sol.Id;
     }
 
-    public static void deleteSolucion(Id solucionId) {
-        delete [SELECT Id FROM Solucion_Tecnica__c WHERE Id = :solucionId];
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, Object>> getInspectionQuestions(String serviceType) {
+        List<Map<String, Object>> questions = new List<Map<String, Object>>();
+        for (Plantilla_Inspeccion__mdt q : [SELECT Orden__c, Pregunta__c, Respuesta_Esperada__c, Area_Oportunidad__c 
+                                           FROM Plantilla_Inspeccion__mdt 
+                                           WHERE Tipo_Servicio__c = :serviceType 
+                                           ORDER BY Orden__c ASC]) {
+            questions.add(new Map<String, Object>{
+                'order' => q.Orden__c,
+                'question' => q.Pregunta__c,
+                'expected' => q.Respuesta_Esperada__c,
+                'deficiency' => q.Area_Oportunidad__c
+            });
+        }
+        return questions;
+    }
+
+    @AuraEnabled
+    public static void saveInspectionResult(Id saId, String payloadJson, String deficiencies) {
+        try {
+            Inspeccion_Tecnica__c it = [SELECT Id FROM Inspeccion_Tecnica__c WHERE Cita_Servicio__c = :saId LIMIT 1];
+            it.Respuestas_JSON__c = payloadJson;
+            it.Deficiencias_Detectadas__c = deficiencies;
+            update it;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error al guardar inspección: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Object> getInspectionData(Id saId) {
+        try {
+            ServiceAppointment sa = [SELECT Id, Subject, AppointmentNumber, WorkTypeId, (SELECT Id, Tipo_Reporte__c, Respuestas_JSON__c FROM Inspecciones_Tecnicas__r LIMIT 1) 
+                                   FROM ServiceAppointment WHERE Id = :saId LIMIT 1];
+            
+            Map<String, Object> result = new Map<String, Object>();
+            result.put('saNumber', sa.AppointmentNumber);
+            result.put('saSubject', sa.Subject);
+            
+            if (!sa.Inspecciones_Tecnicas__r.isEmpty()) {
+                result.put('inspectionId', sa.Inspecciones_Tecnicas__r[0].Id);
+                result.put('reportType', sa.Inspecciones_Tecnicas__r[0].Tipo_Reporte__c);
+                result.put('existingData', sa.Inspecciones_Tecnicas__r[0].Respuestas_JSON__c);
+            }
+            return result;
+        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
     }
 }

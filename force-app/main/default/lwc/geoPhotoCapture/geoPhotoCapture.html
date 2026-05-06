@@ -1,0 +1,200 @@
+<template>
+<div class="gpc-root">
+
+    <!-- ══ PANTALLA: CAPTURA ══════════════════════════════════════════════ -->
+    <template if:false={photoReady}>
+
+        <!-- GPS Status bar -->
+        <div class="gps-bar">
+            <template if:true={loadingGps}>
+                <lightning-spinner size="x-small" alternative-text="GPS"></lightning-spinner>
+                <span class="gps-bar__text gps-bar__text--weak">Obteniendo ubicación...</span>
+            </template>
+            <template if:false={loadingGps}>
+                <template if:true={gpsReady}>
+                    <div class="gps-dot gps-dot--ok"></div>
+                    <span class="gps-bar__text gps-bar__text--ok">{gpsLabel}</span>
+                </template>
+                <template if:false={gpsReady}>
+                    <div class="gps-dot gps-dot--err"></div>
+                    <span class="gps-bar__text gps-bar__text--err">{gpsError}</span>
+                </template>
+            </template>
+        </div>
+
+        <!-- Botón cámara principal -->
+        <div class="capture-area">
+            <button class="capture-btn" onclick={handleCaptureClick} disabled={captureDisabled}>
+                <div class="capture-btn__icon">
+                    <lightning-icon icon-name="utility:photo" size="large"></lightning-icon>
+                </div>
+                <span class="capture-btn__label">Tomar Fotografía</span>
+                <span class="capture-btn__sublabel">La foto incluirá coordenadas GPS</span>
+            </button>
+            <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="hidden-input"
+                data-id="cameraInput"
+                onchange={handlePhotoSelected} />
+        </div>
+
+        <!-- Galería -->
+        <div class="gallery-section">
+            <div class="gallery-section__header">
+                <span class="gallery-section__title">Fotos guardadas</span>
+                <template if:true={hasPhotos}>
+                    <span class="gallery-section__badge">{photoCount}</span>
+                </template>
+            </div>
+
+            <template if:true={loadingPhotos}>
+                <div class="gallery-loading">
+                    <lightning-spinner size="small" alternative-text="Cargando"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={loadingPhotos}>
+                <template if:true={hasPhotos}>
+                    <div class="gallery-grid">
+                        <template for:each={photos} for:item="photo">
+                            <button key={photo.id} class="gallery-thumb-btn" data-id={photo.id} onclick={handlePhotoClick}>
+                                <template if:true={photo.thumbBase64}>
+                                    <img src={photo.thumbSrc} alt={photo.title} class="gallery-thumb-img" />
+                                </template>
+                                <template if:false={photo.thumbBase64}>
+                                    <div class="gallery-thumb-placeholder">
+                                        <lightning-icon icon-name="utility:photo" size="medium"></lightning-icon>
+                                    </div>
+                                </template>
+                                <span class="gallery-thumb-date">{photo.createdDate}</span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasPhotos}>
+                    <div class="gallery-empty">
+                        <lightning-icon icon-name="utility:image" size="medium" class="gallery-empty__icon"></lightning-icon>
+                        <p class="gallery-empty__text">Aún no hay fotos para este registro</p>
+                    </div>
+                </template>
+            </template>
+        </div>
+
+    </template>
+
+    <!-- ══ PANTALLA: PREVIEW ══════════════════════════════════════════════ -->
+    <template if:true={photoReady}>
+        <div class="preview-screen">
+
+            <!-- Canvas con la foto -->
+            <div class="preview-canvas-wrap">
+                <canvas data-id="photoCanvas" class="preview-canvas"></canvas>
+            </div>
+
+            <!-- Info GPS -->
+            <div class="preview-info">
+                <div class="preview-info__row">
+                    <div class="preview-info__item">
+                        <span class="preview-info__label">Latitud</span>
+                        <span class="preview-info__value">{coords.latitude}</span>
+                    </div>
+                    <div class="preview-info__item">
+                        <span class="preview-info__label">Longitud</span>
+                        <span class="preview-info__value">{coords.longitude}</span>
+                    </div>
+                    <div class="preview-info__item">
+                        <span class="preview-info__label">Precisión</span>
+                        <span class="preview-info__value">±{coords.accuracy}m</span>
+                    </div>
+                    <div class="preview-info__item">
+                        <span class="preview-info__label">Fecha/Hora</span>
+                        <span class="preview-info__value">{photoTimestamp}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="preview-actions">
+                <button class="preview-btn preview-btn--secondary" onclick={handleRetake} disabled={saving}>
+                    <lightning-icon icon-name="utility:refresh" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    Repetir
+                </button>
+                <button class="preview-btn preview-btn--primary" onclick={handleSave} disabled={saving}>
+                    <template if:true={saving}>
+                        <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                    </template>
+                    <template if:false={saving}>
+                        <lightning-icon icon-name="utility:save" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    </template>
+                    {saveLabel}
+                </button>
+            </div>
+
+        </div>
+    </template>
+
+</div>
+
+<!-- ══ MODAL FOTO AMPLIADA ════════════════════════════════════════════════ -->
+<template if:true={showModal}>
+    <div class="modal-overlay" onclick={handleCloseModal}></div>
+    <div class="modal-sheet">
+
+        <!-- Drag handle visual -->
+        <div class="modal-handle"></div>
+
+        <!-- Imagen -->
+        <div class="modal-img-wrap">
+            <template if:true={loadingFullPhoto}>
+                <lightning-spinner size="medium" alternative-text="Cargando"></lightning-spinner>
+            </template>
+            <template if:false={loadingFullPhoto}>
+                <img src={selectedPhoto.fullSrc} alt={selectedPhoto.title} class="modal-img" />
+            </template>
+        </div>
+
+        <!-- Meta -->
+        <div class="modal-meta">
+            <p class="modal-meta__title">{selectedPhoto.title}</p>
+            <p class="modal-meta__date">{selectedPhoto.createdDate}</p>
+        </div>
+
+        <!-- Acciones normales -->
+        <template if:false={confirmDelete}>
+            <div class="modal-actions">
+                <button class="modal-action-btn modal-action-btn--download" onclick={handleDownload} disabled={loadingFullPhoto}>
+                    <lightning-icon icon-name="utility:download" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    Descargar
+                </button>
+                <button class="modal-action-btn modal-action-btn--delete" onclick={handleDeleteClick}>
+                    <lightning-icon icon-name="utility:delete" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    Eliminar
+                </button>
+            </div>
+            <button class="modal-close-pill" onclick={handleCloseModal}>Cerrar</button>
+        </template>
+
+        <!-- Confirmación eliminar -->
+        <template if:true={confirmDelete}>
+            <div class="modal-confirm">
+                <p class="modal-confirm__text">¿Eliminar esta foto permanentemente? Esta acción no se puede deshacer.</p>
+                <div class="modal-actions">
+                    <button class="modal-action-btn modal-action-btn--cancel" onclick={handleDeleteCancel} disabled={deleting}>
+                        Cancelar
+                    </button>
+                    <button class="modal-action-btn modal-action-btn--confirm-delete" onclick={handleDeleteConfirm} disabled={deleting}>
+                        <template if:true={deleting}>
+                            <lightning-spinner size="x-small" alternative-text="Eliminando" variant="inverse"></lightning-spinner>
+                        </template>
+                        {deleteLabel}
+                    </button>
+                </div>
+            </div>
+        </template>
+
+    </div>
+</template>
+
+</template>
