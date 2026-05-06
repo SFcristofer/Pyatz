@@ -20,6 +20,10 @@ public with sharing class SurveyService {
         upsert sol; return sol.Id;
     }
 
+    public static void deleteSolucion(Id solucionId) {
+        delete [SELECT Id FROM Solucion_Tecnica__c WHERE Id = :solucionId];
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getInspectionQuestions(String serviceType) {
         List<Map<String, Object>> questions = new List<Map<String, Object>>();
