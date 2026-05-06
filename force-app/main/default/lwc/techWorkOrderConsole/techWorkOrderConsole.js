@@ -14,6 +14,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
     @track isLoading = true;
     @track isSaving = false;
+    @track isUpdateMode = false;
+    @track existingWorkOrderId = '';
 
     // IDs de respaldo para el guardado
     accountId;
@@ -88,7 +90,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @wire(getInitialWorkOrderData, { oppId: '$recordId', quoteId: '$quoteId', serviceContractId: '$serviceContractId' })
     wiredData({ error, data }) {
         if (data) {
-            if (this.contractFolio === data.folio && this.sedesList.length > 0) {
+            if (this.contractFolio === data.folio && this.sedesList.length > 0 && !data.isUpdateMode) {
                 this.isLoading = false;
                 return;
             }
@@ -98,7 +100,9 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             this.oppId = data.oppId;
             this.internalQuoteId = data.quoteId;
             this.internalServiceContractId = this.serviceContractId || data.serviceContractId;
-
+            this.isUpdateMode = data.isUpdateMode || false;
+            this.existingWorkOrderId = data.existingWorkOrderId || '';
+            
             this.contractData = {
                 cliente: data.cliente || 'Sin cliente',
                 lineaNegocio: data.lineaNegocio || 'No definida',
@@ -115,7 +119,41 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 tratamientos: data.tratamientos ? data.tratamientos.map(t => t.name).join(', ') : 'Ninguno'
             };
 
-            if (data.tratamientos && data.tratamientos.length > 0) {
+            if (this.isUpdateMode && data.tratamientosExistentes) {
+                this.woNotes = data.notes;
+                this.templateStatus = 'Visualizando Orden de Trabajo existente';
+                
+                this.sedesList = [{
+                    id: 'main-sede',
+                    name: data.sedes || 'Sede Principal',
+                    startTime: '08:00:00.000',
+                    endTime: '18:00:00.000',
+                    startTime2: '',
+                    endTime2: '',
+                    tratamientos: data.tratamientosExistentes.map(t => ({
+                        id: t.id,
+                        name: t.name,
+                        quantity: t.quantity || 1,
+                        numTecnicos: t.tecnicosIds.length || 1,
+                        durationHours: Math.floor((t.schedulingRows[0]?.duration || 60) / 60),
+                        durationMinutes: (t.schedulingRows[0]?.duration || 60) % 60,
+                        durationSeconds: 0,
+                        zonas: t.zonas || 'Sin descripción técnica',
+                        numTecnicosSeleccionados: t.tecnicosIds.length,
+                        tecnicosIds: t.tecnicosIds,
+                        schedulingRows: t.schedulingRows.map((row, rIdx) => ({
+                            label: `${rIdx + 1}º Fecha`,
+                            date: row.date || new Date().toISOString().split('T')[0],
+                            startTime: row.startTime || '08:00:00.000',
+                            locked: false,
+                            duration: row.duration || 60,
+                            executed: false,
+                            showNotes: false,
+                            notes: row.notes || ''
+                        }))
+                    }))
+                }];
+            } else if (data.tratamientos && data.tratamientos.length > 0) {
                 this.sedesList = [{
                     id: 'main-sede',
                     name: data.sedes || 'Sede Principal',
@@ -341,6 +379,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         this.isSaving = true;
 
         const payload = {
+            existingWorkOrderId: this.existingWorkOrderId,
             quoteId: this.internalQuoteId,
             serviceContractId: this.internalServiceContractId,
             oppId: this.oppId,
@@ -376,6 +415,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
     get remainingChars() {
         return 2048 - (this.woNotes ? this.woNotes.length : 0);
+    }
+
+    get saveButtonLabel() {
+        return this.isUpdateMode ? 'ACTUALIZAR ÓRDENES DE TRABAJO' : 'GENERAR ÓRDENES DE TRABAJO';
     }
 
     get daysVariant() { return this.ganttView === 'days' ? 'brand' : 'neutral'; }

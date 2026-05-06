@@ -425,7 +425,7 @@
             <div class="footer-actions slds-grid slds-grid_align-center">
                 <lightning-button label="Agregar fechas candidatas" variant="brand-outline" icon-name="utility:settings" class="slds-m-right_medium" onclick={handleAddCandidateDates}></lightning-button>
                 <lightning-button label="Previsualizar Calendario" variant="brand-outline" icon-name="utility:event" class="slds-m-right_medium"></lightning-button>
-                <lightning-button label="GENERAR ÓRDENES DE TRABAJO" variant="brand" icon-name="utility:record_create" size="large" onclick={handleGenerateODTs} disabled={isSaving}></lightning-button>
+                <lightning-button label={saveButtonLabel} variant="brand" icon-name="utility:record_create" size="large" onclick={handleGenerateODTs} disabled={isSaving}></lightning-button>
             </div>
         </template>
     </div>

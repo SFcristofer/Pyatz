@@ -4,9 +4,25 @@ public with sharing class TechWorkOrderController {
     public static Map<String, Object> getInitialWorkOrderData(Id oppId, Id quoteId, Id serviceContractId) {
         Map<String, Object> result = new Map<String, Object>();
         try {
+            // BUSCAR ODT EXISTENTE
+            WorkOrder existingWO = null;
             if (serviceContractId != null) {
-                ServiceContract sc = [SELECT Id, Name, StartDate, EndDate, Account.Name, 
-                                            Quote_Source__r.QuoteNumber, Quote_Source__r.Business_Lines_Selected__c, 
+                List<WorkOrder> wos = [SELECT Id FROM WorkOrder WHERE ServiceContractId = :serviceContractId LIMIT 1];
+                if (!wos.isEmpty()) existingWO = wos[0];
+            }
+
+            if (existingWO != null) {
+                // CARGAR DATOS DE ODT EXISTENTE (MODO VISOR/EDITOR)
+                Map<String, Object> templateData = getWorkOrderTemplateData(existingWO.Id);
+                result.put('existingWorkOrderId', existingWO.Id);
+                result.put('isUpdateMode', true);
+                result.put('notes', templateData.get('notes'));
+                result.put('tratamientosExistentes', templateData.get('tratamientos'));
+            }
+
+            if (serviceContractId != null) {
+                ServiceContract sc = [SELECT Id, Name, StartDate, EndDate, Account.Name, AccountId,
+                                            Quote_Source__c, Quote_Source__r.QuoteNumber, Quote_Source__r.Business_Lines_Selected__c, 
                                             Quote_Source__r.Technical_Sedes__c 
                                      FROM ServiceContract WHERE Id = :serviceContractId LIMIT 1];
                 result.put('quoteId', sc.Quote_Source__c);
@@ -146,9 +162,18 @@ public with sharing class TechWorkOrderController {
     public static String saveWorkOrders(String payloadJson) {
         try {
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadJson);
-            Id quoteId = (Id) payload.get('quoteId');
-            Id serviceContractId = (Id) payload.get('serviceContractId');
-            Id accountId = (Id) payload.get('accountId');
+            
+            // PARSEO SEGURO DE IDS
+            String eWoIdStr = (String) payload.get('existingWorkOrderId');
+            String qIdStr = (String) payload.get('quoteId');
+            String scIdStr = (String) payload.get('serviceContractId');
+            String accIdStr = (String) payload.get('accountId');
+
+            Id existingWorkOrderId = String.isNotBlank(eWoIdStr) ? (Id) eWoIdStr : null;
+            Id quoteId = String.isNotBlank(qIdStr) ? (Id) qIdStr : null;
+            Id serviceContractId = String.isNotBlank(scIdStr) ? (Id) scIdStr : null;
+            Id accountId = String.isNotBlank(accIdStr) ? (Id) accIdStr : null;
+
             String notes = (String) payload.get('notes');
             String folio = (String) payload.get('folio');
             List<Object> sedesPayload = (List<Object>) payload.get('sedesList');
@@ -160,10 +185,19 @@ public with sharing class TechWorkOrderController {
             if (quoteId != null) pricebookId = [SELECT Pricebook2Id FROM Quote WHERE Id = :quoteId LIMIT 1].Pricebook2Id;
             else if (serviceContractId != null) pricebookId = [SELECT Pricebook2Id FROM ServiceContract WHERE Id = :serviceContractId LIMIT 1].Pricebook2Id;
 
-            // 1. Crear Work Order Maestra (SIN FORZAR TERRITORIO)
-            WorkOrder wo = new WorkOrder();
+            // 1. Crear o Buscar Work Order Maestra
+            WorkOrder wo;
+            if (existingWorkOrderId != null) {
+                wo = [SELECT Id FROM WorkOrder WHERE Id = :existingWorkOrderId LIMIT 1];
+                // Limpiar partidas previas para refrescar (Se vuelven a crear abajo)
+                delete [SELECT Id FROM WorkOrderLineItem WHERE WorkOrderId = :wo.Id];
+            } else {
+                wo = new WorkOrder();
+            }
+
             wo.Subject = 'Contrato Pyatz: ' + folio;
             wo.AccountId = accountId;
+            wo.ServiceContractId = serviceContractId; 
             wo.Pricebook2Id = pricebookId;
             wo.Status = 'New';
             wo.Street = acc.BillingStreet;
@@ -172,7 +206,7 @@ public with sharing class TechWorkOrderController {
             wo.PostalCode = acc.BillingPostalCode;
             wo.Country = acc.BillingCountry;
             wo.Description = 'Generada desde 360 Pyatz.\nNotas:\n' + notes;
-            insert wo;
+            upsert wo;
 
             // 2. Crear Work Order Line Items
             List<WorkOrderLineItem> wolisToInsert = new List<WorkOrderLineItem>();
@@ -181,9 +215,18 @@ public with sharing class TechWorkOrderController {
                 for (Object traObj : (List<Object>) sede.get('tratamientos')) {
                     Map<String, Object> tra = (Map<String, Object>) traObj;
                     WorkOrderLineItem woli = new WorkOrderLineItem(WorkOrderId = wo.Id);
-                    Id traId = (Id) tra.get('id');
-                    if (traId != null && traId.getSObjectType().getDescribe().getName() == 'QuoteLineItem') woli.PricebookEntryId = [SELECT PricebookEntryId FROM QuoteLineItem WHERE Id = :traId LIMIT 1].PricebookEntryId;
-                    else if (traId != null && traId.getSObjectType().getDescribe().getName() == 'ContractLineItem') woli.PricebookEntryId = [SELECT PricebookEntryId FROM ContractLineItem WHERE Id = :traId LIMIT 1].PricebookEntryId;
+                    
+                    String traIdStr = (String) tra.get('id');
+                    Id traId = String.isNotBlank(traIdStr) ? (Id) traIdStr : null;
+
+                    if (traId != null && traId.getSObjectType().getDescribe().getName() == 'QuoteLineItem') {
+                        woli.PricebookEntryId = [SELECT PricebookEntryId FROM QuoteLineItem WHERE Id = :traId LIMIT 1].PricebookEntryId;
+                    } else if (traId != null && traId.getSObjectType().getDescribe().getName() == 'ContractLineItem') {
+                        woli.PricebookEntryId = [SELECT PricebookEntryId FROM ContractLineItem WHERE Id = :traId LIMIT 1].PricebookEntryId;
+                    } else if (traId != null && traId.getSObjectType().getDescribe().getName() == 'PricebookEntry') {
+                        woli.PricebookEntryId = traId; // Caso de carga desde ODT anterior
+                    }
+                    
                     woli.Description = (String) tra.get('name') + ' - ' + (String) tra.get('zonas');
                     woli.Quantity = (Decimal) tra.get('quantity');
                     wolisToInsert.add(woli);
