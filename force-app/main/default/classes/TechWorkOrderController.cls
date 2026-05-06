@@ -364,8 +364,43 @@ public with sharing class TechWorkOrderController {
                     sasToUpdate.add(new ServiceAppointment(Id = sa.Id, Status = 'Programado'));
                 }
                 update sasToUpdate;
+
+                // 4. GENERAR INSPECCIONES TÉCNICAS AUTOMÁTICAS (NUEVO)
+                List<Inspeccion_Tecnica__c> inspectionsToInsert = new List<Inspeccion_Tecnica__c>();
+                // Mapa para evitar queries redundantes en el bucle
+                Map<Id, String> woliToTemplate = new Map<Id, String>();
+                Set<Id> pbeIds = new Set<Id>();
+                for(WorkOrderLineItem woli : wolisToInsert) pbeIds.add(woli.PricebookEntryId);
                 
-                // 4. Intentar Asignar Técnicos (SILENCIOSO PARA EVITAR EL ERROR DE TERRITORIO)
+                Map<Id, PricebookEntry> pbeMap = new Map<Id, PricebookEntry>([SELECT Id, Product2.Plantilla_Inspeccion__c FROM PricebookEntry WHERE Id IN :pbeIds]);
+                
+                Integer saIdx = 0;
+                for (Object sedeObj : sedesPayload) {
+                    Map<String, Object> sede = (Map<String, Object>) sedeObj;
+                    for (Object traObj : (List<Object>) sede.get('tratamientos')) {
+                        Map<String, Object> tra = (Map<String, Object>) traObj;
+                        // Encontrar el WOLI correspondiente para obtener el producto y su plantilla
+                        WorkOrderLineItem currentWoli = wolisToInsert[inspectionsToInsert.size() / ((List<Object>)tra.get('schedulingRows')).size()]; // Aproximación por índice
+                        // Nota: Re-mapeamos de forma más precisa buscando por el PBE
+                        
+                        PricebookEntry pbe = pbeMap.get(currentWoli.PricebookEntryId);
+                        String templateName = (pbe != null) ? pbe.Product2.Plantilla_Inspeccion__c : null;
+
+                        for (Object rowObj : (List<Object>) tra.get('schedulingRows')) {
+                            if (String.isNotBlank(templateName)) {
+                                inspectionsToInsert.add(new Inspeccion_Tecnica__c(
+                                    Cita_Servicio__c = sasToInsert[saIdx].Id,
+                                    Tipo_Reporte__c = templateName,
+                                    Respuestas_JSON__c = '[]' // Se llenará dinámicamente en el LWC móvil
+                                ));
+                            }
+                            saIdx++;
+                        }
+                    }
+                }
+                if (!inspectionsToInsert.isEmpty()) insert inspectionsToInsert;
+                
+                // 5. Intentar Asignar Técnicos (SILENCIOSO PARA EVITAR EL ERROR DE TERRITORIO)
                 List<AssignedResource> arsToInsert = new List<AssignedResource>();
                 for (Integer i = 0; i < sasToInsert.size(); i++) {
                     for (String tId : techniciansPerSA[i]) {
