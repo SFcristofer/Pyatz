@@ -119,6 +119,51 @@
     margin-top: 4px;
 }
 
+/* ESTILOS PROGRAMACIÓN REDISEÑADA */
+.scheduling-header-row {
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px 4px 0 0;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.scheduling-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    transition: all 0.2s ease;
+}
+
+.scheduling-card:hover {
+    background-color: #fcfcfc;
+    border-color: #cbd5e0;
+}
+
+.scheduling-card:last-child {
+    border-radius: 0 0 4px 4px;
+}
+
+.compact-input {
+    --slds-c-input-spacing-vertical-start: 2px;
+    --slds-c-input-spacing-vertical-end: 2px;
+}
+
+.bg-light-yellow {
+    background-color: #fffaf0;
+}
+
+.border-top-dashed {
+    border-top: 1px dashed #ed8936;
+}
+
+.input-tiny {
+    width: 60px;
+}
+
 .treatment-header {
     padding: 0.75rem 1rem;
     display: flex;

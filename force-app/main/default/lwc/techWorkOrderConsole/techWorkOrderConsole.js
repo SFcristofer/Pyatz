@@ -233,12 +233,53 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         const field = event.target.dataset.field;
         const traId = event.target.dataset.traId;
         const val = event.target.value;
+        
         this.sedesList = this.sedesList.map(sede => ({
             ...sede,
             tratamientos: sede.tratamientos.map(tra => {
-                if (tra.id === traId) return { ...tra, [field]: val };
+                if (tra.id === traId) {
+                    const updatedTra = { ...tra, [field]: val };
+                    
+                    // LÓGICA DE CASCADA: Si cambia duración, propagar a filas no bloqueadas
+                    if (field === 'durationHours' || field === 'durationMinutes') {
+                        const totalMinutes = (parseInt(updatedTra.durationHours) || 0) * 60 + (parseInt(updatedTra.durationMinutes) || 0);
+                        updatedTra.schedulingRows = updatedTra.schedulingRows.map(row => {
+                            if (!row.locked) return { ...row, duration: totalMinutes };
+                            return row;
+                        });
+                    }
+                    return updatedTra;
+                }
                 return tra;
             })
+        }));
+    }
+
+    handleSyncAllRows(event) {
+        const traId = event.target.dataset.traId;
+        this.sedesList = this.sedesList.map(sede => ({
+            ...sede,
+            tratamientos: sede.tratamientos.map(tra => {
+                if (tra.id === traId && tra.schedulingRows.length > 1) {
+                    const firstRow = tra.schedulingRows[0];
+                    const updatedRows = tra.schedulingRows.map((row, idx) => {
+                        if (idx === 0 || row.locked) return row;
+                        return { 
+                            ...row, 
+                            startTime: firstRow.startTime, 
+                            duration: firstRow.duration,
+                            notes: firstRow.notes 
+                        };
+                    });
+                    return { ...tra, schedulingRows: updatedRows };
+                }
+                return tra;
+            })
+        }));
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Sincronizado',
+            message: 'Se han replicado los valores de la primera fecha a las demás.',
+            variant: 'info'
         }));
     }
 

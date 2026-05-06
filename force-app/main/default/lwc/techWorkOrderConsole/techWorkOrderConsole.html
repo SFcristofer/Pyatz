@@ -247,45 +247,105 @@
 
                                     <!-- SECCIÓN: PROGRAMACIÓN DE FECHAS DE SERVICIO -->
                                     <template if:true={showSchedulingSection}>
-                                        <div class="slds-m-top_large border-top slds-p-top_small">
-                                            <h3 class="slds-text-title_bold slds-m-bottom_small" style="color: #2c5282;">
+                                    <!-- 6. PROGRAMACIÓN DE FECHAS (UI MEJORADA) -->
+                                    <div class="slds-m-top_large border-top slds-p-top_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                                            <h3 class="slds-text-title_bold slds-col" style="color: #2c5282;">
                                                 Programación de Fechas de Servicio
                                             </h3>
-                                            <div class="scheduling-container">
-                                                <template for:each={tra.schedulingRows} for:item="row" for:index="idx">
-                                                    <div key={row.label} class="scheduling-wrapper slds-m-bottom_small slds-p-bottom_small border-bottom-light">
-                                                        <div class="scheduling-row slds-grid slds-grid_vertical-align-center">
-                                                            <div class="slds-col slds-size_1-of-12">{row.label}</div>
-                                                            <div class="slds-col slds-size_2-of-12">
-                                                                <lightning-input type="date" variant="label-hidden" value={row.date} data-field="date" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
-                                                            </div>
-                                                            <div class="slds-col slds-size_2-of-12">
-                                                                <lightning-input type="time" variant="label-hidden" value={row.startTime} data-field="startTime" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
-                                                            </div>
-                                                            <div class="slds-col slds-size_1-of-12 slds-grid slds-grid_align-center">
-                                                                <lightning-input type="checkbox" label="BLOQUEO" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox"></lightning-input>
-                                                            </div>
-                                                            <div class="slds-col slds-size_2-of-12">
-                                                                <span class="compact-text">DUR:</span>
-                                                                <lightning-input type="number" variant="label-hidden" value={row.duration} data-field="duration" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="input-tiny"></lightning-input>
-                                                            </div>
-                                                            <div class="slds-col slds-size_4-of-12 slds-grid slds-grid_align-end">
-                                                                <lightning-input type="checkbox" label="YA EJECUTADA" checked={row.executed} data-field="executed" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox slds-m-right_small"></lightning-input>
-                                                                <lightning-input type="checkbox" label="Indicaciones" checked={row.showNotes} data-field="showNotes" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-checkbox"></lightning-input>
-                                                            </div>
-                                                        </div>
-                                                        <!-- Campo de notas condicional -->
-                                                        <template if:true={row.showNotes}>
-                                                            <div class="slds-m-top_x-small slds-p-horizontal_small">
-                                                                <lightning-textarea variant="label-hidden" placeholder="Escriba indicaciones técnicas para esta visita..."
-                                                                    value={row.notes} data-field="notes" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}>
-                                                                </lightning-textarea>
-                                                            </div>
-                                                        </template>
-                                                    </div>
-                                                </template>
+                                            <div class="slds-col slds-grow-none">
+                                                <lightning-button-icon
+                                                    icon-name="utility:sync"
+                                                    variant="border-filled"
+                                                    alternative-text="Sincronizar todas las fechas con la primera"
+                                                    title="Sincronizar todas las fechas con la primera"
+                                                    data-tra-id={tra.id}
+                                                    onclick={handleSyncAllRows}
+                                                    class="slds-m-left_small">
+                                                </lightning-button-icon>
+                                                <span class="slds-m-left_x-small slds-text-body_small">Sincronizar</span>
                                             </div>
                                         </div>
+
+                                        <!-- CABECERA DE TABLA DE PROGRAMACIÓN -->
+                                        <div class="scheduling-header-row slds-grid slds-p-around_x-small">
+                                            <div class="slds-col slds-size_1-of-12">#</div>
+                                            <div class="slds-col slds-size_2-of-12">Fecha</div>
+                                            <div class="slds-col slds-size_2-of-12">Hora Inicio</div>
+                                            <div class="slds-col slds-size_1-of-12 slds-text-align_center">Lock</div>
+                                            <div class="slds-col slds-size_2-of-12">Duración (Min)</div>
+                                            <div class="slds-col slds-size_4-of-12 slds-text-align_right">Acciones</div>
+                                        </div>
+
+                                        <div class="scheduling-container">
+                                            <template for:each={tra.schedulingRows} for:item="row" for:index="idx">
+                                                <div key={row.label} class="scheduling-card slds-m-bottom_x-small">
+                                                    <div class="slds-grid slds-grid_vertical-align-center slds-p-around_x-small">
+                                                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">{row.label}</div>
+                                                        <div class="slds-col slds-size_2-of-12">
+                                                            <lightning-input type="date" variant="label-hidden" value={row.date} 
+                                                                data-field="date" data-row-index={idx} data-tra-id={tra.id} 
+                                                                onchange={handleRowChange} class="compact-input">
+                                                            </lightning-input>
+                                                        </div>
+                                                        <div class="slds-col slds-size_2-of-12">
+                                                            <lightning-input type="time" variant="label-hidden" value={row.startTime} 
+                                                                data-field="startTime" data-row-index={idx} data-tra-id={tra.id} 
+                                                                onchange={handleRowChange} class="compact-input">
+                                                            </lightning-input>
+                                                        </div>
+                                                        <div class="slds-col slds-size_1-of-12 slds-grid slds-grid_align-center">
+                                                            <lightning-input type="checkbox" checked={row.locked} 
+                                                                data-field="locked" data-row-index={idx} data-tra-id={tra.id} 
+                                                                onchange={handleRowChange}>
+                                                            </lightning-input>
+                                                        </div>
+                                                        <div class="slds-col slds-size_2-of-12">
+                                                            <lightning-input type="number" variant="label-hidden" value={row.duration} 
+                                                                data-field="duration" data-row-index={idx} data-tra-id={tra.id} 
+                                                                onchange={handleRowChange} class="input-tiny">
+                                                            </lightning-input>
+                                                        </div>
+                                                        <div class="slds-col slds-size_4-of-12 slds-grid slds-grid_align-end">
+                                                            <lightning-button-icon
+                                                                icon-name="utility:clock"
+                                                                variant="border-filled"
+                                                                alternative-text="Marcar como ejecutado"
+                                                                title="Marcar como ejecutado"
+                                                                data-field="executed" data-row-index={idx} data-tra-id={tra.id}
+                                                                onclick={handleRowChange}
+                                                                class="slds-m-right_x-small">
+                                                            </lightning-button-icon>
+                                                            
+                                                            <lightning-button-icon
+                                                                icon-name="utility:note"
+                                                                variant="border-filled"
+                                                                alternative-text="Agregar indicaciones"
+                                                                title="Agregar indicaciones"
+                                                                data-field="showNotes" data-row-index={idx} data-tra-id={tra.id}
+                                                                onclick={handleRowChange}>
+                                                            </lightning-button-icon>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Campo de notas expandible -->
+                                                    <template if:true={row.showNotes}>
+                                                        <div class="slds-p-around_small bg-light-yellow border-top-dashed">
+                                                            <lightning-textarea 
+                                                                label="Indicaciones Técnicas para esta visita"
+                                                                placeholder="Escriba aquí..."
+                                                                value={row.notes} 
+                                                                data-field="notes" 
+                                                                data-row-index={idx} 
+                                                                data-tra-id={tra.id} 
+                                                                onchange={handleRowChange}>
+                                                            </lightning-textarea>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
                                     </template>
 
                                     <!-- LÍNEA DE TIEMPO DE PLANIFICACIÓN (GANTT CHART CUSTOM) -->
