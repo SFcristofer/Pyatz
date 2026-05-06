@@ -8,7 +8,20 @@ public with sharing class QuoteController {
         return FileService.getRelatedFiles(recordId);
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getOpportunityLevantamientos(Id oppId) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (Levantamiento_Tecnico__c l : [SELECT Id, Name, Tipo_Servicio__c, Area_Cocina_Banos__c, Nivel__c 
+                                          FROM Levantamiento_Tecnico__c 
+                                          WHERE Oportunidad__c = :oppId 
+                                          ORDER BY Tipo_Servicio__c, Name ASC]) {
+            String label = '[' + l.Tipo_Servicio__c + '] ' + l.Name + (String.isNotBlank(l.Area_Cocina_Banos__c) ? ' - ' + l.Area_Cocina_Banos__c : '');
+            results.add(new Map<String, String>{ 'label' => label, 'value' => l.Id });
+        }
+        return results;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static Map<String, Object> getInitialData(Id recordId) {
         Map<String, Object> result = new Map<String, Object>();
         Id accountId;
@@ -220,7 +233,8 @@ public with sharing class QuoteController {
                             PricebookEntryId = (Id)item.get('PricebookEntryId'),
                             Quantity = Decimal.valueOf(String.valueOf(item.get('Quantity'))),
                             UnitPrice = Decimal.valueOf(String.valueOf(item.get('UnitPrice'))),
-                            Description = (String)item.get('Description')
+                            Description = (String)item.get('Description'),
+                            Levantamiento_Tecnico__c = (item.get('Levantamiento_Tecnico__c') != null) ? (Id)item.get('Levantamiento_Tecnico__c') : null
                         ));
                     }
                 }

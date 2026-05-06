@@ -5,6 +5,26 @@
     
     <fieldPermissions>
         <editable>true</editable>
+        <field>QuoteLineItem.Levantamiento_Tecnico__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ContractLineItem.Levantamiento_Tecnico__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Inspeccion_Tecnica__c.Levantamiento_Tecnico__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrderLineItem.Levantamiento_Tecnico__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Levantamiento_Tecnico__c.Area_Cocina_Banos__c</field>
         <readable>true</readable>
     </fieldPermissions>

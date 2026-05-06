@@ -57,7 +57,7 @@ public with sharing class SurveyService {
     public static Map<String, Object> getInspectionData(Id saId) {
         if (saId == null) return new Map<String, Object>();
         try {
-            ServiceAppointment sa = [SELECT Id, Subject, AppointmentNumber, WorkTypeId, (SELECT Id, Tipo_Reporte__c, Respuestas_JSON__c FROM Inspecciones_Tecnicas__r LIMIT 1) 
+            ServiceAppointment sa = [SELECT Id, Subject, AppointmentNumber, WorkTypeId, (SELECT Id, Tipo_Reporte__c, Respuestas_JSON__c, Levantamiento_Tecnico__r.Tipo_Servicio__c FROM Inspecciones_Tecnicas__r LIMIT 1) 
                                    FROM ServiceAppointment WHERE Id = :saId LIMIT 1];
             
             Map<String, Object> result = new Map<String, Object>();
@@ -65,9 +65,16 @@ public with sharing class SurveyService {
             result.put('saSubject', sa.Subject);
             
             if (!sa.Inspecciones_Tecnicas__r.isEmpty()) {
-                result.put('inspectionId', sa.Inspecciones_Tecnicas__r[0].Id);
-                result.put('reportType', sa.Inspecciones_Tecnicas__r[0].Tipo_Reporte__c);
-                result.put('existingData', sa.Inspecciones_Tecnicas__r[0].Respuestas_JSON__c);
+                Inspeccion_Tecnica__c insp = sa.Inspecciones_Tecnicas__r[0];
+                result.put('inspectionId', insp.Id);
+                
+                String rType = insp.Tipo_Reporte__c;
+                if (String.isBlank(rType) && insp.Levantamiento_Tecnico__c != null) {
+                    rType = insp.Levantamiento_Tecnico__r.Tipo_Servicio__c;
+                }
+                
+                result.put('reportType', rType);
+                result.put('existingData', insp.Respuestas_JSON__c);
             }
             return result;
         } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }

@@ -140,6 +140,23 @@
                                 </div>
                             </div>
 
+                            <!-- Vínculo con Levantamiento -->
+                            <div class="slds-grid slds-m-bottom_small">
+                                <div class="slds-col slds-size_1-of-1">
+                                    <div class="slds-box slds-theme_default" style="background: #f0fdf4; border-left: 4px solid #22c55e;">
+                                        <p class="slds-text-title_bold slds-m-bottom_x-small" style="color: #166534;">5. Vincular con Levantamiento Técnico</p>
+                                        <lightning-combobox
+                                            name="levantamiento"
+                                            value={selectedLevantamientoId}
+                                            placeholder="Seleccione el levantamiento de origen para las inspecciones..."
+                                            options={levantamientoOptions}
+                                            onchange={handleLevantamientoChange}
+                                            variant="label-hidden">
+                                        </lightning-combobox>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="slds-grid slds-gutters">
                                 <div class="slds-col slds-size_1-of-1">
                                     <div class="slds-box slds-theme_default">

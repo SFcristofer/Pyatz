@@ -1,10 +1,12 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import searchProducts from '@salesforce/apex/QuoteController.searchProducts';
 import getProductPrices from '@salesforce/apex/QuoteController.getProductPrices';
 import getProductInfoByPBE from '@salesforce/apex/QuoteController.getProductInfoByPBE';
+import getOpportunityLevantamientos from '@salesforce/apex/QuoteController.getOpportunityLevantamientos';
 
 export default class TechQuoteItemConfigurator extends LightningElement {
     @api recordId;
+    @api opportunityId; // Añadido para buscar levantamientos
     @api selectedSedesObjects = [];
     @api selectedLines = [];
     @api allowOtherLines = false;
@@ -20,7 +22,22 @@ export default class TechQuoteItemConfigurator extends LightningElement {
     }
     _editItem;
 
+    @track levantamientoOptions = [];
+    @track selectedLevantamientoId = '';
     @track searchResults = [];
+
+    @wire(getOpportunityLevantamientos, { oppId: '$opportunityId' })
+    wiredLevantamientos({ error, data }) {
+        if (data) {
+            this.levantamientoOptions = data;
+        } else if (error) {
+            console.error('Error cargando levantamientos:', error);
+        }
+    }
+
+    handleLevantamientoChange(event) {
+        this.selectedLevantamientoId = event.detail.value;
+    }
     @track selectedProductId = '';
     @track selectedPbeId = '';
     @track selectedProductName = '';
@@ -102,6 +119,7 @@ export default class TechQuoteItemConfigurator extends LightningElement {
             };
         });
         this.selectedProductPrice = item.totalSinImpuestos / (item.cantidad || 1);
+        this.selectedLevantamientoId = item.levantamientoId || '';
     }
 
     handleToggleGlobalSearch(event) {
@@ -259,6 +277,7 @@ export default class TechQuoteItemConfigurator extends LightningElement {
             sedes: row.sede,
             areas: this.zonasAfectadas.join(', '),
             detalleTecnico: this.modalDescription,
+            levantamientoId: this.selectedLevantamientoId,
             rowClass: 'row-service'
         }));
 

@@ -42,18 +42,18 @@ public with sharing class TechWorkOrderController {
                 List<AccountContactRelation> acrs = [SELECT Contact.Name FROM AccountContactRelation WHERE AccountId = :sc.AccountId AND IsDirect = true LIMIT 1];
                 if (!acrs.isEmpty()) result.put('contacto', acrs[0].Contact.Name);
 
-                List<ContractLineItem> clis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
+                List<ContractLineItem> clis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description, Levantamiento_Tecnico__c FROM ContractLineItem WHERE ServiceContractId = :sc.Id];
                 List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
                 
                 if (!clis.isEmpty()) {
                     for (ContractLineItem cli : clis) {
-                        tratamientos.add(new Map<String, Object>{'id' => cli.Id, 'name' => cli.Product2.Name, 'quantity' => cli.Quantity, 'zonas' => cli.Description});
+                        tratamientos.add(new Map<String, Object>{'id' => cli.Id, 'name' => cli.Product2.Name, 'quantity' => cli.Quantity, 'zonas' => cli.Description, 'levantamientoId' => cli.Levantamiento_Tecnico__c});
                     }
                 } else if (sc.Quote_Source__c != null) {
                     // FALLBACK: Si el contrato no tiene partidas, buscamos en la cotización de origen
-                    for (QuoteLineItem qli : [SELECT Id, Product2.Name, Quantity, Description, Zonas_a_Tratar__c FROM QuoteLineItem WHERE QuoteId = :sc.Quote_Source__c]) {
+                    for (QuoteLineItem qli : [SELECT Id, Product2.Name, Quantity, Description, Zonas_a_Tratar__c, Levantamiento_Tecnico__c FROM QuoteLineItem WHERE QuoteId = :sc.Quote_Source__c]) {
                         String zonas = String.isNotBlank(qli.Zonas_a_Tratar__c) ? qli.Zonas_a_Tratar__c : qli.Description;
-                        tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => zonas});
+                        tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => zonas, 'levantamientoId' => qli.Levantamiento_Tecnico__c});
                     }
                 }
                 
@@ -91,11 +91,11 @@ public with sharing class TechWorkOrderController {
             List<AccountContactRelation> acrsOpp = [SELECT Contact.Name FROM AccountContactRelation WHERE AccountId = :targetQuote.AccountId AND IsDirect = true LIMIT 1];
             if (!acrsOpp.isEmpty()) result.put('contacto', acrsOpp[0].Contact.Name);
             
-            List<QuoteLineItem> qlis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description, Zonas_a_Tratar__c FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
+            List<QuoteLineItem> qlis = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, Description, Zonas_a_Tratar__c, Levantamiento_Tecnico__c FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id];
             List<Map<String, Object>> tratamientos = new List<Map<String, Object>>();
             for (QuoteLineItem qli : qlis) {
                 String zonas = String.isNotBlank(qli.Zonas_a_Tratar__c) ? qli.Zonas_a_Tratar__c : qli.Description;
-                tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => zonas});
+                tratamientos.add(new Map<String, Object>{'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 'zonas' => zonas, 'levantamientoId' => qli.Levantamiento_Tecnico__c});
             }
             result.put('tratamientos', tratamientos);
             return result;
@@ -284,6 +284,7 @@ public with sharing class TechWorkOrderController {
                     
                     woli.Description = (String) tra.get('name') + ' - ' + (String) tra.get('zonas');
                     woli.Quantity = (Decimal) tra.get('quantity');
+                    woli.Levantamiento_Tecnico__c = (tra.get('levantamientoId') != null && String.valueOf(tra.get('levantamientoId')) != '') ? (Id) tra.get('levantamientoId') : null;
                     wolisToInsert.add(woli);
                 }
             }
@@ -365,31 +366,42 @@ public with sharing class TechWorkOrderController {
                 }
                 update sasToUpdate;
 
-                // 4. GENERAR INSPECCIONES TÉCNICAS AUTOMÁTICAS (NUEVO & REFINADO)
+                // 4. GENERAR INSPECCIONES TÉCNICAS AUTOMÁTICAS (MEJORADO CON LEVANTAMIENTOS)
                 List<Inspeccion_Tecnica__c> inspectionsToInsert = new List<Inspeccion_Tecnica__c>();
                 Set<Id> pbeIds = new Set<Id>();
-                for(WorkOrderLineItem woli : wolisToInsert) pbeIds.add(woli.PricebookEntryId);
+                Set<Id> levIds = new Set<Id>();
+                for(WorkOrderLineItem woli : wolisToInsert) {
+                    pbeIds.add(woli.PricebookEntryId);
+                    if (woli.Levantamiento_Tecnico__c != null) levIds.add(woli.Levantamiento_Tecnico__c);
+                }
                 
                 Map<Id, PricebookEntry> pbeMap = new Map<Id, PricebookEntry>([
                     SELECT Id, Product2.Plantilla_Inspeccion__c 
                     FROM PricebookEntry WHERE Id IN :pbeIds
+                ]);
+                Map<Id, Levantamiento_Tecnico__c> levMap = new Map<Id, Levantamiento_Tecnico__c>([
+                    SELECT Id, Tipo_Servicio__c FROM Levantamiento_Tecnico__c WHERE Id IN :levIds
                 ]);
                 
                 Integer saPointer = 0;
                 for (Integer i = 0; i < wolisToInsert.size(); i++) {
                     WorkOrderLineItem currentWoli = wolisToInsert[i];
                     PricebookEntry pbe = pbeMap.get(currentWoli.PricebookEntryId);
+                    Levantamiento_Tecnico__c lev = currentWoli.Levantamiento_Tecnico__c != null ? levMap.get(currentWoli.Levantamiento_Tecnico__c) : null;
+                    
                     String templateName = (pbe != null) ? pbe.Product2.Plantilla_Inspeccion__c : null;
+                    // PRIORIDAD: Si el WOLI tiene Levantamiento, usamos su Tipo de Servicio para el reporte
+                    if (lev != null && String.isNotBlank(lev.Tipo_Servicio__c)) {
+                        templateName = lev.Tipo_Servicio__c;
+                    }
                     
-                    // Si el producto tiene plantilla, creamos inspección para CADA SA asociada a este WOLI
-                    // (Quantity define cuántos SAs se crearon para este WOLI)
                     Integer numSAsForThisWoli = Integer.valueOf(currentWoli.Quantity);
-                    
                     if (String.isNotBlank(templateName)) {
                         for (Integer j = 0; j < numSAsForThisWoli; j++) {
                             if (saPointer < sasToInsert.size()) {
                                 inspectionsToInsert.add(new Inspeccion_Tecnica__c(
                                     Cita_Servicio__c = sasToInsert[saPointer].Id,
+                                    Levantamiento_Tecnico__c = currentWoli.Levantamiento_Tecnico__c,
                                     Tipo_Reporte__c = templateName,
                                     Respuestas_JSON__c = '[]'
                                 ));
@@ -397,7 +409,7 @@ public with sharing class TechWorkOrderController {
                             }
                         }
                     } else {
-                        saPointer += numSAsForThisWoli; // Avanzamos el puntero aunque no haya inspección
+                        saPointer += numSAsForThisWoli;
                     }
                 }
                 if (!inspectionsToInsert.isEmpty()) insert inspectionsToInsert;
