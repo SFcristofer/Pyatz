@@ -226,13 +226,40 @@
 .gantt-main-container {
     border: 1px solid #edf2f7;
     border-radius: 8px;
-    overflow: hidden;
+    overflow-x: auto;
     background: #f7fafc;
+    cursor: grab;
+}
+
+.gantt-main-container:active {
+    cursor: grabbing;
+}
+
+/* El lienzo interno donde vive el Gantt */
+.gantt-timeline-header, .gantt-body {
+    min-width: 3000px; /* Ancho fijo grande para forzar el scroll y dar espacio */
+    position: relative;
+}
+
+/* Barra de desplazamiento estética */
+.gantt-main-container::-webkit-scrollbar {
+    height: 10px;
+}
+.gantt-main-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.gantt-main-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+.gantt-main-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
 }
 
 /* HEADER TIMELINE */
 .gantt-timeline-header {
-    height: 50px;
+    height: 60px;
     background: #ffffff;
     border-bottom: 2px solid #e2e8f0;
     position: relative;
@@ -346,6 +373,14 @@
     font-size: 9px;
     color: #718096;
     font-weight: 600;
+}
+
+.pro-time {
+    font-size: 10px;
+    color: #4a5568;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 2px;
 }
 
 .pro-card-body {

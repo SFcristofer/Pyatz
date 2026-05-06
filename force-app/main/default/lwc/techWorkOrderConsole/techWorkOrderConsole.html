@@ -396,7 +396,10 @@
                                             <div key={item.id} class="gantt-pro-card" style={item.style} title={item.fullLabel}>
                                                 <div class="pro-card-header">
                                                     <span class="pro-tra-name">{item.name}</span>
-                                                    <span class="pro-date">{item.dateStr}</span>
+                                                    <div class="slds-grid slds-grid_vertical">
+                                                        <span class="pro-date">{item.dateStr}</span>
+                                                        <span class="pro-time">{item.timeStr} hrs</span>
+                                                    </div>
                                                 </div>
                                                 <div class="pro-card-body">
                                                     <div class="slds-grid slds-grid_vertical-align-center">

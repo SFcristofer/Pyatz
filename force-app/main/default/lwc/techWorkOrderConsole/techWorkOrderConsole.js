@@ -382,45 +382,76 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     get weeksVariant() { return this.ganttView === 'weeks' ? 'brand' : 'neutral'; }
     get monthsVariant() { return this.ganttView === 'months' ? 'brand' : 'neutral'; }
 
-    // LÓGICA DINÁMICA PARA EL GANTT PROFESIONAL
-    get ganttAxisLabels() {
-        const result = [];
+    // HELPER PARA CALCULAR EL RANGO UNIFICADO (ALINEACIÓN PERFECTA)
+    getGanttRange() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        let start = new Date(today);
+        let end = new Date(today);
+        let units = 0;
+
+        if (this.ganttView === 'months') {
+            start = new Date(today.getFullYear(), today.getMonth(), 1); // Inicio de mes
+            end = new Date(start);
+            end.setMonth(start.getMonth() + 12);
+            units = 12;
+        } else if (this.ganttView === 'weeks') {
+            const day = today.getDay();
+            start.setDate(today.getDate() - day); // Inicio de semana (Domingo)
+            end = new Date(start);
+            end.setDate(start.getDate() + (7 * 24));
+            units = 24;
+        } else { // days
+            start = new Date(today);
+            end = new Date(start);
+            end.setDate(start.getDate() + 60);
+            units = 60;
+        }
+
+        return { start, end, total: end.getTime() - start.getTime(), units };
+    }
+
+    // LÓGICA DINÁMICA PARA EL GANTT PROFESIONAL CON ALINEACIÓN CORREGIDA
+    get ganttAxisLabels() {
+        const { start, total, units } = this.getGanttRange();
+        const result = [];
         const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         
         if (this.ganttView === 'months') {
             const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            for (let i = 0; i < 6; i++) {
-                const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+            for (let i = 0; i < units; i++) {
+                const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+                const offsetMs = d.getTime() - start.getTime();
                 result.push({ 
                     id: i, 
                     label: months[d.getMonth()], 
                     subLabel: d.getFullYear(),
-                    style: `left: ${(i / 6) * 100}%` 
+                    style: `left: ${(offsetMs / total) * 100}%` 
                 });
             }
         } else if (this.ganttView === 'weeks') {
-            for (let i = 0; i < 12; i++) {
-                const d = new Date(today);
-                d.setDate(today.getDate() + (i * 7));
+            for (let i = 0; i < units; i++) {
+                const d = new Date(start);
+                d.setDate(start.getDate() + (i * 7));
+                const offsetMs = d.getTime() - start.getTime();
                 result.push({ 
                     id: i, 
                     label: `Sem ${i + 1}`, 
                     subLabel: `${d.getDate()}/${d.getMonth() + 1}`,
-                    style: `left: ${(i / 12) * 100}%`
+                    style: `left: ${(offsetMs / total) * 100}%`
                 });
             }
         } else { // 'days' view
-            for (let i = 0; i < 31; i++) {
-                const d = new Date(today);
-                d.setDate(today.getDate() + i);
-                if (i % 2 === 0 || i === 0) { // Mostrar cada 2 días para no saturar
+            for (let i = 0; i <= units; i++) {
+                const d = new Date(start);
+                d.setDate(start.getDate() + i);
+                if (i % 2 === 0 || i === 0) { 
+                    const offsetMs = d.getTime() - start.getTime();
                     result.push({ 
                         id: i, 
                         label: dayNames[d.getDay()], 
                         subLabel: d.getDate(),
-                        style: `left: ${(i / 30) * 100}%`
+                        style: `left: ${(offsetMs / total) * 100}%`
                     });
                 }
             }
@@ -429,22 +460,16 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     }
 
     get todayMarkerStyle() {
-        return `left: 0%; border-left: 2px dashed #f56565; height: 100%; position: absolute; z-index: 10; top: 0;`;
+        const today = new Date();
+        const { start, total } = this.getGanttRange();
+        const offsetMs = today.getTime() - start.getTime();
+        const leftPercent = (offsetMs / total) * 100;
+        return `left: ${leftPercent}%; border-left: 2px dashed #f56565; height: 100%; position: absolute; z-index: 10; top: 0;`;
     }
 
     get ganttItems() {
         const items = [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        let startGantt = new Date(today);
-        let endGantt = new Date(today);
-
-        if (this.ganttView === 'months') endGantt.setMonth(today.getMonth() + 6);
-        else if (this.ganttView === 'weeks') endGantt.setDate(today.getDate() + (7 * 12));
-        else endGantt.setDate(today.getDate() + 30);
-
-        const totalMs = endGantt.getTime() - startGantt.getTime();
+        const { start, total } = this.getGanttRange();
 
         this.sedesList.forEach(sede => {
             sede.tratamientos.forEach(tra => {
@@ -455,9 +480,11 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
                 tra.schedulingRows.forEach((row, idx) => {
                     const rowDate = new Date(row.date + 'T00:00:00');
-                    if (rowDate >= startGantt && rowDate <= endGantt) {
-                        const offsetMs = rowDate.getTime() - startGantt.getTime();
-                        const leftPercent = (offsetMs / totalMs) * 100;
+                    // Solo incluimos si está dentro del rango visible
+                    const { end } = this.getGanttRange();
+                    if (rowDate >= start && rowDate <= end) {
+                        const offsetMs = rowDate.getTime() - start.getTime();
+                        const leftPercent = (offsetMs / total) * 100;
 
                         const colors = ['#4299e1', '#48bb78', '#ed8936', '#9f7aea', '#f56565'];
                         const color = colors[Math.abs(tra.name.length) % colors.length];
@@ -468,8 +495,9 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             techs: techNames || 'Sin asignar',
                             area: tra.zonas || 'Sede Principal',
                             dateStr: row.date,
-                            style: `left: ${leftPercent}%; top: ${(idx % 5) * 50}px; border-left: 4px solid ${color};`,
-                            fullLabel: `${tra.name} - ${row.date}`
+                            timeStr: row.startTime ? row.startTime.substring(0, 5) : '--:--',
+                            style: `left: ${leftPercent}%; top: ${(idx % 5) * 70}px; border-left: 4px solid ${color};`,
+                            fullLabel: `${tra.name} - ${row.date} ${row.startTime}`
                         });
                     }
                 });
