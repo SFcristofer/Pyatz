@@ -365,37 +365,39 @@ public with sharing class TechWorkOrderController {
                 }
                 update sasToUpdate;
 
-                // 4. GENERAR INSPECCIONES TÉCNICAS AUTOMÁTICAS (NUEVO)
+                // 4. GENERAR INSPECCIONES TÉCNICAS AUTOMÁTICAS (NUEVO & REFINADO)
                 List<Inspeccion_Tecnica__c> inspectionsToInsert = new List<Inspeccion_Tecnica__c>();
-                // Mapa para evitar queries redundantes en el bucle
-                Map<Id, String> woliToTemplate = new Map<Id, String>();
                 Set<Id> pbeIds = new Set<Id>();
                 for(WorkOrderLineItem woli : wolisToInsert) pbeIds.add(woli.PricebookEntryId);
                 
-                Map<Id, PricebookEntry> pbeMap = new Map<Id, PricebookEntry>([SELECT Id, Product2.Plantilla_Inspeccion__c FROM PricebookEntry WHERE Id IN :pbeIds]);
+                Map<Id, PricebookEntry> pbeMap = new Map<Id, PricebookEntry>([
+                    SELECT Id, Product2.Plantilla_Inspeccion__c 
+                    FROM PricebookEntry WHERE Id IN :pbeIds
+                ]);
                 
-                Integer saIdx = 0;
-                for (Object sedeObj : sedesPayload) {
-                    Map<String, Object> sede = (Map<String, Object>) sedeObj;
-                    for (Object traObj : (List<Object>) sede.get('tratamientos')) {
-                        Map<String, Object> tra = (Map<String, Object>) traObj;
-                        // Encontrar el WOLI correspondiente para obtener el producto y su plantilla
-                        WorkOrderLineItem currentWoli = wolisToInsert[inspectionsToInsert.size() / ((List<Object>)tra.get('schedulingRows')).size()]; // Aproximación por índice
-                        // Nota: Re-mapeamos de forma más precisa buscando por el PBE
-                        
-                        PricebookEntry pbe = pbeMap.get(currentWoli.PricebookEntryId);
-                        String templateName = (pbe != null) ? pbe.Product2.Plantilla_Inspeccion__c : null;
-
-                        for (Object rowObj : (List<Object>) tra.get('schedulingRows')) {
-                            if (String.isNotBlank(templateName)) {
+                Integer saPointer = 0;
+                for (Integer i = 0; i < wolisToInsert.size(); i++) {
+                    WorkOrderLineItem currentWoli = wolisToInsert[i];
+                    PricebookEntry pbe = pbeMap.get(currentWoli.PricebookEntryId);
+                    String templateName = (pbe != null) ? pbe.Product2.Plantilla_Inspeccion__c : null;
+                    
+                    // Si el producto tiene plantilla, creamos inspección para CADA SA asociada a este WOLI
+                    // (Quantity define cuántos SAs se crearon para este WOLI)
+                    Integer numSAsForThisWoli = Integer.valueOf(currentWoli.Quantity);
+                    
+                    if (String.isNotBlank(templateName)) {
+                        for (Integer j = 0; j < numSAsForThisWoli; j++) {
+                            if (saPointer < sasToInsert.size()) {
                                 inspectionsToInsert.add(new Inspeccion_Tecnica__c(
-                                    Cita_Servicio__c = sasToInsert[saIdx].Id,
+                                    Cita_Servicio__c = sasToInsert[saPointer].Id,
                                     Tipo_Reporte__c = templateName,
-                                    Respuestas_JSON__c = '[]' // Se llenará dinámicamente en el LWC móvil
+                                    Respuestas_JSON__c = '[]'
                                 ));
+                                saPointer++;
                             }
-                            saIdx++;
                         }
+                    } else {
+                        saPointer += numSAsForThisWoli; // Avanzamos el puntero aunque no haya inspección
                     }
                 }
                 if (!inspectionsToInsert.isEmpty()) insert inspectionsToInsert;

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>PLAG 1 - Se detecto algun tipo de plaga</label>
+    <protected>false</protected>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Control_Plaga</value>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">1.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">Se detecto algun tipo de plaga</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">No</value>
+    </values>
+</CustomMetadata>

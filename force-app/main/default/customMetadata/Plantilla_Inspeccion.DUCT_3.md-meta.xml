@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>DUCT 3 - Falta de registros</label>
+    <protected>false</protected>
+    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Ductos</value></values>
+    <values><field>Orden__c</field><value xsi:type="xsd:double">3.0</value></values>
+    <values><field>Pregunta__c</field><value xsi:type="xsd:string">Falta de registros para acceso a ductos.</value></values>
+    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">No</value></values>
+    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">Realizar registros necesarios para acceder a las áreas necesarias.</value></values>
+</CustomMetadata>

@@ -51,6 +51,7 @@ public with sharing class SurveyService {
 
     @AuraEnabled(cacheable=true)
     public static Map<String, Object> getInspectionData(Id saId) {
+        if (saId == null) return new Map<String, Object>();
         try {
             ServiceAppointment sa = [SELECT Id, Subject, AppointmentNumber, WorkTypeId, (SELECT Id, Tipo_Reporte__c, Respuestas_JSON__c FROM Inspecciones_Tecnicas__r LIMIT 1) 
                                    FROM ServiceAppointment WHERE Id = :saId LIMIT 1];

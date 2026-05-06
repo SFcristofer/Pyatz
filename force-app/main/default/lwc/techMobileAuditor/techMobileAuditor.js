@@ -21,13 +21,19 @@ export default class TechMobileAuditor extends LightningElement {
     
     @wire(getInspectionData, { saId: '$recordId' })
     wiredSA({ error, data }) {
-        if (data) {
-            this.saNumber = data.saNumber;
-            this.reportTitle = data.saSubject;
+        if (data && Object.keys(data).length > 0) {
+            this.saNumber = data.saNumber || '';
+            this.reportTitle = data.saSubject || 'Reporte Técnico';
             this.reportType = data.reportType;
-            if (this.reportType) this.loadQuestions();
-            else this.isLoading = false;
+            
+            if (this.reportType) {
+                this.loadQuestions();
+            } else {
+                this.isLoading = false;
+                this.reportTitle = 'Sin Plantilla Asignada';
+            }
         } else if (error) {
+            console.error('Error cargando datos de la cita:', error);
             this.isLoading = false;
         }
     }

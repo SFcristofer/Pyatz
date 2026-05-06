@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>DUCT 6 - Cortafuego bloqueado</label>
+    <protected>false</protected>
+    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Ductos</value></values>
+    <values><field>Orden__c</field><value xsi:type="xsd:double">6.0</value></values>
+    <values><field>Pregunta__c</field><value xsi:type="xsd:string">Cortafuego bloqueado (cerrado)</value></values>
+    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">No</value></values>
+    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">El cortafuego se encuentra cerrado y bloqueado, se requiere realizar la apertura del cortafuegos para dar libre paso a la extracción de los gases de cocina y evite una saturación de los mismos en la trayectoria del ducto y la campana.</value></values>
+</CustomMetadata>

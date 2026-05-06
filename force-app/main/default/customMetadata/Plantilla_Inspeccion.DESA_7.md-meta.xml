@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>DESA 7 - Tapa atascada</label>
+    <protected>false</protected>
+    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Desazolve</value></values>
+    <values><field>Orden__c</field><value xsi:type="xsd:double">7.0</value></values>
+    <values><field>Pregunta__c</field><value xsi:type="xsd:string">Tapa de cárcamo o registro atascada o con obstrucción.</value></values>
+    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">No</value></values>
+    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">Se requiere liberar la tapa para realizar el servicio. Se solicita a responsables de mantenimiento realizar la apertura y liberación del área y crear las condiciones necesarias para la ejecución segura del servicio.</value></values>
+</CustomMetadata>
