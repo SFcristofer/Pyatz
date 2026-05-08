@@ -233,38 +233,23 @@ export default class TechQuoteItemConfigurator extends LightningElement {
         this.recalculateModalData();
     }
 
-    handleZonaInput(event) {
-        const value = event.target.value;
-        if (value.includes(',')) {
-            const nuevasZonas = value.split(',').map(z => z.trim()).filter(z => z !== '');
-            this.zonasAfectadas = [...new Set([...this.zonasAfectadas, ...nuevasZonas])];
-            this.zonaInput = '';
-            this.filteredZoneSuggestions = [];
-        } else {
-            this.zonaInput = value;
-            // Filtrar sugerencias históricas (que no estén ya agregadas)
-            if (value && value.length >= 1) {
-                this.filteredZoneSuggestions = this.allHistoricalZones
-                    .filter(z => z.toLowerCase().includes(value.toLowerCase()) && !this.zonasAfectadas.includes(z))
-                    .slice(0, 5); // Mostrar máximo 5
-            } else {
-                this.filteredZoneSuggestions = [];
-            }
-        }
-    }
+    handleToggleZone(event) {
+        const zoneName = event.target.dataset.name;
+        const isChecked = event.target.checked;
 
-    handleSelectZoneSuggestion(event) {
-        const selectedZone = event.currentTarget.dataset.name;
-        if (selectedZone) {
-            this.zonasAfectadas = [...new Set([...this.zonasAfectadas, selectedZone])];
-            this.zonaInput = '';
-            this.filteredZoneSuggestions = [];
+        if (isChecked) {
+            if (!this.zonasAfectadas.includes(zoneName)) {
+                this.zonasAfectadas = [...this.zonasAfectadas, zoneName];
+            }
+        } else {
+            this.zonasAfectadas = this.zonasAfectadas.filter(z => z !== zoneName);
         }
     }
 
     removeZona(event) {
         const zona = event.target.name;
         this.zonasAfectadas = this.zonasAfectadas.filter(z => z !== zona);
+        // Desmarcar también en la lista visual si existe
     }
 
     handleModalInputChange(event) {

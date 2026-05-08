@@ -256,3 +256,38 @@
 .suggestion-item:hover lightning-icon {
     --slds-c-icon-color-foreground: #001a33;
 }
+
+/* CUADRÍCULA DE SELECCIÓN DE ZONAS (CATÁLOGO CERRADO) */
+.zones-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px inset #e2e8f0;
+}
+
+.zone-checkbox-item {
+    background: white;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.zone-checkbox-item:hover {
+    border-color: #001a33;
+    background: #f0f7ff;
+}
+
+.border-dashed {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+}
+
+.border-top {
+    border-top: 1px solid #e2e8f0;
+}
