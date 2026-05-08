@@ -244,51 +244,51 @@ public with sharing class QuoteTechnicalController {
             // 2. Decodificar y Parsear JSON
             String jsonStr = EncodingUtil.base64Decode(markersBase64).toString();
             Map<String, Object> root = (Map<String, Object>)JSON.deserializeUntyped(jsonStr);
-            List<Object> markers = (List<Object>)root.get('markers');
-            if (markers == null || markers.isEmpty()) return;
+            
+            // Buscamos en 'serviciosData' que es donde el LWC guarda las zonas actualmente
+            List<Object> servicios = (List<Object>)root.get('serviciosData');
+            if (servicios == null || servicios.isEmpty()) return;
 
-            // 3. Preparar catálogo de plantillas para vinculación automática
-            Map<String, Id> typeToTemplate = new Map<String, Id>();
-            for (Form_Template__c ft : [SELECT Id, Tipo_Reporte__c FROM Form_Template__c WHERE Activo__c = true]) {
-                typeToTemplate.put(ft.Tipo_Reporte__c, ft.Id);
-            }
-
-            // 4. Procesar cada marcador como una Zona de Servicio
+            // 3. Procesar cada servicio y sus áreas (zonas)
             List<Zona_Servicio_Pyatz__c> zonesToUpsert = new List<Zona_Servicio_Pyatz__c>();
-            for (Object obj : markers) {
-                Map<String, Object> m = (Map<String, Object>)obj;
-                String zoneName = (String)m.get('title');
-                String serviceType = (String)m.get('type');
+            for (Object obj : servicios) {
+                Map<String, Object> s = (Map<String, Object>)obj;
+                String areasStr = (String)s.get('areas');
+                String serviceName = (String)s.get('descripcion'); // Nombre del producto/servicio
+                String techDetail = (String)s.get('detalleTecnico');
                 
-                if (String.isBlank(zoneName)) continue;
+                if (String.isBlank(areasStr)) continue;
 
-                Zona_Servicio_Pyatz__c z = new Zona_Servicio_Pyatz__c();
-                z.Name = zoneName;
-                z.Cotizacion__c = quoteId;
-                z.Cuenta__c = q.AccountId;
-                z.Tipo_de_Servicio__c = serviceType;
-                z.Detalle_Tecnico__c = (String)m.get('description');
+                // Separamos las zonas por coma ya que el usuario las escribe así
+                List<String> zoneNames = areasStr.split(',');
                 
-                // Llave externa para evitar duplicados en re-guardados
-                z.Id_Unico_Zona__c = quoteId + '_' + zoneName.replaceAll('\\s+', '_');
-                
-                // Vinculación automática con el catálogo de plantillas (si existe match)
-                if (typeToTemplate.containsKey(serviceType)) {
-                    // Nota: Suponiendo que existe el campo de relación, si no existe el upsert fallará graciosamente
-                    // pero la lógica es la solicitada para que funcione como catálogo.
-                    z.put('Formulario_Plantilla__c', typeToTemplate.get(serviceType));
+                for (String zoneName : zoneNames) {
+                    String trimmedName = zoneName.trim();
+                    if (String.isBlank(trimmedName)) continue;
+
+                    Zona_Servicio_Pyatz__c z = new Zona_Servicio_Pyatz__c();
+                    z.Name = trimmedName;
+                    z.Cotizacion__c = quoteId;
+                    z.Cuenta__c = q.AccountId;
+                    z.Tipo_de_Servicio__c = serviceName;
+                    z.Detalle_Tecnico__c = techDetail;
+                    
+                    // Llave externa para evitar duplicados en re-guardados
+                    // Sanitizamos el nombre para la llave única
+                    String safeName = trimmedName.toLowerCase().replaceAll('[^a-z0-9]', '_');
+                    z.Id_Unico_Zona__c = quoteId + '_' + safeName;
+                    
+                    zonesToUpsert.add(z);
                 }
-
-                zonesToUpsert.add(z);
             }
 
             if (!zonesToUpsert.isEmpty()) {
+                // Upsert usando el ID Único para actualizar si el nombre es el mismo
                 upsert zonesToUpsert Id_Unico_Zona__c;
             }
 
         } catch (Exception e) {
             System.debug('Error en syncServiceZones: ' + e.getMessage());
-            // No lanzamos excepción para no romper el guardado principal de la cotización
         }
     }
 }
