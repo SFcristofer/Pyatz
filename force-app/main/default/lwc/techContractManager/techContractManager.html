@@ -78,9 +78,10 @@
                                     <tr>
                                         <th style="width: 3rem;">INC.</th>
                                         <th style="width: 100px;">CÓDIGO</th>
-                                        <th style="width: 400px;">DESCRIPCIÓN</th>
-                                        <th style="width: 80px; text-align: center;">CANT.</th>
-                                        <th style="width: 150px;">SEDE</th>
+                                        <th style="width: 300px;">DESCRIPCIÓN</th>
+                                        <th style="width: 150px;">ZONAS A TRATAR</th>
+                                        <th style="width: 60px; text-align: center;">CANT.</th>
+                                        <th style="width: 120px;">SEDE</th>
                                         <th style="width: 120px; text-align: right;">IMPORTE</th>
                                         <th style="width: 80px; text-align: center;">ACCIONES</th>
                                     </tr>
@@ -93,6 +94,9 @@
                                             <td>
                                                 <div class="slds-text-title_bold">{item.ProductName}</div>
                                                 <div class="slds-text-color_weak slds-text-body_small" style="white-space: pre-line;">{item.Description}</div>
+                                            </td>
+                                            <td class="slds-text-body_small">
+                                                <lightning-badge label={item.Zonas_a_Tratar__c} icon-name="utility:location" if:true={item.Zonas_a_Tratar__c}></lightning-badge>
                                             </td>
                                             <td style="text-align: center;">{item.Quantity}</td>
                                             <td class="slds-text-body_small">{item.Sede}</td>

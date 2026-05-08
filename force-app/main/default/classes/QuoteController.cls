@@ -210,7 +210,14 @@ public with sharing class QuoteController {
         result.put('opportunity', opp);
         result.put('quotes', [SELECT Id, QuoteNumber, Name, GrandTotal, Status, CreatedDate, Introduction_Text__c FROM Quote WHERE OpportunityId = :oppId ORDER BY CreatedDate DESC]);
         result.put('syncedQuoteId', opp.SyncedQuoteId);
-        if (opp.SyncedQuoteId != null) result.put('selectedQuote', QuoteSelector.getQuoteById(opp.SyncedQuoteId));
+        
+        if (opp.SyncedQuoteId != null) {
+            result.put('selectedQuote', QuoteSelector.getQuoteById(opp.SyncedQuoteId));
+            // RECUPERACIÓN INTELIGENTE: Traer las zonas materializadas (iGeo Style)
+            result.put('historicalZones', [SELECT Id, Name, Tipo_de_Servicio__c, Detalle_Tecnico__c, Levantamiento_Tecnico__c 
+                                          FROM Zona_Servicio_Pyatz__c 
+                                          WHERE Cotizacion__c = :opp.SyncedQuoteId]);
+        }
         return result;
     }
 
@@ -220,6 +227,7 @@ public with sharing class QuoteController {
             Quote q = QuoteSelector.getQuoteById(quoteId);
             String scName = 'Contrato: ' + q.QuoteNumber + ' - ' + q.Name;
             
+            // 1. Crear o actualizar Contrato base
             ServiceContract sc = new ServiceContract(
                 Name = scName, 
                 AccountId = q.AccountId, 
@@ -231,7 +239,7 @@ public with sharing class QuoteController {
             if (contractData.containsKey('contenidoLegal')) sc.Legal_Content__c = (String)contractData.get('contenidoLegal');
             insert sc;
 
-            // CREACIÓN DE PARTIDAS DE CONTRATO (MATERIALIDAD)
+            // 2. SINCRONIZACIÓN DE MATERIALIDAD: Crear partidas de contrato con vínculos técnicos
             if (contractData.containsKey('lineItemsJson')) {
                 List<Object> items = (List<Object>)JSON.deserializeUntyped((String)contractData.get('lineItemsJson'));
                 List<ContractLineItem> clis = new List<ContractLineItem>();
@@ -244,7 +252,10 @@ public with sharing class QuoteController {
                             Quantity = Decimal.valueOf(String.valueOf(item.get('Quantity'))),
                             UnitPrice = Decimal.valueOf(String.valueOf(item.get('UnitPrice'))),
                             Description = (String)item.get('Description'),
-                            Levantamiento_Tecnico__c = (item.get('Levantamiento_Tecnico__c') != null) ? (Id)item.get('Levantamiento_Tecnico__c') : null
+                            // Preservamos el vínculo al Levantamiento para la App móvil
+                            Levantamiento_Tecnico__c = (item.get('Levantamiento_Tecnico__c') != null && String.valueOf(item.get('Levantamiento_Tecnico__c')) != '') ? (Id)item.get('Levantamiento_Tecnico__c') : null,
+                            // Mapeamos las zonas reales unificadas
+                            Zonas_a_Tratar__c = (String)item.get('Zonas_a_Tratar__c')
                         ));
                     }
                 }
@@ -253,7 +264,7 @@ public with sharing class QuoteController {
 
             update new Quote(Id = quoteId, Status = 'In Review'); 
             return sc.Id;
-        } catch (Exception e) { throw new AuraHandledException(e.getMessage()); }
+        } catch (Exception e) { throw new AuraHandledException('Error al guardar contrato: ' + e.getMessage()); }
     }
 
     @AuraEnabled(cacheable=true)

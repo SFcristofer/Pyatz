@@ -97,6 +97,8 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         }, 300);
     }
 
+    @track historicalZones = [];
+
     loadInitialData() {
         this.isLoading = true;
         getContractInitialData({ oppId: this.recordId })
@@ -108,6 +110,11 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                 }));
                 this.syncedQuoteId = result.syncedQuoteId;
                 
+                // MEJORA: Almacenar zonas materializadas para el mapeo
+                if (result.historicalZones) {
+                    this.historicalZones = result.historicalZones;
+                }
+
                 // Mapear contactos
                 if (result.contacts) {
                     this.contactOptions = result.contacts.map(c => ({
@@ -134,11 +141,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                 this.isLoading = false;
                 console.error('Error cargando datos de contrato:', error);
             });
-    }
-
-    handleQuoteSelect(event) {
-        const quoteId = event.currentTarget.dataset.id;
-        this.selectQuote(quoteId);
     }
 
     selectQuote(quoteId) {
@@ -178,13 +180,31 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     fetchLineItems(quoteId) {
         getQuoteLineItems({ quoteId: quoteId })
             .then(result => {
-                this.quoteLineItems = result.map(item => ({
-                    ...item,
-                    ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
-                    ProductName: item.Product2 ? item.Product2.Name : 'Producto',
-                    Sede: (item.Quote && item.Quote.Technical_Sedes__c) ? item.Quote.Technical_Sedes__c : '---',
-                    isSelected: true
-                }));
+                this.quoteLineItems = result.map(item => {
+                    // SINCRONIZACIÓN DE ZONAS (iGeo Style):
+                    // Buscamos las zonas materializadas que corresponden a esta partida (por el nombre del servicio)
+                    // Si no hay correspondencia exacta, usamos el campo de texto Zonas_a_Tratar__c como fallback
+                    let displayZones = item.Zonas_a_Tratar__c || '';
+                    
+                    if (this.historicalZones && this.historicalZones.length > 0) {
+                        const relatedZones = this.historicalZones
+                            .filter(z => z.Tipo_de_Servicio__c && z.Tipo_de_Servicio__c.includes(item.Product2.Name))
+                            .map(z => z.Name);
+                        
+                        if (relatedZones.length > 0) {
+                            displayZones = relatedZones.join(', ');
+                        }
+                    }
+
+                    return {
+                        ...item,
+                        ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
+                        ProductName: item.Product2 ? item.Product2.Name : 'Producto',
+                        Sede: (item.Quote && item.Quote.Technical_Sedes__c) ? item.Quote.Technical_Sedes__c : '---',
+                        Zonas_a_Tratar__c: displayZones,
+                        isSelected: true
+                    };
+                });
                 this.calculateTotals();
             })
             .catch(error => console.error('Error recuperando partidas:', error));
