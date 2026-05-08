@@ -258,6 +258,7 @@ public with sharing class QuoteTechnicalController {
             List<Zona_Servicio_Pyatz__c> zonesToUpsert = new List<Zona_Servicio_Pyatz__c>();
             for (Object obj : servicios) {
                 Map<String, Object> s = (Map<String, Object>)obj;
+                String rowId = (String)s.get('id'); // ID único de la fila/servicio en el JSON
                 String areasStr = (String)s.get('areas');
                 String serviceName = (String)s.get('descripcion');
                 String techDetail = (String)s.get('detalleTecnico');
@@ -293,9 +294,10 @@ public with sharing class QuoteTechnicalController {
                         z.Linea_de_Cotizacion__c = pbeToQliId.get(pbeId);
                     }
                     
-                    // Llave externa sanitizada
+                    // Llave externa sanitizada (Estilo iGeo)
+                    // Incluimos el rowId para que la misma zona pueda existir en diferentes servicios
                     String safeName = trimmedName.toLowerCase().replaceAll('[^a-z0-9]', '_');
-                    z.Id_Unico_Zona__c = quoteId + '_' + safeName;
+                    z.Id_Unico_Zona__c = quoteId + '_' + (String.isNotBlank(rowId) ? rowId + '_' : '') + safeName;
                     
                     zonesToUpsert.add(z);
                 }

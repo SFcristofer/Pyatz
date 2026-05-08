@@ -159,9 +159,30 @@
 
                             <div class="slds-grid slds-gutters">
                                 <div class="slds-col slds-size_1-of-1">
-                                    <div class="slds-box slds-theme_default">
+                                    <div class="slds-box slds-theme_default" style="position: relative;">
                                         <p class="slds-text-title_bold slds-m-bottom_x-small">5. Zonas / Áreas de Aplicación</p>
-                                        <lightning-input type="text" placeholder="Zona + Coma (Ej: SITE, Cocina...)" value={zonaInput} onchange={handleZonaInput} variant="label-hidden"></lightning-input>
+                                        <lightning-input 
+                                            type="text" 
+                                            placeholder="Zona + Coma (Ej: SITE, Cocina...)" 
+                                            value={zonaInput} 
+                                            onchange={handleZonaInput} 
+                                            variant="label-hidden"
+                                            autocomplete="off">
+                                        </lightning-input>
+
+                                        <!-- Sugerencias de Historial (Estilo iGeo) -->
+                                        <template if:true={filteredZoneSuggestions.length}>
+                                            <div class="zone-suggestions-dropdown">
+                                                <div class="suggestions-header">Sugerencias del Historial:</div>
+                                                <template for:each={filteredZoneSuggestions} for:item="z">
+                                                    <div key={z} class="suggestion-item" onclick={handleSelectZoneSuggestion} data-name={z}>
+                                                        <lightning-icon icon-name="utility:history" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
+                                                        <span>{z}</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
                                         <div class="slds-m-top_x-small">
                                             <template for:each={zonasAfectadas} for:item="zona">
                                                 <lightning-pill key={zona} label={zona} onremove={removeZona} name={zona} class="slds-m-right_xx-small slds-m-bottom_xx-small"></lightning-pill>

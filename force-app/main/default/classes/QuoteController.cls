@@ -127,6 +127,16 @@ public with sharing class QuoteController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<String> getHistoricalZones(Id accountId) {
+        List<String> zoneNames = new List<String>();
+        if (accountId == null) return zoneNames;
+        for (AggregateResult ar : [SELECT Name FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId GROUP BY Name ORDER BY Name ASC LIMIT 100]) {
+            zoneNames.add((String)ar.get('Name'));
+        }
+        return zoneNames;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> searchParentAccounts(String searchTerm) {
         String key = '%' + searchTerm + '%';
         List<Map<String, String>> results = new List<Map<String, String>>();

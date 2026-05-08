@@ -3,10 +3,12 @@ import searchProducts from '@salesforce/apex/QuoteController.searchProducts';
 import getProductPrices from '@salesforce/apex/QuoteController.getProductPrices';
 import getProductInfoByPBE from '@salesforce/apex/QuoteController.getProductInfoByPBE';
 import getOpportunityLevantamientos from '@salesforce/apex/QuoteController.getOpportunityLevantamientos';
+import getHistoricalZones from '@salesforce/apex/QuoteController.getHistoricalZones';
 
 export default class TechQuoteItemConfigurator extends LightningElement {
     @api recordId;
-    @api opportunityId; // Añadido para buscar levantamientos
+    @api opportunityId;
+    @api accountId; // Recibido desde el editor padre
     @api selectedSedesObjects = [];
     @api selectedLines = [];
     @api allowOtherLines = false;
@@ -25,6 +27,19 @@ export default class TechQuoteItemConfigurator extends LightningElement {
     @track levantamientoOptions = [];
     @track selectedLevantamientoId = '';
     @track searchResults = [];
+
+    // Sugerencias de Zonas
+    @track allHistoricalZones = [];
+    @track filteredZoneSuggestions = [];
+
+    @wire(getHistoricalZones, { accountId: '$accountId' })
+    wiredZones({ error, data }) {
+        if (data) {
+            this.allHistoricalZones = data;
+        } else if (error) {
+            console.error('Error cargando zonas históricas:', error);
+        }
+    }
 
     @wire(getOpportunityLevantamientos, { oppId: '$opportunityId' })
     wiredLevantamientos({ error, data }) {
@@ -224,8 +239,26 @@ export default class TechQuoteItemConfigurator extends LightningElement {
             const nuevasZonas = value.split(',').map(z => z.trim()).filter(z => z !== '');
             this.zonasAfectadas = [...new Set([...this.zonasAfectadas, ...nuevasZonas])];
             this.zonaInput = '';
+            this.filteredZoneSuggestions = [];
         } else {
             this.zonaInput = value;
+            // Filtrar sugerencias históricas (que no estén ya agregadas)
+            if (value && value.length >= 1) {
+                this.filteredZoneSuggestions = this.allHistoricalZones
+                    .filter(z => z.toLowerCase().includes(value.toLowerCase()) && !this.zonasAfectadas.includes(z))
+                    .slice(0, 5); // Mostrar máximo 5
+            } else {
+                this.filteredZoneSuggestions = [];
+            }
+        }
+    }
+
+    handleSelectZoneSuggestion(event) {
+        const selectedZone = event.currentTarget.dataset.name;
+        if (selectedZone) {
+            this.zonasAfectadas = [...new Set([...this.zonasAfectadas, selectedZone])];
+            this.zonaInput = '';
+            this.filteredZoneSuggestions = [];
         }
     }
 
