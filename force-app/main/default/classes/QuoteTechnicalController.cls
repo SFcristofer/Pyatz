@@ -238,14 +238,19 @@ public with sharing class QuoteTechnicalController {
     public static void syncServiceZones(Id quoteId, String markersBase64) {
         if (String.isBlank(markersBase64)) return;
         try {
-            // 1. Obtener datos de la Cotización para contexto (Cuenta/Sede)
-            Quote q = [SELECT Id, AccountId FROM Quote WHERE Id = :quoteId LIMIT 1];
+            // 1. Obtener datos de la Cotización y sus partidas para contexto
+            Quote q = [SELECT Id, AccountId, Business_Lines_Selected__c FROM Quote WHERE Id = :quoteId LIMIT 1];
+            
+            // Mapeo de Partidas para vinculación (Usamos Product2Id o PricebookEntryId como referencia)
+            Map<String, Id> pbeToQliId = new Map<String, Id>();
+            for (QuoteLineItem qli : [SELECT Id, PricebookEntryId FROM QuoteLineItem WHERE QuoteId = :quoteId]) {
+                pbeToQliId.put(qli.PricebookEntryId, qli.Id);
+            }
             
             // 2. Decodificar y Parsear JSON
             String jsonStr = EncodingUtil.base64Decode(markersBase64).toString();
             Map<String, Object> root = (Map<String, Object>)JSON.deserializeUntyped(jsonStr);
             
-            // Buscamos en 'serviciosData' que es donde el LWC guarda las zonas actualmente
             List<Object> servicios = (List<Object>)root.get('serviciosData');
             if (servicios == null || servicios.isEmpty()) return;
 
@@ -254,12 +259,13 @@ public with sharing class QuoteTechnicalController {
             for (Object obj : servicios) {
                 Map<String, Object> s = (Map<String, Object>)obj;
                 String areasStr = (String)s.get('areas');
-                String serviceName = (String)s.get('descripcion'); // Nombre del producto/servicio
+                String serviceName = (String)s.get('descripcion');
                 String techDetail = (String)s.get('detalleTecnico');
+                String pbeId = (String)s.get('pbeId');
+                String levantamientoId = (String)s.get('levantamientoId');
                 
                 if (String.isBlank(areasStr)) continue;
 
-                // Separamos las zonas por coma ya que el usuario las escribe así
                 List<String> zoneNames = areasStr.split(',');
                 
                 for (String zoneName : zoneNames) {
@@ -273,8 +279,21 @@ public with sharing class QuoteTechnicalController {
                     z.Tipo_de_Servicio__c = serviceName;
                     z.Detalle_Tecnico__c = techDetail;
                     
-                    // Llave externa para evitar duplicados en re-guardados
-                    // Sanitizamos el nombre para la llave única
+                    // --- NUEVOS VÍNCULOS DE INTEGRACIÓN ---
+                    // Vinculación con el Levantamiento (Etapa 1)
+                    if (String.isNotBlank(levantamientoId)) {
+                        z.Levantamiento_Tecnico__c = (Id)levantamientoId;
+                    }
+                    
+                    // Vinculación con la Línea de Negocio (Etapa 2)
+                    z.Linea_de_Negocio__c = q.Business_Lines_Selected__c;
+
+                    // Vinculación con la Partida de Cotización
+                    if (pbeToQliId.containsKey(pbeId)) {
+                        z.Linea_de_Cotizacion__c = pbeToQliId.get(pbeId);
+                    }
+                    
+                    // Llave externa sanitizada
                     String safeName = trimmedName.toLowerCase().replaceAll('[^a-z0-9]', '_');
                     z.Id_Unico_Zona__c = quoteId + '_' + safeName;
                     
@@ -283,7 +302,6 @@ public with sharing class QuoteTechnicalController {
             }
 
             if (!zonesToUpsert.isEmpty()) {
-                // Upsert usando el ID Único para actualizar si el nombre es el mismo
                 upsert zonesToUpsert Id_Unico_Zona__c;
             }
 
