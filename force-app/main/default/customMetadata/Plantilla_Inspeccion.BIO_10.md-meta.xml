@@ -2,9 +2,32 @@
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <label>BIO 10 - ED Ubicación</label>
     <protected>false</protected>
-    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Bioenzimático</value></values>
-    <values><field>Orden__c</field><value xsi:type="xsd:double">10.0</value></values>
-    <values><field>Pregunta__c</field><value xsi:type="xsd:string">ED Ubicación</value></values>
-    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">En su lugar</value></values>
-    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">El equipo no se encontraba en su lugar al momento del servicio. Se solicita al responsable de cocina y/o jefe de mantenimiento notificar a PYATZ en caso de remodelación para el retiro y/o reubicación del equipo dosificador (comodato) y producto. El equipo se encuentra en comodato y en caso de daños imputables al cliente deberá pagar el costo del mismo.</value></values>
+    <values>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">El equipo no se encontraba en su lugar al momento del servicio. Se solicita al responsable de cocina y/o jefe de mantenimiento notificar a PYATZ en caso de remodelación para el retiro y/o reubicación del equipo dosificador (comodato) y producto. El equipo se encuentra en comodato y en caso de daños imputables al cliente deberá pagar el costo del mismo.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">10.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">ED Ubicación</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">En su lugar</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Bioenzimático</value>
+    </values>
 </CustomMetadata>

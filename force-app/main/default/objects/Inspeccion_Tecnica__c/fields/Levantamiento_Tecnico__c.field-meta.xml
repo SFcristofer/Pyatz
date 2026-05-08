@@ -3,12 +3,12 @@
     <fullName>Levantamiento_Tecnico__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Levantamiento técnico que dio origen a esta inspección.</description>
-    <externalId>false</externalId>
     <label>Levantamiento Técnico</label>
     <referenceTo>Levantamiento_Tecnico__c</referenceTo>
     <relationshipLabel>Inspecciones Técnicas</relationshipLabel>
     <relationshipName>Inspecciones_Tecnicas</relationshipName>
     <required>false</required>
+    <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

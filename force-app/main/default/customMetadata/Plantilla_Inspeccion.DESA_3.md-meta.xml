@@ -2,9 +2,32 @@
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <label>DESA 3 - Conexiones deterioradas</label>
     <protected>false</protected>
-    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Desazolve</value></values>
-    <values><field>Orden__c</field><value xsi:type="xsd:double">3.0</value></values>
-    <values><field>Pregunta__c</field><value xsi:type="xsd:string">Conexiones entre tuberías deterioradas</value></values>
-    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">No</value></values>
-    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">El estado actual de las instalaciones representa un riesgo ya que al momento de realizar el desazolve mecánico se podrían abrir las conexiones de la tubería.</value></values>
+    <values>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">El estado actual de las instalaciones representa un riesgo ya que al momento de realizar el desazolve mecánico se podrían abrir las conexiones de la tubería.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">3.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">Conexiones entre tuberías deterioradas</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">No</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Desazolve</value>
+    </values>
 </CustomMetadata>

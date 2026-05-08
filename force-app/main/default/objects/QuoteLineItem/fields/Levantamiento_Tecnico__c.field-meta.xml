@@ -3,11 +3,11 @@
     <fullName>Levantamiento_Tecnico__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Vínculo con el levantamiento técnico que originó esta partida.</description>
-    <externalId>false</externalId>
     <label>Levantamiento Técnico</label>
     <referenceTo>Levantamiento_Tecnico__c</referenceTo>
     <relationshipLabel>Partidas de Presupuesto</relationshipLabel>
     <relationshipName>QuoteLineItems</relationshipName>
     <required>false</required>
+    <trackHistory>false</trackHistory>
     <type>Lookup</type>
 </CustomField>

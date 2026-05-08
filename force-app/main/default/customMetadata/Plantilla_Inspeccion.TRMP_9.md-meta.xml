@@ -2,9 +2,32 @@
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <label>TRMP 9 - Tornillos en buen estado</label>
     <protected>false</protected>
-    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Limpieza de Trampa</value></values>
-    <values><field>Orden__c</field><value xsi:type="xsd:double">9.0</value></values>
-    <values><field>Pregunta__c</field><value xsi:type="xsd:string">Tornillos en buen estado</value></values>
-    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">Si</value></values>
-    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">Se sugiere cambio de tornillos, limpieza de la cuerda y cabeza de tornillo para conservar en mejor estado la función de estos y la tapa con el fin de evitar desbordamientos.</value></values>
+    <values>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">Se sugiere cambio de tornillos, limpieza de la cuerda y cabeza de tornillo para conservar en mejor estado la función de estos y la tapa con el fin de evitar desbordamientos.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">9.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">Tornillos en buen estado</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">Si</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Limpieza de Trampa</value>
+    </values>
 </CustomMetadata>

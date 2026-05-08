@@ -3,8 +3,12 @@
     <label>TRMP 1 - Retiro sólidos</label>
     <protected>false</protected>
     <values>
-        <field>Tipo_Servicio__c</field>
-        <value xsi:type="xsd:string">Trampa_Grasa</value>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">Se exhorta a realizar una correcta disposición de sólidos orgánicos e inorgánicos en los botes de basura (mejorar el escamoche), evitando arrojar residuos en tarjas o coladeras y así prevenir desbordamientos o azolves en trampa y tuberías.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Orden__c</field>
@@ -19,7 +23,11 @@
         <value xsi:type="xsd:string">Alto, medio, bajo</value>
     </values>
     <values>
-        <field>Area_Oportunidad__c</field>
-        <value xsi:type="xsd:string">Se exhorta a realizar una correcta disposición de sólidos orgánicos e inorgánicos en los botes de basura (mejorar el escamoche), evitando arrojar residuos en tarjas o coladeras y así prevenir desbordamientos o azolves en trampa y tuberías.</value>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Trampa_Grasa</value>
     </values>
 </CustomMetadata>

@@ -2,8 +2,32 @@
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <label>PLOM 2 - Condición final</label>
     <protected>false</protected>
-    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">PLOM</value></values>
-    <values><field>Orden__c</field><value xsi:type="xsd:double">2.0</value></values>
-    <values><field>Pregunta__c</field><value xsi:type="xsd:string">Condición final</value></values>
-    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">Descripción</value></values>
+    <values>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">2.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">Condición final</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">Descripción</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">PLOM</value>
+    </values>
 </CustomMetadata>

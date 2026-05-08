@@ -3,8 +3,12 @@
     <label>BIO 1 - Consumo total</label>
     <protected>false</protected>
     <values>
-        <field>Tipo_Servicio__c</field>
-        <value xsi:type="xsd:string">Bioenzimatico</value>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Orden__c</field>
@@ -17,5 +21,13 @@
     <values>
         <field>Respuesta_Esperada__c</field>
         <value xsi:type="xsd:string">Si</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Bioenzimatico</value>
     </values>
 </CustomMetadata>

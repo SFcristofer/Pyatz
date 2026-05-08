@@ -3,15 +3,15 @@
     <label>Recibos de nómina de técnicos</label>
     <protected>false</protected>
     <values>
-        <field>Tag__c</field>
-        <value xsi:type="xsd:string">PY_NOMINA</value>
-    </values>
-    <values>
         <field>Categoria__c</field>
         <value xsi:type="xsd:string">Alta Pyatz</value>
     </values>
     <values>
         <field>Obligatorio__c</field>
         <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Tag__c</field>
+        <value xsi:type="xsd:string">PY_NOMINA</value>
     </values>
 </CustomMetadata>

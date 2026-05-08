@@ -2,9 +2,32 @@
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <label>DESA 9 - Falta de acceso</label>
     <protected>false</protected>
-    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Desazolve</value></values>
-    <values><field>Orden__c</field><value xsi:type="xsd:double">9.0</value></values>
-    <values><field>Pregunta__c</field><value xsi:type="xsd:string">No se realizó servicio por falta de acceso.</value></values>
-    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">No</value></values>
-    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">El servicio no se realizó ya que no se contaba con el permiso de acceso o llaves. Se solicita al cliente tramite permisos de acceso previos al servicio, con la finalidad de terminar los trabajos en el evento concretado.</value></values>
+    <values>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">El servicio no se realizó ya que no se contaba con el permiso de acceso o llays. Se solicita al cliente tramite permisos de acceso previos al servicio, con la finalidad de terminar los trabajos en el vento concretado.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">9.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">No se realizó servicio por falta de acceso.</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">No</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Desazolve</value>
+    </values>
 </CustomMetadata>

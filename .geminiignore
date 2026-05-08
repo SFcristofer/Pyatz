@@ -1,0 +1,8 @@
+force-app/main/default/classes/*-meta.xml
+force-app/main/default/customMetadata/*
+force-app/main/default/layouts/*
+force-app/main/default/profiles/*
+force-app/main/default/permissionsets/*
+.sfdx/
+.sf/
+node_modules/

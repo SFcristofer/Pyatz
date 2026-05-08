@@ -3,8 +3,12 @@
     <label>BIO 13 - Fauna nociva</label>
     <protected>false</protected>
     <values>
-        <field>Tipo_Servicio__c</field>
-        <value xsi:type="xsd:string">Bioenzimatico</value>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">Se sugiere la fumigación de la zona e implementar políticas de separación de residuos sólidos y líquidos con disposición correcta para evitar la presencia de plagas.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Orden__c</field>
@@ -19,7 +23,11 @@
         <value xsi:type="xsd:string">No</value>
     </values>
     <values>
-        <field>Area_Oportunidad__c</field>
-        <value xsi:type="xsd:string">Se sugiere la fumigación de la zona e implementar políticas de separación de residuos sólidos y líquidos con disposición correcta para evitar la presencia de plagas.</value>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Bioenzimatico</value>
     </values>
 </CustomMetadata>

@@ -1,0 +1,245 @@
+<template>
+<div class="fta-root">
+
+    <!-- ══ VISTA: LISTA ══════════════════════════════════════════════════════ -->
+    <template if:false={loading}>
+    <template if:true={isList}>
+
+        <div class="fta-header">
+            <h1 class="fta-title">Plantillas de Formulario</h1>
+            <button class="btn-new" onclick={handleNewTemplate}>
+                <lightning-icon icon-name="utility:add" size="x-small" variant="inverse"></lightning-icon>
+                Nueva plantilla
+            </button>
+        </div>
+
+        <template if:true={hasTemplates}>
+            <div class="tpl-list">
+                <template for:each={templates} for:item="tpl">
+                    <div key={tpl.id} class={tpl.rowClass}>
+                        <lightning-icon
+                            icon-name={tpl.icono}
+                            size="small"
+                            class="tpl-row__icon">
+                        </lightning-icon>
+                        <div class="tpl-row__body">
+                            <div class="tpl-row__tipo">{tpl.tipo}</div>
+                            <div class="tpl-row__meta">
+                                {tpl.questionLabel}
+                                <template if:false={tpl.activo}>
+                                    <span class="badge-inactive">Inactivo</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="tpl-row__actions">
+                            <button class="btn-icon" data-id={tpl.id} onclick={handleEditTemplate}
+                                    title="Editar">
+                                <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                            </button>
+                            <button class="btn-icon btn-icon--danger" data-id={tpl.id}
+                                    onclick={handleDeleteClick} title="Eliminar">
+                                <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <template if:false={hasTemplates}>
+            <div class="empty-msg">
+                No hay plantillas aún.
+                <button class="btn-link" onclick={handleNewTemplate}>Crear la primera</button>
+            </div>
+        </template>
+
+        <!-- Modal confirmación eliminar -->
+        <template if:true={confirmTemplate}>
+            <div class="modal-overlay"></div>
+            <div class="modal-box">
+                <div class="modal-box__title">¿Eliminar plantilla?</div>
+                <div class="modal-box__body">
+                    Se eliminará <strong>{confirmTemplate.tipo}</strong> permanentemente.
+                    Los registros existentes de Revision_Cita_Servicio__c no se verán afectados.
+                </div>
+                <div class="modal-box__footer">
+                    <button class="btn-secondary" onclick={handleDeleteCancel}>Cancelar</button>
+                    <button class="btn-danger"    onclick={handleDeleteConfirm}>Eliminar</button>
+                </div>
+            </div>
+        </template>
+
+    </template><!-- /list -->
+    </template>
+
+    <!-- ══ LOADING ═══════════════════════════════════════════════════════════ -->
+    <template if:true={loading}>
+        <div class="fta-loading">
+            <lightning-spinner size="medium" alternative-text="Cargando"></lightning-spinner>
+        </div>
+    </template>
+
+    <!-- ══ VISTA: EDITOR ══════════════════════════════════════════════════════ -->
+    <template if:true={isEdit}>
+
+        <div class="fta-header">
+            <button class="btn-back" onclick={handleCancelEdit}>
+                <lightning-icon icon-name="utility:chevronleft" size="x-small"></lightning-icon>
+            </button>
+            <h1 class="fta-title">{editTitle}</h1>
+        </div>
+
+        <!-- Datos generales -->
+        <div class="edit-section">
+            <div class="edit-section__title">Datos de la plantilla</div>
+
+            <div class="field-row">
+                <label class="field-label">Tipo de Reporte *</label>
+                <template if:true={isNewTemplate}>
+                    <input type="text" class="field-input" value={editTipo}
+                           placeholder="Ej: Bioenzmático" onchange={handleTipoChange} />
+                </template>
+                <template if:false={isNewTemplate}>
+                    <div class="field-readonly">{editTipo}</div>
+                </template>
+            </div>
+
+            <div class="field-row field-row--2col">
+                <div>
+                    <label class="field-label">Ícono</label>
+                    <lightning-combobox
+                        value={editIcono}
+                        options={iconOptions}
+                        variant="label-hidden"
+                        onchange={handleIconoChange}>
+                    </lightning-combobox>
+                </div>
+                <div>
+                    <label class="field-label">Orden</label>
+                    <input type="number" class="field-input" value={editOrden}
+                           min="1" max="999" onchange={handleOrdenChange} />
+                </div>
+            </div>
+
+            <div class="field-row field-row--check">
+                <input type="checkbox" id="chkActivo" checked={editActivo} onchange={handleActivoChange} />
+                <label for="chkActivo" class="field-label field-label--inline">Plantilla activa</label>
+            </div>
+        </div>
+
+        <!-- Editor de preguntas -->
+        <div class="edit-section">
+            <div class="edit-section__header">
+                <div class="edit-section__title">Preguntas</div>
+                <button class="btn-add-q" onclick={handleAddQuestion}>
+                    <lightning-icon icon-name="utility:add" size="x-small" variant="inverse"></lightning-icon>
+                    Agregar
+                </button>
+            </div>
+
+            <template if:false={hasQuestions}>
+                <div class="empty-q-msg">
+                    Sin preguntas → se mostrará un campo de texto libre al técnico.
+                </div>
+            </template>
+
+            <template for:each={editQuestions} for:item="q">
+                <div key={q.id} class="q-card">
+
+                    <!-- Cabecera de la pregunta -->
+                    <div class="q-card__header">
+                        <div class="q-card__num">P{q.num}</div>
+                        <div class="q-card__reorder">
+                            <button class="btn-reorder" data-idx={q.idx} onclick={handleMoveUp}
+                                    disabled={q.isFirst} title="Subir">▲</button>
+                            <button class="btn-reorder" data-idx={q.idx} onclick={handleMoveDown}
+                                    disabled={q.isLast} title="Bajar">▼</button>
+                        </div>
+                        <button class="btn-icon btn-icon--danger q-card__delete"
+                                data-idx={q.idx} onclick={handleDeleteQuestion} title="Eliminar pregunta">
+                            <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                        </button>
+                    </div>
+
+                    <!-- Tipo + Etiqueta -->
+                    <div class="q-fields">
+                        <div class="q-field q-field--label">
+                            <label class="field-label">Etiqueta</label>
+                            <input type="text" class="field-input" value={q.label}
+                                   placeholder="Texto de la pregunta" data-idx={q.idx}
+                                   onchange={handleQLabelChange} />
+                        </div>
+                        <div class="q-field q-field--type">
+                            <label class="field-label">Tipo</label>
+                            <lightning-combobox
+                                value={q.type}
+                                options={typeOptions}
+                                variant="label-hidden"
+                                data-idx={q.idx}
+                                onchange={handleQTypeChange}>
+                            </lightning-combobox>
+                        </div>
+                    </div>
+
+                    <!-- Opciones (solo radio) -->
+                    <template if:true={q.isRadio}>
+                        <div class="q-fields">
+                            <div class="q-field q-field--full">
+                                <label class="field-label">
+                                    Opciones <span class="field-hint">(separadas por coma)</span>
+                                </label>
+                                <input type="text" class="field-input" value={q.optionsStr}
+                                       placeholder="Sí, No" data-idx={q.idx}
+                                       onchange={handleQOptionsChange} />
+                            </div>
+                        </div>
+
+                        <template if:true={q.showDefOn}>
+                            <div class="q-fields">
+                                <div class="q-field q-field--defon">
+                                    <label class="field-label">Opción que activa área de oportunidad</label>
+                                    <lightning-combobox
+                                        value={q.defOn}
+                                        options={q.defOnOptions}
+                                        variant="label-hidden"
+                                        data-idx={q.idx}
+                                        onchange={handleQDefOnChange}>
+                                    </lightning-combobox>
+                                </div>
+                            </div>
+
+                            <template if:true={q.showDef}>
+                                <div class="q-fields">
+                                    <div class="q-field q-field--full">
+                                        <label class="field-label">Texto del área de oportunidad</label>
+                                        <textarea class="field-textarea" data-idx={q.idx}
+                                                  onchange={handleQDefChange}>{q.def}</textarea>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </template>
+
+                </div><!-- /q-card -->
+            </template>
+
+        </div><!-- /edit-section preguntas -->
+
+        <!-- Footer guardar -->
+        <div class="edit-footer">
+            <button class="btn-secondary" onclick={handleCancelEdit} disabled={saving}>Cancelar</button>
+            <button class="btn-save" onclick={handleSaveTemplate} disabled={saving}>
+                <template if:true={saving}>
+                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                </template>
+                <template if:false={saving}>
+                    <lightning-icon icon-name="utility:save" size="x-small" variant="inverse"></lightning-icon>
+                    Guardar plantilla
+                </template>
+            </button>
+        </div>
+
+    </template><!-- /edit -->
+
+</div>
+</template>

@@ -16,4 +16,32 @@
         <shortDescription>Contraseña para acceso al P&amp;L de Pyatz</shortDescription>
         <value>REMOVED_BY_SECURITY_POLICY</value>
     </labels>
+    <labels>
+        <fullName>GeoPhoto_BgColor</fullName>
+        <language>es_MX</language>
+        <protected>false</protected>
+        <shortDescription>GeoPhoto_BgColor</shortDescription>
+        <value>rgba(0,0,0,0.55)</value>
+    </labels>
+    <labels>
+        <fullName>GeoPhoto_FontColor</fullName>
+        <language>es_MX</language>
+        <protected>false</protected>
+        <shortDescription>GeoPhoto_FontColor</shortDescription>
+        <value>#FFFFFF</value>
+    </labels>
+    <labels>
+        <fullName>GeoPhoto_FontSize</fullName>
+        <language>es_MX</language>
+        <protected>false</protected>
+        <shortDescription>GeoPhoto_FontSize</shortDescription>
+        <value>28</value>
+    </labels>
+    <labels>
+        <fullName>GeoPhoto_WatermarkFormat</fullName>
+        <language>es_MX</language>
+        <protected>false</protected>
+        <shortDescription>GeoPhoto_WatermarkFormat</shortDescription>
+        <value>{lat}, {lng}</value>
+    </labels>
 </CustomLabels>

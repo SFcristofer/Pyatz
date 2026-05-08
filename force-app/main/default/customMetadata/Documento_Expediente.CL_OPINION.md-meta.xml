@@ -3,15 +3,15 @@
     <label>Opinión Cumplimiento Fiscal</label>
     <protected>false</protected>
     <values>
-        <field>Tag__c</field>
-        <value xsi:type="xsd:string">CL_OPINION</value>
-    </values>
-    <values>
         <field>Categoria__c</field>
         <value xsi:type="xsd:string">Alta Cliente</value>
     </values>
     <values>
         <field>Obligatorio__c</field>
         <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Tag__c</field>
+        <value xsi:type="xsd:string">CL_OPINION</value>
     </values>
 </CustomMetadata>

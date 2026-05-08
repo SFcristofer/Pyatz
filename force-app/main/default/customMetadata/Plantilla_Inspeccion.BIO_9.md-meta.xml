@@ -2,9 +2,32 @@
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <label>BIO 9 - ED Conexión</label>
     <protected>false</protected>
-    <values><field>Tipo_Servicio__c</field><value xsi:type="xsd:string">Bioenzimático</value></values>
-    <values><field>Orden__c</field><value xsi:type="xsd:double">9.0</value></values>
-    <values><field>Pregunta__c</field><value xsi:type="xsd:string">ED Conexión</value></values>
-    <values><field>Respuesta_Esperada__c</field><value xsi:type="xsd:string">Correcto</value></values>
-    <values><field>Area_Oportunidad__c</field><value xsi:type="xsd:string">Se solicita al personal y responsable de cocina no desconectar el equipo dosificador del contacto asignado.</value></values>
+    <values>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">Se solicita al personal y responsable de cocina no desconectar el equipo dosificador del contacto asignado.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Orden__c</field>
+        <value xsi:type="xsd:double">9.0</value>
+    </values>
+    <values>
+        <field>Pregunta__c</field>
+        <value xsi:type="xsd:string">ED Conexión</value>
+    </values>
+    <values>
+        <field>Respuesta_Esperada__c</field>
+        <value xsi:type="xsd:string">Correcto</value>
+    </values>
+    <values>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Bioenzimático</value>
+    </values>
 </CustomMetadata>

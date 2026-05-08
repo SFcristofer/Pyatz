@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Preguntas__c</fullName>
+    <description>JSON array con la definición de preguntas. Estructura: [{id,label,type,options[],defOn,def}]. Vacío = formulario libre.</description>
+    <label>Preguntas</label>
+    <length>131072</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

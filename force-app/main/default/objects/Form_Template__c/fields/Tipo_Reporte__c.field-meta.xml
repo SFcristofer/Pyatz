@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tipo_Reporte__c</fullName>
+    <caseSensitive>false</caseSensitive>
+    <description>Debe coincidir exactamente con el valor del picklist Tipo_Reporte__c en Revision_Cita_Servicio__c.</description>
+    <externalId>true</externalId>
+    <label>Tipo de Reporte</label>
+    <length>100</length>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

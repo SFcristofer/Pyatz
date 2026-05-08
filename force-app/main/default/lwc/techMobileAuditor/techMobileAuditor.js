@@ -21,7 +21,8 @@ export default class TechMobileAuditor extends LightningElement {
     
     @wire(getInspectionData, { saId: '$recordId' })
     wiredSA({ error, data }) {
-        if (data && Object.keys(data).length > 0) {
+        if (data) {
+            console.log('--- Datos Recibidos en Móvil:', JSON.stringify(data));
             this.saNumber = data.saNumber || '';
             this.reportTitle = data.saSubject || 'Reporte Técnico';
             this.reportType = data.reportType;
@@ -30,11 +31,14 @@ export default class TechMobileAuditor extends LightningElement {
                 this.loadQuestions();
             } else {
                 this.isLoading = false;
-                this.reportTitle = 'Sin Plantilla Asignada';
+                this.reportTitle = 'Sin Plantilla';
+                // Si no hay tipo de reporte, no hay preguntas que cargar
+                this.questions = [];
             }
         } else if (error) {
             console.error('Error cargando datos de la cita:', error);
             this.isLoading = false;
+            this.reportTitle = 'Error de Conexión';
         }
     }
 

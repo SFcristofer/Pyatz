@@ -1,0 +1,474 @@
+<template>
+<div class="rev-root">
+
+    <!-- ══ LOADING ══════════════════════════════════════════════════════════ -->
+    <template if:true={isLoading}>
+        <div class="rev-loading">
+            <lightning-spinner size="medium" alternative-text="Cargando"></lightning-spinner>
+            <span>Cargando información...</span>
+        </div>
+    </template>
+
+    <!-- ══ OVERVIEW ═════════════════════════════════════════════════════════ -->
+    <template if:true={isOverview}>
+        <div class="rev-overview">
+
+            <!-- Banner SA -->
+            <div class="rev-banner">
+                <div class="rev-banner__account">{saInfo.accountName}</div>
+                <div class="rev-banner__meta">Cita: {saInfo.saNumber} · OT: {saInfo.workOrderNumber}</div>
+                <div class="rev-banner__progress">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style={progressStyle}></div>
+                    </div>
+                    <span class="progress-label">{saInfo.revisionesCompletadas} / {saInfo.maxRevisiones} revisiones</span>
+                </div>
+            </div>
+
+            <!-- Lista de revisiones existentes -->
+            <template if:true={hasRevisions}>
+                <div class="rev-list-header">Revisiones registradas</div>
+                <template for:each={saInfo.revisionesList} for:item="rev">
+                    <div key={rev.id} class={rev.cardClass}>
+                        <div class="rev-card__num">{rev.numero}</div>
+                        <div class="rev-card__body">
+                            <div class="rev-card__tipo">{rev.tipo}</div>
+                            <div class="rev-card__meta">{rev.fecha} · {rev.tecnico}</div>
+                        </div>
+                        <span class={rev.badgeClass}>{rev.status}</span>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Acciones -->
+            <div class="rev-actions">
+                <template if:true={saInfo.canCreateRevision}>
+                    <button class="btn-start" onclick={handleStartRevision}>
+                        <lightning-icon icon-name="utility:add" size="small" variant="inverse"></lightning-icon>
+                        Iniciar Revisión #{nextRevNumber}
+                    </button>
+                </template>
+                <template if:false={saInfo.canCreateRevision}>
+                    <div class="all-done-msg">✓ Todas las revisiones completadas</div>
+                </template>
+                <button class="btn-report" onclick={handleGenerateReport} disabled={noRevisions}>
+                    <lightning-icon icon-name="utility:file" size="small"></lightning-icon>
+                    Generar Reporte PDF
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- ══ WIZARD ════════════════════════════════════════════════════════════ -->
+    <template if:true={isWizard}>
+        <div class="wizard-shell">
+
+            <!-- Header -->
+            <div class="wizard-header">
+                <template if:true={canGoBack}>
+                    <button class="wizard-header__back" onclick={handleBack}>
+                        <lightning-icon icon-name="utility:chevronleft" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                </template>
+                <span class="wizard-header__title">{wizardTitle}</span>
+                <button class="wizard-header__cancel" onclick={handleCancelWizard}>Cancelar</button>
+            </div>
+
+            <!-- Step indicators -->
+            <div class="step-indicators">
+                <div class={pip1Class}></div>
+                <div class={pip2Class}></div>
+                <div class={pip3Class}></div>
+                <div class={pip4Class}></div>
+            </div>
+
+            <!-- Body -->
+            <div class="wizard-body">
+
+                <!-- ── STEP 1: FOTOS ─────────────────────────────────────── -->
+                <template if:true={isStepPhotos}>
+
+                    <template if:false={photoReady}>
+                        <!-- GPS bar -->
+                        <div class="gps-bar">
+                            <template if:true={loadingGps}>
+                                <lightning-spinner size="x-small" alternative-text="GPS"></lightning-spinner>
+                                <span class="gps-bar__text gps-bar__text--weak">Obteniendo ubicación...</span>
+                            </template>
+                            <template if:false={loadingGps}>
+                                <template if:true={gpsReady}>
+                                    <div class="gps-dot gps-dot--ok"></div>
+                                    <span class="gps-bar__text gps-bar__text--ok">{gpsLabel}</span>
+                                </template>
+                                <template if:false={gpsReady}>
+                                    <div class="gps-dot gps-dot--err"></div>
+                                    <span class="gps-bar__text gps-bar__text--err">{gpsError}</span>
+                                </template>
+                            </template>
+                        </div>
+
+                        <!-- Captura -->
+                        <div class="capture-area">
+                            <button class="capture-btn" onclick={handleCaptureClick} disabled={captureDisabled}>
+                                <lightning-icon icon-name="utility:photo" size="large"></lightning-icon>
+                                <span class="capture-btn__label">Tomar Fotografía</span>
+                                <span class="capture-btn__sublabel">La foto incluirá sello GPS</span>
+                            </button>
+                            <input type="file" accept="image/*" capture="environment"
+                                class="hidden-input" data-id="cameraInput"
+                                onchange={handlePhotoSelected} />
+                        </div>
+
+                        <!-- Galería de fotos de esta revisión -->
+                        <div class="gallery-section">
+                            <div class="gallery-section__header">
+                                <span class="gallery-section__title">Fotos de esta revisión</span>
+                                <template if:true={hasRevPhotos}>
+                                    <span class="gallery-section__badge">{revPhotoCount}</span>
+                                </template>
+                            </div>
+                            <template if:true={loadingRevPhotos}>
+                                <lightning-spinner size="small" alternative-text="Cargando"></lightning-spinner>
+                            </template>
+                            <template if:false={loadingRevPhotos}>
+                                <template if:true={hasRevPhotos}>
+                                    <div class="gallery-grid">
+                                        <template for:each={revisionPhotos} for:item="photo">
+                                            <button key={photo.id} class="gallery-thumb-btn"
+                                                data-id={photo.id} onclick={handlePhotoClick}>
+                                                <img src={photo.thumbSrc} alt={photo.title} class="gallery-thumb-img" />
+                                                <span class="gallery-thumb-date">{photo.title}</span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template if:false={hasRevPhotos}>
+                                    <div class="gallery-empty">
+                                        <lightning-icon icon-name="utility:image" size="medium"></lightning-icon>
+                                        <p class="gallery-empty__text">Sin fotos aún — puedes continuar sin fotos</p>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Preview foto -->
+                    <template if:true={photoReady}>
+                        <div class="preview-screen">
+                            <div class="preview-canvas-wrap">
+                                <canvas data-id="photoCanvas" class="preview-canvas"></canvas>
+                            </div>
+                            <div class="preview-info">
+                                <div class="preview-info__row">
+                                    <div>
+                                        <div class="preview-info__label">Latitud</div>
+                                        <div class="preview-info__value">{coords.latitude}</div>
+                                    </div>
+                                    <div>
+                                        <div class="preview-info__label">Longitud</div>
+                                        <div class="preview-info__value">{coords.longitude}</div>
+                                    </div>
+                                    <div>
+                                        <div class="preview-info__label">Precisión</div>
+                                        <div class="preview-info__value">±{coords.accuracy}m</div>
+                                    </div>
+                                    <div>
+                                        <div class="preview-info__label">Fecha/Hora</div>
+                                        <div class="preview-info__value">{photoTimestamp}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wizard-footer" style="padding:0;">
+                                <button class="btn-secondary" onclick={handleRetakePhoto} disabled={savingPhoto}>Repetir</button>
+                                <button class="btn-primary" onclick={handleSavePhoto} disabled={savingPhoto}>
+                                    <template if:true={savingPhoto}>
+                                        <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                                    </template>
+                                    <template if:false={savingPhoto}>Guardar Foto</template>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- ── STEP 2: FIRMA ──────────────────────────────────────── -->
+                <template if:true={isStepSignature}>
+
+                    <!-- Firma ya guardada -->
+                    <template if:true={signatureSaved}>
+                        <div class="sig-saved-preview">
+                            <template if:true={savedSigThumb}>
+                                <img src={savedSigThumb} class="sig-saved-thumb" alt="Firma" />
+                            </template>
+                            <div>
+                                <div class="sig-saved-name">✓ Firma de {savedSigName} registrada</div>
+                                <button class="sig-saved-btn" onclick={handleResign}>Volver a firmar</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Idle: pedir nombre -->
+                    <template if:true={sigStateIdle}>
+                        <div class="sig-intro">
+                            <div class="sig-intro__label">Nombre del firmante</div>
+                            <lightning-input
+                                type="text"
+                                placeholder="Nombre completo del cliente"
+                                value={signerName}
+                                onchange={handleSignerNameChange}
+                                variant="label-hidden">
+                            </lightning-input>
+                        </div>
+                        <div class="sig-step-btns">
+                            <button class="btn-primary btn-full" onclick={handleGoSign} disabled={sigNameEmpty}>
+                                <lightning-icon icon-name="utility:signature" size="small" variant="inverse"></lightning-icon>
+                                Iniciar Firma
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Signing: canvas -->
+                    <template if:true={sigStateSigning}>
+                        <div class="gps-bar">
+                            <div class={sigGpsDotClass}></div>
+                            <span class="gps-bar__text gps-bar__text--weak">{sigGpsLabel}</span>
+                        </div>
+                        <p style="font-size:12px;color:#888;margin-bottom:8px;">Pide al cliente que firme en el recuadro</p>
+                        <div class="sign-canvas-wrap">
+                            <canvas data-id="signCanvas" class="sign-canvas"></canvas>
+                        </div>
+                        <div class="sign-actions">
+                            <button class="btn-secondary" onclick={handleClearSignature}>Limpiar</button>
+                            <button class="btn-secondary" onclick={handleBackToIdle}>← Nombre</button>
+                            <button class="btn-primary" onclick={handleConfirmSign} disabled={canvasEmpty}>
+                                Continuar →
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Preview firma -->
+                    <template if:true={sigStatePreview}>
+                        <p style="font-size:12px;color:#888;margin-bottom:8px;">Vista previa de la firma con datos verificados</p>
+                        <canvas data-id="previewCanvas" class="preview-canvas-sig"></canvas>
+                        <div class="sign-actions" style="margin-top:12px;">
+                            <button class="btn-secondary" onclick={handleRetrySign}>Reintentar</button>
+                            <button class="btn-primary" onclick={handleSaveSignature} disabled={savingSignature}>
+                                <template if:true={savingSignature}>
+                                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                                </template>
+                                <template if:false={savingSignature}>Guardar Firma</template>
+                            </button>
+                        </div>
+                    </template>
+
+                </template>
+
+                <!-- ── STEP 3: TIPO DE FORMULARIO ────────────────────────── -->
+                <template if:true={isStepFormSelect}>
+                    <div class="form-section-title">Selecciona el tipo de reporte</div>
+                    <div class="form-type-grid">
+                        <template for:each={formTypeOptions} for:item="opt">
+                            <div key={opt.value}
+                                class={opt.cardClass}
+                                data-value={opt.value}
+                                onclick={handleSelectFormType}>
+                                <div class="form-type-card__icon">
+                                    <lightning-icon icon-name={opt.icon} size="x-small"
+                                        variant={opt.iconVariant}></lightning-icon>
+                                </div>
+                                <div>
+                                    <div class="form-type-card__label">{opt.label}</div>
+                                    <div class="form-type-card__desc">{opt.questionCount} preguntas</div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- ── STEP 4: FORMULARIO ────────────────────────────────── -->
+                <template if:true={isStepFormFill}>
+                    <div class="form-section-title">{selectedFormType}</div>
+
+                    <template for:each={formQuestions} for:item="q">
+                        <div key={q.id} class="form-question">
+                            <label class="question-label">{q.label}</label>
+
+                            <template if:true={q.isRadio}>
+                                <lightning-radio-group
+                                    name={q.id}
+                                    options={q.lwcOptions}
+                                    value={q.value}
+                                    type="radio"
+                                    variant="label-hidden"
+                                    data-qid={q.id}
+                                    onchange={handleQuestionChange}>
+                                </lightning-radio-group>
+                            </template>
+
+                            <template if:true={q.isNumber}>
+                                <lightning-input
+                                    type="number"
+                                    value={q.value}
+                                    variant="label-hidden"
+                                    data-qid={q.id}
+                                    onchange={handleQuestionChange}>
+                                </lightning-input>
+                            </template>
+
+                            <template if:true={q.isText}>
+                                <lightning-textarea
+                                    value={q.value}
+                                    variant="label-hidden"
+                                    placeholder="Escribe aquí..."
+                                    data-qid={q.id}
+                                    onchange={handleQuestionChange}>
+                                </lightning-textarea>
+                            </template>
+
+                            <template if:true={q.showDeficiencia}>
+                                <div class="defic-box">
+                                    <div class="defic-box__title">Área de oportunidad</div>
+                                    <div class="defic-box__text">{q.deficienciaText}</div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="obs-section">
+                        <label class="obs-section__label">Observaciones generales (opcional)</label>
+                        <lightning-textarea
+                            value={observaciones}
+                            placeholder="Notas adicionales..."
+                            variant="label-hidden"
+                            onchange={handleObsChange}>
+                        </lightning-textarea>
+                    </div>
+                </template>
+
+                <!-- ── DONE ───────────────────────────────────────────────── -->
+                <template if:true={isDone}>
+                    <div class="done-screen">
+                        <div class="done-check">
+                            <lightning-icon icon-name="utility:success" size="large" style="color:#2e7d32;"></lightning-icon>
+                        </div>
+                        <div class="done-title">Revisión guardada</div>
+                        <div class="done-subtitle">La revisión #{savedRevNumber} fue registrada correctamente</div>
+                        <div class="done-summary">
+                            <div class="done-summary__row">
+                                <span class="done-summary__label">Tipo</span>
+                                <span class="done-summary__val">{selectedFormType}</span>
+                            </div>
+                            <div class="done-summary__row">
+                                <span class="done-summary__label">Fotos</span>
+                                <span class="done-summary__val">{revPhotoCount}</span>
+                            </div>
+                            <div class="done-summary__row">
+                                <span class="done-summary__label">Firma</span>
+                                <span class="done-summary__val">{savedSigName}</span>
+                            </div>
+                            <div class="done-summary__row">
+                                <span class="done-summary__label">Estado cita</span>
+                                <span class="done-summary__val">{saInfo.saStatus}</span>
+                            </div>
+                        </div>
+                        <button class="btn-report btn-full" onclick={handleGenerateReport}>
+                            <lightning-icon icon-name="utility:file" size="small"></lightning-icon>
+                            Generar Reporte PDF
+                        </button>
+                        <button class="btn-secondary btn-full" onclick={handleBackToOverview}>
+                            ← Volver a la cita
+                        </button>
+                    </div>
+                </template>
+
+            </div><!-- /wizard-body -->
+
+            <!-- Footer de navegación (pasos 1-4) -->
+            <template if:true={showWizardFooter}>
+                <div class="wizard-footer">
+                    <template if:true={isStepPhotos}>
+                        <template if:false={photoReady}>
+                            <button class="btn-primary" onclick={handleNextFromPhotos}>
+                                Siguiente → Firma
+                            </button>
+                        </template>
+                    </template>
+                    <template if:true={isStepSignature}>
+                        <template if:true={canSkipSignature}>
+                            <button class="btn-secondary" onclick={handleNextFromSignature}>
+                                Continuar sin firma
+                            </button>
+                        </template>
+                        <template if:true={signatureSaved}>
+                            <button class="btn-primary" onclick={handleNextFromSignature}>
+                                Siguiente → Formulario
+                            </button>
+                        </template>
+                    </template>
+                    <template if:true={isStepFormSelect}>
+                        <button class="btn-primary" onclick={handleNextFromFormSelect} disabled={noFormTypeSelected}>
+                            Siguiente → Llenar
+                        </button>
+                    </template>
+                    <template if:true={isStepFormFill}>
+                        <button class="btn-primary" onclick={handleSaveRevision} disabled={savingRevision}>
+                            <template if:true={savingRevision}>
+                                <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                            </template>
+                            <template if:false={savingRevision}>
+                                <lightning-icon icon-name="utility:save" size="small" variant="inverse"></lightning-icon>
+                                Guardar Revisión
+                            </template>
+                        </button>
+                    </template>
+                </div>
+            </template>
+
+        </div><!-- /wizard-shell -->
+    </template>
+
+</div>
+
+<!-- ══ MODAL FOTO ══════════════════════════════════════════════════════════ -->
+<template if:true={showPhotoModal}>
+    <div class="modal-overlay" onclick={handleClosePhotoModal}></div>
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-img-wrap">
+            <template if:true={loadingFullPhoto}>
+                <lightning-spinner size="medium" alternative-text="Cargando"></lightning-spinner>
+            </template>
+            <template if:false={loadingFullPhoto}>
+                <img src={selectedPhoto.fullSrc} alt={selectedPhoto.title} class="modal-img" />
+            </template>
+        </div>
+        <div class="modal-meta">
+            <p class="modal-meta__title">{selectedPhoto.title}</p>
+        </div>
+        <template if:false={confirmDeletePhoto}>
+            <div class="modal-actions">
+                <button class="modal-action-btn modal-action-btn--delete" onclick={handleDeletePhotoClick}>
+                    <lightning-icon icon-name="utility:delete" size="small"></lightning-icon>
+                    Eliminar
+                </button>
+            </div>
+            <button class="modal-close-pill" onclick={handleClosePhotoModal}>Cerrar</button>
+        </template>
+        <template if:true={confirmDeletePhoto}>
+            <div class="modal-confirm">
+                <p class="modal-confirm__text">¿Eliminar esta foto permanentemente?</p>
+                <div class="modal-actions">
+                    <button class="modal-action-btn modal-action-btn--cancel" onclick={handleDeletePhotoCancel} disabled={deletingPhoto}>Cancelar</button>
+                    <button class="modal-action-btn modal-action-btn--confirm-delete" onclick={handleDeletePhotoConfirm} disabled={deletingPhoto}>
+                        <template if:true={deletingPhoto}>
+                            <lightning-spinner size="x-small" alternative-text="Eliminando" variant="inverse"></lightning-spinner>
+                        </template>
+                        <template if:false={deletingPhoto}>Eliminar</template>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>
+
+</template>

@@ -3,8 +3,12 @@
     <label>BIO 4 - Sello seguridad</label>
     <protected>false</protected>
     <values>
-        <field>Tipo_Servicio__c</field>
-        <value xsi:type="xsd:string">Bioenzimatico</value>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">Se solicita al Jefe de mantenimiento, Chef y/o Gerente de Cocina refuercen con el personal de lavado que no desconecten el producto o lo utilicen para otros fines.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Orden__c</field>
@@ -19,7 +23,11 @@
         <value xsi:type="xsd:string">Sin alterar</value>
     </values>
     <values>
-        <field>Area_Oportunidad__c</field>
-        <value xsi:type="xsd:string">Se solicita al Jefe de mantenimiento, Chef y/o Gerente de Cocina refuercen con el personal de lavado que no desconecten el producto o lo utilicen para otros fines.</value>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Bioenzimatico</value>
     </values>
 </CustomMetadata>

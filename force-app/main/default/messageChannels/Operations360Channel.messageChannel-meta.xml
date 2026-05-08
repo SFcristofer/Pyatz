@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
-    <masterLabel>Operations360Channel</masterLabel>
-    <isExposed>true</isExposed>
     <description>Canal de comunicación para sincronizar los módulos del Desarrollo 360 de Pyatz.</description>
+    <isExposed>true</isExposed>
     <lightningMessageFields>
-        <fieldName>recordId</fieldName>
         <description>ID del registro principal (Opportunity/Expediente)</description>
+        <fieldName>recordId</fieldName>
     </lightningMessageFields>
     <lightningMessageFields>
-        <fieldName>phase</fieldName>
         <description>Fase actual del desarrollo</description>
+        <fieldName>phase</fieldName>
     </lightningMessageFields>
     <lightningMessageFields>
-        <fieldName>status</fieldName>
         <description>Estado de la operación (Updated, Completed, etc.)</description>
+        <fieldName>status</fieldName>
     </lightningMessageFields>
+    <masterLabel>Operations360Channel</masterLabel>
 </LightningMessageChannel>

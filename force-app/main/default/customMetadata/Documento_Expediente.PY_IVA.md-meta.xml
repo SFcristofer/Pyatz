@@ -3,15 +3,15 @@
     <label>Declaración y acuse de pago IVA</label>
     <protected>false</protected>
     <values>
-        <field>Tag__c</field>
-        <value xsi:type="xsd:string">PY_IVA</value>
-    </values>
-    <values>
         <field>Categoria__c</field>
         <value xsi:type="xsd:string">Alta Pyatz</value>
     </values>
     <values>
         <field>Obligatorio__c</field>
         <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Tag__c</field>
+        <value xsi:type="xsd:string">PY_IVA</value>
     </values>
 </CustomMetadata>

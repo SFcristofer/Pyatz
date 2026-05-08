@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <hasActivationRequired>false</hasActivationRequired>
-    <label>Pyatz - Reportabilidad Levantamientos</label>
-    
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>QuoteLineItem.Levantamiento_Tecnico__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>ContractLineItem.Levantamiento_Tecnico__c</field>
@@ -16,11 +8,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Inspeccion_Tecnica__c.Levantamiento_Tecnico__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>WorkOrderLineItem.Levantamiento_Tecnico__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -93,7 +80,11 @@
         <field>Quote.Memoria_Descriptiva__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>QuoteLineItem.Levantamiento_Tecnico__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Solucion_Tecnica__c.Descripcion_Detallada__c</field>
@@ -104,7 +95,13 @@
         <field>Solucion_Tecnica__c.Observaciones_Comerciales__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrderLineItem.Levantamiento_Tecnico__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Pyatz - Reportabilidad Levantamientos</label>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -112,6 +109,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
         <object>Levantamiento_Tecnico__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -121,6 +119,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
         <object>Solucion_Tecnica__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 </PermissionSet>

@@ -3,12 +3,12 @@
     <fullName>Levantamiento_Tecnico__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <description>Vínculo con el levantamiento técnico original para trazabilidad.</description>
-    <externalId>false</externalId>
     <label>Levantamiento Técnico</label>
     <referenceTo>Levantamiento_Tecnico__c</referenceTo>
     <relationshipLabel>Partidas de Orden de Trabajo</relationshipLabel>
     <relationshipName>Work_Order_Line_Items</relationshipName>
     <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>
     <type>Lookup</type>
 </CustomField>

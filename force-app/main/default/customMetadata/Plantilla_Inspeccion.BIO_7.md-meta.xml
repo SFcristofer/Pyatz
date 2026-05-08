@@ -3,8 +3,12 @@
     <label>BIO 7 - ED Edo físico</label>
     <protected>false</protected>
     <values>
-        <field>Tipo_Servicio__c</field>
-        <value xsi:type="xsd:string">Bioenzimatico</value>
+        <field>Area_Oportunidad__c</field>
+        <value xsi:type="xsd:string">Se solicita reubicar el equipo dosificador para evitar accidentes. El equipo se encuentra en comodato y en caso de daños imputables al cliente deberá pagar el costo del mismo.</value>
+    </values>
+    <values>
+        <field>Opciones_Falla__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Orden__c</field>
@@ -19,7 +23,11 @@
         <value xsi:type="xsd:string">Buen estado</value>
     </values>
     <values>
-        <field>Area_Oportunidad__c</field>
-        <value xsi:type="xsd:string">Se solicita reubicar el equipo dosificador para evitar accidentes. El equipo se encuentra en comodato y en caso de daños imputables al cliente deberá pagar el costo del mismo.</value>
+        <field>Tipo_Entrada__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Tipo_Servicio__c</field>
+        <value xsi:type="xsd:string">Bioenzimatico</value>
     </values>
 </CustomMetadata>
