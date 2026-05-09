@@ -64,60 +64,7 @@
                 </div>
             </div>
 
-            <!-- 3. DATOS GENERALES Y CLONACIÓN -->
-            <div class="general-config-area">
-                <div class="slds-box slds-theme_shade slds-m-bottom_medium">
-                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                        <h2 class="slds-text-heading_small">Datos Generales para las Órdenes de Trabajo propuestas</h2>
-                        
-                        <!-- SECCIÓN DE CLONACIÓN -->
-                        <div class="slds-grid slds-grid_vertical-align-end">
-                            <lightning-combobox
-                                label="Cargar desde ODT anterior"
-                                placeholder="Seleccionar ODT base..."
-                                value={selectedTemplateId}
-                                options={recentWorkOrders}
-                                onchange={handleTemplateChange}
-                                variant="label-hidden"
-                                class="slds-m-right_small"
-                                style="width: 300px;">
-                            </lightning-combobox>
-                            <lightning-button 
-                                label="Cargar Configuración" 
-                                variant="brand-outline" 
-                                icon-name="utility:copy"
-                                onclick={handleLoadTemplate}
-                                disabled={isLoading}>
-                            </lightning-button>
-                        </div>
-                    </div>
-                    
-                    <div class="textarea-container">
-                        <lightning-textarea label="Notas para las Órdenes de Trabajo" 
-                            value={woNotes} 
-                            onchange={handleNoteChange}
-                            placeholder="Escriba aquí indicaciones generales para todas las OT..."
-                            max-length="2048">
-                        </lightning-textarea>
-                        <div class="slds-grid slds-grid_align-spread">
-                            <span class="template-status-label">{templateStatus}</span>
-                            <span class="char-counter">{remainingChars} caracteres restantes</span>
-                        </div>
-                    </div>
-
-                    <div class="slds-grid slds-gutters slds-m-top_medium">
-                        <div class="slds-col slds-size_1-of-2">
-                            <lightning-input type="date" label="Fecha del primer tratamiento" value={startDate}></lightning-input>
-                        </div>
-                        <div class="slds-col slds-size_1-of-2">
-                            <lightning-input type="date" label="Fecha límite servicio" value={endDate}></lightning-input>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN: SEDE SELECCIONADA (NUEVA) -->
-            <div class="slds-box slds-theme_default slds-m-bottom_medium" style="border-left: 4px solid #0070d2; background: #f0f8ff;">
+            <!-- SECCIÓN: SEDE SELECCIONADA (NUEVA) -->            <div class="slds-box slds-theme_default slds-m-bottom_medium" style="border-left: 4px solid #0070d2; background: #f0f8ff;">
                 <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
                     <h2 class="slds-text-heading_small" style="color: #0070d2; font-weight: bold;">Sede de Operación Seleccionada</h2>
                     <span class="slds-badge slds-theme_info">Folio: {contractData.folioSede}</span>

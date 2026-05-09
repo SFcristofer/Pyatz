@@ -95,8 +95,31 @@
                                                 <div class="slds-text-title_bold">{item.ProductName}</div>
                                                 <div class="slds-text-color_weak slds-text-body_small" style="white-space: pre-line;">{item.Description}</div>
                                             </td>
-                                            <td class="slds-text-body_small">
-                                                <lightning-badge label={item.Zonas_a_Tratar__c} icon-name="utility:location" if:true={item.Zonas_a_Tratar__c}></lightning-badge>
+                                            <td class="slds-p-around_x-small" style="min-width: 250px;">
+                                                <div class="slds-grid slds-grid_vertical-align-center">
+                                                    <div class="pills-container slds-grow">
+                                                        <template for:each={item.selectedZonesPills} for:item="pill">
+                                                            <lightning-pill 
+                                                                key={pill.name} 
+                                                                label={pill.label} 
+                                                                name={pill.name} 
+                                                                data-item-id={item.Id}
+                                                                onremove={handleRemoveZonePill}
+                                                                class="zone-pill">
+                                                            </lightning-pill>
+                                                        </template>
+                                                        <template if:false={item.selectedZonesPills.length}>
+                                                            <span class="slds-text-color_weak slds-text-body_small">Sin zonas</span>
+                                                        </template>
+                                                    </div>
+                                                    <lightning-button-icon 
+                                                        icon-name="utility:edit" 
+                                                        variant="bare" 
+                                                        data-id={item.Id}
+                                                        onclick={handleOpenZoneModal}
+                                                        class="slds-m-left_x-small">
+                                                    </lightning-button-icon>
+                                                </div>
                                             </td>
                                             <td style="text-align: center;">{item.Quantity}</td>
                                             <td class="slds-text-body_small">{item.Sede}</td>
@@ -331,6 +354,73 @@
                 <footer class="slds-modal__footer">
                     <lightning-button label="Cancelar" onclick={handleCloseEditModal} class="slds-m-right_x-small"></lightning-button>
                     <lightning-button label="Guardar" variant="brand" onclick={handleSaveItemChanges}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- MODAL DE GESTIÓN DE ZONAS (IGEO STYLE) -->
+    <template if:true={showZoneModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Gestionar Zonas: {activeItemName}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium bg-light-gray">
+                    <div class="slds-grid slds-gutters">
+                        <!-- Columna 1: Catálogo de la Cuenta -->
+                        <div class="slds-col slds-size_2-of-3">
+                            <div class="slds-box bg-white">
+                                <h3 class="slds-text-title_bold slds-m-bottom_small">Catálogo de Zonas (Sugeridas por iGeo)</h3>
+                                <div class="modal-zones-scroll">
+                                    <template for:each={historicalZonesCategorized} for:item="group">
+                                        <div key={group.label} class="zone-group-modal">
+                                            <p class="zone-group-header">{group.label}</p>
+                                            <div class="slds-grid slds-wrap">
+                                                <template for:each={group.zones} for:item="z">
+                                                    <div key={z.name} class="slds-col slds-size_1-of-2 slds-p-around_xx-small">
+                                                        <div class="zone-card-checkbox">
+                                                            <lightning-input 
+                                                                type="checkbox" 
+                                                                label={z.name} 
+                                                                checked={z.isSelected}
+                                                                data-name={z.name}
+                                                                onchange={handleToggleZoneSelection}>
+                                                            </lightning-input>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna 2: Añadir Nueva -->
+                        <div class="slds-col slds-size_1-of-3">
+                            <div class="slds-box bg-white shadow-inner">
+                                <h3 class="slds-text-title_bold slds-m-bottom_small">Añadir Nueva Zona</h3>
+                                <lightning-input label="Nombre de Zona" value={newZoneName} onchange={handleNewZoneInputChange} data-field="name" placeholder="Ej: Pasillo 5"></lightning-input>
+                                <lightning-combobox label="Tipo de Reporte" options={serviceTypeOptions} value={newZoneType} onchange={handleNewZoneInputChange} data-field="type" placeholder="Seleccione..."></lightning-combobox>
+                                <lightning-button label="Añadir al Listado" variant="brand" icon-name="utility:add" class="slds-m-top_medium slds-size_1-of-1" onclick={handleAddNewZone} disabled={isAddZoneDisabled}></lightning-button>
+                                
+                                <div class="slds-m-top_large slds-p-top_medium slds-border_top">
+                                    <p class="slds-text-title_bold">Seleccionadas ({tempSelectedZones.length})</p>
+                                    <div class="slds-m-top_small">
+                                        <template for:each={tempSelectedZones} for:item="z">
+                                            <lightning-pill key={z} label={z} class="slds-m-xx-small"></lightning-pill>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancelar" onclick={handleCloseZoneModal} class="slds-m-right_x-small"></lightning-button>
+                    <lightning-button label="Aplicar Zonas al Contrato" variant="brand" onclick={handleApplyZones}></lightning-button>
                 </footer>
             </div>
         </section>

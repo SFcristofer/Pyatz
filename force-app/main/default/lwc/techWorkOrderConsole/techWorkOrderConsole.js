@@ -45,9 +45,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     };
 
     @track sedesList = [];
-    @track woNotes = '';
-    @track startDate = '';
-    @track endDate = '';
     @track showSchedulingSection = true; 
 
     @track daysOfWeek = [
@@ -60,9 +57,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @track tecnicosOptions = [];
     @track priorityOptions = [];
     @track territoryOptions = [];
-    @track recentWorkOrders = [];
-    @track selectedTemplateId = '';
-    @track templateStatus = ''; // Feedback visual
     @track ganttView = 'months'; // 'days', 'weeks', 'months'
 
     @wire(getServiceResources)
@@ -121,13 +115,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         );
     }
 
-    @wire(getRecentWorkOrders, { accountId: '$accountId' })
-    wiredRecentWOs({ error, data }) {
-        if (data) {
-            this.recentWorkOrders = data.map(wo => ({ label: wo.name, value: wo.id }));
-        }
-    }
-
     @wire(getInitialWorkOrderData, { oppId: '$recordId', quoteId: '$quoteId', serviceContractId: '$serviceContractId' })
     wiredData({ error, data }) {
         if (data) {
@@ -162,9 +149,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             };
 
             if (this.isUpdateMode && data.tratamientosExistentes) {
-                this.woNotes = data.notes;
-                this.templateStatus = 'Visualizando Orden de Trabajo existente';
-                
                 this.sedesList = [{
                     id: 'main-sede',
                     name: data.sedes || 'Sede Principal',
@@ -247,61 +231,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             });
         }
         return rows;
-    }
-
-    // CLONACIÓN / PLANTILLA
-    handleTemplateChange(event) {
-        this.selectedTemplateId = event.detail.value;
-    }
-
-    handleLoadTemplate() {
-        if (!this.selectedTemplateId) return;
-        this.isLoading = true;
-        
-        // Buscar el nombre de la ODT seleccionada para el status
-        const selectedWO = this.recentWorkOrders.find(wo => wo.value === this.selectedTemplateId);
-        const woName = selectedWO ? selectedWO.label.split(' - ')[0] : 'ODT';
-
-        getWorkOrderTemplateData({ workOrderId: this.selectedTemplateId })
-            .then(data => {
-                this.woNotes = data.notes;
-                this.templateStatus = `Configuración cargada desde: ${woName}`;
-
-                this.sedesList = this.sedesList.map(sede => {
-                    const updatedTratamientos = sede.tratamientos.map(tra => {
-                        const templateTra = data.tratamientos.find(t => t.name === tra.name);
-                        if (templateTra) {
-                            return {
-                                ...tra,
-                                numTecnicos: templateTra.tecnicosIds.length || 1,
-                                tecnicosIds: templateTra.tecnicosIds,
-                                numTecnicosSeleccionados: templateTra.tecnicosIds.length,
-                                durationHours: Math.floor((templateTra.schedulingRows[0]?.duration || 60) / 60),
-                                durationMinutes: (templateTra.schedulingRows[0]?.duration || 60) % 60,
-                                schedulingRows: tra.schedulingRows.map((row, idx) => ({
-                                    ...row,
-                                    duration: templateTra.schedulingRows[0]?.duration || 60,
-                                    tecnicoId: templateTra.schedulingRows[idx] ? templateTra.schedulingRows[idx].tecnicoId : '',
-                                    arrivalMargin: templateTra.schedulingRows[idx] ? templateTra.schedulingRows[idx].arrivalMargin || 0 : 0
-                                }))
-                            };
-                        }
-                        return tra;
-                    });
-                    return { ...sede, tratamientos: updatedTratamientos };
-                });
-
-                this.dispatchEvent(new ShowToastEvent({
-                    title: 'Éxito',
-                    message: 'Configuración cargada desde ODT anterior.',
-                    variant: 'success'
-                }));
-                this.isLoading = false;
-            })
-            .catch(error => {
-                this.isLoading = false;
-                console.error('Error cargando plantilla:', error);
-            });
     }
 
     // MANEJADORES DE INTERFAZ
@@ -410,7 +339,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }));
     }
 
-    handleNoteChange(event) { this.woNotes = event.target.value; }
     handleBackToContract() { this.dispatchEvent(new CustomEvent('back')); }
     handleViewQuote() { /* Lógica para abrir PDF */ }
     handleAddCandidateDates() { this.showSchedulingSection = !this.showSchedulingSection; }
@@ -431,7 +359,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             oppId: this.oppId,
             accountId: this.accountId,
             folio: this.contractFolio,
-            notes: this.woNotes,
+            notes: '',
             priority: this.contractData.prioridad,
             territoryId: this.contractData.territoryId,
             executionAddress: this.contractData.direccionSede,
@@ -461,10 +389,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                     variant: 'error'
                 }));
             });
-    }
-
-    get remainingChars() {
-        return 2048 - (this.woNotes ? this.woNotes.length : 0);
     }
 
     get saveButtonLabel() {

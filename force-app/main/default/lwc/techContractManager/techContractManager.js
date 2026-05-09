@@ -42,7 +42,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     wiredUser({ error, data }) {
         if (data) {
             const userName = data.fields.Name.value;
-            // Solo autocompletar si no se ha seleccionado nada manualmente todavía
             if (!this.selectedCreator.id) {
                 this.selectedCreator = { id: USER_ID, name: userName };
             }
@@ -75,6 +74,29 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track editingItem = {};
     @track editingIndex = -1;
 
+    // --- GESTIÓN DE ZONAS (NUEVAS PROPIEDADES) ---
+    @track historicalZones = [];
+    @track showZoneModal = false;
+    @track activeItemId = null;
+    @track tempSelectedZones = [];
+    @track newZoneName = '';
+    @track newZoneType = '';
+
+    get serviceTypeOptions() {
+        return [
+            { label: 'Bioenzimático', value: 'BIOENZIMÁTICO' },
+            { label: 'Fumigación', value: 'PÓLIZA FUMIGACIÓN' },
+            { label: 'Gestión Menstrual', value: 'GESTIÓN MENSTRUAL (ÍNTIMA)' },
+            { label: 'Aromatización', value: 'AROMATIZACIÓN' },
+            { label: 'Limpieza de Trampas', value: 'TRAMPAS DE GRASA' }
+        ];
+    }
+
+    get activeItemName() {
+        const item = this.quoteLineItems.find(i => i.Id === this.activeItemId);
+        return item ? item.ProductName : '';
+    }
+
     get selectedClientSignerDisplay() {
         if (!this.selectedClientSigner) return 'No seleccionado';
         const contact = this.contactOptions.find(c => c.value === this.selectedClientSigner);
@@ -97,8 +119,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         }, 300);
     }
 
-    @track historicalZones = [];
-
     loadInitialData() {
         this.isLoading = true;
         getContractInitialData({ oppId: this.recordId })
@@ -110,12 +130,10 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                 }));
                 this.syncedQuoteId = result.syncedQuoteId;
                 
-                // MEJORA: Almacenar zonas materializadas para el mapeo
                 if (result.historicalZones) {
                     this.historicalZones = result.historicalZones;
                 }
 
-                // Mapear contactos
                 if (result.contacts) {
                     this.contactOptions = result.contacts.map(c => ({
                         label: `${c.Name} (${c.Title || 'Sin Cargo'})`,
@@ -123,15 +141,11 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                     }));
                 }
 
-                // --- LÓGICA LINEAL QUIRÚRGICA ---
                 if (this.syncedQuoteId) {
-                    // 1. Prioridad: El que está sincronizado oficialmente
                     this.selectQuote(this.syncedQuoteId);
                 } else if (this.availableQuotes.length > 0) {
-                    // 2. Fallback: El más reciente (para no detener el flujo lineal)
                     this.selectQuote(this.availableQuotes[0].Id);
                 } else {
-                    // 3. Caso sin presupuestos: Mostrar error o advertencia
                     this.isLoading = false;
                 }
                 
@@ -149,10 +163,8 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         const quote = this.availableQuotes.find(q => q.Id === quoteId);
         this.selectedQuoteName = quote ? `${quote.QuoteNumber} - ${quote.Name}` : 'Presupuesto seleccionado';
         
-        // Cargar las partidas del presupuesto seleccionado
         this.fetchLineItems(quoteId);
         
-        // MEJORA: Cargar automáticamente la introducción desde el presupuesto
         if (quote && quote.Introduction_Text__c) {
             this.introduccionPresupuesto = quote.Introduction_Text__c;
         } else {
@@ -181,9 +193,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         getQuoteLineItems({ quoteId: quoteId })
             .then(result => {
                 this.quoteLineItems = result.map(item => {
-                    // SINCRONIZACIÓN DE ZONAS (iGeo Style):
-                    // Buscamos las zonas materializadas que corresponden a esta partida (por el nombre del servicio)
-                    // Si no hay correspondencia exacta, usamos el campo de texto Zonas_a_Tratar__c como fallback
                     let displayZones = item.Zonas_a_Tratar__c || '';
                     
                     if (this.historicalZones && this.historicalZones.length > 0) {
@@ -196,18 +205,117 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                         }
                     }
 
+                    const selectedZones = displayZones ? displayZones.split(',').map(z => z.trim()).filter(z => z !== '') : [];
+
                     return {
                         ...item,
                         ProductCode: item.Product2 ? item.Product2.ProductCode : '---',
                         ProductName: item.Product2 ? item.Product2.Name : 'Producto',
                         Sede: (item.Quote && item.Quote.Technical_Sedes__c) ? item.Quote.Technical_Sedes__c : '---',
                         Zonas_a_Tratar__c: displayZones,
+                        selectedZonesPills: selectedZones.map(z => ({ label: z, name: z })),
                         isSelected: true
                     };
                 });
                 this.calculateTotals();
             })
             .catch(error => console.error('Error recuperando partidas:', error));
+    }
+
+    // --- GESTIÓN AVANZADA DE ZONAS (IGEO REPLICA) ---
+    handleOpenZoneModal(event) {
+        this.activeItemId = event.currentTarget.dataset.id;
+        const item = this.quoteLineItems.find(i => i.Id === this.activeItemId);
+        this.tempSelectedZones = [...item.selectedZonesPills.map(p => p.name)];
+        this.showZoneModal = true;
+    }
+
+    handleCloseZoneModal() {
+        this.showZoneModal = false;
+        this.newZoneName = '';
+        this.newZoneType = '';
+    }
+
+    handleToggleZoneSelection(event) {
+        const zoneName = event.target.dataset.name;
+        const isChecked = event.target.checked;
+
+        if (isChecked && !this.tempSelectedZones.includes(zoneName)) {
+            this.tempSelectedZones.push(zoneName);
+        } else if (!isChecked) {
+            this.tempSelectedZones = this.tempSelectedZones.filter(z => z !== zoneName);
+        }
+    }
+
+    handleNewZoneInputChange(event) {
+        const field = event.target.dataset.field;
+        if (field === 'name') this.newZoneName = event.target.value;
+        else if (field === 'type') this.newZoneType = event.target.value;
+    }
+
+    handleAddNewZone() {
+        if (!this.newZoneName) return;
+        
+        const zoneNameWithPrefix = `CDT ${this.newZoneName}`;
+        
+        if (!this.tempSelectedZones.includes(zoneNameWithPrefix)) {
+            this.tempSelectedZones.push(zoneNameWithPrefix);
+        }
+
+        if (!this.historicalZones.some(z => z.Name === zoneNameWithPrefix)) {
+            this.historicalZones = [...this.historicalZones, {
+                Name: zoneNameWithPrefix,
+                Tipo_de_Servicio__c: this.newZoneType || 'GENERAL'
+            }];
+        }
+
+        this.newZoneName = '';
+        this.newZoneType = '';
+    }
+
+    handleApplyZones() {
+        this.quoteLineItems = this.quoteLineItems.map(item => {
+            if (item.Id === this.activeItemId) {
+                return {
+                    ...item,
+                    selectedZonesPills: this.tempSelectedZones.map(z => ({ label: z, name: z })),
+                    Zonas_a_Tratar__c: this.tempSelectedZones.join(', ')
+                };
+            }
+            return item;
+        });
+        this.handleCloseZoneModal();
+    }
+
+    handleRemoveZonePill(event) {
+        const itemId = event.currentTarget.dataset.itemId;
+        const zoneName = event.detail.name;
+        
+        this.quoteLineItems = this.quoteLineItems.map(item => {
+            if (item.Id === itemId) {
+                const zones = item.selectedZonesPills.map(p => p.name).filter(z => z !== zoneName);
+                return {
+                    ...item,
+                    selectedZonesPills: zones.map(z => ({ label: z, name: z })),
+                    Zonas_a_Tratar__c: zones.join(', ')
+                };
+            }
+            return item;
+        });
+    }
+
+    get historicalZonesCategorized() {
+        if (!this.historicalZones) return [];
+        const groups = {};
+        this.historicalZones.forEach(z => {
+            const type = z.Tipo_de_Servicio__c || 'Otras Zonas';
+            if (!groups[type]) groups[type] = [];
+            groups[type].push({
+                name: z.Name,
+                isSelected: this.tempSelectedZones.includes(z.Name)
+            });
+        });
+        return Object.keys(groups).map(type => ({ label: type, zones: groups[type] }));
     }
 
     // BÚSQUEDA DE USUARIOS
@@ -266,7 +374,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         const val = event.target.value;
         if (id === 'primerServicio') {
             this.fechaPrimerServicio = val;
-            // MEJORA: Sincronizar con inicio de contrato si está vacío
             if (!this.fechaInicioContrato && val) {
                 this.fechaInicioContrato = val;
                 this.autoCalculateEndDate(val);
@@ -294,8 +401,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             const d = new Date(parts[0], parts[1] - 1, parts[2]);
             d.setFullYear(d.getFullYear() + 1);
             d.setDate(d.getDate() - 1);
-            
-            // Formatear a YYYY-MM-DD
             const year = d.getFullYear();
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
@@ -392,14 +497,14 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             fechaPrimerServicio: this.fechaPrimerServicio,
             fechaLimiteServicio: this.fechaLimiteServicio,
             introduccion: this.introduccionPresupuesto,
-            observaciones: this.observacionesRenovacion, // Mapeado a SpecialTerms
+            observaciones: this.observacionesRenovacion, 
             observacionesPrivadas: this.observacionesPrivadas,
             contenidoLegal: this.contenidoLegal,
             status: 'In Review',
             creatorId: this.selectedCreator.id,
             managerId: this.selectedManager.id,
             clientSignerId: this.selectedClientSigner,
-            lineItemsJson: JSON.stringify(this.quoteLineItems) // ENVIAMOS TODA LA MATERIALIDAD EDITADA
+            lineItemsJson: JSON.stringify(this.quoteLineItems)
         };
 
         this.isLoading = true;
@@ -411,8 +516,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                     message: 'Contrato de Servicio generado y guardado en Salesforce.', 
                     variant: 'success' 
                 }));
-                
-                // NOTIFICAR AL DASHBOARD DEL NUEVO CONTRATO
                 this.dispatchEvent(new CustomEvent('contractgenerated', { detail: scId }));
                 return scId;
             })
@@ -434,7 +537,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
             return;
         }
 
-        // Primero guardar y luego procesar navegación
         this.handleSaveDraft()
             .then(scId => {
                 const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
@@ -444,8 +546,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
                 url += `&clientSigner=${encodeURIComponent(this.selectedClientSigner)}`;
 
                 window.open(url, '_blank');
-
-                // NOTIFICAR FINALIZACIÓN PARA AUTO-NAVEGACIÓN
                 this.dispatchEvent(new CustomEvent('contractfinalized', { detail: scId }));
             })
             .catch(error => {

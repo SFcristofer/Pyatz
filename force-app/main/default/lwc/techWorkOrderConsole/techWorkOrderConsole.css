@@ -102,23 +102,6 @@
     border-radius: 4px;
 }
 
-/* ESTILOS CLONACIÓN */
-.general-config-area .slds-box {
-    border-left: 4px solid var(--pyatz-purple);
-}
-
-.slds-combobox_container {
-    --slds-c-combobox-input-font-size: 0.85rem;
-}
-
-.template-status-label {
-    font-size: 0.75rem;
-    color: #38a169;
-    font-weight: 600;
-    font-style: italic;
-    margin-top: 4px;
-}
-
 /* ESTILOS PROGRAMACIÓN REDISEÑADA */
 .scheduling-header-row {
     background-color: #f7fafc;
