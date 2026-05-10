@@ -1,0 +1,169 @@
+<template>
+    <section class={drawerClass} role="dialog" aria-modal="true">
+        <!-- TOP BAR: HEADER + GLOBAL SEARCH -->
+        <div class="premium-top-bar">
+            <div class="top-bar-content">
+                <div class="header-main">
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <lightning-icon icon-name="standard:service_territory_location" size="small" class="slds-m-right_small icon-white"></lightning-icon>
+                        <div>
+                            <h2 class="drawer-title">Dashboard Técnico de Zonas</h2>
+                            <div class="slds-grid slds-grid_vertical-align-center slds-m-top_xx-small">
+                                <span class="slds-badge badge-count">{zones.length} Registros</span>
+                                <span class="slds-m-left_small slds-text-color_inverse-weak slds-text-body_small">Account Catalyst Management</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <div class="search-area-global">
+                            <lightning-input 
+                                type="search" 
+                                variant="label-hidden" 
+                                placeholder="Búsqueda rápida en todo el catálogo..." 
+                                onchange={handleSearchChange}
+                                class="integrated-search">
+                            </lightning-input>
+                        </div>
+                        <!-- iGeo Intelligence Toggle -->
+                        <div class="slds-m-left_large slds-grid slds-grid_vertical-align-center context-toggle">
+                            <span class="slds-m-right_x-small slds-text-title_caps text-white" style="font-size: 0.65rem;">Filtro Inteligente</span>
+                            <lightning-input type="toggle" label="Contexto" variant="label-hidden" checked={onlyContextZones} onchange={handleToggleContextFilter}></lightning-input>
+                        </div>
+                        <lightning-button-icon 
+                            icon-name="utility:close" 
+                            variant="bare-inverse" 
+                            onclick={closeDrawer} 
+                            class="slds-m-left_large close-btn"
+                            size="large">
+                        </lightning-button-icon>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEWPORT: INTEGRATED FILTERS + TABLE -->
+        <div class="content-body">
+            <!-- SECTION 1: TABLE WITH EMBEDDED FILTERS -->
+            <div class="section-table">
+                <div class="table-wrapper">
+                    <!-- HEADER FILTERS (ESTÉTICOS E INTEGRADOS SOBRE CABECERAS) -->
+                    <div class="embedded-filter-bar slds-p-vertical_small">
+                        <div class="filter-flex-row">
+                            <div class="filter-col flex-4">
+                                <lightning-input label="ZONA" variant="label-hidden" placeholder="Filtrar Zona..." value={filterZona} data-field="zona" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
+                            </div>
+                            <div class="filter-col flex-3">
+                                <lightning-input label="TIPO" variant="label-hidden" placeholder="Filtrar Protocolo..." value={filterTipo} data-field="tipo" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
+                            </div>
+                            <div class="filter-col flex-3">
+                                <lightning-input label="LINEA" variant="label-hidden" placeholder="Filtrar Línea..." value={filterLob} data-field="lob" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
+                            </div>
+                            <div class="filter-col flex-2">
+                                <lightning-input label="CODIGO" variant="label-hidden" placeholder="Código..." value={filterCodigo} data-field="codigo" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
+                            </div>
+                            <div class="filter-col flex-2"></div> <!-- Espacio para ID -->
+                        </div>
+                    </div>
+
+                    <template if:true={isLoading}>
+                        <div class="loading-overlay">
+                            <lightning-spinner alternative-text="Sincronizando..." size="medium" variant="brand"></lightning-spinner>
+                        </div>
+                    </template>
+                    
+                    <lightning-datatable
+                        key-field="Id"
+                        data={pagedZones}
+                        columns={columns}
+                        max-row-selection="1"
+                        onrowselection={handleRowSelection}
+                        class="premium-table datatable-no-border">
+                    </lightning-datatable>
+
+                    <!-- TABLE FOOTER: PAGINACIÓN INTEGRADA -->
+                    <div class="table-pagination-footer slds-p-vertical_small">
+                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                            <div class="slds-text-color_weak slds-text-body_small">
+                                Mostrando página {currentPage} de {totalPages} ({zones.length} registros)
+                            </div>
+                            <div class="slds-grid slds-grid_vertical-align-center">
+                                <lightning-button 
+                                    label="Anterior" 
+                                    icon-name="utility:chevronleft" 
+                                    onclick={handlePrevPage} 
+                                    disabled={isFirstPage}
+                                    variant="neutral"
+                                    class="slds-m-right_small compact-nav-btn">
+                                </lightning-button>
+                                <div class="compact-page-indicator slds-m-right_small">{currentPage}</div>
+                                <lightning-button 
+                                    label="Siguiente" 
+                                    icon-name="utility:chevronright" 
+                                    icon-position="right"
+                                    onclick={handleNextPage} 
+                                    disabled={isLastPage}
+                                    variant="neutral"
+                                    class="compact-nav-btn">
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <template if:false={zones.length}>
+                        <template if:false={isLoading}>
+                            <div class="empty-state">
+                                <lightning-icon icon-name="utility:search" size="large" variant="light"></lightning-icon>
+                                <p>No se encontraron resultados para los criterios aplicados.</p>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ZONE 2: WORK ORDER SCOPE SECTION (NEW) -->
+            <div class="section-details slds-p-vertical_large">
+                <div class="top-bar-content">
+                    <div class="slds-grid slds-gutters">
+                        <!-- Scope Card -->
+                        <div class="slds-col slds-size_1-of-1">
+                            <div class="detail-card">
+                                <header class="detail-card-header slds-grid slds-grid_align-spread">
+                                    <h3 class="slds-text-title_bold text-slate-800">ALCANCE DE LA ORDEN DE TRABAJO (PROYECTADO)</h3>
+                                    <span class="slds-badge slds-theme_info">{treatmentList.length} Servicios</span>
+                                </header>
+                                <div class="detail-card-body">
+                                    <template if:true={hasTreatments}>
+                                        <div class="slds-grid slds-wrap">
+                                            <template for:each={treatmentList} for:item="tra">
+                                                <div key={tra.id} class="slds-col slds-size_1-of-4 slds-p-around_small">
+                                                    <div class="treatment-scope-card">
+                                                        <div class="slds-grid slds-grid_vertical-align-center">
+                                                            <lightning-icon icon-name={tra.icon} size="small" class="slds-m-right_small"></lightning-icon>
+                                                            <div class="slds-grow">
+                                                                <p class="detail-label">Servicio</p>
+                                                                <p class="detail-value-compact">{tra.name}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasTreatments}>
+                                        <div class="slds-align_absolute-center slds-p-around_large text-slate-400">
+                                            No hay tratamientos configurados para esta orden de trabajo.
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <template if:true={isOpen}>
+        <div class="slds-backdrop slds-backdrop_open" onclick={closeDrawer}></div>
+    </template>
+</template>

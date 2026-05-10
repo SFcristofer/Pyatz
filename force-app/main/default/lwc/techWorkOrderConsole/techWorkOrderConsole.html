@@ -174,9 +174,17 @@
                                 </div>
                                 
                                 <div class="treatment-body">
-                                    <p class="slds-text-color_weak slds-m-bottom_small">
-                                        <strong>Tipos de Reporte por Zona:</strong> {tra.zonas}
-                                    </p>
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                                        <p class="slds-text-color_weak slds-grow">
+                                            <strong>Tipos de Reporte por Zona:</strong> {tra.zonas}
+                                        </p>
+                                        <lightning-button-icon 
+                                            icon-name="utility:search" 
+                                            variant="border-filled" 
+                                            title="Explorar Catálogo de Zonas" 
+                                            onclick={handleOpenZoneBrowser}>
+                                        </lightning-button-icon>
+                                    </div>
 
                                     <div class="resource-config slds-grid slds-wrap">
                                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-right_small">
@@ -410,5 +418,12 @@
                 <lightning-button label={saveButtonLabel} variant="brand" icon-name="utility:record_create" size="large" onclick={handleGenerateODTs} disabled={isSaving}></lightning-button>
             </div>
         </template>
+
+        <!-- NAVEGADOR DE ZONAS (DRAWER) -->
+        <c-tech-zone-browser-drawer 
+            account-id={accountId} 
+            current-business-lines={contractData.lineaNegocio}
+            planned-treatments={contractData.tratamientos}>
+        </c-tech-zone-browser-drawer>
     </div>
 </template>

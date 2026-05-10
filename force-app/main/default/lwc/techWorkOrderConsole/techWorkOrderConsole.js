@@ -339,6 +339,11 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }));
     }
 
+    handleOpenZoneBrowser() {
+        const drawer = this.template.querySelector('c-tech-zone-browser-drawer');
+        if (drawer) drawer.open();
+    }
+
     handleBackToContract() { this.dispatchEvent(new CustomEvent('back')); }
     handleViewQuote() { /* Lógica para abrir PDF */ }
     handleAddCandidateDates() { this.showSchedulingSection = !this.showSchedulingSection; }

@@ -196,6 +196,40 @@ public with sharing class TechWorkOrderController {
         return results;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<Zona_Servicio_Pyatz__c> getAccountZonesData(Id accountId, String searchTerm, String nameFilter, String templateFilter, String lobFilter, String codeFilter) {
+        String query = 'SELECT Id, Name, Linea_de_Negocio__c, Tipo_de_Servicio__c, Id_Unico_Zona__c, Plantilla_de_Formulario__r.Name FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId';
+        
+        String searchKey = String.isNotBlank(searchTerm) ? '%' + searchTerm + '%' : null;
+        String nameKey = String.isNotBlank(nameFilter) ? '%' + nameFilter + '%' : null;
+        String templateKey = String.isNotBlank(templateFilter) ? '%' + templateFilter + '%' : null;
+        String lobKey = String.isNotBlank(lobFilter) ? '%' + lobFilter + '%' : null;
+        String codeKey = String.isNotBlank(codeFilter) ? '%' + codeFilter + '%' : null;
+
+        if (searchKey != null) {
+            query += ' AND (Name LIKE :searchKey OR Tipo_de_Servicio__c LIKE :searchKey OR Id_Unico_Zona__c LIKE :searchKey OR Plantilla_de_Formulario__r.Name LIKE :searchKey)';
+        }
+        
+        if (nameKey != null) {
+            query += ' AND Name LIKE :nameKey';
+        }
+        
+        if (templateKey != null) {
+            query += ' AND (Plantilla_de_Formulario__r.Name LIKE :templateKey OR Tipo_de_Servicio__c LIKE :templateKey)';
+        }
+        
+        if (lobKey != null) {
+            query += ' AND Linea_de_Negocio__c LIKE :lobKey';
+        }
+        
+        if (codeKey != null) {
+            query += ' AND Id_Unico_Zona__c LIKE :codeKey';
+        }
+
+        query += ' ORDER BY Name ASC LIMIT 500';
+        return Database.query(query);
+    }
+
     @AuraEnabled
     public static String saveWorkOrders(String payloadJson) {
         try {
