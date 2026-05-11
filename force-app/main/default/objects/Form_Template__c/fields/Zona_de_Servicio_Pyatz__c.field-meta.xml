@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Zona_de_Servicio_Pyatz__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Zona de Servicio Pyatz</label>
+    <referenceTo>Zona_Servicio_Pyatz__c</referenceTo>
+    <relationshipLabel>Tipo de reporte</relationshipLabel>
+    <relationshipName>Plantillas_de_Formulario</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -291,17 +291,30 @@ public with sharing class TechWorkOrderController {
             if (!sasToInsert.isEmpty()) {
                 insert sasToInsert;
                 List<ServiceAppointment> sasUpdate = new List<ServiceAppointment>();
-                List<Inspeccion_Tecnica__c> inspToIns = new List<Inspeccion_Tecnica__c>();
+                List<Revision_Cita_Servicio__c> revsToIns = new List<Revision_Cita_Servicio__c>();
                 List<AssignedResource> arsToIns = new List<AssignedResource>();
+                
                 for (Integer i = 0; i < sasToInsert.size(); i++) {
                     sasUpdate.add(new ServiceAppointment(Id = sasToInsert[i].Id, Status = 'Programado'));
-                    for (String tId : templatesPerSA[i]) {
-                        inspToIns.add(new Inspeccion_Tecnica__c(Cita_Servicio__c = sasToInsert[i].Id, Levantamiento_Tecnico__c = levantamientosPerSA[i], Tipo_Reporte__c = tId, Respuestas_JSON__c = '[]'));
+                    
+                    Integer revCounter = 1;
+                    for (String templateIdOrName : templatesPerSA[i]) {
+                        revsToIns.add(new Revision_Cita_Servicio__c(
+                            Cita_Servicio__c = sasToInsert[i].Id, 
+                            Numero_Revision__c = revCounter++,
+                            Status__c = 'En Proceso',
+                            Tipo_Reporte__c = templateIdOrName, // La App busca por el nombre del tipo
+                            Fecha_Revision__c = Datetime.now(),
+                            Tecnico__c = UserInfo.getUserId()
+                        ));
                     }
-                    for (String tId : techniciansPerSA[i]) arsToIns.add(new AssignedResource(ServiceAppointmentId = sasToInsert[i].Id, ServiceResourceId = (Id)tId));
+                    
+                    for (String tId : techniciansPerSA[i]) {
+                        arsToIns.add(new AssignedResource(ServiceAppointmentId = sasToInsert[i].Id, ServiceResourceId = (Id)tId));
+                    }
                 }
                 update sasUpdate;
-                if (!inspToIns.isEmpty()) insert inspToIns;
+                if (!revsToIns.isEmpty()) insert revsToIns;
                 if (!arsToIns.isEmpty()) { try { insert arsToIns; } catch (Exception e) { } }
             }
             return wo.Id;

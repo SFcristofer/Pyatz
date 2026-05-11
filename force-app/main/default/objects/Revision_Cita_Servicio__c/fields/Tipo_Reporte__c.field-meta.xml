@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tipo_Reporte__c</fullName>
+    <label>Tipo de Reporte</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Bioenzmático</fullName>
+                <default>false</default>
+                <label>Bioenzmático</label>
+            </value>
+            <value>
+                <fullName>Limpieza de Trampa</fullName>
+                <default>false</default>
+                <label>Limpieza de Trampa</label>
+            </value>
+            <value>
+                <fullName>Recolección de Grasa</fullName>
+                <default>false</default>
+                <label>Recolección de Grasa</label>
+            </value>
+            <value>
+                <fullName>Íntima</fullName>
+                <default>false</default>
+                <label>Íntima</label>
+            </value>
+            <value>
+                <fullName>Desazolve</fullName>
+                <default>false</default>
+                <label>Desazolve</label>
+            </value>
+            <value>
+                <fullName>Ductos</fullName>
+                <default>false</default>
+                <label>Ductos</label>
+            </value>
+            <value>
+                <fullName>Aplicación de retardante</fullName>
+                <default>false</default>
+                <label>Aplicación de retardante</label>
+            </value>
+            <value>
+                <fullName>PLOM</fullName>
+                <default>false</default>
+                <label>PLOM</label>
+            </value>
+            <value>
+                <fullName>Aromatizante</fullName>
+                <default>false</default>
+                <label>Aromatizante</label>
+            </value>
+            <value>
+                <fullName>Bacter</fullName>
+                <default>false</default>
+                <label>Bacter (Bactereo)</label>
+            </value>
+            <value>
+                <fullName>Filtros</fullName>
+                <default>false</default>
+                <label>Filtros</label>
+            </value>
+            <value>
+                <fullName>Limpieza</fullName>
+                <default>false</default>
+                <label>Limpieza</label>
+            </value>
+            <value>
+                <fullName>Control de Plaga</fullName>
+                <default>false</default>
+                <label>Control de Plaga</label>
+            </value>
+            <value>
+                <fullName>Instalación</fullName>
+                <default>false</default>
+                <label>Instalación</label>
+            </value>
+            <value>
+                <fullName>Elcla</fullName>
+                <default>false</default>
+                <label>Elcla</label>
+            </value>
+            <value>
+                <fullName>Entrega</fullName>
+                <default>false</default>
+                <label>Entrega</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,477 @@
+<apex:page controller="ServiceReviewPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+    <html>
+        <head>
+            <style type="text/css">
+                @page { size: letter; margin: 0; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
+
+                * { box-sizing: border-box; }
+                body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:9pt; color:#2c2c2c; line-height:1.45; margin:0; padding:0; }
+
+                .header-img   { width:100%; display:block; position:fixed; top:0; left:0; z-index:1000; }
+                .footer-img   { width:100%; display:block; position:fixed; bottom:0; left:0; height:1.5cm; z-index:1000; }
+                .watermark    { position:fixed; top:30%; width:100%; z-index:-1; }
+                .page-counter { position:fixed; top:0.45cm; right:14pt; font-size:7pt; color:#fff; z-index:1001; }
+                .pgNum:before   { content: counter(page); }
+                .pgCount:before { content: counter(pages); }
+
+                /* ── Cabecera documento ── */
+                .doc-id-main { font-size:11pt; font-weight:bold; color:#1a2035; }
+                .doc-id-sub  { font-size:7.5pt; color:#555; margin-top:1pt; }
+                .doc-company { font-size:7pt; color:#666; text-align:right; line-height:1.5; }
+
+                /* ── Banner compacto (1 sola barra) ── */
+                .banner-bar  { background:#1a2035; padding:5pt 10pt; margin-bottom:6pt; }
+                .banner-sa   { font-size:14pt; font-weight:bold; color:#fff; }
+                .banner-label{ font-size:6pt; text-transform:uppercase; letter-spacing:1pt; color:#a5d6a7; display:block; }
+                .banner-sep  { color:rgba(255,255,255,0.25); padding:0 6pt; font-size:9pt; }
+                .banner-lbl  { font-size:6pt; text-transform:uppercase; color:#8899bb; display:block; }
+                .banner-val  { font-size:8pt; font-weight:bold; color:#fff; }
+                .banner-td   { padding:3pt 8pt; vertical-align:middle; border-right:0.5pt solid rgba(255,255,255,0.12); }
+                .banner-td-last { padding:3pt 8pt; vertical-align:middle; }
+                .banner-td-main { padding:3pt 8pt; vertical-align:middle; border-right:0.5pt solid rgba(255,255,255,0.12); background:#1b5e20; }
+
+                /* ── Sección ── */
+                .section-title {
+                    font-size:7.5pt; font-weight:bold; letter-spacing:1.5pt; text-transform:uppercase;
+                    color:#1b5e20; border-bottom:1pt solid #1b5e20;
+                    padding-bottom:2pt; margin-bottom:5pt; margin-top:5pt;
+                }
+
+                /* ── Tarjeta ── */
+                .rev-card       { border:0.5pt solid #ddd; margin-bottom:8pt; border-collapse:collapse; width:100%; }
+                .rev-card-break { border:0.5pt solid #ddd; margin-bottom:8pt; border-collapse:collapse; width:100%; page-break-before:always; }
+
+                /* ID bar compacto — fusiona número + tipo + fecha + técnico + status */
+                .rev-id-bar  { background:#1b5e20; color:#fff; padding:3pt 8pt; }
+                .rev-id-num  { font-size:11pt; font-weight:bold; color:#fff; }
+                .rev-id-tipo { font-size:7.5pt; font-weight:bold; color:#fff; }
+                .rev-id-meta { font-size:6.5pt; color:#b2dfdb; }
+                .rev-status-pill        { font-size:6.5pt; font-weight:bold; padding:1.5pt 6pt; border-radius:20pt; }
+                .rev-status--completada { background:#69f0ae; color:#1b5e20; }
+                .rev-status--proceso    { background:#ffcc02; color:#5d4000; }
+
+                /* Contexto compacto — fila slim bajo el ID bar */
+                .rev-context { background:#f8fafb; border-bottom:0.5pt solid #e8e8e8; padding:2pt 8pt; }
+                .ctx-lbl { font-size:5.5pt; text-transform:uppercase; letter-spacing:0.5pt; color:#999; margin-bottom:0; }
+                .ctx-val { font-size:7pt; font-weight:bold; color:#222; }
+
+                /* Checklist */
+                .chk-section { padding:4pt 8pt 0; }
+                .chk-sec-title { font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5pt; color:#555; margin-bottom:2pt; }
+                .chk-tbl  { width:100%; border-collapse:collapse; }
+                .chk-th   { font-size:5.5pt; font-weight:bold; text-transform:uppercase; color:#fff; background:#37474f; padding:2pt 4pt; }
+                .chk-td   { font-size:6.5pt; color:#333; padding:1.5pt 4pt; border-bottom:0.5pt solid #f0f0f0; vertical-align:middle; }
+                .chk-td-r { font-size:6.5pt; font-weight:bold; padding:1.5pt 4pt; border-bottom:0.5pt solid #f0f0f0; text-align:center; vertical-align:middle; width:28%; }
+                .chk-ok   { color:#2e7d32; }
+                .chk-nok  { color:#c62828; }
+                .chk-row-def { background:#fff3e0; }
+
+                /* Deficiencias */
+                .defic-section { padding:3pt 10pt 0; }
+                .defic-title { font-size:6.5pt; font-weight:bold; text-transform:uppercase; color:#e65100; letter-spacing:0.5pt; margin-bottom:2pt; }
+                .defic-item  { border-left:2pt solid #ff9800; background:#fff8f0; padding:2pt 4pt; margin-bottom:2pt; }
+                .defic-q     { font-size:6.5pt; font-weight:bold; color:#333; }
+                .defic-txt   { font-size:6pt; color:#666; margin-top:1pt; line-height:1.35; }
+
+                /* Observaciones */
+                .obs-box { border-left:2pt solid #1b5e20; background:#f1f8f1; padding:3pt 6pt; margin-top:3pt; }
+                .obs-lbl { font-size:6pt; font-weight:bold; text-transform:uppercase; color:#1b5e20; margin-bottom:1pt; }
+                .obs-txt { font-size:7pt; color:#444; }
+
+                /* Firma + Fotos */
+                .bottom-section { padding:4pt 8pt; }
+                .sig-area { border:0.5pt dashed #ccc; padding:3pt; text-align:center; background:#fafafa; }
+                .sig-lbl  { font-size:5.5pt; text-transform:uppercase; color:#999; margin-bottom:2pt; }
+                .sig-img  { height:24pt; width:auto; }
+                .sig-line { border-top:0.5pt solid #bbb; margin-top:3pt; padding-top:2pt; font-size:7pt; color:#444; }
+                .sig-role { font-size:6pt; color:#888; }
+                .no-sig   { font-size:7.5pt; color:#ccc; font-style:italic; }
+
+                /* Fotos */
+                .photos-title { font-size:6.5pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5pt; color:#555; margin-bottom:3pt; }
+                .photo-img    { width:120pt; height:80pt; border:0.5pt solid #ddd; display:block; }
+                .photo-cap    { font-size:6pt; color:#aaa; text-align:center; margin-top:1pt; word-break:break-all; }
+                .no-photos    { font-size:7.5pt; color:#bbb; font-style:italic; text-align:center; padding:10pt; }
+
+                /* ── KPIs ── */
+                .kpi-cell { border:0.5pt solid #e0e0e0; text-align:center; padding:8pt; background:#fff; }
+                .kpi-num  { font-size:20pt; font-weight:bold; color:#1b5e20; }
+                .kpi-lbl  { font-size:7pt; text-transform:uppercase; color:#888; margin-top:2pt; letter-spacing:0.5pt; }
+
+                /* ── Certificado ── */
+                .cert-text     { font-size:8.5pt; text-align:justify; line-height:1.7; color:#444; margin:10pt 0; }
+                .cert-info-tbl { width:100%; border-collapse:collapse; margin-bottom:8pt; }
+                .cert-info-td  { padding:3pt 6pt 3pt 0; font-size:8.5pt; width:50%; }
+                .cert-lbl      { color:#777; }
+                .cert-val      { font-weight:bold; color:#222; }
+                .cert-sig-line { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; color:#333; }
+                .cert-sig-role { font-size:7.5pt; color:#888; margin-top:2pt; }
+            </style>
+        </head>
+        <body>
+            <img src="{!$Resource.HeaderPDF}" class="header-img"/>
+            <img src="{!$Resource.FooterPDF}" class="footer-img"/>
+            <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
+            <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
+
+            <!-- ══ Cada revisión en su propia tabla outer con thead/tfoot propios ══
+                 La primera tabla incluye también el banner del documento.
+                 Las siguientes usan page-break-before:always en la tabla outer.   -->
+            <apex:repeat value="{!revWrappers}" var="w">
+            <table style="width:100%; border-collapse:collapse; {!IF(w.isFirst,'','page-break-before:always;')}">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                        <div style="padding:0 24pt;">
+
+                            <!-- Banner del documento — solo en la primera revisión -->
+                            <apex:outputPanel rendered="{!w.isFirst}" layout="none">
+                                <div class="banner-bar">
+                                    <table style="width:100%; border-collapse:collapse;">
+                                        <tr>
+                                            <td class="banner-td-main" width="28%">
+                                                <span class="banner-label">Reporte de Revisiones</span>
+                                                <span class="banner-sa">{!saRecord.AppointmentNumber}</span>
+                                            </td>
+                                            <td class="banner-td" width="26%">
+                                                <span class="banner-lbl">Cliente / Cuenta</span>
+                                                <span class="banner-val">{!accountName}</span>
+                                            </td>
+                                            <td class="banner-td" width="18%">
+                                                <span class="banner-lbl">Fecha</span>
+                                                <span class="banner-val">{!fechaSA}</span>
+                                            </td>
+                                            <td class="banner-td" width="14%">
+                                                <span class="banner-lbl">Revisiones</span>
+                                                <span class="banner-val">{!totalRevs} reg.</span>
+                                            </td>
+                                            <td class="banner-td" width="7%">
+                                                <span class="banner-lbl">Fotos</span>
+                                                <span class="banner-val">{!totalFotos}</span>
+                                            </td>
+                                            <td class="banner-td-last" width="7%">
+                                                <span class="banner-lbl">Estado</span>
+                                                <span class="banner-val">{!saRecord.Status}</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="section-title">R E V I S I O N E S &nbsp; D E &nbsp; S E R V I C I O</div>
+                            </apex:outputPanel>
+
+                            <!-- Tarjeta de revisión -->
+                            <table class="rev-card">
+
+                                <!-- 1. ID bar + contexto fusionados en 1 fila compacta -->
+                                <tr>
+                                    <td class="rev-id-bar">
+                                        <table style="width:100%; border-collapse:collapse;">
+                                            <tr>
+                                                <td width="8%" style="vertical-align:middle; padding:0;">
+                                                    <div style="font-size:5.5pt; color:#a5d6a7; text-transform:uppercase; letter-spacing:0.8pt;">Rev.</div>
+                                                    <div class="rev-id-num">#{!w.rev.Numero_Revision__c}</div>
+                                                </td>
+                                                <td width="44%" style="vertical-align:middle; padding:0 8pt;">
+                                                    <div class="rev-id-tipo">{!w.rev.Tipo_Reporte__c}</div>
+                                                    <div class="rev-id-meta">{!w.fecha}&#160;&#183;&#160;T&#233;cnico: {!w.tecnico}</div>
+                                                </td>
+                                                <td width="20%" style="vertical-align:middle; padding:0 4pt; border-left:0.5pt solid rgba(255,255,255,0.2);">
+                                                    <div style="font-size:5.5pt; color:#a5d6a7; text-transform:uppercase;">Cuenta</div>
+                                                    <div style="font-size:7pt; color:#fff; font-weight:bold;">{!accountName}</div>
+                                                </td>
+                                                <td width="18%" style="vertical-align:middle; padding:0 4pt; border-left:0.5pt solid rgba(255,255,255,0.2);">
+                                                    <div style="font-size:5.5pt; color:#a5d6a7; text-transform:uppercase;">OT</div>
+                                                    <div style="font-size:7pt; color:#fff; font-weight:bold;">
+                                                        <apex:outputPanel rendered="{!NOT(ISBLANK(workOrderNum))}" layout="none">{!workOrderNum}</apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!ISBLANK(workOrderNum)}" layout="none">&#8212;</apex:outputPanel>
+                                                    </div>
+                                                </td>
+                                                <td width="10%" style="text-align:right; vertical-align:middle; padding:0;">
+                                                    <apex:outputPanel rendered="{!w.rev.Status__c == 'Completada'}" layout="none">
+                                                        <span class="rev-status-pill rev-status--completada">&#10003;</span>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!w.rev.Status__c != 'Completada'}" layout="none">
+                                                        <span class="rev-status-pill rev-status--proceso">&#9679;</span>
+                                                    </apex:outputPanel>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- 3. Checklist — 2 columnas -->
+                                <apex:outputPanel rendered="{!w.hasAnswers}" layout="none">
+                                <tr>
+                                    <td class="chk-section">
+                                        <div class="chk-sec-title">Actividades realizadas / Condici&#243;n encontrada</div>
+                                        <table style="width:100%; border-collapse:collapse;">
+                                            <tr>
+                                                <td width="50%" style="vertical-align:top; padding-right:4pt;">
+                                                    <table class="chk-tbl">
+                                                        <thead><tr>
+                                                            <th class="chk-th">Criterio</th>
+                                                            <th class="chk-th" style="width:28%; text-align:center;">Resultado</th>
+                                                        </tr></thead>
+                                                        <tbody>
+                                                            <apex:repeat value="{!w.answersLeft}" var="a">
+                                                                <apex:outputPanel rendered="{!NOT(a.hasDefic)}" layout="none">
+                                                                    <tr><td class="chk-td">{!a.label}</td><td class="chk-td-r chk-ok">{!a.respuesta}</td></tr>
+                                                                </apex:outputPanel>
+                                                                <apex:outputPanel rendered="{!a.hasDefic}" layout="none">
+                                                                    <tr class="chk-row-def"><td class="chk-td">{!a.label}</td><td class="chk-td-r chk-nok">{!a.respuesta}</td></tr>
+                                                                </apex:outputPanel>
+                                                            </apex:repeat>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                                <td width="50%" style="vertical-align:top;">
+                                                    <table class="chk-tbl">
+                                                        <thead><tr>
+                                                            <th class="chk-th">Criterio</th>
+                                                            <th class="chk-th" style="width:28%; text-align:center;">Resultado</th>
+                                                        </tr></thead>
+                                                        <tbody>
+                                                            <apex:repeat value="{!w.answersRight}" var="a">
+                                                                <apex:outputPanel rendered="{!NOT(a.hasDefic)}" layout="none">
+                                                                    <tr><td class="chk-td">{!a.label}</td><td class="chk-td-r chk-ok">{!a.respuesta}</td></tr>
+                                                                </apex:outputPanel>
+                                                                <apex:outputPanel rendered="{!a.hasDefic}" layout="none">
+                                                                    <tr class="chk-row-def"><td class="chk-td">{!a.label}</td><td class="chk-td-r chk-nok">{!a.respuesta}</td></tr>
+                                                                </apex:outputPanel>
+                                                            </apex:repeat>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </apex:outputPanel>
+
+                                <!-- 4. Deficiencias — 2 columnas -->
+                                <apex:outputPanel rendered="{!w.hasDefics}" layout="none">
+                                <tr>
+                                    <td class="defic-section">
+                                        <div class="defic-title">&#9888; &#193;reas de oportunidad / No conformidades</div>
+                                        <table style="width:100%; border-collapse:collapse;">
+                                            <tr>
+                                                <td width="50%" style="vertical-align:top; padding-right:3pt;">
+                                                    <apex:repeat value="{!w.deficsLeft}" var="da">
+                                                        <div class="defic-item">
+                                                            <div class="defic-q">{!da.label}: <span class="chk-nok">{!da.respuesta}</span></div>
+                                                            <div class="defic-txt">{!da.deficiencia}</div>
+                                                        </div>
+                                                    </apex:repeat>
+                                                </td>
+                                                <td width="50%" style="vertical-align:top;">
+                                                    <apex:repeat value="{!w.deficsRight}" var="da">
+                                                        <div class="defic-item">
+                                                            <div class="defic-q">{!da.label}: <span class="chk-nok">{!da.respuesta}</span></div>
+                                                            <div class="defic-txt">{!da.deficiencia}</div>
+                                                        </div>
+                                                    </apex:repeat>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </apex:outputPanel>
+
+                                <!-- 5. Obs + Firma / Fotos -->
+                                <tr>
+                                    <td class="bottom-section">
+                                        <table style="width:100%; border-collapse:collapse;">
+                                            <tr>
+                                                <td width="30%" style="vertical-align:top; padding-right:8pt;">
+                                                    <apex:outputPanel rendered="{!w.hasObs}" layout="none">
+                                                        <div class="obs-box">
+                                                            <div class="obs-lbl">Observaciones generales</div>
+                                                            <div class="obs-txt">{!w.rev.Observaciones__c}</div>
+                                                        </div>
+                                                    </apex:outputPanel>
+                                                    <div class="sig-area" style="margin-top:{!IF(w.hasObs,'4pt','0')};">
+                                                        <div class="sig-lbl">Validaci&#243;n y conformidad del cliente</div>
+                                                        <apex:outputPanel rendered="{!w.hasSignature}" layout="none">
+                                                            <img src="{!w.sigUrl}" class="sig-img" alt="Firma"/>
+                                                        </apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!NOT(w.hasSignature)}" layout="none">
+                                                            <div class="no-sig">Sin firma registrada</div>
+                                                        </apex:outputPanel>
+                                                        <div class="sig-line">
+                                                            <apex:outputPanel rendered="{!w.hasSignature}" layout="none">{!w.sigName}</apex:outputPanel>
+                                                            <apex:outputPanel rendered="{!NOT(w.hasSignature)}" layout="none">&#160;</apex:outputPanel>
+                                                        </div>
+                                                        <div class="sig-role">Cliente / Responsable de instalaci&#243;n</div>
+                                                    </div>
+                                                </td>
+                                                <td width="70%" style="vertical-align:top;">
+                                                    <div class="photos-title">
+                                                        Evidencia fotogr&#225;fica
+                                                        <apex:outputPanel rendered="{!w.hasPhotos}" layout="none">&#183; {!w.photos.size} foto(s)</apex:outputPanel>
+                                                    </div>
+                                                    <apex:outputPanel rendered="{!w.hasPhotos}" layout="none">
+                                                        <table style="width:100%; border-collapse:collapse;">
+                                                            <apex:repeat value="{!w.photoRows}" var="row">
+                                                                <tr>
+                                                                    <apex:repeat value="{!row}" var="p">
+                                                                        <td style="padding:2pt; text-align:center; vertical-align:top; width:50%;">
+                                                                            <img src="{!p.url}" class="photo-img" alt="{!p.title}"/>
+                                                                            <div class="photo-cap">{!p.title}</div>
+                                                                        </td>
+                                                                    </apex:repeat>
+                                                                </tr>
+                                                            </apex:repeat>
+                                                        </table>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!NOT(w.hasPhotos)}" layout="none">
+                                                        <div class="no-photos">Sin evidencia fotogr&#225;fica</div>
+                                                    </apex:outputPanel>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </table><!-- /rev-card -->
+
+                        </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table><!-- /tabla outer de revisión -->
+            </apex:repeat>
+
+            <!-- ═══ SECCIÓN 2: RESUMEN + CERTIFICADO — tabla outer propia ═══ -->
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                        <div style="padding:0 24pt;">
+
+                            <table style="width:100%; border-collapse:collapse; margin-bottom:8pt;">
+                                <tr>
+                                    <td width="55%" style="vertical-align:top; padding:0;">
+                                        <div class="doc-id-main">{!accountName}</div>
+                                        <div class="doc-id-sub">Cita {!saRecord.AppointmentNumber}&#160;&#183;&#160;{!saRecord.Subject}</div>
+                                    </td>
+                                    <td width="45%" style="vertical-align:top; padding:0;">
+                                        <div class="doc-company">
+                                            PYATZ INGENIER&#205;A BIOTECNOL&#211;GICA S.A. DE C.V.<br/>
+                                            www.pyatz.com.mx &#183; Tel: 5556878837
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="section-title">R E S U M E N &nbsp; E J E C U T I V O</div>
+
+                            <table style="width:100%; border-collapse:collapse; margin-bottom:12pt;">
+                                <tr>
+                                    <td class="kpi-cell" width="25%">
+                                        <div class="kpi-num">{!totalRevs}</div>
+                                        <div class="kpi-lbl">Revisiones realizadas</div>
+                                    </td>
+                                    <td class="kpi-cell" width="25%">
+                                        <div class="kpi-num">{!totalFotos}</div>
+                                        <div class="kpi-lbl">Fotos de evidencia</div>
+                                    </td>
+                                    <td class="kpi-cell" width="25%">
+                                        <div class="kpi-num" style="color:#e65100;">{!totalDeficiencias}</div>
+                                        <div class="kpi-lbl">No conformidades</div>
+                                    </td>
+                                    <td class="kpi-cell" width="25%">
+                                        <div class="kpi-num">{!totalFirmadas}</div>
+                                        <div class="kpi-lbl">Firmadas por cliente</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table class="cert-info-tbl">
+                                <tr>
+                                    <td class="cert-info-td"><span class="cert-lbl">Cuenta:&#160;</span><span class="cert-val">{!accountName}</span></td>
+                                    <td class="cert-info-td"><span class="cert-lbl">Fecha del reporte:&#160;</span><span class="cert-val">{!fechaSA}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="cert-info-td"><span class="cert-lbl">Cita de servicio:&#160;</span><span class="cert-val">{!saRecord.AppointmentNumber}</span></td>
+                                    <td class="cert-info-td"><span class="cert-lbl">Orden de trabajo:&#160;</span><span class="cert-val">
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(workOrderNum))}" layout="none">{!workOrderNum}</apex:outputPanel>
+                                        <apex:outputPanel rendered="{!ISBLANK(workOrderNum)}" layout="none">&#8212;</apex:outputPanel>
+                                    </span></td>
+                                </tr>
+                                <tr>
+                                    <td class="cert-info-td"><span class="cert-lbl">Estado final:&#160;</span><span class="cert-val">{!saRecord.Status}</span></td>
+                                    <td class="cert-info-td"><span class="cert-lbl">Total:&#160;</span><span class="cert-val">{!totalRevs} revisiones / {!totalFotos} fotos</span></td>
+                                </tr>
+                            </table>
+
+                            <div class="section-title">C E R T I F I C A D O &nbsp; D E &nbsp; C O N F O R M I D A D</div>
+
+                            <p class="cert-text">
+                                El presente certificado hace constar que el servicio de revisi&#243;n y mantenimiento
+                                fue realizado en las instalaciones del cliente indicado, conforme a los est&#225;ndares
+                                de calidad, procedimientos t&#233;cnicos y normativa aplicable de Pyatz Ingenier&#237;a
+                                Biotecnol&#243;gica S.A. de C.V. Las actividades ejecutadas, la evidencia fotogr&#225;fica
+                                y la condici&#243;n encontrada en cada punto de control quedan registradas en el presente
+                                documento. Las firmas abajo consignadas validan la correcta ejecuci&#243;n de los trabajos
+                                y la conformidad de las partes responsables con los resultados del servicio.
+                            </p>
+
+                            <table style="width:100%; border-collapse:collapse; margin-top:30pt;">
+                                <tr>
+                                    <td style="text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt;">
+                                        <span style="height:55pt; display:block;">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigUrl))}" layout="none">
+                                                <img src="{!clientSigUrl}" style="height:44pt; width:auto;" alt="Firma cliente"/>
+                                            </apex:outputPanel>
+                                        </span>
+                                        <div class="cert-sig-line">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigName))}" layout="none">{!clientSigName}</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!ISBLANK(clientSigName)}" layout="none">&#160;</apex:outputPanel>
+                                        </div>
+                                        <div class="cert-sig-role">Recibi&#243; del Cliente</div>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt;">
+                                        <span style="height:55pt; display:block;">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(pyatzSignatureUrl))}" layout="none">
+                                                <img src="{!pyatzSignatureUrl}" style="height:44pt; width:auto;" alt="Firma Pyatz"/>
+                                            </apex:outputPanel>
+                                        </span>
+                                        <div class="cert-sig-line">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(techName))}" layout="none">{!techName}</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!ISBLANK(techName)}" layout="none">&#160;</apex:outputPanel>
+                                        </div>
+                                        <div class="cert-sig-role">Firma Autorizada Pyatz</div>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt;">
+                                        <span style="height:55pt; display:block;">
+                                            <img src="{!$Resource.sello}" style="height:50pt; width:auto;" alt="Sello Pyatz"/>
+                                        </span>
+                                        <div class="cert-sig-line">&#160;</div>
+                                        <div class="cert-sig-role">T&#233;cnico Aplicador</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table><!-- /tabla outer resumen -->
+
+        </body>
+    </html>
+</apex:page>
