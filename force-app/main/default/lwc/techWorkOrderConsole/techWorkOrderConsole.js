@@ -342,7 +342,11 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             ...sede,
             tratamientos: sede.tratamientos.map(tra => {
                 if (traIds.includes(tra.id)) {
-                    return { ...tra, zonas: zonesNames };
+                    return { 
+                        ...tra, 
+                        zonas: zonesNames,
+                        selectedZonesData: zones // Guardamos los objetos completos (ID, Nombre, Plantilla)
+                    };
                 }
                 return tra;
             })

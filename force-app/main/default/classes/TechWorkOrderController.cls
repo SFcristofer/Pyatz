@@ -201,9 +201,8 @@ public with sharing class TechWorkOrderController {
 
             List<ServiceAppointment> sasToInsert = new List<ServiceAppointment>();
             List<List<String>> techniciansPerSA = new List<List<String>>();
-            List<String> templatesPerSA = new List<String>();
+            List<List<String>> templatesPerSA = new List<List<String>>();
             List<Id> levantamientosPerSA = new List<Id>();
-            List<Id> productIdsPerSA = new List<Id>();
 
             Set<Id> originIds = new Set<Id>();
             for (Object sedeObj : sedesPayload) {
@@ -235,8 +234,25 @@ public with sharing class TechWorkOrderController {
                     Map<String, Object> tra = (Map<String, Object>)traObj;
                     Id originId = (Id)tra.get('id');
                     Id productId = originToProduct.get(originId);
-                    String templateName = productToTemplate.get(productId);
+                    String defaultTemplate = productToTemplate.get(productId);
                     Id levId = (tra.get('levantamientoId') != null && String.valueOf(tra.get('levantamientoId')) != '') ? (Id)tra.get('levantamientoId') : null;
+                    
+                    // Extraer plantillas de las zonas seleccionadas
+                    List<String> zoneTemplates = new List<String>();
+                    if (tra.containsKey('selectedZonesData')) {
+                        for (Object zoneObj : (List<Object>)tra.get('selectedZonesData')) {
+                            Map<String, Object> zone = (Map<String, Object>)zoneObj;
+                            if (zone.containsKey('Plantilla_de_Formulario__c') && zone.get('Plantilla_de_Formulario__c') != null) {
+                                String zTemp = (String)zone.get('Plantilla_de_Formulario__c');
+                                if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
+                            }
+                        }
+                    }
+                    
+                    // Si no hay plantillas específicas por zona, usar la del producto
+                    if (zoneTemplates.isEmpty() && String.isNotBlank(defaultTemplate)) {
+                        zoneTemplates.add(defaultTemplate);
+                    }
                     
                     for (Object rowObj : (List<Object>)tra.get('schedulingRows')) {
                         Map<String, Object> row = (Map<String, Object>)rowObj;
@@ -246,7 +262,7 @@ public with sharing class TechWorkOrderController {
                         sa.Duration = (Decimal)row.get('duration');
                         sa.DurationType = 'Minutes';
                         sa.Status = 'Ninguno';
-                        sa.Tipo_de_Reporte__c = templateName;
+                        sa.Tipo_de_Reporte__c = !zoneTemplates.isEmpty() ? zoneTemplates[0] : null; 
                         sa.Zonas_a_Tratar__c = (String)tra.get('zonas');
                         sa.Producto_Relacionado__c = productId;
                         sa.Levantamiento_Tecnico__c = levId;
@@ -267,7 +283,7 @@ public with sharing class TechWorkOrderController {
                         if (String.isNotBlank((String)row.get('tecnicoId'))) techs.add((String)row.get('tecnicoId'));
                         else if (tra.containsKey('tecnicosIds')) for (Object tId : (List<Object>)tra.get('tecnicosIds')) techs.add((String)tId);
                         techniciansPerSA.add(techs);
-                        templatesPerSA.add(templateName);
+                        templatesPerSA.add(zoneTemplates);
                         levantamientosPerSA.add(levId);
                     }
                 }
@@ -279,7 +295,9 @@ public with sharing class TechWorkOrderController {
                 List<AssignedResource> arsToIns = new List<AssignedResource>();
                 for (Integer i = 0; i < sasToInsert.size(); i++) {
                     sasUpdate.add(new ServiceAppointment(Id = sasToInsert[i].Id, Status = 'Programado'));
-                    if (String.isNotBlank(templatesPerSA[i])) inspToIns.add(new Inspeccion_Tecnica__c(Cita_Servicio__c = sasToInsert[i].Id, Levantamiento_Tecnico__c = levantamientosPerSA[i], Tipo_Reporte__c = templatesPerSA[i], Respuestas_JSON__c = '[]'));
+                    for (String tId : templatesPerSA[i]) {
+                        inspToIns.add(new Inspeccion_Tecnica__c(Cita_Servicio__c = sasToInsert[i].Id, Levantamiento_Tecnico__c = levantamientosPerSA[i], Tipo_Reporte__c = tId, Respuestas_JSON__c = '[]'));
+                    }
                     for (String tId : techniciansPerSA[i]) arsToIns.add(new AssignedResource(ServiceAppointmentId = sasToInsert[i].Id, ServiceResourceId = (Id)tId));
                 }
                 update sasUpdate;
