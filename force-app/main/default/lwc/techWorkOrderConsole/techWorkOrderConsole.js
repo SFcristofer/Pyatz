@@ -148,40 +148,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 tratamientos: data.tratamientos ? data.tratamientos.map(t => t.name).join(', ') : 'Ninguno'
             };
 
-            if (this.isUpdateMode && data.tratamientosExistentes) {
-                this.sedesList = [{
-                    id: 'main-sede',
-                    name: data.sedes || 'Sede Principal',
-                    startTime: '08:00:00.000',
-                    endTime: '18:00:00.000',
-                    startTime2: '',
-                    endTime2: '',
-                    tratamientos: data.tratamientosExistentes.map(t => ({
-                        id: t.id,
-                        name: t.name,
-                        quantity: t.quantity || 1,
-                        numTecnicos: t.tecnicosIds.length || 1,
-                        durationHours: Math.floor((t.schedulingRows[0]?.duration || 60) / 60),
-                        durationMinutes: (t.schedulingRows[0]?.duration || 60) % 60,
-                        durationSeconds: 0,
-                        zonas: t.zonas || 'Sin descripción técnica',
-                        numTecnicosSeleccionados: t.tecnicosIds.length,
-                        tecnicosIds: t.tecnicosIds,
-                        schedulingRows: t.schedulingRows.map((row, rIdx) => ({
-                            label: `${rIdx + 1}º Fecha`,
-                            date: row.date || new Date().toISOString().split('T')[0],
-                            startTime: row.startTime || '08:00:00.000',
-                            locked: false,
-                            duration: row.duration || 60,
-                            arrivalMargin: row.arrivalMargin || 0,
-                            tecnicoId: row.tecnicoId || '',
-                            executed: false,
-                            showNotes: false,
-                            notes: row.notes || ''
-                        }))
-                    }))
-                }];
-            } else if (data.tratamientos && data.tratamientos.length > 0) {
+            if (data.tratamientos && data.tratamientos.length > 0) {
                 this.sedesList = [{
                     id: 'main-sede',
                     name: data.sedes || 'Sede Principal',
@@ -193,14 +160,25 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                         id: t.id,
                         name: t.name,
                         quantity: t.quantity || 1,
-                        numTecnicos: 1,
-                        durationHours: 1,
-                        durationMinutes: 0,
+                        numTecnicos: t.tecnicosIds ? t.tecnicosIds.length : 1,
+                        durationHours: t.schedulingRows && t.schedulingRows[0] ? Math.floor((t.schedulingRows[0].duration || 60) / 60) : 1,
+                        durationMinutes: t.schedulingRows && t.schedulingRows[0] ? (t.schedulingRows[0].duration || 60) % 60 : 0,
                         durationSeconds: 0,
-                        zonas: t.zonas || t.description || 'Sin descripción técnica',
-                        numTecnicosSeleccionados: 0,
-                        tecnicosIds: [],
-                        schedulingRows: this.generateSchedulingRows(t.quantity || 1)
+                        zonas: t.zonas || 'Sin descripción técnica',
+                        numTecnicosSeleccionados: t.tecnicosIds ? t.tecnicosIds.length : 0,
+                        tecnicosIds: t.tecnicosIds || [],
+                        schedulingRows: t.schedulingRows ? t.schedulingRows.map((row, rIdx) => ({
+                            label: `${rIdx + 1}º Fecha`,
+                            date: row.date || new Date().toISOString().split('T')[0],
+                            startTime: row.startTime || '08:00:00.000',
+                            locked: row.locked || false,
+                            duration: row.duration || 60,
+                            arrivalMargin: row.arrivalMargin || 0,
+                            tecnicoId: row.tecnicoId || '',
+                            executed: false,
+                            showNotes: false,
+                            notes: row.notes || ''
+                        })) : this.generateSchedulingRows(t.quantity || 1)
                     }))
                 }];
             }
