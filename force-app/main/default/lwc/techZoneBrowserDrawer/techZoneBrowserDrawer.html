@@ -1,37 +1,29 @@
 <template>
     <section class={drawerClass} role="dialog" aria-modal="true">
-        <!-- TOP BAR: HEADER + GLOBAL SEARCH -->
+        <!-- TOP BAR: HEADER ONLY (CLEAN MODE) -->
         <div class="premium-top-bar">
             <div class="top-bar-content">
                 <div class="header-main">
                     <div class="slds-grid slds-grid_vertical-align-center">
-                        <lightning-icon icon-name="standard:service_territory_location" size="small" class="slds-m-right_small icon-white"></lightning-icon>
+                        <lightning-icon icon-name="standard:service_territory_location" size="small" class="slds-m-right_small icon-main-color"></lightning-icon>
                         <div>
-                            <h2 class="drawer-title">Dashboard Técnico de Zonas</h2>
-                            <div class="slds-grid slds-grid_vertical-align-center slds-m-top_xx-small">
-                                <span class="slds-badge badge-count">{zones.length} Registros</span>
-                                <span class="slds-m-left_small slds-text-color_inverse-weak slds-text-body_small">Account Catalyst Management</span>
-                            </div>
+                            <h2 class="drawer-title">Puntos de control</h2>
                         </div>
                     </div>
                     <div class="slds-grid slds-grid_vertical-align-center">
-                        <div class="search-area-global">
-                            <lightning-input 
-                                type="search" 
-                                variant="label-hidden" 
-                                placeholder="Búsqueda rápida en todo el catálogo..." 
-                                onchange={handleSearchChange}
-                                class="integrated-search">
-                            </lightning-input>
-                        </div>
-                        <!-- iGeo Intelligence Toggle -->
-                        <div class="slds-m-left_large slds-grid slds-grid_vertical-align-center context-toggle">
-                            <span class="slds-m-right_x-small slds-text-title_caps text-white" style="font-size: 0.65rem;">Filtro Inteligente</span>
-                            <lightning-input type="toggle" label="Contexto" variant="label-hidden" checked={onlyContextZones} onchange={handleToggleContextFilter}></lightning-input>
-                        </div>
+                        <!-- BOTÓN DE CONFIRMACIÓN -->
+                        <lightning-button 
+                            label="CONFIRMAR SELECCIÓN" 
+                            variant="success" 
+                            icon-name="utility:check"
+                            onclick={handleConfirmSelection}
+                            disabled={isSelectionEmpty}
+                            class="slds-m-left_large btn-confirm">
+                        </lightning-button>
+
                         <lightning-button-icon 
                             icon-name="utility:close" 
-                            variant="bare-inverse" 
+                            variant="bare" 
                             onclick={closeDrawer} 
                             class="slds-m-left_large close-btn"
                             size="large">
@@ -75,8 +67,8 @@
                         key-field="Id"
                         data={pagedZones}
                         columns={columns}
-                        max-row-selection="1"
                         onrowselection={handleRowSelection}
+                        selected-rows={selectedRowsIds}
                         class="premium-table datatable-no-border">
                     </lightning-datatable>
 
@@ -120,42 +112,83 @@
                 </div>
             </div>
 
-            <!-- ZONE 2: WORK ORDER SCOPE SECTION (NEW) -->
+            <!-- ZONE 2: WORK ORDER SCOPE SECTION (TABLE MODE) -->
             <div class="section-details slds-p-vertical_large">
                 <div class="top-bar-content">
-                    <div class="slds-grid slds-gutters">
-                        <!-- Scope Card -->
-                        <div class="slds-col slds-size_1-of-1">
-                            <div class="detail-card">
-                                <header class="detail-card-header slds-grid slds-grid_align-spread">
-                                    <h3 class="slds-text-title_bold text-slate-800">ALCANCE DE LA ORDEN DE TRABAJO (PROYECTADO)</h3>
-                                    <span class="slds-badge slds-theme_info">{treatmentList.length} Servicios</span>
-                                </header>
-                                <div class="detail-card-body">
-                                    <template if:true={hasTreatments}>
-                                        <div class="slds-grid slds-wrap">
-                                            <template for:each={treatmentList} for:item="tra">
-                                                <div key={tra.id} class="slds-col slds-size_1-of-4 slds-p-around_small">
-                                                    <div class="treatment-scope-card">
-                                                        <div class="slds-grid slds-grid_vertical-align-center">
-                                                            <lightning-icon icon-name={tra.icon} size="small" class="slds-m-right_small"></lightning-icon>
-                                                            <div class="slds-grow">
-                                                                <p class="detail-label">Servicio</p>
-                                                                <p class="detail-value-compact">{tra.name}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
-                                    <template if:false={hasTreatments}>
-                                        <div class="slds-align_absolute-center slds-p-around_large text-slate-400">
-                                            No hay tratamientos configurados para esta orden de trabajo.
-                                        </div>
-                                    </template>
-                                </div>
+                    <div class="detail-card">
+                        <header class="detail-card-header slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                            <div>
+                                <h3 class="slds-text-title_bold text-slate-800">DISTRIBUCIÓN DE PUNTOS DE CONTROL</h3>
+                                <p class="slds-text-body_small text-slate-400">Selecciona los servicios donde se replicará esta configuración técnica.</p>
                             </div>
+                            <div class="slds-grid slds-grid_vertical-align-center">
+                                <div class="slds-m-right_medium slds-grid slds-grid_vertical-align-center">
+                                    <span class="slds-text-body_small slds-m-right_x-small">Seleccionar Todo</span>
+                                    <lightning-input 
+                                        type="toggle" 
+                                        label="Seleccionar Todo" 
+                                        variant="label-hidden" 
+                                        checked={isAllTreatmentsSelected}
+                                        onchange={handleToggleAllTreatments}>
+                                    </lightning-input>
+                                </div>
+                                <span class="slds-badge slds-theme_info">{selectedTreatmentsCount} Servicios</span>
+                            </div>
+                        </header>
+                        <div class="detail-card-body slds-p-around_none">
+                            <template if:true={hasTreatments}>
+                                <div class="table-scroll">
+                                    <table class="slds-table slds-table_bordered slds-table_fixed-layout custom-scope-table">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th class="slds-text-title_caps" scope="col" style="width: 3.25rem;">
+                                                    <div class="slds-truncate slds-p-left_small">Sel</div>
+                                                </th>
+                                                <th class="slds-text-title_caps" scope="col">
+                                                    <div class="slds-truncate">Tratamiento (Cód. Producto)</div>
+                                                </th>
+                                                <th class="slds-text-title_caps" scope="col" style="width: 150px;">
+                                                    <div class="slds-truncate">Fecha</div>
+                                                </th>
+                                                <th class="slds-text-title_caps" scope="col" style="width: 200px;">
+                                                    <div class="slds-truncate">¿Puntos Asignados?</div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={treatmentList} for:item="tra">
+                                                <tr key={tra.id} class={tra.rowClass} onclick={handleTreatmentClick} data-id={tra.id}>
+                                                    <td class="slds-p-left_small">
+                                                        <lightning-input type="checkbox" checked={tra.selected} variant="label-hidden" data-id={tra.id} onchange={handleTreatmentToggle}></lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-grid slds-grid_vertical-align-center">
+                                                            <div class="treatment-name-cell">
+                                                                <p class="main-text">{tra.name}</p>
+                                                                <p class="sub-text">Cód: {tra.code}</p>
+                                                            </div>
+                                                            <template if:true={tra.isMain}>
+                                                                <span class="slds-badge slds-m-left_small badge-origin">ORIGEN</span>
+                                                            </template>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-truncate text-slate-600">{tra.fecha}</div>
+                                                    </td>
+                                                    <td>
+                                                        <span class={tra.statusClass}>{tra.hasPoints}</span>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasTreatments}>
+                                <div class="slds-align_absolute-center slds-p-around_large text-slate-400">
+                                    No hay tratamientos disponibles.
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>

@@ -12,24 +12,24 @@ const COLUMNS = [
 export default class TechZoneBrowserDrawer extends LightningElement {
     @api accountId;
     @api currentBusinessLines = ''; 
-    @api plannedTreatments = ''; // Recibe la lista de tratamientos (ej: "BIOENZIMÁTICO, FUMIGACIÓN")
+    @api plannedTreatments = []; // Recibe sedesList[0].tratamientos
     
     @track isOpen = false;
     @track isLoading = false;
     @track zones = [];
     @track searchTerm = '';
-    @track selectedZone = null;
+    @track selectedZones = []; 
+    @track targetTraId = ''; 
+    @track initialNamesToMatch = []; 
+    @track selectedTreatmentIds = new Set(); 
     
-    // Filtros por columna
     @track filterZona = '';
     @track filterTipo = '';
     @track filterLob = '';
     @track filterCodigo = '';
 
-    // Filtro de Contexto (iGeo Intelligence)
     @track onlyContextZones = false;
 
-    // Paginación
     @track currentPage = 1;
     recordsPerPage = 10;
     
@@ -37,8 +37,18 @@ export default class TechZoneBrowserDrawer extends LightningElement {
     searchDelay;
 
     @api
-    open() {
+    open(traId, currentZonesText) {
         this.isOpen = true;
+        this.targetTraId = traId || '';
+        this.selectedZones = []; 
+        this.selectedTreatmentIds = new Set([this.targetTraId]); 
+
+        if (currentZonesText && currentZonesText !== 'Sin descripción técnica') {
+            this.initialNamesToMatch = currentZonesText.split(',').map(n => n.trim());
+        } else {
+            this.initialNamesToMatch = [];
+        }
+
         this.resetFilters();
         this.loadZones();
     }
@@ -56,7 +66,6 @@ export default class TechZoneBrowserDrawer extends LightningElement {
         this.filterCodigo = '';
         this.onlyContextZones = false;
         this.currentPage = 1;
-        this.selectedZone = null;
     }
 
     handleToggleContextFilter(event) {
@@ -86,7 +95,6 @@ export default class TechZoneBrowserDrawer extends LightningElement {
             const budgetLine = this.currentBusinessLines || 'Línea de Negocio';
             const contextLines = budgetLine.toLowerCase().split(';').map(l => l.trim());
 
-            // MAPEO INTELIGENTE: Detección Universal de Línea y Protocolo
             let processedData = result.map(z => {
                 const rawLOB = (z.Linea_de_Negocio__c || z.Tipo_de_Servicio__c || '').toLowerCase();
                 const isMatch = contextLines.some(cl => rawLOB.includes(cl));
@@ -104,7 +112,6 @@ export default class TechZoneBrowserDrawer extends LightningElement {
                 processedData = processedData.filter(z => z.isContextMatch);
             }
 
-            // --- MOTOR DE RELEVANCIA 6.0 ---
             const filterTerm = (this.searchTerm || this.filterTipo || this.filterZona || '').toLowerCase();
             
             processedData = processedData.map(z => {
@@ -124,10 +131,17 @@ export default class TechZoneBrowserDrawer extends LightningElement {
             }).sort((a, b) => b._searchScore - a._searchScore || (a.Name || '').localeCompare(b.Name || ''));
 
             this.zones = processedData;
+
+            if (this.initialNamesToMatch.length > 0) {
+                const matchingZones = this.zones.filter(z => this.initialNamesToMatch.includes(z.Name));
+                if (matchingZones.length > 0) {
+                    this.selectedZones = [...matchingZones];
+                }
+                this.initialNamesToMatch = []; 
+            }
+
             this.currentPage = 1;
             this.isLoading = false;
-            if (this.zones.length > 0) this.selectedZone = this.zones[0];
-            else this.selectedZone = null;
         })
         .catch(error => {
             console.error('Error cargando zonas:', error);
@@ -136,10 +150,70 @@ export default class TechZoneBrowserDrawer extends LightningElement {
     }
 
     handleRowSelection(event) {
-        const selectedRows = event.detail.selectedRows;
-        if (selectedRows.length > 0) {
-            this.selectedZone = selectedRows[0];
+        this.selectedZones = event.detail.selectedRows;
+    }
+
+    handleConfirmSelection() {
+        if (this.selectedZones.length > 0) {
+            const selectedEvent = new CustomEvent('zoneselected', {
+                detail: {
+                    traIds: Array.from(this.selectedTreatmentIds),
+                    zones: this.selectedZones
+                }
+            });
+            this.dispatchEvent(selectedEvent);
+            this.closeDrawer();
         }
+    }
+
+    handleTreatmentToggle(event) {
+        const traId = event.target.dataset.id;
+        const checked = event.target.checked;
+        this.updateTreatmentSelection(traId, checked);
+    }
+
+    handleTreatmentClick(event) {
+        const traId = event.currentTarget.dataset.id;
+        // Solo alternar si no es el checkbox el que disparó el evento (para evitar doble disparo)
+        if (event.target.tagName !== 'LIGHTNING-INPUT') {
+            const isSelected = this.selectedTreatmentIds.has(traId);
+            this.updateTreatmentSelection(traId, !isSelected);
+        }
+    }
+
+    updateTreatmentSelection(traId, isSelected) {
+        const newSet = new Set(this.selectedTreatmentIds);
+        if (isSelected) newSet.add(traId);
+        else {
+            // Evitar deseleccionar el origen por error si el usuario quiere que esté ahí
+            newSet.delete(traId);
+        }
+        this.selectedTreatmentIds = newSet;
+    }
+
+    handleToggleAllTreatments(event) {
+        const checked = event.target.checked;
+        if (checked) {
+            this.selectedTreatmentIds = new Set(this.treatmentList.map(t => t.id));
+        } else {
+            this.selectedTreatmentIds = new Set([this.targetTraId]);
+        }
+    }
+
+    get isAllTreatmentsSelected() {
+        return this.selectedTreatmentIds.size === this.treatmentList.length;
+    }
+
+    get selectedTreatmentsCount() {
+        return this.selectedTreatmentIds.size;
+    }
+
+    get isSelectionEmpty() {
+        return this.selectedZones.length === 0;
+    }
+
+    get selectedRowsIds() {
+        return this.selectedZones.map(z => z.Id);
     }
 
     handleSearchChange(event) {
@@ -184,19 +258,27 @@ export default class TechZoneBrowserDrawer extends LightningElement {
         if (this.currentPage < this.totalPages) this.currentPage++;
     }
 
-    // GETTERS PARA SECCIÓN DE ALCANCE (REEMPLAZANDO DETALLES)
     get treatmentList() {
-        if (!this.plannedTreatments) return [];
-        return this.plannedTreatments.split(',').map(t => {
-            const name = t.trim();
-            let icon = 'standard:product';
-            if (name.toLowerCase().includes('bio')) icon = 'standard:article';
-            if (name.toLowerCase().includes('fumi')) icon = 'standard:service_appointment';
+        if (!this.plannedTreatments || !Array.isArray(this.plannedTreatments)) return [];
+        return this.plannedTreatments.map(t => {
+            const hasPoints = t.zonas && t.zonas !== 'Sin descripción técnica' && t.zonas.length > 0;
+            const firstDate = (t.schedulingRows && t.schedulingRows[0]) ? t.schedulingRows[0].date : 'N/A';
+            const firstTime = (t.schedulingRows && t.schedulingRows[0] && t.schedulingRows[0].startTime) ? t.schedulingRows[0].startTime.substring(0, 5) : '--:--';
+            const dateTime = firstDate !== 'N/A' ? `${firstDate} ${firstTime}` : 'N/A';
             
+            const isSelected = this.selectedTreatmentIds.has(t.id);
+            const isMain = t.id === this.targetTraId;
+
             return {
-                id: name,
-                name: name.toUpperCase(),
-                icon: icon
+                id: t.id,
+                name: (t.name || '').toUpperCase(),
+                code: t.code || 'N/A',
+                fecha: dateTime,
+                hasPoints: hasPoints ? 'SÍ' : 'NO',
+                statusClass: hasPoints ? 'slds-badge slds-theme_success' : 'slds-badge slds-theme_error',
+                rowClass: isSelected ? 'table-row-selected' : '',
+                selected: isSelected,
+                isMain: isMain
             };
         });
     }

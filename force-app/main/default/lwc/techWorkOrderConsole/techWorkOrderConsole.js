@@ -145,7 +145,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 fechaFin: data.fechaFin || 'N/A',
                 fechaPrimerTratamiento: data.fechaPrimerTratamiento || 'Pendiente',
                 fechaLimiteServicios: data.fechaLimiteServicios || 'Pendiente',
-                tratamientos: data.tratamientos ? data.tratamientos.map(t => t.name).join(', ') : 'Ninguno'
+                tratamientos: data.tratamientos ? data.tratamientos.map(t => t.name).join(', ') : 'Ninguno',
+                treatmentsRaw: data.tratamientos || []
             };
 
             if (data.tratamientos && data.tratamientos.length > 0) {
@@ -159,6 +160,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                     tratamientos: data.tratamientos.map(t => ({
                         id: t.id,
                         name: t.name,
+                        code: t.code || 'N/A',
                         quantity: t.quantity || 1,
                         numTecnicos: t.tecnicosIds ? t.tecnicosIds.length : 1,
                         durationHours: t.schedulingRows && t.schedulingRows[0] ? Math.floor((t.schedulingRows[0].duration || 60) / 60) : 1,
@@ -317,9 +319,40 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }));
     }
 
-    handleOpenZoneBrowser() {
+    handleOpenZoneBrowser(event) {
+        const traId = event.currentTarget.dataset.traId;
+        let currentZones = '';
+        
+        // Buscar el texto actual de zonas para este tratamiento
+        this.sedesList.forEach(sede => {
+            sede.tratamientos.forEach(tra => {
+                if (tra.id === traId) currentZones = tra.zonas;
+            });
+        });
+
         const drawer = this.template.querySelector('c-tech-zone-browser-drawer');
-        if (drawer) drawer.open();
+        if (drawer) drawer.open(traId, currentZones);
+    }
+
+    handleZoneSelection(event) {
+        const { traIds, zones } = event.detail;
+        const zonesNames = zones.map(z => z.Name).join(', ');
+
+        this.sedesList = this.sedesList.map(sede => ({
+            ...sede,
+            tratamientos: sede.tratamientos.map(tra => {
+                if (traIds.includes(tra.id)) {
+                    return { ...tra, zonas: zonesNames };
+                }
+                return tra;
+            })
+        }));
+
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Zonas Actualizadas',
+            message: `Se han configurado ${zones.length} zonas en ${traIds.length} tratamientos.`,
+            variant: 'success'
+        }));
     }
 
     handleBackToContract() { this.dispatchEvent(new CustomEvent('back')); }
@@ -408,6 +441,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }
 
         return { start, end, total: end.getTime() - start.getTime(), units };
+    }
+
+    get firstSedeTreatments() {
+        return (this.sedesList && this.sedesList.length > 0) ? this.sedesList[0].tratamientos : [];
     }
 
     get ganttAxisLabels() {

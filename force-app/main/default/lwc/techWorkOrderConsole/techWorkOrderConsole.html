@@ -178,12 +178,15 @@
                                         <p class="slds-text-color_weak slds-grow">
                                             <strong>Tipos de Reporte por Zona:</strong> {tra.zonas}
                                         </p>
-                                        <lightning-button-icon 
-                                            icon-name="utility:search" 
-                                            variant="border-filled" 
-                                            title="Explorar Catálogo de Zonas" 
-                                            onclick={handleOpenZoneBrowser}>
-                                        </lightning-button-icon>
+                                        <lightning-button 
+                                            label="PUNTOS DE CONTROL"
+                                            icon-name="utility:location" 
+                                            variant="brand-outline" 
+                                            title="Explorar Catálogo de Zonas y Puntos de Control" 
+                                            data-tra-id={tra.id}
+                                            onclick={handleOpenZoneBrowser}
+                                            class="btn-puntos-control">
+                                        </lightning-button>
                                     </div>
 
                                     <div class="resource-config slds-grid slds-wrap">
@@ -423,7 +426,8 @@
         <c-tech-zone-browser-drawer 
             account-id={accountId} 
             current-business-lines={contractData.lineaNegocio}
-            planned-treatments={contractData.tratamientos}>
+            planned-treatments={firstSedeTreatments}
+            onzoneselected={handleZoneSelection}>
         </c-tech-zone-browser-drawer>
     </div>
 </template>

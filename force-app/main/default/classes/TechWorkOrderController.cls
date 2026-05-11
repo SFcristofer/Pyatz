@@ -23,21 +23,21 @@ public with sharing class TechWorkOrderController {
             // 2. CARGAR TRATAMIENTOS "COMERCIALES"
             List<Map<String, Object>> tratamientosComerciales = new List<Map<String, Object>>();
             if (serviceContractId != null) {
-                for (ContractLineItem cli : [SELECT Id, Product2Id, Product2.Name, Quantity, Description, Levantamiento_Tecnico__c 
+                for (ContractLineItem cli : [SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Quantity, Description, Levantamiento_Tecnico__c 
                                             FROM ContractLineItem WHERE ServiceContractId = :serviceContractId]) {
                     tratamientosComerciales.add(new Map<String, Object>{
-                        'id' => cli.Id, 'name' => cli.Product2.Name, 'quantity' => cli.Quantity, 
+                        'id' => cli.Id, 'name' => cli.Product2.Name, 'code' => cli.Product2.ProductCode, 'quantity' => cli.Quantity, 
                         'zonas' => cli.Description, 'levantamientoId' => cli.Levantamiento_Tecnico__c,
                         'productId' => cli.Product2Id
                     });
                 }
             }
             if (tratamientosComerciales.isEmpty()) {
-                for (QuoteLineItem qli : [SELECT Id, Product2Id, Product2.Name, Quantity, Description, Zonas_a_Tratar__c, Levantamiento_Tecnico__c 
+                for (QuoteLineItem qli : [SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Quantity, Description, Zonas_a_Tratar__c, Levantamiento_Tecnico__c 
                                          FROM QuoteLineItem WHERE QuoteId = :targetQuote.Id]) {
                     String zonas = String.isNotBlank(qli.Zonas_a_Tratar__c) ? qli.Zonas_a_Tratar__c : qli.Description;
                     tratamientosComerciales.add(new Map<String, Object>{
-                        'id' => qli.Id, 'name' => qli.Product2.Name, 'quantity' => qli.Quantity, 
+                        'id' => qli.Id, 'name' => qli.Product2.Name, 'code' => qli.Product2.ProductCode, 'quantity' => qli.Quantity, 
                         'zonas' => zonas, 'levantamientoId' => qli.Levantamiento_Tecnico__c,
                         'productId' => qli.Product2Id
                     });
