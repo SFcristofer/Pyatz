@@ -171,6 +171,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                         tecnicosIds: t.tecnicosIds || [],
                         schedulingRows: t.schedulingRows ? t.schedulingRows.map((row, rIdx) => ({
                             label: `${rIdx + 1}º Fecha`,
+                            saId: row.saId || '',
                             date: row.date || new Date().toISOString().split('T')[0],
                             startTime: row.startTime || '08:00:00.000',
                             locked: row.locked || false,
@@ -199,6 +200,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             nextDate.setMonth(baseDate.getMonth() + (i - 1));
             rows.push({
                 label: `${i}º Fecha`,
+                saId: '',
                 date: nextDate.toISOString().split('T')[0],
                 startTime: '08:00:00.000',
                 locked: false,

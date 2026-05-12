@@ -68,45 +68,52 @@ public with sharing class TechWorkOrderController {
                                                 (SELECT ServiceResourceId FROM ServiceResources) 
                                                FROM ServiceAppointment WHERE ParentRecordId = :existingWO.Id ORDER BY SchedStartTime ASC];
                 
-                Map<Id, List<Map<String, Object>>> productToScheduling = new Map<Id, List<Map<String, Object>>>();
-                Map<Id, Set<String>> productToTechs = new Map<Id, Set<String>>();
-                Map<Id, String> productToZones = new Map<Id, String>();
-
+                // Mapeo inteligente de citas existentes a tratamientos (evitando duplicados por producto)
+                Map<Id, List<ServiceAppointment>> availableSAsByProduct = new Map<Id, List<ServiceAppointment>>();
                 for (ServiceAppointment sa : sas) {
                     if (sa.Producto_Relacionado__c == null) continue;
-                    if (!productToScheduling.containsKey(sa.Producto_Relacionado__c)) {
-                        productToScheduling.put(sa.Producto_Relacionado__c, new List<Map<String, Object>>());
-                        productToTechs.put(sa.Producto_Relacionado__c, new Set<String>());
-                        productToZones.put(sa.Producto_Relacionado__c, sa.Zonas_a_Tratar__c);
+                    if (!availableSAsByProduct.containsKey(sa.Producto_Relacionado__c)) {
+                        availableSAsByProduct.put(sa.Producto_Relacionado__c, new List<ServiceAppointment>());
                     }
-                    String firstTechId = '';
-                    for (AssignedResource ar : sa.ServiceResources) {
-                        if (String.isBlank(firstTechId)) firstTechId = ar.ServiceResourceId;
-                        productToTechs.get(sa.Producto_Relacionado__c).add(ar.ServiceResourceId);
-                    }
-                    Integer margin = 0;
-                    if (sa.ArrivalWindowStartTime != null && sa.ArrivalWindowEndTime != null) {
-                        margin = Integer.valueOf((sa.ArrivalWindowEndTime.getTime() - sa.ArrivalWindowStartTime.getTime()) / (1000 * 60));
-                    }
-                    productToScheduling.get(sa.Producto_Relacionado__c).add(new Map<String, Object>{
-                        'saId' => sa.Id,
-                        'date' => sa.SchedStartTime != null ? sa.SchedStartTime.format('yyyy-MM-dd') : '',
-                        'startTime' => sa.SchedStartTime != null ? sa.SchedStartTime.format('HH:mm:ss.000') : '08:00:00.000',
-                        'duration' => sa.Duration,
-                        'notes' => String.isNotBlank(sa.ServiceNote) ? sa.ServiceNote : '',
-                        'arrivalMargin' => margin,
-                        'locked' => sa.FSL__Pinned__c,
-                        'tecnicoId' => firstTechId
-                    });
+                    availableSAsByProduct.get(sa.Producto_Relacionado__c).add(sa);
                 }
+
                 for (Map<String, Object> tra : tratamientosComerciales) {
                     Id pId = (Id)tra.get('productId');
-                    if (productToScheduling.containsKey(pId)) {
-                        tra.put('schedulingRows', productToScheduling.get(pId));
-                        tra.put('tecnicosIds', new List<String>(productToTechs.get(pId)));
-                        if (productToZones.containsKey(pId)) {
-                            tra.put('zonas', productToZones.get(pId));
+                    if (availableSAsByProduct.containsKey(pId) && !availableSAsByProduct.get(pId).isEmpty()) {
+                        List<ServiceAppointment> matchingSAs = availableSAsByProduct.get(pId);
+                        List<Map<String, Object>> rows = new List<Map<String, Object>>();
+                        Set<String> techIds = new Set<String>();
+                        String lastZonas = '';
+
+                        for (ServiceAppointment sa : matchingSAs) {
+                            String firstTechId = '';
+                            for (AssignedResource ar : sa.ServiceResources) {
+                                if (String.isBlank(firstTechId)) firstTechId = ar.ServiceResourceId;
+                                techIds.add(ar.ServiceResourceId);
+                            }
+                            Integer margin = 0;
+                            if (sa.ArrivalWindowStartTime != null && sa.ArrivalWindowEndTime != null) {
+                                margin = Integer.valueOf((sa.ArrivalWindowEndTime.getTime() - sa.ArrivalWindowStartTime.getTime()) / (1000 * 60));
+                            }
+                            rows.add(new Map<String, Object>{
+                                'saId' => sa.Id,
+                                'date' => sa.SchedStartTime != null ? sa.SchedStartTime.format('yyyy-MM-dd') : '',
+                                'startTime' => sa.SchedStartTime != null ? sa.SchedStartTime.format('HH:mm:ss.000') : '08:00:00.000',
+                                'duration' => sa.Duration,
+                                'notes' => String.isNotBlank(sa.ServiceNote) ? sa.ServiceNote : '',
+                                'arrivalMargin' => margin,
+                                'locked' => sa.FSL__Pinned__c,
+                                'tecnicoId' => firstTechId
+                            });
+                            lastZonas = sa.Zonas_a_Tratar__c;
                         }
+                        tra.put('schedulingRows', rows);
+                        tra.put('tecnicosIds', new List<String>(techIds));
+                        if (String.isNotBlank(lastZonas)) tra.put('zonas', lastZonas);
+                        
+                        // Consumir las citas para que no se asignen a otro tratamiento del mismo producto
+                        availableSAsByProduct.remove(pId);
                     }
                 }
             }
@@ -314,11 +321,19 @@ public with sharing class TechWorkOrderController {
 
             if (!sasToUpsert.isEmpty()) {
                 upsert sasToUpsert;
+                
+                Set<Id> saIds = new Map<Id, ServiceAppointment>(sasToUpsert).keySet();
+                List<Revision_Cita_Servicio__c> allExistingRevs = [SELECT Id, Cita_Servicio__c FROM Revision_Cita_Servicio__c WHERE Cita_Servicio__c IN :saIds];
+                Map<Id, List<Revision_Cita_Servicio__c>> revsBySA = new Map<Id, List<Revision_Cita_Servicio__c>>();
+                for (Revision_Cita_Servicio__c r : allExistingRevs) {
+                    if (!revsBySA.containsKey(r.Cita_Servicio__c)) revsBySA.put(r.Cita_Servicio__c, new List<Revision_Cita_Servicio__c>());
+                    revsBySA.get(r.Cita_Servicio__c).add(r);
+                }
+
                 List<ServiceAppointment> sasUpdate = new List<ServiceAppointment>();
                 List<Revision_Cita_Servicio__c> revsToIns = new List<Revision_Cita_Servicio__c>();
                 List<AssignedResource> arsToIns = new List<AssignedResource>();
                 
-                // Limpiar asignaciones viejas de citas actualizadas para evitar duplicados
                 if (!incomingSaIds.isEmpty()) delete [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId IN :incomingSaIds];
 
                 Id firstTechId = null;
@@ -326,11 +341,7 @@ public with sharing class TechWorkOrderController {
                     ServiceAppointment currentSA = sasToUpsert[i];
                     if (currentSA.Status == 'Ninguno') sasUpdate.add(new ServiceAppointment(Id = currentSA.Id, Status = 'Programado'));
                     
-                    // Solo crear revisiones si la cita es NUEVA (no tiene saId previo) 
-                    // o si no tiene ninguna revisión aún vinculada
-                    List<Revision_Cita_Servicio__c> existingRevs = [SELECT Id FROM Revision_Cita_Servicio__c WHERE Cita_Servicio__c = :currentSA.Id LIMIT 1];
-                    
-                    if (existingRevs.isEmpty()) {
+                    if (!revsBySA.containsKey(currentSA.Id) || revsBySA.get(currentSA.Id).isEmpty()) {
                         Integer revCounter = 1;
                         for (String templateId : templateIndexMap.get(i)) {
                             revsToIns.add(new Revision_Cita_Servicio__c(Cita_Servicio__c = currentSA.Id, Numero_Revision__c = revCounter++, Status__c = 'En Proceso', Plantilla_de_Formulario__c = (Id)templateId, Fecha_Revision__c = Datetime.now(), Tecnico__c = UserInfo.getUserId()));
