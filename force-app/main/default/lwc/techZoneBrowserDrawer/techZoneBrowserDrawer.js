@@ -3,10 +3,8 @@ import getAccountZonesData from '@salesforce/apex/TechWorkOrderController.getAcc
 
 const COLUMNS = [
     { label: 'Zona', fieldName: 'Name', type: 'text', sortable: true, cellAttributes: { class: 'slds-text-title_bold' } },
-    { label: 'Tipo (Protocolo)', fieldName: 'TemplateName', type: 'text', sortable: true, cellAttributes: { class: 'slds-text-color_success slds-text-title_bold' } },
-    { label: 'Línea de Negocio (Actual)', fieldName: 'DisplayLOB', type: 'text', cellAttributes: { class: { fieldName: 'lobStatusClass' } } },
-    { label: 'Código Único', fieldName: 'Id_Unico_Zona__c', type: 'text', cellAttributes: { class: 'mono-text' } },
-    { label: 'ID de Sistema', fieldName: 'Id', type: 'text', cellAttributes: { class: 'slds-text-color_weak slds-text-body_small' } }
+    { label: 'Tipo', fieldName: 'TemplateName', type: 'text', sortable: true, cellAttributes: { class: 'slds-text-color_success slds-text-title_bold' } },
+    { label: 'Línea de Negocio', fieldName: 'DisplayLOB', type: 'text', cellAttributes: { class: { fieldName: 'lobStatusClass' } } }
 ];
 
 export default class TechZoneBrowserDrawer extends LightningElement {

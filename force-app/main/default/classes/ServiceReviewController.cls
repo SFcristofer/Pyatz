@@ -24,10 +24,13 @@ public with sharing class ServiceReviewController {
         @AuraEnabled public String  name;
         @AuraEnabled public Integer numero;
         @AuraEnabled public String  tipo;
+        @AuraEnabled public String  templateId;
         @AuraEnabled public String  status;
         @AuraEnabled public String  fecha;
         @AuraEnabled public String  tecnico;
         @AuraEnabled public Boolean isCompleted;
+        @AuraEnabled public String  cardClass;
+        @AuraEnabled public String  badgeClass;
     }
 
     public class PhotoInfo {
@@ -65,7 +68,7 @@ public with sharing class ServiceReviewController {
         }
 
         List<Revision_Cita_Servicio__c> revs = [
-            SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c,
+            SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Plantilla_de_Formulario__c,
                    Status__c, Fecha_Revision__c, Tecnico__r.Name
             FROM Revision_Cita_Servicio__c
             WHERE Cita_Servicio__c = :saId
@@ -80,12 +83,18 @@ public with sharing class ServiceReviewController {
             rs.name        = r.Name;
             rs.numero      = r.Numero_Revision__c != null ? Integer.valueOf(r.Numero_Revision__c) : 0;
             rs.tipo        = r.Tipo_Reporte__c;
+            rs.templateId  = r.Plantilla_de_Formulario__c;
             rs.status      = r.Status__c;
             rs.isCompleted = r.Status__c == 'Completada';
             rs.fecha       = r.Fecha_Revision__c != null
                 ? r.Fecha_Revision__c.format('dd/MM/yyyy HH:mm')
                 : '';
             rs.tecnico     = r.Tecnico__r != null ? r.Tecnico__r.Name : '';
+            
+            // Estilos para LWC
+            rs.cardClass   = 'rev-card ' + (rs.isCompleted ? 'rev-card--done' : 'rev-card--pending');
+            rs.badgeClass  = 'rev-card__badge ' + (rs.isCompleted ? 'rev-card__badge--done' : 'rev-card__badge--pending');
+            
             revList.add(rs);
             if (r.Status__c == 'Completada') completadas++;
         }
@@ -137,7 +146,16 @@ public with sharing class ServiceReviewController {
             WHERE Id = :revisionId
             LIMIT 1
         ];
-        rev.Tipo_Reporte__c     = tipoReporte;
+        
+        if (tipoReporte instanceof Id) {
+            rev.Plantilla_de_Formulario__c = (Id)tipoReporte;
+            // Opcional: llenar el nombre en el campo de texto para reportes viejos
+            Form_Template__c temp = [SELECT Tipo_Reporte__c FROM Form_Template__c WHERE Id = :tipoReporte LIMIT 1];
+            rev.Tipo_Reporte__c = temp.Tipo_Reporte__c;
+        } else {
+            rev.Tipo_Reporte__c = tipoReporte;
+        }
+        
         rev.Datos_Formulario__c = datosFormulario;
         rev.Observaciones__c    = observaciones;
         rev.Status__c           = 'Completada';

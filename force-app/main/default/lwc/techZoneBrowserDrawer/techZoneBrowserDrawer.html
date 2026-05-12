@@ -41,19 +41,12 @@
                     <!-- HEADER FILTERS (ESTÉTICOS E INTEGRADOS SOBRE CABECERAS) -->
                     <div class="embedded-filter-bar slds-p-vertical_small">
                         <div class="filter-flex-row">
-                            <div class="filter-col flex-4">
+                            <div class="filter-col flex-6">
                                 <lightning-input label="ZONA" variant="label-hidden" placeholder="Filtrar Zona..." value={filterZona} data-field="zona" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
                             </div>
-                            <div class="filter-col flex-3">
-                                <lightning-input label="TIPO" variant="label-hidden" placeholder="Filtrar Protocolo..." value={filterTipo} data-field="tipo" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
+                            <div class="filter-col flex-6">
+                                <lightning-input label="TIPO" variant="label-hidden" placeholder="Filtrar Tipo..." value={filterTipo} data-field="tipo" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
                             </div>
-                            <div class="filter-col flex-3">
-                                <lightning-input label="LINEA" variant="label-hidden" placeholder="Filtrar Línea..." value={filterLob} data-field="lob" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
-                            </div>
-                            <div class="filter-col flex-2">
-                                <lightning-input label="CODIGO" variant="label-hidden" placeholder="Código..." value={filterCodigo} data-field="codigo" onchange={handleColumnFilterChange} class="table-header-input"></lightning-input>
-                            </div>
-                            <div class="filter-col flex-2"></div> <!-- Espacio para ID -->
                         </div>
                     </div>
 

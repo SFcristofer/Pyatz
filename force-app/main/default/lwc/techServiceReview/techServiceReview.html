@@ -29,7 +29,7 @@
             <template if:true={hasRevisions}>
                 <div class="rev-list-header">Revisiones registradas</div>
                 <template for:each={saInfo.revisionesList} for:item="rev">
-                    <div key={rev.id} class={rev.cardClass}>
+                    <div key={rev.id} class={rev.cardClass} onclick={handleRevisionClick} data-id={rev.id}>
                         <div class="rev-card__num">{rev.numero}</div>
                         <div class="rev-card__body">
                             <div class="rev-card__tipo">{rev.tipo}</div>

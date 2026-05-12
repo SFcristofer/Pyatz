@@ -285,6 +285,45 @@ export default class TechServiceReview extends LightningElement {
             .catch(() => {});
     }
 
+    handleRevisionClick(event) {
+        const revId = event.currentTarget.dataset.id;
+        const rev = this.saInfo.revisionesList.find(r => r.id === revId);
+        if (!rev || rev.isCompleted) return;
+
+        this.revisionId = rev.id;
+        this.savedRevNumber = rev.numero;
+        this.selectedFormType = rev.templateId || rev.tipo; // Prioridad al ID del Lookup
+        this.revisionPhotos = [];
+        this.signatureSaved = false;
+        this.observaciones = '';
+        
+        this._loadRevisionState(revId);
+        this._startGPS();
+        this.currentStep = STEP_PHOTOS;
+    }
+
+    _loadRevisionState(revId) {
+        this.loadingRevPhotos = true;
+        getRevisionPhotos({ revisionId: revId })
+            .then(data => {
+                this.revisionPhotos = data.map(p => ({
+                    ...p,
+                    thumbSrc: `data:image/png;base64,${p.thumbBase64}`
+                }));
+            })
+            .catch(() => {});
+
+        getRevisionSignature({ revisionId: revId })
+            .then(data => {
+                if (data.thumbBase64) {
+                    this.signatureSaved = true;
+                    this.savedSigName = data.signerName;
+                    this.savedSigThumb = `data:image/png;base64,${data.thumbBase64}`;
+                }
+            })
+            .catch(() => {});
+    }
+
     handleGenerateReport() {
         // eslint-disable-next-line @lwc/lwc/no-async-operation
         window.open(`/apex/ServiceReviewPDF?id=${this.recordId}`, '_blank');

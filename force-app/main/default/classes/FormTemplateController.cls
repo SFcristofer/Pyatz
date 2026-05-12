@@ -47,13 +47,15 @@ public with sharing class FormTemplateController {
 
     @AuraEnabled(cacheable=false)
     public static String getFormTemplate(String tipoReporte) {
-        List<Form_Template__c> rows = [
-            SELECT Preguntas__c
-            FROM Form_Template__c
-            WHERE Tipo_Reporte__c = :tipoReporte
-              AND Activo__c = true
-            LIMIT 1
-        ];
+        if (String.isBlank(tipoReporte)) return '[]';
+        
+        List<Form_Template__c> rows;
+        if (tipoReporte instanceof Id) {
+            rows = [SELECT Preguntas__c FROM Form_Template__c WHERE Id = :tipoReporte AND Activo__c = true LIMIT 1];
+        } else {
+            rows = [SELECT Preguntas__c FROM Form_Template__c WHERE Tipo_Reporte__c = :tipoReporte AND Activo__c = true LIMIT 1];
+        }
+        
         if (rows.isEmpty() || String.isBlank(rows[0].Preguntas__c)) return '[]';
         return rows[0].Preguntas__c;
     }
