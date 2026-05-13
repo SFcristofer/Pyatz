@@ -21,12 +21,32 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     @track isSaving = false;
     @track isUpdateMode = false;
     @track existingWorkOrderId = '';
+    @track currentStep = '1'; // Nuevo: Control de navegación por pasos
 
     // IDs de respaldo para el guardado
     accountId;
     oppId;
     internalQuoteId;
     internalServiceContractId;
+
+    // Métodos de navegación
+    handleNextStep() {
+        if (this.currentStep === '1') this.currentStep = '2';
+        else if (this.currentStep === '2') this.currentStep = '3';
+    }
+
+    handlePrevStep() {
+        if (this.currentStep === '2') this.currentStep = '1';
+        else if (this.currentStep === '3') this.currentStep = '2';
+    }
+
+    get isStep1() { return this.currentStep === '1'; }
+    get isStep2() { return this.currentStep === '2'; }
+    get isStep3() { return this.currentStep === '3'; }
+    
+    get step1Class() { return this.currentStep === '1' ? 'step-active' : 'step-inactive'; }
+    get step2Class() { return this.currentStep === '2' ? 'step-active' : 'step-inactive'; }
+    get step3Class() { return this.currentStep === '3' ? 'step-active' : 'step-inactive'; }
 
     @track contractFolio = 'CARGANDO...';
     @track contractData = {
