@@ -1,0 +1,222 @@
+.citas-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Card ── */
+.cita-card {
+    border: 1px solid #dde3ee;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(26,32,53,0.07);
+}
+
+/* ── Card header ── */
+.card-header {
+    background: #1a2035;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.cita-number {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.cita-zonas {
+    font-size: 11px;
+    color: #a5d6a7;
+    margin-top: 2px;
+}
+
+/* ── Status pills ── */
+.status-pill {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+.status-completado { background: #69f0ae; color: #1b5e20; }
+.status-en-curso   { background: #ffcc02; color: #5d4000; }
+.status-programado { background: #64b5f6; color: #0d47a1; }
+.status-ninguno    { background: #cfd8dc; color: #546e7a; }
+.status-default    { background: #e0e0e0; color: #424242; }
+
+/* ── Revisiones summary ── */
+.revisiones-summary {
+    padding: 8px 14px 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rev-label-head {
+    font-size: 10px;
+    font-weight: bold;
+    color: #546e7a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rev-fraction {
+    font-size: 12px;
+    color: #37474f;
+}
+
+.rev-completed { color: #1b5e20; }
+.rev-total     { color: #78909c; }
+.rev-sep       { color: #b0bec5; }
+.rev-suffix    { font-size: 11px; color: #78909c; }
+
+/* ── Progress bar ── */
+.progress-bar-bg {
+    height: 4px;
+    background: #e8f5e9;
+    margin: 0 14px 6px;
+    border-radius: 2px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #1b5e20;
+    border-radius: 2px;
+    min-width: 2px;
+}
+
+/* ── Revisiones list ── */
+.revisiones-list {
+    border-top: 1px solid #f0f0f0;
+}
+
+.revision-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-bottom: 1px solid #f8f8f8;
+}
+
+.revision-row:last-child { border-bottom: none; }
+
+.rev-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #37474f;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cita-number-link {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+}
+.cita-number-link:hover { text-decoration: underline; color: #a5d6a7; }
+
+.rev-formato {
+    font-size: 11px;
+    color: #546e7a;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rev-badge {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.rev-badge-fotos { background: #e3f2fd; color: #1565c0; }
+.rev-badge-nc    { background: #fff3e0; color: #e65100; }
+
+.rev-status {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.rev-completada  { background: #e8f5e9; color: #1b5e20; }
+.rev-en-proceso  { background: #fff8e1; color: #f57f17; }
+
+/* ── No revisiones ── */
+.no-revisiones {
+    padding: 8px 14px;
+    font-size: 11px;
+    color: #90a4ae;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* ── Error ── */
+.error-box {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #ffeaea;
+    border: 1px solid #ffcdd2;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #c62828;
+}
+
+/* ── Card header right ── */
+.card-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ── Botón PDF por SA ── */
+.btn-pdf-sa {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+}
+.btn-pdf-sa:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+/* ── Modal ── */
+.modal-body {
+    padding: 0;
+    height: 80vh;
+}
+
+.pdf-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* ── Card title slot ── */
+.card-title-slot {
+    display: flex;
+    align-items: center;
+}

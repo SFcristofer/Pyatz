@@ -1,0 +1,48 @@
+.point-detail-box {
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.coord-badge {
+    background: #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: monospace;
+    font-size: 0.875rem;
+}
+
+.visit-timeline {
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.visit-item {
+    border-left: 2px solid #e2e8f0;
+    padding-left: 12px;
+    padding-bottom: 4px;
+    position: relative;
+}
+
+.visit-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 20px;
+}
+
+.visit-dot {
+    flex-shrink: 0;
+}
+
+.visit-line {
+    flex: 1;
+    width: 2px;
+    background: #e2e8f0;
+    margin-top: 4px;
+}
+
+.slds-modal__container {
+    max-width: 560px;
+}

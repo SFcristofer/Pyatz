@@ -1,0 +1,3 @@
+<aura:component implements="force:lightningQuickAction,force:hasRecordId" access="global">
+    <c:geoPhotoCapture recordId="{!v.recordId}" />
+</aura:component>

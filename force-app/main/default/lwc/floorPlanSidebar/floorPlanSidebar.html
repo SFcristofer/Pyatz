@@ -1,0 +1,166 @@
+<template>
+    <lightning-card title="Puntos de Control" icon-name="utility:location">
+        <div slot="actions">
+            <lightning-button-icon
+                icon-name="utility:refresh"
+                alternative-text="Actualizar"
+                title="Actualizar"
+                onclick={handleRefresh}>
+            </lightning-button-icon>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+
+            <!-- Spinner -->
+            <template if:true={isLoading}>
+                <div class="slds-text-align_center slds-p-around_medium">
+                    <lightning-spinner alternative-text="Cargando..." size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Sin puntos -->
+            <template if:false={hasPoints}>
+                <template if:false={isLoading}>
+                    <div class="slds-text-align_center slds-p-around_medium">
+                        <lightning-icon icon-name="utility:location" size="small" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-body_small slds-text-color_weak">Sin puntos de control.<br/>Haz clic en el plano para agregar.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Resumen conteos -->
+            <template if:true={hasPoints}>
+                <div class="summary-chips slds-m-bottom_small">
+                    <span class="chip chip-active">{countActive} Activos</span>
+                    <span class="chip chip-triggered">{countTriggered} Activados</span>
+                    <span class="chip chip-inactive">{countInactive} Inactivos</span>
+                </div>
+
+                <!-- Accordion puntos -->
+                <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
+                    <template for:each={controlPointItems} for:item="item">
+                        <lightning-accordion-section
+                            key={item.id}
+                            name={item.id}
+                            label={item.accordionLabel}>
+
+                            <span slot="actions">
+                                <span class="status-pill" style={item.statusPillStyle}>{item.statusLabel}</span>
+                            </span>
+
+                            <!-- Detalle punto -->
+                            <div class="point-detail slds-p-bottom_x-small">
+                                <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_x-small">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <p class="detail-label">Tipo</p>
+                                        <p class="detail-value">{item.typeLabel}</p>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <p class="detail-label">Última Visita</p>
+                                        <p class="detail-value">{item.lastVisitLabel}</p>
+                                    </div>
+                                    <template if:true={item.point.Notes__c}>
+                                        <div class="slds-col slds-size_1-of-1 slds-m-top_xx-small">
+                                            <p class="detail-label">Notas</p>
+                                            <p class="detail-value">{item.point.Notes__c}</p>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Timeline visitas -->
+                                <template if:true={item.hasVisits}>
+                                    <p class="section-subtitle slds-m-bottom_xx-small">Últimas visitas</p>
+                                    <ul class="visit-list">
+                                        <template for:each={item.visits} for:item="visit">
+                                            <li key={visit.Id} class="visit-row">
+                                                <span class="visit-dot" style={visit.dotStyle}></span>
+                                                <div class="visit-info">
+                                                    <span class="visit-result">{visit.resultLabel}</span>
+                                                    <template if:true={visit.Quantity__c}>
+                                                        <span class="visit-qty"> — {visit.Quantity__c}</span>
+                                                    </template>
+                                                    <span class="visit-date">{visit.dateLabel}</span>
+                                                    <template if:true={visit.Observations__c}>
+                                                        <span class="visit-obs">{visit.Observations__c}</span>
+                                                    </template>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template if:false={item.hasVisits}>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">Sin visitas registradas</p>
+                                </template>
+
+                                <!-- Formulario registrar visita -->
+                                <template if:false={item.showForm}>
+                                    <div class="slds-m-top_small">
+                                        <lightning-button
+                                            label="Registrar Visita"
+                                            icon-name="utility:add"
+                                            variant="neutral"
+                                            size="small"
+                                            data-id={item.id}
+                                            onclick={handleShowForm}>
+                                        </lightning-button>
+                                    </div>
+                                </template>
+
+                                <template if:true={item.showForm}>
+                                    <div class="visit-form slds-m-top_small">
+                                        <lightning-combobox
+                                            label="Resultado"
+                                            value={item.formResult}
+                                            options={resultOptions}
+                                            data-id={item.id}
+                                            onchange={handleFormResultChange}
+                                            required>
+                                        </lightning-combobox>
+                                        <lightning-input
+                                            type="number"
+                                            label="Cantidad"
+                                            value={item.formQuantity}
+                                            min="0"
+                                            step="0.01"
+                                            data-id={item.id}
+                                            onchange={handleFormQuantityChange}
+                                            class="slds-m-top_xx-small">
+                                        </lightning-input>
+                                        <lightning-textarea
+                                            label="Observaciones"
+                                            value={item.formObservations}
+                                            max-length="1000"
+                                            data-id={item.id}
+                                            onchange={handleFormObservationsChange}
+                                            class="slds-m-top_xx-small">
+                                        </lightning-textarea>
+                                        <div class="slds-grid slds-m-top_small slds-grid_align-end">
+                                            <lightning-button
+                                                label="Cancelar"
+                                                data-id={item.id}
+                                                onclick={handleHideForm}
+                                                class="slds-m-right_small">
+                                            </lightning-button>
+                                            <lightning-button
+                                                variant="brand"
+                                                label="Guardar"
+                                                data-id={item.id}
+                                                onclick={handleSaveVisit}
+                                                disabled={item.isSaving}>
+                                            </lightning-button>
+                                        </div>
+                                        <template if:true={item.formError}>
+                                            <p class="form-error slds-m-top_xx-small">{item.formError}</p>
+                                        </template>
+                                    </div>
+                                </template>
+
+                            </div>
+                        </lightning-accordion-section>
+                    </template>
+                </lightning-accordion>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

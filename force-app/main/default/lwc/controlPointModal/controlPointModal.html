@@ -1,0 +1,202 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+
+            <!-- Header -->
+            <header class="slds-modal__header">
+                <button
+                    class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                    title="Cerrar"
+                    onclick={handleClose}>
+                    <lightning-icon icon-name="utility:close" size="small" alternative-text="Cerrar"></lightning-icon>
+                </button>
+                <h2 class="slds-modal__title slds-hyphenate">{modalTitle}</h2>
+                <p class="slds-text-body_small slds-m-top_xx-small" style="color:#cbd5e1">{modalSubtitle}</p>
+            </header>
+
+            <!-- Body -->
+            <div class="slds-modal__content slds-p-around_medium">
+
+                <!-- ===================== MODO CREAR ===================== -->
+                <template if:true={isCreateMode}>
+                    <div class="slds-form slds-form_stacked">
+                        <div class="slds-form-element slds-m-bottom_small">
+                            <label class="slds-form-element__label">Coordenadas</label>
+                            <div class="slds-form-element__control">
+                                <span class="slds-text-body_regular coord-badge">X: {xPercent}%</span>
+                                <span class="slds-text-body_regular coord-badge slds-m-left_small">Y: {yPercent}%</span>
+                            </div>
+                        </div>
+
+                        <lightning-combobox
+                            label="Tipo de Punto"
+                            value={newPointType}
+                            options={pointTypeOptions}
+                            placeholder="Selecciona tipo..."
+                            onchange={handlePointTypeChange}
+                            required>
+                        </lightning-combobox>
+
+                        <lightning-combobox
+                            label="Estado"
+                            value={newStatus}
+                            options={statusOptions}
+                            placeholder="Selecciona estado..."
+                            onchange={handleStatusChange}
+                            class="slds-m-top_small">
+                        </lightning-combobox>
+
+                        <lightning-textarea
+                            label="Notas"
+                            value={newNotes}
+                            onchange={handleNotesChange}
+                            max-length="500"
+                            class="slds-m-top_small">
+                        </lightning-textarea>
+                    </div>
+                </template>
+
+                <!-- ===================== MODO VER ===================== -->
+                <template if:true={isViewMode}>
+
+                    <!-- Detalle del punto -->
+                    <template if:false={showVisitForm}>
+                        <div class="slds-box slds-p-around_small slds-m-bottom_medium point-detail-box">
+                            <div class="slds-grid slds-gutters slds-wrap">
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <p class="slds-text-body_small slds-text-color_weak">Tipo</p>
+                                    <p class="slds-text-body_regular">{pointTypeLabel}</p>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <p class="slds-text-body_small slds-text-color_weak">Estado</p>
+                                    <span class="slds-badge" style={statusBadgeStyle}>{pointStatusLabel}</span>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <p class="slds-text-body_small slds-text-color_weak">Posición</p>
+                                    <p class="slds-text-body_regular">X: {controlPointData.XPercent__c}% / Y: {controlPointData.YPercent__c}%</p>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <p class="slds-text-body_small slds-text-color_weak">Última Visita</p>
+                                    <p class="slds-text-body_regular">{lastVisitFormatted}</p>
+                                </div>
+                                <template if:true={controlPointData.Notes__c}>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <p class="slds-text-body_small slds-text-color_weak">Notas</p>
+                                        <p class="slds-text-body_regular">{controlPointData.Notes__c}</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Historial de visitas -->
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">Historial de Visitas</h3>
+                        <template if:true={hasVisits}>
+                            <div class="visit-timeline">
+                                <template for:each={recentVisits} for:item="visit">
+                                    <div key={visit.Id} class="visit-item slds-m-bottom_small">
+                                        <div class="slds-grid">
+                                            <div class="visit-dot-col">
+                                                <div class="visit-dot" style={visit.resultDotStyle}></div>
+                                                <div class="visit-line"></div>
+                                            </div>
+                                            <div class="slds-col slds-p-left_small">
+                                                <p class="slds-text-body_small slds-text-color_weak">{visit.formattedDate}</p>
+                                                <p class="slds-text-body_regular"><strong>{visit.resultLabel}</strong>
+                                                    <template if:true={visit.Quantity__c}>
+                                                        &nbsp;— {visit.Quantity__c} uds.
+                                                    </template>
+                                                </p>
+                                                <template if:true={visit.Observations__c}>
+                                                    <p class="slds-text-body_small">{visit.Observations__c}</p>
+                                                </template>
+                                                <template if:true={visit.TechnicianUser__r}>
+                                                    <p class="slds-text-body_small slds-text-color_weak">{visit.TechnicianUser__r.Name}</p>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={hasVisits}>
+                            <p class="slds-text-body_small slds-text-color_weak slds-p-around_small">Sin visitas registradas</p>
+                        </template>
+                    </template>
+
+                    <!-- Formulario nueva visita -->
+                    <template if:true={showVisitForm}>
+                        <div class="slds-form slds-form_stacked">
+                            <lightning-combobox
+                                label="Resultado"
+                                value={visitResult}
+                                options={resultOptions}
+                                placeholder="Selecciona resultado..."
+                                onchange={handleVisitResultChange}
+                                required>
+                            </lightning-combobox>
+
+                            <lightning-input
+                                type="number"
+                                label="Cantidad"
+                                value={visitQuantity}
+                                onchange={handleVisitQuantityChange}
+                                min="0"
+                                step="0.01"
+                                class="slds-m-top_small">
+                            </lightning-input>
+
+                            <lightning-textarea
+                                label="Observaciones"
+                                value={visitObservations}
+                                onchange={handleVisitObservationsChange}
+                                max-length="1000"
+                                class="slds-m-top_small">
+                            </lightning-textarea>
+                        </div>
+                    </template>
+
+                </template>
+
+                <!-- Error -->
+                <template if:true={errorMessage}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error slds-m-top_small" role="alert">
+                        <span>{errorMessage}</span>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Footer -->
+            <footer class="slds-modal__footer">
+
+                <!-- Crear modo -->
+                <template if:true={isCreateMode}>
+                    <lightning-button label="Cancelar" onclick={handleClose} class="slds-m-right_small"></lightning-button>
+                    <lightning-button variant="brand" label="Guardar Punto" onclick={handleSavePoint} disabled={isSaving}></lightning-button>
+                </template>
+
+                <!-- Ver modo — detalle -->
+                <template if:true={isViewMode}>
+                    <template if:false={showVisitForm}>
+                        <template if:true={canDelete}>
+                            <lightning-button
+                                variant="destructive"
+                                label="Eliminar Punto"
+                                onclick={handleDeletePoint}
+                                disabled={isSaving}
+                                class="slds-m-right_auto">
+                            </lightning-button>
+                        </template>
+                        <lightning-button label="Cerrar" onclick={handleClose} class="slds-m-right_small"></lightning-button>
+                        <lightning-button variant="brand" label="Registrar Visita" onclick={handleShowVisitForm}></lightning-button>
+                    </template>
+                    <template if:true={showVisitForm}>
+                        <lightning-button label="Cancelar" onclick={handleHideVisitForm} class="slds-m-right_small"></lightning-button>
+                        <lightning-button variant="brand" label="Guardar Visita" onclick={handleSaveVisit} disabled={isSaving}></lightning-button>
+                    </template>
+                </template>
+
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

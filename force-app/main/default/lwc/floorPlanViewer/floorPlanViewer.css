@@ -1,0 +1,140 @@
+/* ── Wrapper ─────────────────────────────────────────── */
+.floor-plan-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    cursor: crosshair;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.floor-plan-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: contain;
+    pointer-events: none;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+/* ── SVG overlay — MISMO patrón que versión funcional ─── */
+.floor-plan-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+/* ── Marker group ──────────────────────────────────────── */
+.cp-group {
+    pointer-events: all;
+    cursor: pointer;
+}
+
+/* Sombra en círculo exterior */
+.cp-shadow {
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+}
+
+/* Círculo principal — hover agranda ligeramente */
+.cp-circle {
+    transition: r 0.15s ease;
+}
+
+.cp-group:hover .cp-circle {
+    r: 17;
+}
+
+.cp-group:hover .cp-shadow {
+    r: 20;
+}
+
+/* Textos */
+.cp-type,
+.cp-num {
+    pointer-events: none;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ── Status bar ──────────────────────────────────────── */
+.status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.pill-active    { background: #dcfce7; color: #15803d; }
+.pill-triggered { background: #fee2e2; color: #b91c1c; }
+.pill-inactive  { background: #f3f4f6; color: #4b5563; }
+
+.pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+}
+
+.hint-text {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+/* ── Legend ──────────────────────────────────────────── */
+.legend-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 4px 2px;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: #4b5563;
+}
+
+.legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.legend-types {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+/* ── Sin imagen ──────────────────────────────────────── */
+.no-image-box {
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+}

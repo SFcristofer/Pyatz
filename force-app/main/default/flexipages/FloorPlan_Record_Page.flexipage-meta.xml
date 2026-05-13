@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Página de registro del Plano de Instalación</description>
+    <masterLabel>Plano de Instalación</masterLabel>
+    <pageTemplate>RecordPage</pageTemplate>
+    <sobjectType>FloorPlan__c</sobjectType>
+    <type>RecordPage</type>
+    <flexiPageRegions>
+        <name>main</name>
+        <mode>Replace</mode>
+        <type>Region</type>
+        <itemInstances>
+            <componentInstance>
+                <componentName>c:floorPlanViewer</componentName>
+                <visibilityRule>
+                    <booleanFilter/>
+                    <criteria/>
+                </visibilityRule>
+                <componentInstanceProperties>
+                    <name>recordId</name>
+                    <value>{!recordId}</value>
+                </componentInstanceProperties>
+            </componentInstance>
+        </itemInstances>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <name>sidebar</name>
+        <mode>Replace</mode>
+        <type>Region</type>
+        <itemInstances>
+            <componentInstance>
+                <componentName>flexipage:recordDetail</componentName>
+                <visibilityRule>
+                    <booleanFilter/>
+                    <criteria/>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+    </flexiPageRegions>
+</FlexiPage>

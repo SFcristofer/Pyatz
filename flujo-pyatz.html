@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flujo de Servicio — Pyatz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap');
+
+  :root {
+    --ink:    #0b0f1a;
+    --green:  #00c45a;
+    --lime:   #d4f53c;
+    --amber:  #ffaa00;
+    --mist:   #f2f4f0;
+    --slate:  #8a95a3;
+    --white:  #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: var(--mist);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ══════════════════════════════════════════
+     HERO
+  ══════════════════════════════════════════ */
+  .hero {
+    background: var(--ink);
+    padding: 60px 48px 52px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: 'PYATZ';
+    position: absolute;
+    right: -20px;
+    top: -30px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 200px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    letter-spacing: -8px;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: var(--green);
+    color: var(--ink);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 0.95;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    margin-bottom: 18px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--green);
+  }
+  .hero p {
+    font-size: 14px;
+    color: var(--slate);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+  .hero-kpis {
+    display: flex;
+    gap: 32px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .kpi { border-left: 3px solid var(--green); padding-left: 14px; }
+  .kpi-n { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; color: var(--white); line-height: 1; }
+  .kpi-l { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* ══════════════════════════════════════════
+     MAIN GRID
+  ══════════════════════════════════════════ */
+  .main { max-width: 1100px; margin: 0 auto; padding: 56px 32px; }
+
+  /* ══════════════════════════════════════════
+     FLOW STRIP (horizontal números grandes)
+  ══════════════════════════════════════════ */
+  .flow-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 56px;
+    background: var(--ink);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .flow-cell {
+    background: var(--ink);
+    padding: 32px 24px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+    cursor: default;
+  }
+  .flow-cell:hover { background: #141a2e; }
+  .flow-cell::before {
+    content: attr(data-n);
+    position: absolute;
+    right: -8px;
+    bottom: -20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 110px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .flow-cell-arrow {
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 2px;
+  }
+  .cell-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+  .dot-green  { background: var(--green);  color: var(--ink); }
+  .dot-lime   { background: var(--lime);   color: var(--ink); }
+  .dot-amber  { background: var(--amber);  color: var(--ink); }
+  .dot-white  { background: rgba(255,255,255,0.1); color: var(--white); }
+
+  .cell-step { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--slate); margin-bottom: 6px; }
+  .cell-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--white); text-transform: uppercase; line-height: 1.1; margin-bottom: 8px; }
+  .cell-desc  { font-size: 11.5px; color: var(--slate); line-height: 1.6; }
+  .cell-tag   { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; margin-top: 12px; }
+  .tag-green  { background: rgba(0,196,90,0.15); color: var(--green); }
+  .tag-lime   { background: rgba(212,245,60,0.15); color: var(--lime); }
+  .tag-amber  { background: rgba(255,170,0,0.15); color: var(--amber); }
+
+  /* separador vertical entre celdas */
+  .flow-cell + .flow-cell {
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ══════════════════════════════════════════
+     SECCIÓN: EJECUCIÓN EN CAMPO
+  ══════════════════════════════════════════ */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #d0d4d8;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3px;
+    margin-bottom: 56px;
+  }
+
+  .field-card {
+    background: var(--white);
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .field-card::after {
+    content: attr(data-icon);
+    position: absolute;
+    right: 16px;
+    bottom: 8px;
+    font-size: 64px;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+  .field-card:first-child { border-radius: 6px 0 0 6px; }
+  .field-card:last-child  { border-radius: 0 6px 6px 0; }
+
+  .fc-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--slate);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .fc-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .fc-title-green { color: #00943f; }
+  .fc-title-blue  { color: #1a56b0; }
+  .fc-title-purple{ color: #7b1fa2; }
+
+  .fc-line {
+    width: 32px;
+    height: 3px;
+    margin-bottom: 14px;
+    border-radius: 2px;
+  }
+  .fc-line-green  { background: #00943f; }
+  .fc-line-blue   { background: #1a56b0; }
+  .fc-line-purple { background: #7b1fa2; }
+  .fc-dot-green  { background: #00943f; }
+  .fc-dot-blue   { background: #1a56b0; }
+  .fc-dot-purple { background: #7b1fa2; }
+  .fc-desc { font-size: 12px; color: #555; line-height: 1.65; }
+  .fc-pills { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
+  .fc-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #444;
+  }
+  .fc-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ══════════════════════════════════════════
+     REGLAS DE NEGOCIO
+  ══════════════════════════════════════════ */
+  .rules-section {
+    background: var(--ink);
+    border-radius: 6px;
+    padding: 36px 40px;
+    margin-bottom: 56px;
+  }
+  .rules-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .rules-head h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+  .rules-head span {
+    font-size: 11px;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .rule {
+    border-top: 2px solid rgba(255,255,255,0.08);
+    padding-top: 16px;
+  }
+  .rule-icon { font-size: 20px; margin-bottom: 10px; }
+  .rule-title { font-size: 12px; font-weight: 700; color: var(--white); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .rule-desc { font-size: 11px; color: var(--slate); line-height: 1.6; }
+  .rule-accent { color: var(--green); font-weight: 700; }
+
+  /* ══════════════════════════════════════════
+     RESULTADO FINAL
+  ══════════════════════════════════════════ */
+  .outcome-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3px;
+    margin-bottom: 48px;
+  }
+  .outcome-card {
+    padding: 28px 24px;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .outcome-card:first-child { border-radius: 6px 0 0 6px; }
+  .outcome-card:last-child  { border-radius: 0 6px 6px 0; }
+  .oc-green  { background: var(--green); }
+  .oc-lime   { background: var(--lime);  }
+  .oc-amber  { background: var(--amber); }
+  .oc-icon { font-size: 28px; margin-bottom: 12px; }
+  .oc-title { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; text-transform: uppercase; color: var(--ink); margin-bottom: 6px; }
+  .oc-desc  { font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.55; }
+
+  /* ══════════════════════════════════════════
+     FOOTER
+  ══════════════════════════════════════════ */
+  .foot {
+    background: var(--ink);
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .foot-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .foot-brand em { font-style: normal; color: var(--green); }
+  .foot-copy { font-size: 11px; color: var(--slate); }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .flow-strip   { grid-template-columns: 1fr 1fr; }
+    .field-grid   { grid-template-columns: 1fr; gap: 3px; }
+    .field-card:first-child { border-radius: 6px 6px 0 0; }
+    .field-card:last-child  { border-radius: 0 0 6px 6px; }
+    .rules-grid   { grid-template-columns: 1fr 1fr; }
+    .outcome-strip{ grid-template-columns: 1fr; gap: 3px; }
+    .outcome-card:first-child { border-radius: 6px 6px 0 0; }
+    .outcome-card:last-child  { border-radius: 0 0 6px 6px; }
+    .hero { padding: 40px 24px 36px; }
+    .main { padding: 40px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-tag">Proceso operativo</div>
+  <h1>Flujo de<br><em>servicio</em></h1>
+  <p>Del contrato firmado a la revisión completada, con evidencia fotográfica, formulario técnico y firma del cliente.</p>
+  <div class="hero-kpis">
+    <div class="kpi"><div class="kpi-n">4</div><div class="kpi-l">Etapas del proceso</div></div>
+    <div class="kpi"><div class="kpi-n">3</div><div class="kpi-l">Pasos en campo</div></div>
+    <div class="kpi"><div class="kpi-n">100%</div><div class="kpi-l">Trazabilidad digital</div></div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- Flow strip -->
+  <div class="flow-strip">
+    <div class="flow-cell" data-n="01">
+      <div class="cell-dot dot-green">📃</div>
+      <div class="cell-step">Etapa 01</div>
+      <div class="cell-title">Contrato<br>de servicio</div>
+      <div class="cell-desc">El cliente firma el contrato. Se definen servicios, productos y zonas físicas de trabajo.</div>
+      <span class="cell-tag tag-green">Origen</span>
+    </div>
+    <div class="flow-cell" data-n="02">
+      <div class="cell-dot dot-lime">🔧</div>
+      <div class="cell-step">Etapa 02</div>
+      <div class="cell-title">Orden de<br>trabajo</div>
+      <div class="cell-desc">El técnico genera la orden de trabajo vinculada al contrato del cliente.</div>
+      <span class="cell-tag tag-lime">Planificación</span>
+    </div>
+    <div class="flow-cell" data-n="03">
+      <div class="cell-dot dot-amber">📅</div>
+      <div class="cell-step">Etapa 03</div>
+      <div class="cell-title">Citas de<br>servicio</div>
+      <div class="cell-desc">Por cada servicio se crea una cita con las zonas a tratar y el número de visitas.</div>
+      <span class="cell-tag tag-amber">Programación</span>
+    </div>
+    <div class="flow-cell" data-n="04">
+      <div class="cell-dot dot-white">✅</div>
+      <div class="cell-step">Etapa 04</div>
+      <div class="cell-title">Revisiones<br>en campo</div>
+      <div class="cell-desc">El técnico ejecuta cada revisión: fotos, formulario y firma. La cita cierra automáticamente.</div>
+      <span class="cell-tag tag-green">Ejecución</span>
+    </div>
+  </div>
+
+  <!-- Sección campo -->
+  <div class="section-label">Detalle — ejecución en campo</div>
+  <div class="field-grid">
+
+    <div class="field-card" data-icon="📷">
+      <div class="fc-num">Paso 01 / 03</div>
+      <div class="fc-title fc-title-green">Fotografía</div>
+      <div class="fc-line fc-line-green"></div>
+      <div class="fc-desc">El técnico captura evidencia visual con la cámara del dispositivo.</div>
+      <div class="fc-pills">
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-green"></div>Sello con coordenadas GPS</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-green"></div>Fecha, hora y número de OT</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-green"></div>Nombre del técnico asignado</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-green"></div>Galería por revisión</div>
+      </div>
+    </div>
+
+    <div class="field-card" data-icon="📝">
+      <div class="fc-num">Paso 02 / 03</div>
+      <div class="fc-title fc-title-blue">Formulario</div>
+      <div class="fc-line fc-line-blue"></div>
+      <div class="fc-desc">Se llena el checklist de condiciones encontradas según el tipo de servicio contratado.</div>
+      <div class="fc-pills">
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-blue"></div>Plantilla específica por servicio</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-blue"></div>Criterios con resultado</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-blue"></div>Deficiencias con descripción</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-blue"></div>Observaciones libres</div>
+      </div>
+    </div>
+
+    <div class="field-card" data-icon="✍️">
+      <div class="fc-num">Paso 03 / 03</div>
+      <div class="fc-title fc-title-purple">Firma</div>
+      <div class="fc-line fc-line-purple"></div>
+      <div class="fc-desc">El cliente valida el servicio con firma digital en pantalla. Paso obligatorio para cerrar.</div>
+      <div class="fc-pills">
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-purple"></div>Trazo táctil sobre pantalla</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-purple"></div>Sello con datos verificados</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-purple"></div>Nombre del firmante registrado</div>
+        <div class="fc-pill"><div class="fc-pill-dot fc-dot-purple"></div>Obligatoria — no se puede omitir</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Reglas de negocio -->
+  <div class="rules-section">
+    <div class="rules-head">
+      <h2>Automatizaciones</h2>
+      <span>activas en Salesforce</span>
+    </div>
+    <div class="rules-grid">
+      <div class="rule">
+        <div class="rule-icon">⚡</div>
+        <div class="rule-title">Estado automático</div>
+        <div class="rule-desc">La cita pasa a <span class="rule-accent">"En curso"</span> al iniciar la primera revisión y a <span class="rule-accent">"Completado"</span> cuando todas terminan.</div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon">🔒</div>
+        <div class="rule-title">Firma obligatoria</div>
+        <div class="rule-desc">No es posible cerrar una revisión sin la firma del cliente. El botón permanece bloqueado.</div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon">📋</div>
+        <div class="rule-title">Plantilla por servicio</div>
+        <div class="rule-desc">Cada revisión tiene su formulario asignado desde el contrato, sin configuración manual.</div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon">📍</div>
+        <div class="rule-title">Evidencia geolocalizada</div>
+        <div class="rule-desc">Cada foto queda sellada con GPS, fecha, técnico y número de orden. Infalsificable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="section-label">Resultado al completar el servicio</div>
+  <div class="outcome-strip">
+    <div class="outcome-card oc-green">
+      <div class="oc-icon">📊</div>
+      <div class="oc-title">Cita completada</div>
+      <div class="oc-desc">El estado se actualiza automáticamente. Sin intervención manual del operador.</div>
+    </div>
+    <div class="outcome-card oc-lime">
+      <div class="oc-icon">📄</div>
+      <div class="oc-title">Reporte PDF</div>
+      <div class="oc-desc">Documento con zonas, checklist, fotos geolocalizadas y firma del cliente.</div>
+    </div>
+    <div class="outcome-card oc-amber">
+      <div class="oc-icon">🗂️</div>
+      <div class="oc-title">Trazabilidad</div>
+      <div class="oc-desc">Historial completo en Salesforce por cliente, técnico, cita y revisión.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ FOOTER ═════════════════════════════════════════════════════ -->
+<div class="foot">
+  <div class="foot-brand">P<em>Y</em>ATZ</div>
+  <div class="foot-copy">Proceso operativo · Field Service · 2026</div>
+</div>
+
+</body>
+</html>

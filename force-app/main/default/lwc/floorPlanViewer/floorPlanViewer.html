@@ -1,0 +1,109 @@
+<template>
+    <lightning-card title="Plano de Instalación" icon-name="utility:map">
+        <div slot="actions">
+            <lightning-button-icon
+                icon-name="utility:refresh"
+                alternative-text="Actualizar"
+                title="Actualizar"
+                onclick={handleRefresh}>
+            </lightning-button-icon>
+        </div>
+
+        <div class="slds-p-around_medium">
+
+            <!-- Sin imagen -->
+            <template if:false={imageUrl}>
+                <template if:false={isLoading}>
+                    <div class="no-image-box slds-text-align_center slds-p-around_large">
+                        <lightning-icon icon-name="utility:image" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-bottom_small">Sin plano cargado</p>
+                        <p class="slds-text-body_regular slds-m-bottom_medium slds-text-color_weak">Sube una imagen para colocar puntos de control</p>
+                        <lightning-file-upload
+                            label="Subir Plano"
+                            name="planoUpload"
+                            accept=".jpg,.jpeg,.png,.gif,.webp"
+                            record-id={recordId}
+                            onuploadfinished={handleUploadFinished}
+                            multiple="false">
+                        </lightning-file-upload>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Con imagen -->
+            <template if:true={imageUrl}>
+                <!-- Barra resumen -->
+                <div class="status-bar slds-m-bottom_small">
+                    <span class="status-pill pill-active"><span class="pill-dot"></span>{countActive} Activos</span>
+                    <span class="status-pill pill-triggered"><span class="pill-dot"></span>{countTriggered} Activados</span>
+                    <span class="status-pill pill-inactive"><span class="pill-dot"></span>{countInactive} Inactivos</span>
+                    <span class="hint-text">· Clic en área vacía para agregar punto</span>
+                </div>
+
+                <!-- Contenedor plano — MISMO patrón que versión original funcional -->
+                <div class="floor-plan-wrapper" onmousedown={handleCanvasClick}>
+                    <img
+                        class="floor-plan-image"
+                        src={imageUrl}
+                        alt="Plano"
+                        onload={handleImageLoad}
+                        draggable="false"
+                    />
+                    <svg class="floor-plan-svg" xmlns="http://www.w3.org/2000/svg">
+                        <template for:each={controlPoints} for:item="point">
+                            <g
+                                key={point.Id}
+                                data-id={point.Id}
+                                onclick={handlePointClick}
+                                class="cp-group"
+                                style={point.svgTransform}>
+
+                                <!-- Círculo exterior blanco (sombra) -->
+                                <circle cx="0" cy="0" r="17" fill="white" stroke="white" stroke-width="0" class="cp-shadow"/>
+                                <!-- Círculo principal -->
+                                <circle cx="0" cy="0" r="14" fill={point.statusColor} stroke="white" stroke-width="2.5" class="cp-circle"/>
+                                <!-- Letra tipo -->
+                                <text x="0" y="1" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="9" font-weight="800" class="cp-type">{point.typeAbbr}</text>
+                                <!-- Número debajo -->
+                                <text x="0" y="24" text-anchor="middle" fill={point.statusColor} font-size="7" font-weight="700" class="cp-num">{point.pointNum}</text>
+
+                            </g>
+                        </template>
+                    </svg>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="legend-bar slds-m-top_small">
+                    <span class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>Activo</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>Activado</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Inactivo</span>
+                    <span class="legend-types">T=Trampa · B=Cebo · S=Sensor · I=Inspección · O=Otro</span>
+                </div>
+            </template>
+
+            <template if:true={isLoading}>
+                <div class="slds-text-align_center slds-p-around_large">
+                    <lightning-spinner alternative-text="Cargando..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:true={errorMessage}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-top_small" role="alert">
+                    <span>{errorMessage}</span>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <template if:true={showModal}>
+        <c-control-point-modal
+            mode={modalMode}
+            floor-plan-id={recordId}
+            x-percent={pendingX}
+            y-percent={pendingY}
+            control-point-id={selectedPointId}
+            onpointsaved={handlePointSaved}
+            onclose={handleModalClose}>
+        </c-control-point-modal>
+    </template>
+</template>

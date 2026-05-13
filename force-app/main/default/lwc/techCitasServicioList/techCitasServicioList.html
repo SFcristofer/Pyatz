@@ -1,0 +1,143 @@
+<template>
+    <lightning-card icon-name="standard:service_appointment">
+        <div slot="title" class="card-title-slot">
+            <span class="slds-text-heading_small">Citas de Servicio</span>
+        </div>
+        <div slot="actions">
+            <lightning-button
+                label="PDF Consolidado"
+                icon-name="utility:pdf"
+                variant="brand"
+                disabled={isLoading}
+                onclick={handleUnifiedPDF}>
+            </lightning-button>
+        </div>
+
+        <!-- Modal PDF -->
+        <template if:true={showModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            onclick={handleCloseModal}>
+                            <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">{modalTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content modal-body">
+                        <iframe src={modalUrl} class="pdf-iframe" title="PDF"></iframe>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+
+            <!-- Loading -->
+            <template if:true={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Cargando citas..." size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Error -->
+            <template if:true={hasError}>
+                <div class="error-box slds-m-top_small">
+                    <lightning-icon icon-name="utility:error" size="x-small" variant="error"></lightning-icon>
+                    <span class="slds-m-left_x-small">{errorMessage}</span>
+                </div>
+            </template>
+
+            <!-- Empty -->
+            <template if:true={isEmpty}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <p class="slds-text-color_weak slds-text-body_small">Sin citas de servicio registradas.</p>
+                </div>
+            </template>
+
+            <!-- Cards -->
+            <template if:true={hasCitas}>
+                <div class="citas-grid">
+                    <template for:each={citas} for:item="cita">
+                        <div key={cita.id} class="cita-card">
+
+                            <!-- Header -->
+                            <div class="card-header">
+                                <div class="card-header-left">
+                                    <a class="cita-number-link"
+                                       data-sa-id={cita.id}
+                                       onclick={handleOpenSA}
+                                       href="javascript:void(0)">
+                                        {cita.appointmentNumber}
+                                    </a>
+                                    <span class="cita-zonas">{cita.zonasTratar}</span>
+                                </div>
+                                <div class="card-header-right">
+                                    <span class={cita.statusClass}>{cita.status}</span>
+                                    <button class="btn-pdf-sa"
+                                        data-sa-id={cita.id}
+                                        data-sa-num={cita.appointmentNumber}
+                                        onclick={handleSaPDF}
+                                        title="Ver PDF de esta Cita de Servicio">
+                                        PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Revisiones summary -->
+                            <div class="revisiones-summary">
+                                <span class="rev-label-head">Revisiones</span>
+                                <span class="rev-fraction">
+                                    <strong class="rev-completed">{cita.revisionesCompletadas}</strong>
+                                    <span class="rev-sep"> / </span>
+                                    <span class="rev-total">{cita.totalRevisiones}</span>
+                                    <span class="rev-suffix"> completadas</span>
+                                </span>
+                            </div>
+
+                            <!-- Progress bar -->
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style={cita.progressStyle}></div>
+                            </div>
+
+                            <!-- Revisiones list -->
+                            <template if:true={cita.hasRevisiones}>
+                                <div class="revisiones-list">
+                                    <template for:each={cita.revisiones} for:item="rev">
+                                        <div key={rev.id} class="revision-row">
+                                            <span class="rev-name">{rev.name}</span>
+                                            <!-- Formato -->
+                                            <span class="rev-formato">{rev.tipoReporte}</span>
+                                            <!-- Status -->
+                                            <span class={rev.statusClass}>{rev.status}</span>
+                                            <!-- Fotos -->
+                                            <template if:true={rev.hasFotos}>
+                                                <span class="rev-badge rev-badge-fotos" title="Fotos de evidencia">
+                                                    📷 {rev.totalFotos}
+                                                </span>
+                                            </template>
+                                            <!-- No conformidades -->
+                                            <template if:true={rev.hasNC}>
+                                                <span class="rev-badge rev-badge-nc" title="No conformidades">
+                                                    ⚠️ {rev.totalNoConformidades} NC
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- No revisiones -->
+                            <template if:false={cita.hasRevisiones}>
+                                <div class="no-revisiones">Sin revisiones registradas.</div>
+                            </template>
+
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

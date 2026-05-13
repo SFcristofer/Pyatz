@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>No_Cambiar_Plantilla_Si_Contestada</fullName>
+    <active>true</active>
+    <description>Impide cambiar la Plantilla de Formulario si el formulario ya fue contestado o la revisión está completada.</description>
+    <errorConditionFormula>AND(
+    ISCHANGED(Plantilla_de_Formulario__c),
+    OR(
+        NOT(ISBLANK(Datos_Formulario__c)),
+        ISPICKVAL(Status__c, "Completada")
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Plantilla_de_Formulario__c</errorDisplayField>
+    <errorMessage>No se puede cambiar la Plantilla de Formulario porque el formulario ya fue contestado.</errorMessage>
+</ValidationRule>

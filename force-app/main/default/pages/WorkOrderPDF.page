@@ -1,0 +1,405 @@
+<apex:page standardController="WorkOrder" extensions="WorkOrderPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+    <html>
+        <head>
+            <style type="text/css">
+                @page { size: letter; margin: 0; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
+                @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
+
+                body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:10pt; color:#333; line-height:1.4; margin:0; padding:0; }
+
+                .header-img   { width:100%; display:block; position:fixed; top:0; left:0; z-index:1000; }
+                .footer-img   { width:100%; display:block; position:fixed; bottom:0; left:0; height:1.5cm; z-index:1000; }
+                .watermark    { position:fixed; top:30%; width:100%; z-index:-1; }
+                .page-counter { position:fixed; top:0.4cm; right:15pt; font-size:7.5pt; color:#fff; z-index:1001; }
+                .pgNum:before   { content: counter(page); }
+                .pgCount:before { content: counter(pages); }
+
+                .content-body { padding:0 28pt; }
+
+                /* ── Mini-cabecera de página ── */
+                .page-header-tbl  { width:100%; border-collapse:collapse; margin-bottom:10pt; }
+                .page-hdr-account { font-size:13pt; font-weight:bold; color:#1a2035; }
+                .page-hdr-sub     { font-size:9pt; color:#555; margin-top:2pt; }
+                .page-hdr-company { font-size:8pt; color:#555; text-align:right; line-height:1.5; }
+
+                /* ── Banner OT ── */
+                .ot-banner        { background:#1a2035; color:#fff; padding:10pt 14pt; margin-bottom:14pt; }
+                .ot-label         { font-size:7pt; text-transform:uppercase; color:#8899bb; letter-spacing:0.5pt; margin-bottom:2pt; }
+                .ot-number        { font-size:26pt; font-weight:bold; color:#fff; }
+                .ot-meta-lbl      { font-size:7pt; text-transform:uppercase; color:#8899bb; letter-spacing:0.5pt; }
+                .ot-meta-val      { font-size:9pt; font-weight:bold; color:#fff; margin-top:2pt; }
+
+                /* ── Título de sección ── */
+                .section-title    { font-size:9pt; font-weight:bold; letter-spacing:1.5pt; text-transform:uppercase;
+                                    color:#1b5e20; border-bottom:2pt solid #1b5e20; padding-bottom:4pt; margin-bottom:10pt; }
+
+                /* ── Tarjeta SA ── */
+                .sa-card          { border:0.5pt solid #ddd; margin-bottom:10pt; page-break-inside:avoid; }
+                .sa-hdr           { background:#1b5e20; color:#fff; padding:7pt 10pt; }
+                .sa-badge         { background:#fff; color:#1b5e20; font-size:7.5pt; font-weight:bold;
+                                    padding:1.5pt 6pt; border-radius:8pt; margin-right:6pt; }
+                .sa-title         { font-size:10.5pt; font-weight:bold; }
+                .sa-sub           { font-size:8pt; color:#b2dfdb; margin-top:3pt; }
+
+                /* Estado dots */
+                .dot-green  { color:#69f0ae; font-size:9pt; margin-right:3pt; }
+                .dot-orange { color:#ffab40; font-size:9pt; margin-right:3pt; }
+                .dot-gray   { color:#bdbdbd; font-size:9pt; margin-right:3pt; }
+
+                /* Cuerpo SA */
+                .sa-body    { padding:8pt 10pt; }
+                .fld-lbl    { font-size:7pt; text-transform:uppercase; color:#888; margin-bottom:1pt; }
+                .fld-val    { font-size:9.5pt; font-weight:bold; color:#222; margin-bottom:6pt; }
+
+                /* Observaciones */
+                .obs-box    { border-left:3pt solid #e65100; background:#fff8e1; padding:5pt 8pt; margin-top:4pt; margin-bottom:6pt; }
+                .obs-lbl    { font-size:7.5pt; font-weight:bold; color:#e65100; text-transform:uppercase; margin-bottom:2pt; }
+                .obs-txt    { font-size:9pt; color:#555; }
+
+                /* Fotos */
+                .photos-lbl    { font-size:7pt; text-transform:uppercase; color:#888; margin-bottom:4pt; }
+                .photo-tbl     { border-collapse:collapse; }
+                .photo-cell    { vertical-align:top; padding:2pt; text-align:center; }
+                .photo-img     { width:110pt; height:80pt; border:0.5pt solid #ddd; }
+                .photo-caption { font-size:6.5pt; color:#999; text-align:center; margin-top:2pt; width:110pt; }
+
+                /* Firma técnico */
+                .sig-box       { border:0.5pt dashed #bbb; padding:4pt; text-align:center; margin-top:6pt; }
+                .sig-lbl       { font-size:7pt; text-transform:uppercase; color:#888; margin-bottom:4pt; }
+                .sig-img       { height:38pt; width:auto; }
+                .sig-name      { font-size:8pt; color:#444; border-top:0.5pt solid #ccc; padding-top:3pt; margin-top:3pt; }
+
+                /* ── Certificado ── */
+                .cert-title    { font-size:15pt; font-weight:bold; color:#1a2035; margin-bottom:2pt; }
+                .cert-subtitle { font-size:9.5pt; color:#666; margin-bottom:10pt; }
+                .cert-hr       { border:none; border-top:1pt solid #ddd; margin:8pt 0; }
+                .cert-info-lbl { font-size:8pt; color:#777; }
+                .cert-info-val { font-size:9.5pt; font-weight:bold; color:#222; }
+
+                .stat-tbl      { width:100%; border-collapse:collapse; margin:10pt 0; }
+                .stat-cell     { border:0.5pt solid #e0e0e0; padding:8pt; text-align:center; width:25%; background:#f9f9f9; }
+                .stat-num      { font-size:22pt; font-weight:bold; color:#1b5e20; }
+                .stat-lbl-txt  { font-size:7pt; text-transform:uppercase; color:#888; margin-top:2pt; letter-spacing:0.5pt; }
+
+                .cert-text     { font-size:9pt; text-align:justify; line-height:1.7; margin:10pt 0; color:#444; }
+
+                .cert-sig-tbl  { width:100%; border-collapse:collapse; margin-top:30pt; }
+                .cert-sig-td   { text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt; }
+                .cert-sig-space { height:60pt; display:block; }
+                .cert-sig-line  { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; }
+                .cert-sig-role  { font-size:7.5pt; color:#777; margin-top:2pt; }
+            </style>
+        </head>
+        <body>
+            <img src="{!$Resource.HeaderPDF}" class="header-img"/>
+            <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
+            <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
+
+            <!-- ═══ SECCIÓN 1: CABECERA + CITAS DE SERVICIO ════════════════════ -->
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body">
+
+                                <!-- Mini-cabecera -->
+                                <table class="page-header-tbl">
+                                    <tr>
+                                        <td width="55%" style="vertical-align:top; padding:0;">
+                                            <div class="page-hdr-account">{!workOrderRecord.Account.Name}</div>
+                                            <div class="page-hdr-sub">Orden de Trabajo: {!workOrderNumberShort}&#160;&#183;&#160;Fecha: {!fechaEjecucion}</div>
+                                            <div class="page-hdr-sub">Agente: {!workOrderRecord.CreatedBy.Name}</div>
+                                        </td>
+                                        <td width="45%" style="vertical-align:top; padding:0;">
+                                            <div class="page-hdr-company">
+                                                PYATZ INGENIER&#205;A BIOTECNOL&#211;GICA S.A. DE C.V.<br/>
+                                                Callej&#243;n General Anaya #11 Col. Churubusco<br/>
+                                                Ciudad De M&#233;xico &#183; 04120 Coyoac&#225;n<br/>
+                                                www.pyatz.com.mx &#183; Tel: 5556878837
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Banner OT -->
+                                <div class="ot-banner">
+                                    <table style="width:100%; border-collapse:collapse;">
+                                        <tr>
+                                            <td width="32%" style="vertical-align:bottom; padding:0;">
+                                                <div class="ot-label">Orden de Trabajo</div>
+                                                <div class="ot-number">{!workOrderNumberShort}</div>
+                                            </td>
+                                            <td width="17%" style="vertical-align:top; padding:0 4pt;">
+                                                <div class="ot-meta-lbl">Cuenta</div>
+                                                <div class="ot-meta-val">{!workOrderRecord.Account.Name}</div>
+                                            </td>
+                                            <td width="17%" style="vertical-align:top; padding:0 4pt;">
+                                                <div class="ot-meta-lbl">Estado</div>
+                                                <div class="ot-meta-val">{!workOrderRecord.Status}</div>
+                                            </td>
+                                            <td width="17%" style="vertical-align:top; padding:0 4pt;">
+                                                <div class="ot-meta-lbl">Prioridad</div>
+                                                <div class="ot-meta-val">{!workOrderRecord.Priority}</div>
+                                            </td>
+                                            <td width="17%" style="vertical-align:top; padding:0 4pt;">
+                                                <div class="ot-meta-lbl">Tipo</div>
+                                                <div class="ot-meta-val">{!workOrderRecord.WorkType.Name}</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <!-- Título sección -->
+                                <div class="section-title">C I T A S &nbsp; D E &nbsp; S E R V I C I O</div>
+
+                                <!-- Tarjetas SA -->
+                                <apex:repeat value="{!saWrappers}" var="w">
+                                    <div class="sa-card">
+
+                                        <!-- Header de tarjeta -->
+                                        <div class="sa-hdr">
+                                            <table style="width:100%; border-collapse:collapse;">
+                                                <tr>
+                                                    <td style="vertical-align:middle; padding:0;">
+                                                        <span class="sa-badge">{!w.sa.AppointmentNumber}</span>
+                                                        <span class="sa-title">{!w.sa.Subject}</span>
+                                                        <apex:outputPanel rendered="{!NOT(ISBLANK(w.sa.ServiceTerritory.Name))}" layout="none">
+                                                            <div class="sa-sub">{!w.sa.ServiceTerritory.Name}</div>
+                                                        </apex:outputPanel>
+                                                    </td>
+                                                    <td style="text-align:right; vertical-align:middle; padding:0; white-space:nowrap;">
+                                                        <apex:outputPanel rendered="{!w.isCompleted}" layout="none">
+                                                            <span class="dot-green">&#9679;</span><span style="font-size:9pt;">Completada</span>
+                                                        </apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!w.isIncident}" layout="none">
+                                                            <span class="dot-orange">&#9679;</span><span style="font-size:9pt;">Con Incidencia</span>
+                                                        </apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!AND(NOT(w.isCompleted), NOT(w.isIncident))}" layout="none">
+                                                            <span class="dot-gray">&#9679;</span><span style="font-size:9pt;">{!w.sa.Status}</span>
+                                                        </apex:outputPanel>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                        <!-- Cuerpo: datos izq + fotos der -->
+                                        <div class="sa-body">
+                                            <table style="width:100%; border-collapse:collapse;">
+                                                <tr>
+                                                    <!-- Columna izquierda: campos -->
+                                                    <td width="38%" style="vertical-align:top; padding-right:10pt;">
+                                                        <div class="fld-lbl">N&#250;mero de Cita</div>
+                                                        <div class="fld-val">{!w.sa.AppointmentNumber}</div>
+
+                                                        <apex:outputPanel rendered="{!NOT(ISBLANK(w.sa.ServiceTerritory.Name))}" layout="none">
+                                                            <div class="fld-lbl">Territorio</div>
+                                                            <div class="fld-val">{!w.sa.ServiceTerritory.Name}</div>
+                                                        </apex:outputPanel>
+
+                                                        <div class="fld-lbl">Estado</div>
+                                                        <div class="fld-val">{!w.sa.Status}</div>
+
+                                                        <!-- Observaciones -->
+                                                        <apex:outputPanel rendered="{!w.hasObservation}" layout="none">
+                                                            <div class="obs-box">
+                                                                <div class="obs-lbl">Observaciones</div>
+                                                                <div class="obs-txt">{!w.sa.Description}</div>
+                                                            </div>
+                                                        </apex:outputPanel>
+
+                                                        <!-- Firma del cliente en la cita -->
+                                                        <div class="sig-box">
+                                                            <div class="sig-lbl">Firma del Cliente</div>
+                                                            <apex:outputPanel rendered="{!NOT(ISBLANK(w.saSignatureUrl))}" layout="none">
+                                                                <img src="{!w.saSignatureUrl}" class="sig-img"/>
+                                                            </apex:outputPanel>
+                                                            <div class="sig-name">{!w.saSignatureName}</div>
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- Columna derecha: fotos -->
+                                                    <td width="62%" style="vertical-align:top;">
+                                                        <apex:outputPanel rendered="{!w.hasPhotos}" layout="none">
+                                                            <div class="photos-lbl">Evidencia Fotogr&#225;fica &#183; {!w.photos.size} foto(s)</div>
+                                                            <table class="photo-tbl">
+                                                                <tr>
+                                                                    <apex:repeat value="{!w.photos}" var="p">
+                                                                        <td class="photo-cell">
+                                                                            <img src="{!p.url}" class="photo-img"/>
+                                                                            <div class="photo-caption">{!p.title}</div>
+                                                                        </td>
+                                                                    </apex:repeat>
+                                                                </tr>
+                                                            </table>
+                                                        </apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!NOT(w.hasPhotos)}" layout="none">
+                                                            <div class="photos-lbl">Sin evidencia fotogr&#225;fica</div>
+                                                        </apex:outputPanel>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </apex:repeat>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ═══ SECCIÓN 2: CERTIFICADO DE SERVICIO ═══════════════════════════ -->
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;">
+                            <div class="content-body">
+
+                                <div class="cert-title">Certificado de Servicio</div>
+                                <div class="cert-subtitle">Orden de Trabajo No. {!workOrderNumberShort}&#160;&#183;&#160;{!workOrderRecord.WorkType.Name}</div>
+                                <hr class="cert-hr"/>
+
+                                <!-- Info tabla -->
+                                <table style="width:100%; border-collapse:collapse; margin-bottom:4pt;">
+                                    <tr>
+                                        <td width="50%" style="padding:3pt 0;">
+                                            <span class="cert-info-lbl">Cuenta:&#160;</span>
+                                            <span class="cert-info-val">{!workOrderRecord.Account.Name}</span>
+                                        </td>
+                                        <td width="50%" style="padding:3pt 0;">
+                                            <span class="cert-info-lbl">Fecha de ejecuci&#243;n:&#160;</span>
+                                            <span class="cert-info-val">{!fechaEjecucion}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:3pt 0;">
+                                            <span class="cert-info-lbl">Agente verificador:&#160;</span>
+                                            <span class="cert-info-val">{!workOrderRecord.CreatedBy.Name}</span>
+                                        </td>
+                                        <td style="padding:3pt 0;">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(techSigName))}" layout="none">
+                                                <span class="cert-info-lbl">T&#233;cnico aplicador:&#160;</span>
+                                                <span class="cert-info-val">{!techSigName}</span>
+                                            </apex:outputPanel>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:3pt 0;">
+                                            <span class="cert-info-lbl">Total de citas:&#160;</span>
+                                            <span class="cert-info-val">{!totalCitas} citas de servicio</span>
+                                        </td>
+                                        <td style="padding:3pt 0;">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(territorio))}" layout="none">
+                                                <span class="cert-info-lbl">Territorio:&#160;</span>
+                                                <span class="cert-info-val">{!territorio}</span>
+                                            </apex:outputPanel>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Estadísticas -->
+                                <table class="stat-tbl">
+                                    <tr>
+                                        <td class="stat-cell">
+                                            <div class="stat-num">{!citasCompletadas}</div>
+                                            <div class="stat-lbl-txt">Citas Completadas</div>
+                                        </td>
+                                        <td class="stat-cell">
+                                            <div class="stat-num" style="color:#e65100;">{!citasConIncidencia}</div>
+                                            <div class="stat-lbl-txt">Con Incidencia</div>
+                                        </td>
+                                        <td class="stat-cell">
+                                            <div class="stat-num">{!totalFotos}</div>
+                                            <div class="stat-lbl-txt">Fotos Registradas</div>
+                                        </td>
+                                        <td class="stat-cell">
+                                            <div class="stat-num">{!totalPuntos}</div>
+                                            <div class="stat-lbl-txt">Puntos de Control</div>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Texto del certificado -->
+                                <p class="cert-text">
+                                    El presente certificado hace constar que el servicio de revisi&#243;n y mantenimiento de
+                                    dispositivos de control fue realizado en las instalaciones indicadas, conforme a los
+                                    est&#225;ndares de calidad y procedimientos de Pyatz Ingenier&#237;a Biotecnol&#243;gica
+                                    S.A. de C.V. Las firmas abajo consignadas validan la correcta ejecuci&#243;n de los
+                                    trabajos y la conformidad de los responsables.
+                                </p>
+
+                                <!-- Firmas -->
+                                <table class="cert-sig-tbl">
+                                    <tr>
+                                        <!-- Firma cliente -->
+                                        <td class="cert-sig-td">
+                                            <span class="cert-sig-space">
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigUrl))}" layout="none">
+                                                    <img src="{!clientSigUrl}" style="height:50pt; width:auto;"/>
+                                                </apex:outputPanel>
+                                            </span>
+                                            <div class="cert-sig-line">
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigName))}" layout="none">
+                                                    {!clientSigName}
+                                                </apex:outputPanel>
+                                            </div>
+                                            <div class="cert-sig-role">Recibi&#243; del Cliente</div>
+                                        </td>
+
+                                        <!-- Firma Pyatz -->
+                                        <td class="cert-sig-td">
+                                            <span class="cert-sig-space">
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(pyatzSignatureUrl))}" layout="none">
+                                                    <img src="{!pyatzSignatureUrl}" style="height:50pt; width:auto;"/>
+                                                </apex:outputPanel>
+                                                <apex:outputPanel rendered="{!ISBLANK(pyatzSignatureUrl)}" layout="none">
+                                                    <div style="font-family:'Courier New',monospace; font-size:11pt; color:#0070d2;">{!workOrderRecord.CreatedBy.Name}</div>
+                                                </apex:outputPanel>
+                                            </span>
+                                            <div class="cert-sig-line">{!workOrderRecord.CreatedBy.Name}</div>
+                                            <div class="cert-sig-role">Firma Autorizada Pyatz</div>
+                                        </td>
+
+                                        <!-- Sello / Firma técnico -->
+                                        <td class="cert-sig-td">
+                                            <span class="cert-sig-space" style="text-align:center;">
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(techSigUrl))}" layout="none">
+                                                    <img src="{!techSigUrl}" style="height:50pt; width:auto;"/>
+                                                </apex:outputPanel>
+                                                <apex:outputPanel rendered="{!ISBLANK(techSigUrl)}" layout="none">
+                                                    <img src="{!$Resource.sello}" style="height:55pt; width:auto;"/>
+                                                </apex:outputPanel>
+                                            </span>
+                                            <div class="cert-sig-line">
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(techSigName))}" layout="none">
+                                                    {!techSigName}
+                                                </apex:outputPanel>
+                                            </div>
+                                            <div class="cert-sig-role">T&#233;cnico Aplicador</div>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <img src="{!$Resource.FooterPDF}" class="footer-img"/>
+        </body>
+    </html>
+</apex:page>

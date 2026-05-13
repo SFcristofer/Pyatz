@@ -1,0 +1,105 @@
+<template>
+    <div class="dashboard-wrapper">
+
+        <template if:true={isLoading}>
+            <div class="slds-is-relative slds-p-around_medium">
+                <lightning-spinner alternative-text="Cargando..." size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={hasError}>
+            <div class="slds-notify slds-notify_alert slds-theme_error slds-p-around_x-small">
+                <lightning-icon icon-name="utility:error" size="x-small" variant="inverse" class="slds-m-right_x-small"></lightning-icon>
+                Error cargando datos del cliente.
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <div class="dashboard-bar">
+
+                <!-- ÓRDENES DE TRABAJO -->
+                <div class="dash-card">
+                    <div class="dash-icon">
+                        <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
+                    </div>
+                    <div class="dash-content">
+                        <span class="dash-label">Órdenes de Trabajo</span>
+                        <div class="dash-badges">
+                            <span class="badge badge-green tooltip-wrap">
+                                {woOpen}
+                                <span class="tooltip-box">Abiertas (Nuevas / En ejecución)</span>
+                            </span>
+                            <span class="badge badge-orange tooltip-wrap">
+                                {woClosed}
+                                <span class="tooltip-box">Completadas / Cerradas</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-divider"></div>
+
+                <!-- PRESUPUESTOS -->
+                <div class="dash-card">
+                    <div class="dash-icon">
+                        <lightning-icon icon-name="standard:quotes" size="small"></lightning-icon>
+                    </div>
+                    <div class="dash-content">
+                        <span class="dash-label">Presupuestos</span>
+                        <div class="dash-badges">
+                            <span class="badge badge-green tooltip-wrap">
+                                {quoteActive}
+                                <span class="tooltip-box">Aprobados</span>
+                            </span>
+                            <span class="badge badge-orange tooltip-wrap">
+                                {quotePending}
+                                <span class="tooltip-box">En proceso (Borrador / Pendiente)</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-divider"></div>
+
+                <!-- CONTRATOS -->
+                <div class="dash-card">
+                    <div class="dash-icon">
+                        <lightning-icon icon-name="standard:contract" size="small"></lightning-icon>
+                    </div>
+                    <div class="dash-content">
+                        <span class="dash-label">Contratos</span>
+                        <div class="dash-badges">
+                            <span class="badge badge-green tooltip-wrap">
+                                {scActive}
+                                <span class="tooltip-box">Activados</span>
+                            </span>
+                            <span class="badge badge-orange tooltip-wrap">
+                                {scInactive}
+                                <span class="tooltip-box">Borrador / En proceso de aprobación</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-divider"></div>
+
+                <!-- ZONAS -->
+                <div class="dash-card">
+                    <div class="dash-icon">
+                        <lightning-icon icon-name="standard:location" size="small"></lightning-icon>
+                    </div>
+                    <div class="dash-content">
+                        <span class="dash-label">Zonas de Servicio</span>
+                        <div class="dash-badges">
+                            <span class="badge badge-blue tooltip-wrap">
+                                {zonaCount}
+                                <span class="tooltip-box">Total de zonas registradas</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </template>
+    </div>
+</template>
