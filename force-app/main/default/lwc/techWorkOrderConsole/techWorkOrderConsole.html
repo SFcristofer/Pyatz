@@ -166,7 +166,7 @@
                                     </div>
                                     <template for:each={tra.schedulingRows} for:item="row" for:index="idx">
                                         <div key={row.label} class="scheduling-card slds-grid slds-grid_vertical-align-center slds-p-around_x-small">
-                                            <div class="slds-col slds-size_1-of-12 slds-text-title_bold">{idx + 1}</div>
+                                            <div class="slds-col slds-size_1-of-12 slds-text-title_bold">{row.label}</div>
                                             <div class="slds-col slds-size_3-of-12">
                                                 <lightning-input type="date" variant="label-hidden" value={row.date} data-field="date" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
                                             </div>
