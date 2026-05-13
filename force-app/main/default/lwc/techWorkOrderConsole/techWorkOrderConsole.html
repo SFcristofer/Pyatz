@@ -29,6 +29,11 @@
         <template if:false={isLoading}>
             <!-- 2. DATOS DEL CONTRATO (Vista Consolidada) -->
             <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                    <lightning-icon icon-name="standard:contract" size="small" class="slds-m-right_small"></lightning-icon>
+                    <h2 class="slds-text-heading_small slds-text-title_bold">Contexto del Contrato</h2>
+                </div>
+                <p class="slds-text-color_weak slds-m-bottom_small">Información general del presupuesto y vigencia sincronizada.</p>
                 <div class="slds-grid slds-wrap slds-gutters">
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
                         <span class="slds-text-title_bold">Cliente:</span>
@@ -39,11 +44,11 @@
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
                         <span class="slds-text-title_bold">Vigencia:</span>
                         <p>{contractData.fechaInicio} - {contractData.fechaFin}</p>
-                        <span class="slds-text-title_bold slds-m-top_small d-block">Tratamientos:</span>
+                        <span class="slds-text-title_bold slds-m-top_small d-block">Servicios Vendidos:</span>
                         <p>{contractData.tratamientos}</p>
                     </div>
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-grid slds-grid_vertical-align-end slds-grid_align-end">
-                        <lightning-button label="Ver Presupuesto" icon-name="utility:preview" variant="neutral" onclick={handleViewQuote}></lightning-button>
+                        <lightning-button label="Consultar Presupuesto PDF" icon-name="utility:preview" variant="neutral" onclick={handleViewQuote}></lightning-button>
                     </div>
                 </div>
             </div>
@@ -51,30 +56,34 @@
             <!-- 3. CONFIGURACIÓN DE SEDE Y RESTRICCIONES -->
             <div class="slds-box slds-theme_default slds-m-bottom_medium">
                 <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                    <h2 class="slds-text-heading_small slds-text-title_bold" style="color: #0070d2;">Sede de Operación: {contractData.sedeSeleccionada}</h2>
-                    <span class="slds-badge slds-theme_info">Folio: {contractData.folioSede}</span>
+                    <div>
+                        <h2 class="slds-text-heading_small slds-text-title_bold" style="color: #0070d2;">Configuración de Sede y Disponibilidad</h2>
+                        <p class="slds-text-color_weak">Define la dirección de ejecución y los límites de horario permitidos por el cliente.</p>
+                    </div>
+                    <span class="slds-badge slds-theme_info">Sede Seleccionada: {contractData.sedeSeleccionada}</span>
                 </div>
                 
                 <div class="slds-grid slds-wrap slds-gutters">
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input label="Dirección de Ejecución" value={contractData.direccionSede} data-field="executionAddress" onchange={handleSedeChange}></lightning-input>
+                        <lightning-input label="Dirección de Ejecución del Servicio" value={contractData.direccionSede} data-field="executionAddress" onchange={handleSedeChange} placeholder="Especifique la dirección exacta..."></lightning-input>
                     </div>
                     <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
-                        <lightning-combobox label="Prioridad" value={contractData.prioridad} options={priorityOptions} onchange={handlePriorityChange}></lightning-combobox>
+                        <lightning-combobox label="Prioridad de Atención" value={contractData.prioridad} options={priorityOptions} onchange={handlePriorityChange}></lightning-combobox>
                     </div>
                     <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
-                        <lightning-combobox label="Territorio" value={contractData.territoryId} options={territoryOptions} onchange={handleTerritoryChange}></lightning-combobox>
+                        <lightning-combobox label="Territorio Logístico" value={contractData.territoryId} options={territoryOptions} onchange={handleTerritoryChange}></lightning-combobox>
                     </div>
                 </div>
 
                 <div class="slds-m-top_medium">
-                    <h3 class="slds-text-title_bold slds-m-bottom_small">Horario y Días Permitidos</h3>
+                    <h3 class="slds-text-title_bold slds-m-bottom_none">Días y Turnos de Visita</h3>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">Selecciona los días habilitados para programar citas.</p>
                     <template for:each={sedesList} for:item="sede">
                         <div key={sede.id} class="slds-grid slds-wrap slds-grid_vertical-align-center">
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3 slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
-                                <span>Entre las </span>
+                                <span>Rango Horario:</span>
                                 <lightning-input type="time" variant="label-hidden" value={sede.startTime} data-field="startTime" data-sede-id={sede.id} onchange={handleSedeChange} class="slds-m-horizontal_x-small"></lightning-input>
-                                <span> y las </span>
+                                <span> a </span>
                                 <lightning-input type="time" variant="label-hidden" value={sede.endTime} data-field="endTime" data-sede-id={sede.id} onchange={handleSedeChange} class="slds-m-horizontal_x-small"></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-1">
@@ -96,17 +105,20 @@
                     <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
                         <div class="slds-grid slds-grid_vertical-align-center">
                             <lightning-icon icon-name="standard:service_report" size="small" class="slds-m-right_small"></lightning-icon>
-                            <h3 class="slds-text-heading_small slds-text-title_bold">Tratamiento: {tra.name}</h3>
+                            <div>
+                                <h3 class="slds-text-heading_small slds-text-title_bold">Definición Técnica: {tra.name}</h3>
+                                <p class="slds-text-color_weak">Establece el personal base y las zonas para captura de evidencias.</p>
+                            </div>
                         </div>
-                        <lightning-button label="PUNTOS DE CONTROL / ZONAS" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser}></lightning-button>
+                        <lightning-button label="BUSCAR PUNTOS DE CONTROL" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser} title="Configura las ubicaciones exactas del cliente"></lightning-button>
                     </div>
 
                     <div class="slds-grid slds-wrap slds-gutters">
                         <!-- CONFIGURACIÓN TÉCNICA -->
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
-                            <lightning-input type="number" label="Técnicos Requeridos" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange}></lightning-input>
+                            <lightning-input type="number" label="Personal Requerido" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange} field-level-help="Cantidad de técnicos recomendada para esta labor."></lightning-input>
                             
-                            <label class="slds-form-element__label slds-m-top_small">Duración Estimada (HH:MM:SS)</label>
+                            <label class="slds-form-element__label slds-m-top_small">Duración Técnica Estimada (HH:MM:SS)</label>
                             <div class="slds-grid slds-grid_vertical-align-center">
                                 <lightning-input type="number" variant="label-hidden" value={tra.durationHours} data-field="durationHours" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
                                 <span class="slds-m-horizontal_x-small">:</span>
@@ -115,11 +127,12 @@
                                 <lightning-input type="number" variant="label-hidden" value={tra.durationSeconds} data-field="durationSeconds" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
                             </div>
                             
-                            <label class="slds-form-element__label slds-m-top_small">Zonas a Tratar:</label>
-                            <p class="slds-text-color_weak">{tra.zonas}</p>
+                            <label class="slds-form-element__label slds-m-top_small">Zonas Configuradas para el Técnico:</label>
+                            <p class="slds-text-color_weak slds-p-left_xx-small">{tra.zonas}</p>
 
                             <div class="slds-m-top_small">
-                                <label class="slds-form-element__label">Personal Base Asignado ({tra.numTecnicosSeleccionados})</label>
+                                <label class="slds-form-element__label">Asignar Equipo Base ({tra.numTecnicosSeleccionados} técnicos)</label>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_xx-small">El personal seleccionado aparecerá por defecto en el calendario.</p>
                                 <select multiple class="slds-select" style="height: 100px;" data-tra-id={tra.id} onchange={handleTecnicoChange}>
                                     <template for:each={tra.options} for:item="opt">
                                         <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
@@ -131,8 +144,11 @@
                         <!-- TABLA DE PROGRAMACIÓN (GRID) -->
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
                             <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small slds-grid_vertical-align-center">
-                                <h4 class="slds-text-title_bold">Cronograma de Visitas</h4>
-                                <lightning-button-icon icon-name="utility:sync" variant="border-filled" data-tra-id={tra.id} onclick={handleSyncAllRows} title="Sincronizar todas las fechas con la primera"></lightning-button-icon>
+                                <div>
+                                    <h4 class="slds-text-title_bold">Programa tus Citas</h4>
+                                    <p class="slds-text-body_small slds-text-color_weak">Ajusta fechas y horarios específicos por cada visita.</p>
+                                </div>
+                                <lightning-button-icon icon-name="utility:sync" variant="border-filled" data-tra-id={tra.id} onclick={handleSyncAllRows} title="Replicar la configuración de la primera cita a todas las demás"></lightning-button-icon>
                             </div>
 
                             <div class="slds-scrollable_x">
@@ -141,9 +157,9 @@
                                         <tr class="slds-line-height_reset">
                                             <th class="" scope="col" style="width: 3rem;">#</th>
                                             <th class="" scope="col" style="width: 8rem;">Fecha</th>
-                                            <th class="" scope="col" style="width: 7rem;">Inicio</th>
-                                            <th class="" scope="col" style="width: 5rem;">Tol. (+/-)</th>
-                                            <th class="" scope="col">Técnico Específico</th>
+                                            <th class="" scope="col" style="width: 7rem;">Hora Inicio</th>
+                                            <th class="" scope="col" style="width: 5rem;">Tolerancia</th>
+                                            <th class="" scope="col">Técnico Asignado</th>
                                             <th class="" scope="col" style="width: 4rem;">Lock</th>
                                             <th class="" scope="col" style="width: 6rem;">Acciones</th>
                                         </tr>
@@ -159,24 +175,24 @@
                                                     <lightning-input type="time" variant="label-hidden" value={row.startTime} data-field="startTime" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
                                                 </td>
                                                 <td>
-                                                    <lightning-input type="number" variant="label-hidden" value={row.arrivalMargin} placeholder="Min" data-field="arrivalMargin" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
+                                                    <lightning-input type="number" variant="label-hidden" value={row.arrivalMargin} placeholder="+/- Min" data-field="arrivalMargin" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} title="Margen de llegada permitido"></lightning-input>
                                                 </td>
                                                 <td>
-                                                    <lightning-combobox variant="label-hidden" value={row.tecnicoId} options={tecnicosOptions} data-field="tecnicoId" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Asignar"></lightning-combobox>
+                                                    <lightning-combobox variant="label-hidden" value={row.tecnicoId} options={tecnicosOptions} data-field="tecnicoId" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Sobrescribir equipo"></lightning-combobox>
                                                 </td>
                                                 <td class="slds-text-align_center">
-                                                    <lightning-input type="checkbox" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
+                                                    <lightning-input type="checkbox" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} title="Bloquear contra cambios masivos"></lightning-input>
                                                 </td>
                                                 <td class="slds-text-align_right">
-                                                    <lightning-button-icon icon-name="utility:clock" variant="border-filled" size="small" alternative-text="Marcar ejecutado" title="Marcar como ejecutado" data-field="executed" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange}></lightning-button-icon>
-                                                    <lightning-button-icon icon-name="utility:note" variant="border-filled" size="small" alternative-text="Notas" title="Agregar Notas" data-field="showNotes" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange} class="slds-m-left_xx-small"></lightning-button-icon>
+                                                    <lightning-button-icon icon-name="utility:clock" variant="border-filled" size="small" alternative-text="Marcar ejecutado" title="Marcar como ejecutado fuera de sistema" data-field="executed" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange}></lightning-button-icon>
+                                                    <lightning-button-icon icon-name="utility:note" variant="border-filled" size="small" alternative-text="Notas" title="Agregar Instrucciones Específicas" data-field="showNotes" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange} class="slds-m-left_xx-small"></lightning-button-icon>
                                                 </td>
                                             </tr>
                                             <!-- Fila Expandible para Notas -->
                                             <template if:true={row.showNotes}>
                                                 <tr key={row.label} class="slds-hint-parent">
                                                     <td colspan="7" class="slds-theme_shade">
-                                                        <lightning-textarea label="Indicaciones Técnicas para esta visita" value={row.notes} data-field="notes" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Escriba aquí..."></lightning-textarea>
+                                                        <lightning-textarea label="Instrucciones del Planificador para el Técnico" value={row.notes} data-field="notes" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Indica detalles importantes para esta cita específica..."></lightning-textarea>
                                                     </td>
                                                 </tr>
                                             </template>
@@ -191,12 +207,15 @@
 
             <!-- 5. CRONOGRAMA GANTT -->
             <div class="slds-box slds-theme_default slds-m-bottom_medium">
-                <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
-                    <h2 class="slds-text-heading_small slds-text-title_bold">Cronograma Operativo Proyectado</h2>
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_small slds-grid_vertical-align-center">
+                    <div>
+                        <h2 class="slds-text-heading_small slds-text-title_bold">Cronograma Operativo Proyectado</h2>
+                        <p class="slds-text-color_weak">Valida visualmente la distribución de tus servicios en el tiempo.</p>
+                    </div>
                     <lightning-button-group>
-                        <lightning-button label="Días" value="days" variant={daysVariant} onclick={handleGanttViewChange}></lightning-button>
-                        <lightning-button label="Semanas" value="weeks" variant={weeksVariant} onclick={handleGanttViewChange}></lightning-button>
-                        <lightning-button label="Meses" value="months" variant={monthsVariant} onclick={handleGanttViewChange}></lightning-button>
+                        <lightning-button label="Vista Diaria" value="days" variant={daysVariant} onclick={handleGanttViewChange}></lightning-button>
+                        <lightning-button label="Vista Semanal" value="weeks" variant={weeksVariant} onclick={handleGanttViewChange}></lightning-button>
+                        <lightning-button label="Vista Mensual" value="months" variant={monthsVariant} onclick={handleGanttViewChange}></lightning-button>
                     </lightning-button-group>
                 </div>
 
