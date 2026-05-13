@@ -1,23 +1,20 @@
 <template>
-    <div class="main-container">
+    <div class="main-container slds-p-around_medium">
         
-        <!-- 1. BARRA DE NAVEGACIÓN SUPERIOR -->
-        <div class="custom-header">
-            <lightning-button label="VOLVER" 
-                icon-name="utility:back" 
-                class="btn-purple" 
-                variant="brand"
-                onclick={handleBackToContract}>
-            </lightning-button>
-            
-            <h1 class="title-folio">Contrato Nº: {contractFolio}</h1>
-            
-            <div class="stepper-container">
-                <div class={step1Class}>1. Contexto</div>
-                <div class="step-connector"></div>
-                <div class={step2Class}>2. Configuración</div>
-                <div class="step-connector"></div>
-                <div class={step3Class}>3. Calendario</div>
+        <!-- 1. BARRA DE NAVEGACIÓN SUPERIOR (Restaurada y Limpia) -->
+        <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
+            <div class="slds-col">
+                <lightning-button label="VOLVER AL CONTRATO" 
+                    icon-name="utility:back" 
+                    variant="brand-outline"
+                    onclick={handleBackToContract}>
+                </lightning-button>
+            </div>
+            <div class="slds-col">
+                <h1 class="slds-text-heading_medium slds-text-title_bold">Generar ODTs - Contrato Nº: {contractFolio}</h1>
+            </div>
+            <div class="slds-col slds-text-align_right">
+                <lightning-button label={saveButtonLabel} variant="brand" icon-name="utility:record_create" onclick={handleGenerateODTs} disabled={isSaving}></lightning-button>
             </div>
         </div>
 
@@ -25,226 +22,214 @@
         <template if:true={isLoading}>
             <div class="slds-p-around_large slds-text-align_center">
                 <lightning-spinner alternative-text="Cargando..." size="medium"></lightning-spinner>
-                <p class="slds-m-top_medium">Preparando consola operativa...</p>
+                <p class="slds-m-top_medium">Cargando información técnica...</p>
             </div>
         </template>
 
         <template if:false={isLoading}>
-            
-            <!-- PASO 1: CONTEXTO DEL CONTRATO Y SEDES -->
-            <template if:true={isStep1}>
-                <div class="slds-p-horizontal_large slds-m-top_medium animate-fade-in">
-                    <div class="contract-data-box slds-grid slds-wrap slds-p-around_medium">
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 data-column">
-                            <span class="label-title">Cliente:</span>
-                            <p class="value-text">{contractData.cliente}</p>
-                            
-                            <span class="label-title slds-m-top_small">Línea de Negocio:</span>
-                            <p class="value-text">{contractData.lineaNegocio}</p>
-                        </div>
-                        
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 data-column">
-                            <span class="label-title">Vigencia:</span>
-                            <p class="value-text">{contractData.fechaInicio} al {contractData.fechaFin}</p>
-                            
-                            <span class="label-title slds-m-top_small">Tratamientos:</span>
-                            <p class="value-text">{contractData.tratamientos}</p>
-                        </div>
-                        
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 data-column slds-grid slds-grid_vertical-align-center slds-grid_align-center">
-                            <button class="custom-blue-button" onclick={handleViewQuote}>
-                                <lightning-icon icon-name="utility:preview" size="x-small" variant="inverse" class="slds-m-right_x-small"></lightning-icon>
-                                Ver Presupuesto
-                            </button>
-                        </div>
+            <!-- 2. DATOS DEL CONTRATO (Vista Consolidada) -->
+            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                        <span class="slds-text-title_bold">Cliente:</span>
+                        <p>{contractData.cliente}</p>
+                        <span class="slds-text-title_bold slds-m-top_small d-block">Línea de Negocio:</span>
+                        <p>{contractData.lineaNegocio}</p>
                     </div>
-
-                    <div class="sede-card slds-p-around_large">
-                        <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium">
-                            <h2 class="slds-text-heading_small" style="color: #0070d2; font-weight: 800;">Sede de Operación</h2>
-                            <span class="slds-badge slds-theme_info">Folio: {contractData.folioSede}</span>
-                        </div>
-                        
-                        <div class="slds-grid slds-wrap slds-gutters">
-                            <div class="slds-col slds-size_1-of-2">
-                                <lightning-input label="Dirección de Ejecución" value={contractData.direccionSede} readonly></lightning-input>
-                            </div>
-                            <div class="slds-col slds-size_1-of-4">
-                                <lightning-combobox label="Prioridad" value={contractData.prioridad} options={priorityOptions} onchange={handlePriorityChange}></lightning-combobox>
-                            </div>
-                            <div class="slds-col slds-size_1-of-4">
-                                <lightning-combobox label="Territorio" value={contractData.territoryId} options={territoryOptions} onchange={handleTerritoryChange}></lightning-combobox>
-                            </div>
-                        </div>
-
-                        <div class="horario-box slds-m-top_large">
-                            <h3 class="slds-text-title_bold slds-m-bottom_small">Restricciones de Horario</h3>
-                            <template for:each={sedesList} for:item="sede">
-                                <div key={sede.id} class="slds-grid slds-grid_vertical-align-center">
-                                    <span>Horario:</span>
-                                    <lightning-input type="time" class="slds-m-horizontal_small" value={sede.startTime} data-field="startTime" data-sede-id={sede.id} onchange={handleSedeChange}></lightning-input>
-                                    <span>a</span>
-                                    <lightning-input type="time" class="slds-m-horizontal_small" value={sede.endTime} data-field="endTime" data-sede-id={sede.id} onchange={handleSedeChange}></lightning-input>
-                                </div>
-                            </template>
-                            
-                            <h3 class="slds-text-title_bold slds-m-top_medium slds-m-bottom_small">Días Permitidos</h3>
-                            <div class="slds-grid slds-wrap">
-                                <template for:each={daysOfWeek} for:item="day">
-                                    <lightning-input key={day.label} type="checkbox" label={day.label} checked={day.checked} data-day={day.label} onchange={handleDayChange} class="slds-m-right_medium"></lightning-input>
-                                </template>
-                            </div>
-                        </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                        <span class="slds-text-title_bold">Vigencia:</span>
+                        <p>{contractData.fechaInicio} - {contractData.fechaFin}</p>
+                        <span class="slds-text-title_bold slds-m-top_small d-block">Tratamientos:</span>
+                        <p>{contractData.tratamientos}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-grid slds-grid_vertical-align-end slds-grid_align-end">
+                        <lightning-button label="Ver Presupuesto" icon-name="utility:preview" variant="neutral" onclick={handleViewQuote}></lightning-button>
                     </div>
                 </div>
-            </template>
+            </div>
 
-            <!-- PASO 2: CONFIGURACIÓN TÉCNICA Y ZONAS -->
-            <template if:true={isStep2}>
-                <div class="slds-p-horizontal_large slds-m-top_medium animate-fade-in">
-                    <template for:each={treatmentsWithTechOptions} for:item="tra">
-                        <div key={tra.id} class="sede-card slds-p-around_medium">
-                            <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                                <div class="slds-grid slds-grid_vertical-align-center">
-                                    <lightning-icon icon-name="standard:service_report" size="small" class="slds-m-right_small"></lightning-icon>
-                                    <h3 class="slds-text-heading_small" style="font-weight: 800;">{tra.name}</h3>
+            <!-- 3. CONFIGURACIÓN DE SEDE Y RESTRICCIONES -->
+            <div class="slds-box slds-theme_default slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                    <h2 class="slds-text-heading_small slds-text-title_bold" style="color: #0070d2;">Sede de Operación: {contractData.sedeSeleccionada}</h2>
+                    <span class="slds-badge slds-theme_info">Folio: {contractData.folioSede}</span>
+                </div>
+                
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input label="Dirección de Ejecución" value={contractData.direccionSede} data-field="executionAddress" onchange={handleSedeChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                        <lightning-combobox label="Prioridad" value={contractData.prioridad} options={priorityOptions} onchange={handlePriorityChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                        <lightning-combobox label="Territorio" value={contractData.territoryId} options={territoryOptions} onchange={handleTerritoryChange}></lightning-combobox>
+                    </div>
+                </div>
+
+                <div class="slds-m-top_medium">
+                    <h3 class="slds-text-title_bold slds-m-bottom_small">Horario y Días Permitidos</h3>
+                    <template for:each={sedesList} for:item="sede">
+                        <div key={sede.id} class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3 slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                <span>Entre las </span>
+                                <lightning-input type="time" variant="label-hidden" value={sede.startTime} data-field="startTime" data-sede-id={sede.id} onchange={handleSedeChange} class="slds-m-horizontal_x-small"></lightning-input>
+                                <span> y las </span>
+                                <lightning-input type="time" variant="label-hidden" value={sede.endTime} data-field="endTime" data-sede-id={sede.id} onchange={handleSedeChange} class="slds-m-horizontal_x-small"></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1">
+                                <div class="slds-grid slds-wrap">
+                                    <template for:each={daysOfWeek} for:item="day">
+                                        <lightning-input key={day.label} type="checkbox" label={day.label} checked={day.checked} data-day={day.label} onchange={handleDayChange} class="slds-m-right_medium"></lightning-input>
+                                    </template>
                                 </div>
-                                <lightning-button label="GESTIONAR ZONAS" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser}></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 4. LISTA DE TRATAMIENTOS Y PROGRAMACIÓN DETALLADA -->
+            <template for:each={treatmentsWithTechOptions} for:item="tra">
+                <div key={tra.id} class="slds-box slds-theme_default slds-m-bottom_medium">
+                    <!-- CABECERA DE TRATAMIENTO -->
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <lightning-icon icon-name="standard:service_report" size="small" class="slds-m-right_small"></lightning-icon>
+                            <h3 class="slds-text-heading_small slds-text-title_bold">Tratamiento: {tra.name}</h3>
+                        </div>
+                        <lightning-button label="PUNTOS DE CONTROL / ZONAS" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser}></lightning-button>
+                    </div>
+
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <!-- CONFIGURACIÓN TÉCNICA -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                            <lightning-input type="number" label="Técnicos Requeridos" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange}></lightning-input>
+                            
+                            <label class="slds-form-element__label slds-m-top_small">Duración Estimada (HH:MM:SS)</label>
+                            <div class="slds-grid slds-grid_vertical-align-center">
+                                <lightning-input type="number" variant="label-hidden" value={tra.durationHours} data-field="durationHours" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
+                                <span class="slds-m-horizontal_x-small">:</span>
+                                <lightning-input type="number" variant="label-hidden" value={tra.durationMinutes} data-field="durationMinutes" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
+                                <span class="slds-m-horizontal_x-small">:</span>
+                                <lightning-input type="number" variant="label-hidden" value={tra.durationSeconds} data-field="durationSeconds" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
                             </div>
                             
-                            <p class="slds-text-color_weak slds-m-bottom_medium"><strong>Zonas:</strong> {tra.zonas}</p>
+                            <label class="slds-form-element__label slds-m-top_small">Zonas a Tratar:</label>
+                            <p class="slds-text-color_weak">{tra.zonas}</p>
 
-                            <div class="slds-grid slds-wrap slds-gutters">
-                                <div class="slds-col slds-size_1-of-3">
-                                    <lightning-input type="number" label="Técnicos Requeridos" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange}></lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_2-of-3">
-                                    <label class="slds-form-element__label">Duración Estimada (HH:MM)</label>
-                                    <div class="slds-grid slds-grid_vertical-align-center">
-                                        <lightning-input type="number" variant="label-hidden" value={tra.durationHours} data-field="durationHours" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
-                                        <span class="slds-m-horizontal_x-small">:</span>
-                                        <lightning-input type="number" variant="label-hidden" value={tra.durationMinutes} data-field="durationMinutes" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="slds-m-top_medium">
-                                <label class="slds-form-element__label">Personal Asignado</label>
-                                <select multiple class="custom-multi-select slds-select" style="height: 120px;" data-tra-id={tra.id} onchange={handleTecnicoChange}>
+                            <div class="slds-m-top_small">
+                                <label class="slds-form-element__label">Personal Base Asignado ({tra.numTecnicosSeleccionados})</label>
+                                <select multiple class="slds-select" style="height: 100px;" data-tra-id={tra.id} onchange={handleTecnicoChange}>
                                     <template for:each={tra.options} for:item="opt">
                                         <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
                                     </template>
                                 </select>
                             </div>
                         </div>
-                    </template>
-                </div>
-            </template>
 
-            <!-- PASO 3: CALENDARIO Y GANTT -->
-            <template if:true={isStep3}>
-                <div class="slds-p-horizontal_large slds-m-top_medium animate-fade-in">
-                    <template for:each={treatmentsWithTechOptions} for:item="tra">
-                        <div key={tra.id} class="treatment-accordion">
-                            <div class="treatment-header" onclick={toggleAccordion}>
-                                <span class="slds-text-title_bold">{tra.name} - Programación</span>
-                                <lightning-icon icon-name="utility:chevrondown" size="x-small"></lightning-icon>
+                        <!-- TABLA DE PROGRAMACIÓN (GRID) -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                            <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small slds-grid_vertical-align-center">
+                                <h4 class="slds-text-title_bold">Cronograma de Visitas</h4>
+                                <lightning-button-icon icon-name="utility:sync" variant="border-filled" data-tra-id={tra.id} onclick={handleSyncAllRows} title="Sincronizar todas las fechas con la primera"></lightning-button-icon>
                             </div>
-                            <div class="treatment-body">
-                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
-                                    <h3 class="slds-text-title_bold slds-grow" style="color: #2c5282;">Detalle de Visitas</h3>
-                                    <lightning-button-icon icon-name="utility:sync" variant="border-filled" data-tra-id={tra.id} onclick={handleSyncAllRows} title="Sincronizar con la primera fecha"></lightning-button-icon>
-                                </div>
 
-                                <div class="scheduling-container">
-                                    <div class="scheduling-header-row slds-grid slds-p-around_x-small">
-                                        <div class="slds-col slds-size_1-of-12">#</div>
-                                        <div class="slds-col slds-size_3-of-12">Fecha</div>
-                                        <div class="slds-col slds-size_2-of-12">Hora Inicio</div>
-                                        <div class="slds-col slds-size_4-of-12">Técnico Principal</div>
-                                        <div class="slds-col slds-size_2-of-12 slds-text-align_right">Lock</div>
-                                    </div>
-                                    <template for:each={tra.schedulingRows} for:item="row" for:index="idx">
-                                        <div key={row.label} class="scheduling-card slds-grid slds-grid_vertical-align-center slds-p-around_x-small">
-                                            <div class="slds-col slds-size_1-of-12 slds-text-title_bold">{row.label}</div>
-                                            <div class="slds-col slds-size_3-of-12">
-                                                <lightning-input type="date" variant="label-hidden" value={row.date} data-field="date" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
-                                            </div>
-                                            <div class="slds-col slds-size_2-of-12">
-                                                <lightning-input type="time" variant="label-hidden" value={row.startTime} data-field="startTime" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-input>
-                                            </div>
-                                            <div class="slds-col slds-size_4-of-12">
-                                                <lightning-combobox variant="label-hidden" value={row.tecnicoId} options={tecnicosOptions} data-field="tecnicoId" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} class="compact-input"></lightning-combobox>
-                                            </div>
-                                            <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-end">
-                                                <lightning-input type="checkbox" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- GANTT CHART -->
-                    <div class="gantt-wrapper">
-                        <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium">
-                            <h2 class="gantt-title">Cronograma Operativo</h2>
-                            <lightning-button-group>
-                                <lightning-button label="Días" value="days" variant={daysVariant} onclick={handleGanttViewChange}></lightning-button>
-                                <lightning-button label="Semanas" value="weeks" variant={weeksVariant} onclick={handleGanttViewChange}></lightning-button>
-                                <lightning-button label="Meses" value="months" variant={monthsVariant} onclick={handleGanttViewChange}></lightning-button>
-                            </lightning-button-group>
-                        </div>
-                        <div class="gantt-main-container">
-                            <div class="gantt-timeline-header">
-                                <template for:each={ganttAxisLabels} for:item="axis">
-                                    <div key={axis.id} class="gantt-header-tick" style={axis.style}>
-                                        <span class="tick-label">{axis.label}</span>
-                                        <span class="tick-sublabel">{axis.subLabel}</span>
-                                    </div>
-                                </template>
-                            </div>
-                            <div class="gantt-body">
-                                <div class="gantt-grid">
-                                    <template for:each={ganttAxisLabels} for:item="axis">
-                                        <div key={axis.id} class="grid-line" style={axis.style}></div>
-                                    </template>
-                                    <div class="today-line" style={todayMarkerStyle}><span class="today-tag">HOY</span></div>
-                                </div>
-                                <div class="gantt-items-layer">
-                                    <template for:each={ganttItems} for:item="item">
-                                        <div key={item.id} class="gantt-pro-card" style={item.style} title={item.fullLabel}>
-                                            <div class="pro-card-header">
-                                                <span class="pro-tra-name">{item.name}</span>
-                                                <span class="pro-time">{item.timeStr}</span>
-                                            </div>
-                                            <div class="pro-card-body">
-                                                <span class="pro-info-text">{item.techs}</span>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
+                            <div class="slds-scrollable_x">
+                                <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th class="" scope="col" style="width: 3rem;">#</th>
+                                            <th class="" scope="col" style="width: 8rem;">Fecha</th>
+                                            <th class="" scope="col" style="width: 7rem;">Inicio</th>
+                                            <th class="" scope="col" style="width: 5rem;">Tol. (+/-)</th>
+                                            <th class="" scope="col">Técnico Específico</th>
+                                            <th class="" scope="col" style="width: 4rem;">Lock</th>
+                                            <th class="" scope="col" style="width: 6rem;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={tra.schedulingRows} for:item="row" for:index="idx">
+                                            <tr key={row.label} class="slds-hint-parent">
+                                                <td>{idx + 1}</td>
+                                                <td>
+                                                    <lightning-input type="date" variant="label-hidden" value={row.date} data-field="date" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
+                                                </td>
+                                                <td>
+                                                    <lightning-input type="time" variant="label-hidden" value={row.startTime} data-field="startTime" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
+                                                </td>
+                                                <td>
+                                                    <lightning-input type="number" variant="label-hidden" value={row.arrivalMargin} placeholder="Min" data-field="arrivalMargin" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
+                                                </td>
+                                                <td>
+                                                    <lightning-combobox variant="label-hidden" value={row.tecnicoId} options={tecnicosOptions} data-field="tecnicoId" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Asignar"></lightning-combobox>
+                                                </td>
+                                                <td class="slds-text-align_center">
+                                                    <lightning-input type="checkbox" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
+                                                </td>
+                                                <td class="slds-text-align_right">
+                                                    <lightning-button-icon icon-name="utility:clock" variant="border-filled" size="small" alternative-text="Marcar ejecutado" title="Marcar como ejecutado" data-field="executed" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange}></lightning-button-icon>
+                                                    <lightning-button-icon icon-name="utility:note" variant="border-filled" size="small" alternative-text="Notas" title="Agregar Notas" data-field="showNotes" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange} class="slds-m-left_xx-small"></lightning-button-icon>
+                                                </td>
+                                            </tr>
+                                            <!-- Fila Expandible para Notas -->
+                                            <template if:true={row.showNotes}>
+                                                <tr key={row.label} class="slds-hint-parent">
+                                                    <td colspan="7" class="slds-theme_shade">
+                                                        <lightning-textarea label="Indicaciones Técnicas para esta visita" value={row.notes} data-field="notes" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Escriba aquí..."></lightning-textarea>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </template>
 
-            <!-- FOOTER ACCIONES REIMAGINADO -->
-            <div class="footer-actions slds-grid slds-grid_align-spread">
-                <div>
-                    <template if:false={isStep1}>
-                        <lightning-button label="ANTERIOR" icon-name="utility:chevronleft" variant="neutral" onclick={handlePrevStep}></lightning-button>
-                    </template>
+            <!-- 5. CRONOGRAMA GANTT -->
+            <div class="slds-box slds-theme_default slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
+                    <h2 class="slds-text-heading_small slds-text-title_bold">Cronograma Operativo Proyectado</h2>
+                    <lightning-button-group>
+                        <lightning-button label="Días" value="days" variant={daysVariant} onclick={handleGanttViewChange}></lightning-button>
+                        <lightning-button label="Semanas" value="weeks" variant={weeksVariant} onclick={handleGanttViewChange}></lightning-button>
+                        <lightning-button label="Meses" value="months" variant={monthsVariant} onclick={handleGanttViewChange}></lightning-button>
+                    </lightning-button-group>
                 </div>
-                <div>
-                    <template if:false={isStep3}>
-                        <lightning-button label="SIGUIENTE" icon-name="utility:chevronright" variant="brand" onclick={handleNextStep} class="slds-m-left_small"></lightning-button>
-                    </template>
-                    <template if:true={isStep3}>
-                        <lightning-button label={saveButtonLabel} variant="brand" icon-name="utility:record_create" onclick={handleGenerateODTs} disabled={isSaving}></lightning-button>
-                    </template>
+
+                <div class="gantt-main-container slds-scrollable_x">
+                    <div class="gantt-timeline-header">
+                        <template for:each={ganttAxisLabels} for:item="axis">
+                            <div key={axis.id} class="gantt-header-tick" style={axis.style}>
+                                <span class="tick-label">{axis.label}</span>
+                                <span class="tick-sublabel">{axis.subLabel}</span>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="gantt-body">
+                        <div class="gantt-grid">
+                            <template for:each={ganttAxisLabels} for:item="axis">
+                                <div key={axis.id} class="grid-line" style={axis.style}></div>
+                            </template>
+                            <div class="today-line" style={todayMarkerStyle}><span class="today-tag">HOY</span></div>
+                        </div>
+                        <div class="gantt-items-layer">
+                            <template for:each={ganttItems} for:item="item">
+                                <div key={item.id} class="gantt-pro-card" style={item.style} title={item.fullLabel}>
+                                    <div class="pro-card-header">
+                                        <span class="pro-tra-name">{item.name}</span>
+                                        <span class="pro-time">{item.timeStr}</span>
+                                    </div>
+                                    <div class="pro-card-body">
+                                        <span class="pro-info-text">{item.techs}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>
