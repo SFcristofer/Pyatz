@@ -330,34 +330,53 @@ public with sharing class TechWorkOrderController {
                     revsBySA.get(r.Cita_Servicio__c).add(r);
                 }
 
+                // Mapear ServiceResource a UserID para asignación correcta
+                Set<Id> allTechSRIds = new Set<Id>();
+                for (List<String> tList : techIndexMap.values()) for (String tId : tList) allTechSRIds.add((Id)tId);
+                
+                Map<Id, Id> srToUserId = new Map<Id, Id>();
+                for (ServiceResource sr : [SELECT Id, RelatedRecordId FROM ServiceResource WHERE Id IN :allTechSRIds]) {
+                    srToUserId.put(sr.Id, sr.RelatedRecordId);
+                }
+
                 List<ServiceAppointment> sasUpdate = new List<ServiceAppointment>();
                 List<Revision_Cita_Servicio__c> revsToIns = new List<Revision_Cita_Servicio__c>();
                 List<AssignedResource> arsToIns = new List<AssignedResource>();
                 
                 if (!incomingSaIds.isEmpty()) delete [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId IN :incomingSaIds];
 
-                Id firstTechId = null;
+                Id firstUserOwnerId = null;
                 for (Integer i = 0; i < sasToUpsert.size(); i++) {
                     ServiceAppointment currentSA = sasToUpsert[i];
                     if (currentSA.Status == 'Ninguno') sasUpdate.add(new ServiceAppointment(Id = currentSA.Id, Status = 'Programado'));
                     
+                    List<String> saTechSRIds = techIndexMap.get(i);
+                    Id saPrimaryUserId = (!saTechSRIds.isEmpty() && srToUserId.containsKey((Id)saTechSRIds[0])) ? srToUserId.get((Id)saTechSRIds[0]) : UserInfo.getUserId();
+                    if (firstUserOwnerId == null && !saTechSRIds.isEmpty()) firstUserOwnerId = srToUserId.get((Id)saTechSRIds[0]);
+
                     if (!revsBySA.containsKey(currentSA.Id) || revsBySA.get(currentSA.Id).isEmpty()) {
                         Integer revCounter = 1;
                         for (String templateId : templateIndexMap.get(i)) {
-                            revsToIns.add(new Revision_Cita_Servicio__c(Cita_Servicio__c = currentSA.Id, Numero_Revision__c = revCounter++, Status__c = 'En Proceso', Plantilla_de_Formulario__c = (Id)templateId, Fecha_Revision__c = Datetime.now(), Tecnico__c = UserInfo.getUserId()));
+                            revsToIns.add(new Revision_Cita_Servicio__c(
+                                Cita_Servicio__c = currentSA.Id, 
+                                Numero_Revision__c = revCounter++, 
+                                Status__c = 'En Proceso', 
+                                Plantilla_de_Formulario__c = (Id)templateId, 
+                                Fecha_Revision__c = Datetime.now(), 
+                                Tecnico__c = saPrimaryUserId // Asignamos el User ID del Técnico seleccionado
+                            ));
                         }
                     }
                     
-                    for (String tId : techIndexMap.get(i)) {
-                        if (firstTechId == null) firstTechId = (Id)tId;
+                    for (String tId : saTechSRIds) {
                         arsToIns.add(new AssignedResource(ServiceAppointmentId = currentSA.Id, ServiceResourceId = (Id)tId));
                     }
                 }
                 
-                if (firstTechId != null) {
+                if (firstUserOwnerId != null && wo.OwnerId != firstUserOwnerId) {
                     try {
-                        ServiceResource sr = [SELECT RelatedRecordId FROM ServiceResource WHERE Id = :firstTechId LIMIT 1];
-                        if (sr.RelatedRecordId != null && wo.OwnerId != sr.RelatedRecordId) { wo.OwnerId = sr.RelatedRecordId; update wo; }
+                        wo.OwnerId = firstUserOwnerId;
+                        update wo;
                     } catch (Exception e) { }
                 }
 
