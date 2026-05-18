@@ -1,9 +1,12 @@
 public with sharing class ServiceReviewPDFController {
 
     public ServiceAppointment saRecord          {get; set;}
+    public String             docTitle          {get; set;}
+    public String             docStatus         {get; set;}
     public String             accountName       {get; set;}
     public String             workOrderNum      {get; set;}
     public String             fechaSA           {get; set;}
+    public String             zonasTratar       {get; set;}
     public Integer            totalRevs         {get; set;}
     public Integer            totalFotos        {get; set;}
     public Integer            totalDeficiencias {get; set;}
@@ -53,26 +56,15 @@ public with sharing class ServiceReviewPDFController {
     // ─── Constructor ──────────────────────────────────────────────────────────
 
     public ServiceReviewPDFController() {
-        Id saId = ApexPages.currentPage().getParameters().get('id');
-        if (saId == null) return;
+        String saIdParam  = ApexPages.currentPage().getParameters().get('id');
+        String woIdParam  = ApexPages.currentPage().getParameters().get('workOrderId');
+        String revIdParam = ApexPages.currentPage().getParameters().get('revisionId');
 
-        this.saRecord = [
-            SELECT Id, AppointmentNumber, Status, Subject, ParentRecordId
-            FROM ServiceAppointment
-            WHERE Id = :saId
-            LIMIT 1
-        ];
+        Id saId        = String.isNotBlank(saIdParam)  ? (Id)saIdParam  : null;
+        Id workOrderId = String.isNotBlank(woIdParam)  ? (Id)woIdParam  : null;
+        Id revisionId  = String.isNotBlank(revIdParam) ? (Id)revIdParam : null;
 
-        if (this.saRecord.ParentRecordId != null) {
-            try {
-                WorkOrder wo = [
-                    SELECT WorkOrderNumber, Account.Name
-                    FROM WorkOrder WHERE Id = :this.saRecord.ParentRecordId LIMIT 1
-                ];
-                this.accountName  = wo.Account != null ? wo.Account.Name : '';
-                this.workOrderNum = wo.WorkOrderNumber;
-            } catch (Exception e) {}
-        }
+        if (saId == null && workOrderId == null) return;
 
         String[] meses = new String[]{
             'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -81,13 +73,61 @@ public with sharing class ServiceReviewPDFController {
         Datetime now = Datetime.now();
         this.fechaSA = now.day() + ' / ' + meses[now.month() - 1] + ' / ' + now.year();
 
-        List<Revision_Cita_Servicio__c> revs = [
-            SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Status__c,
-                   Fecha_Revision__c, Tecnico__r.Name, Observaciones__c, Datos_Formulario__c
-            FROM Revision_Cita_Servicio__c
-            WHERE Cita_Servicio__c = :saId
-            ORDER BY Numero_Revision__c ASC NULLS LAST
-        ];
+        Set<Id> saIds = new Set<Id>();
+
+        if (saId != null) {
+            this.saRecord = [
+                SELECT Id, AppointmentNumber, Status, Subject, ParentRecordId, Zonas_a_Tratar__c
+                FROM ServiceAppointment WHERE Id = :saId LIMIT 1
+            ];
+            this.zonasTratar = String.isNotBlank(this.saRecord.Zonas_a_Tratar__c)
+                ? this.saRecord.Zonas_a_Tratar__c : '';
+            this.docTitle  = this.saRecord.AppointmentNumber;
+            this.docStatus = this.saRecord.Status;
+            if (this.saRecord.ParentRecordId != null) {
+                try {
+                    WorkOrder wo = [SELECT WorkOrderNumber, Account.Name FROM WorkOrder WHERE Id = :this.saRecord.ParentRecordId LIMIT 1];
+                    this.accountName  = wo.Account != null ? wo.Account.Name : '';
+                    this.workOrderNum = wo.WorkOrderNumber;
+                } catch (Exception e) {}
+            }
+            saIds.add(saId);
+        } else {
+            WorkOrder wo = [SELECT WorkOrderNumber, Account.Name FROM WorkOrder WHERE Id = :workOrderId LIMIT 1];
+            this.accountName  = wo.Account != null ? wo.Account.Name : '';
+            this.workOrderNum = wo.WorkOrderNumber;
+            this.docTitle  = 'Consolidado — OT ' + wo.WorkOrderNumber;
+            this.docStatus = 'Consolidado';
+            Set<String> zonas = new Set<String>();
+            for (ServiceAppointment sa : [
+                SELECT Id, Zonas_a_Tratar__c FROM ServiceAppointment
+                WHERE ParentRecordId = :workOrderId ORDER BY AppointmentNumber ASC
+            ]) {
+                saIds.add(sa.Id);
+                if (String.isNotBlank(sa.Zonas_a_Tratar__c)) zonas.add(sa.Zonas_a_Tratar__c);
+            }
+            this.zonasTratar = String.join(new List<String>(zonas), ' · ');
+        }
+
+        if (saIds.isEmpty()) return;
+
+        List<Revision_Cita_Servicio__c> revs;
+        if (saId != null && revisionId != null) {
+            revs = [
+                SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Status__c,
+                       Fecha_Revision__c, Tecnico__r.Name, Observaciones__c, Datos_Formulario__c
+                FROM Revision_Cita_Servicio__c
+                WHERE Cita_Servicio__c = :saId AND Id = :revisionId
+            ];
+        } else {
+            revs = [
+                SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Status__c,
+                       Fecha_Revision__c, Tecnico__r.Name, Observaciones__c, Datos_Formulario__c
+                FROM Revision_Cita_Servicio__c
+                WHERE Cita_Servicio__c IN :saIds
+                ORDER BY Cita_Servicio__c, Numero_Revision__c ASC NULLS LAST
+            ];
+        }
 
         this.totalRevs         = revs.size();
         this.totalFotos        = 0;

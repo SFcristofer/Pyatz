@@ -107,7 +107,10 @@
                             <lightning-icon icon-name="standard:service_report" size="small" class="slds-m-right_small"></lightning-icon>
                             <div>
                                 <h3 class="slds-text-heading_small slds-text-title_bold">Definición Técnica: {tra.name}</h3>
-                                <p class="slds-text-color_weak">Establece el personal base y las zonas para captura de evidencias.</p>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:location" size="xx-small" class="slds-m-right_xx-small" variant="info"></lightning-icon>
+                                    <p class="slds-text-color_weak"><span class="slds-text-title_bold">Zonas:</span> {tra.zonas}</p>
+                                </div>
                             </div>
                         </div>
                         <lightning-button label="BUSCAR PUNTOS DE CONTROL" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser} title="Configura las ubicaciones exactas del cliente"></lightning-button>
@@ -118,19 +121,9 @@
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
                             <lightning-input type="number" label="Personal Requerido" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange} field-level-help="Cantidad de técnicos recomendada para esta labor."></lightning-input>
                             
-                            <label class="slds-form-element__label slds-m-top_small">Duración Técnica Estimada (HH:MM:SS)</label>
-                            <div class="slds-grid slds-grid_vertical-align-center">
-                                <lightning-input type="number" variant="label-hidden" value={tra.durationHours} data-field="durationHours" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
-                                <span class="slds-m-horizontal_x-small">:</span>
-                                <lightning-input type="number" variant="label-hidden" value={tra.durationMinutes} data-field="durationMinutes" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
-                                <span class="slds-m-horizontal_x-small">:</span>
-                                <lightning-input type="number" variant="label-hidden" value={tra.durationSeconds} data-field="durationSeconds" data-tra-id={tra.id} onchange={handleTraConfigChange} class="input-tiny"></lightning-input>
-                            </div>
+                            <lightning-input type="number" label="Duración Técnica (Minutos)" value={tra.duration} data-field="duration" data-tra-id={tra.id} onchange={handleTraConfigChange} class="slds-m-top_small" field-level-help="Tiempo total estimado para la ejecución del servicio en minutos."></lightning-input>
                             
-                            <label class="slds-form-element__label slds-m-top_small">Zonas Configuradas para el Técnico:</label>
-                            <p class="slds-text-color_weak slds-p-left_xx-small">{tra.zonas}</p>
-
-                            <div class="slds-m-top_small">
+                            <div class="slds-m-top_medium">
                                 <label class="slds-form-element__label">Asignar Equipo Base ({tra.numTecnicosSeleccionados} técnicos)</label>
                                 <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_xx-small">El personal seleccionado aparecerá por defecto en el calendario.</p>
                                 <select multiple class="slds-select" style="height: 100px;" data-tra-id={tra.id} onchange={handleTecnicoChange}>

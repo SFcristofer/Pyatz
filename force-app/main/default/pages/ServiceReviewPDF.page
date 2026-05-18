@@ -139,7 +139,7 @@
                                         <tr>
                                             <td class="banner-td-main" width="28%">
                                                 <span class="banner-label">Reporte de Revisiones</span>
-                                                <span class="banner-sa">{!saRecord.AppointmentNumber}</span>
+                                                <span class="banner-sa">{!docTitle}</span>
                                             </td>
                                             <td class="banner-td" width="26%">
                                                 <span class="banner-lbl">Cliente / Cuenta</span>
@@ -159,11 +159,17 @@
                                             </td>
                                             <td class="banner-td-last" width="7%">
                                                 <span class="banner-lbl">Estado</span>
-                                                <span class="banner-val">{!saRecord.Status}</span>
+                                                <span class="banner-val">{!docStatus}</span>
                                             </td>
                                         </tr>
                                     </table>
                                 </div>
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(zonasTratar))}" layout="none">
+                                    <div style="background:#f4f6fb; border:0.5pt solid #dde3ee; border-radius:3pt; padding:4pt 10pt; margin-bottom:5pt; display:table; width:100%;">
+                                        <span style="font-size:6pt; text-transform:uppercase; letter-spacing:0.8pt; color:#888; font-weight:bold;">Zonas a Tratar&#160;&#160;</span>
+                                        <span style="font-size:8pt; color:#1a2035; font-weight:bold;">{!zonasTratar}</span>
+                                    </div>
+                                </apex:outputPanel>
                                 <div class="section-title">R E V I S I O N E S &nbsp; D E &nbsp; S E R V I C I O</div>
                             </apex:outputPanel>
 

@@ -97,30 +97,22 @@ public with sharing class OdtViewerController {
             });
         }
 
-        // 2. Todas las citas de servicio por WorkOrder
-        Map<Id, List<Map<String, Object>>> woAppointments = new Map<Id, List<Map<String, Object>>>();
+        // 2. Técnico asignado por WorkOrder (primer SA)
+        Map<Id, String> woTechnician = new Map<Id, String>();
+        Map<Id, String> woSchedDate  = new Map<Id, String>();
         for (ServiceAppointment sa : [
-            SELECT Id, AppointmentNumber, ParentRecordId, SchedStartTime, Duration, Status, Description,
+            SELECT Id, ParentRecordId, SchedStartTime,
                    (SELECT ServiceResource.Name FROM ServiceResources LIMIT 1)
             FROM ServiceAppointment
             WHERE ParentRecordId IN (SELECT Id FROM WorkOrder WHERE AccountId = :accountId)
             ORDER BY SchedStartTime ASC
         ]) {
-            if (!woAppointments.containsKey(sa.ParentRecordId)) {
-                woAppointments.put(sa.ParentRecordId, new List<Map<String, Object>>());
+            if (!woTechnician.containsKey(sa.ParentRecordId)) {
+                woTechnician.put(sa.ParentRecordId,
+                    sa.ServiceResources.isEmpty() ? '' : sa.ServiceResources[0].ServiceResource.Name);
+                woSchedDate.put(sa.ParentRecordId,
+                    sa.SchedStartTime != null ? sa.SchedStartTime.format('dd/MM/yyyy HH:mm') : '');
             }
-            String techName  = sa.ServiceResources.isEmpty() ? '' : sa.ServiceResources[0].ServiceResource.Name;
-            String schedDate = sa.SchedStartTime != null ? sa.SchedStartTime.format('dd/MM/yyyy HH:mm') : '';
-            Integer durationMins = sa.Duration != null ? Integer.valueOf(sa.Duration) : 0;
-            woAppointments.get(sa.ParentRecordId).add(new Map<String, Object>{
-                'id'         => sa.Id,
-                'number'     => sa.AppointmentNumber,
-                'schedDate'  => schedDate,
-                'duration'   => durationMins > 0 ? String.valueOf(durationMins) + ' min' : '—',
-                'status'     => sa.Status != null ? sa.Status : '',
-                'technician' => techName,
-                'notes'      => sa.Description != null ? sa.Description : ''
-            });
         }
 
         // 3. Tratamientos por WorkOrder (WorkOrderLineItem → ProductCode)
@@ -161,13 +153,9 @@ public with sharing class OdtViewerController {
             ORDER BY StartDate DESC NULLS LAST
             LIMIT 500
         ]) {
-            List<Map<String, Object>> appts = woAppointments.containsKey(wo.Id)
-                ? woAppointments.get(wo.Id)
-                : new List<Map<String, Object>>();
-
             String fecha = wo.StartDate != null ? wo.StartDate.format() : '';
-            if (String.isBlank(fecha) && !appts.isEmpty()) {
-                fecha = (String) appts[0].get('schedDate');
+            if (String.isBlank(fecha) && woSchedDate.containsKey(wo.Id)) {
+                fecha = woSchedDate.get(wo.Id);
             }
             String startDateRaw = wo.StartDate != null
                 ? wo.StartDate.format('yyyy-MM-dd')
@@ -179,7 +167,7 @@ public with sharing class OdtViewerController {
                 'status'       => wo.Status,
                 'fecha'        => fecha,
                 'startDateRaw' => startDateRaw,
-                'technician'   => !appts.isEmpty() ? (String) appts[0].get('technician') : '',
+                'technician'   => woTechnician.containsKey(wo.Id) ? woTechnician.get(wo.Id) : '',
                 'territory'    => wo.ServiceTerritory != null ? wo.ServiceTerritory.Name : '',
                 'subject'      => wo.Subject,
                 'description'  => wo.Description,
@@ -187,8 +175,7 @@ public with sharing class OdtViewerController {
                 'tipo'         => 'Prevista',
                 'treatments'   => woTreatments.containsKey(wo.Id)
                                   ? String.join(woTreatments.get(wo.Id), ', ')
-                                  : '',
-                'appointments' => appts
+                                  : ''
             };
 
             if (wo.ServiceContractId != null && scMap.containsKey(wo.ServiceContractId)) {

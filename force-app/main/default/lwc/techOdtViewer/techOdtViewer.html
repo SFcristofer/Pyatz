@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <!-- BARRA DE ACCIONES MASIVAS -->
+        <!-- BARRA DE ACCIONES MASIVAS (aparece cuando hay selección) -->
         <template if:true={hasSelected}>
             <div class="bulk-bar">
                 <div class="bulk-bar-left">
@@ -129,21 +129,26 @@
                     <template if:true={group.expanded}>
                         <div class="odt-table-wrap">
 
-                            <!-- Indicador de selección (sin botón Reorganizar) -->
-                            <template if:true={group.hasSelected}>
-                                <div class="sede-actions">
-                                    <span class="group-selected-label">
-                                        <lightning-icon icon-name="utility:check" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                        {group.selectedCount} seleccionadas en este contrato
+                            <!-- BARRA DE ACCIONES DE SEDE -->
+                            <div class="sede-actions">
+                                <lightning-button
+                                    label="Reorganizar Trabajos de esta Sede"
+                                    variant="brand-outline"
+                                    icon-name="utility:settings"
+                                    data-contract-id={group.id}
+                                    onclick={handleReorganizar}>
+                                </lightning-button>
+                                <template if:true={group.hasSelected}>
+                                    <span class="slds-m-left_small group-selected-label">
+                                        {group.selectedCount} seleccionadas
                                     </span>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
 
                             <template if:true={group.hasFilteredWorkOrders}>
                                 <table class="odt-table">
                                     <thead>
                                         <tr>
-                                            <th class="col-expand"></th>
                                             <th class="col-check">
                                                 <input type="checkbox"
                                                     data-group-id={group.id}
@@ -159,190 +164,54 @@
                                             <th class="col-acciones"></th>
                                         </tr>
                                     </thead>
-                                    <template for:each={group.filteredWorkOrders} for:item="wo">
-                                        <tbody key={wo.id}>
-
-                                                <!-- FILA PRINCIPAL ODT -->
-                                                <tr class={wo.rowClass}>
-                                                    <!-- Expand SA accordion -->
-                                                    <td class="col-expand">
-                                                        <template if:true={wo.hasAppointments}>
-                                                            <lightning-button-icon
-                                                                icon-name={wo.saChevronIcon}
-                                                                variant="bare"
-                                                                size="x-small"
-                                                                alternative-text="Citas de servicio"
-                                                                title="Ver citas de servicio"
-                                                                data-id={wo.id}
-                                                                onclick={handleToggleRowExpand}>
-                                                            </lightning-button-icon>
-                                                        </template>
-                                                    </td>
-
-                                                    <!-- Checkbox -->
-                                                    <td class="col-check">
-                                                        <input type="checkbox"
-                                                            checked={wo.selected}
-                                                            data-id={wo.id}
-                                                            onchange={handleSelectRow} />
-                                                    </td>
-
-                                                    <!-- Número -->
-                                                    <td class="col-num">
-                                                        <span class="wo-number">{wo.number}</span>
-                                                    </td>
-
-                                                    <!-- Fecha (editable) -->
-                                                    <td class="col-fecha">
-                                                        <template if:true={wo.isEditing}>
-                                                            <input type="date" class="inline-input"
-                                                                value={wo.editStartDate}
-                                                                data-id={wo.id}
-                                                                data-field="startDate"
-                                                                onchange={handleInlineFieldChange} />
-                                                        </template>
-                                                        <template if:false={wo.isEditing}>
-                                                            {wo.fecha}
-                                                        </template>
-                                                    </td>
-
-                                                    <!-- Estado (editable) -->
-                                                    <td class="col-estado">
-                                                        <template if:true={wo.isEditing}>
-                                                            <lightning-combobox
-                                                                label="Estado"
-                                                                variant="label-hidden"
-                                                                value={wo.editStatusValue}
-                                                                options={statusOptions}
-                                                                class="inline-combobox"
-                                                                data-id={wo.id}
-                                                                data-field="status"
-                                                                onchange={handleInlineFieldChange}>
-                                                            </lightning-combobox>
-                                                        </template>
-                                                        <template if:false={wo.isEditing}>
-                                                            <span class={wo.statusClass}>{wo.status}</span>
-                                                        </template>
-                                                    </td>
-
-                                                    <!-- Técnico -->
-                                                    <td class="col-tecnico">
-                                                        <template if:true={wo.technician}>
-                                                            <div class="tech-cell">
-                                                                <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small tech-icon"></lightning-icon>
-                                                                {wo.technician}
-                                                            </div>
-                                                        </template>
-                                                        <template if:false={wo.technician}>
-                                                            <span class="no-assign">Sin asignar</span>
-                                                        </template>
-                                                    </td>
-
-                                                    <td class="col-territorio">{wo.territory}</td>
-                                                    <td class="col-tipo"><span class="tipo-tag">{wo.tipo}</span></td>
-                                                    <td class="col-tratamientos"><span class="treatments-text">{wo.treatments}</span></td>
-
-                                                    <!-- Acciones -->
-                                                    <td class="col-acciones">
-                                                        <template if:true={wo.isEditing}>
-                                                            <div class="action-group">
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:save"
-                                                                    variant="brand"
-                                                                    size="x-small"
-                                                                    alternative-text="Guardar"
-                                                                    title="Guardar"
-                                                                    disabled={isSavingInline}
-                                                                    data-id={wo.id}
-                                                                    onclick={handleSaveInlineEdit}>
-                                                                </lightning-button-icon>
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:close"
-                                                                    variant="border-filled"
-                                                                    size="x-small"
-                                                                    alternative-text="Cancelar"
-                                                                    title="Cancelar"
-                                                                    onclick={handleCancelInlineEdit}>
-                                                                </lightning-button-icon>
-                                                            </div>
-                                                        </template>
-                                                        <template if:false={wo.isEditing}>
-                                                            <div class="action-group">
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:edit"
-                                                                    variant="border-filled"
-                                                                    size="x-small"
-                                                                    alternative-text="Editar"
-                                                                    title="Editar estado/fecha"
-                                                                    data-id={wo.id}
-                                                                    onclick={handleOpenInlineEdit}>
-                                                                </lightning-button-icon>
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:preview"
-                                                                    variant="border-filled"
-                                                                    size="x-small"
-                                                                    alternative-text="Ver ODT"
-                                                                    title="Ver ODT"
-                                                                    data-id={wo.id}
-                                                                    onclick={handleViewWorkOrder}>
-                                                                </lightning-button-icon>
-                                                            </div>
-                                                        </template>
-                                                    </td>
-                                                </tr>
-
-                                                <!-- FILA ACORDEÓN: CITAS DE SERVICIO -->
-                                                <template if:true={wo.rowExpanded}>
-                                                    <tr class="sa-accordion-row">
-                                                        <td colspan="10">
-                                                            <div class="sa-accordion-content">
-                                                                <div class="sa-accordion-header">
-                                                                    <lightning-icon icon-name="standard:service_appointment" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                                                                    Citas de servicio
-                                                                </div>
-                                                                <table class="sa-table">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Núm.</th>
-                                                                            <th>Fecha programada</th>
-                                                                            <th>Estado</th>
-                                                                            <th>Técnico</th>
-                                                                            <th>Duración</th>
-                                                                            <th>Notas</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <template for:each={wo.appointments} for:item="sa">
-                                                                            <tr key={sa.id} class="sa-row">
-                                                                                <td class="sa-num">{sa.number}</td>
-                                                                                <td>{sa.schedDate}</td>
-                                                                                <td>
-                                                                                    <span class="sa-status-tag">{sa.status}</span>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <template if:true={sa.technician}>
-                                                                                        <div class="tech-cell">
-                                                                                            <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small tech-icon"></lightning-icon>
-                                                                                            {sa.technician}
-                                                                                        </div>
-                                                                                    </template>
-                                                                                    <template if:false={sa.technician}>
-                                                                                        <span class="no-assign">Sin asignar</span>
-                                                                                    </template>
-                                                                                </td>
-                                                                                <td>{sa.duration}</td>
-                                                                                <td class="sa-notes">{sa.notes}</td>
-                                                                            </tr>
-                                                                        </template>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </template>
-
-                                        </tbody>
-                                    </template>
+                                    <tbody>
+                                        <template for:each={group.filteredWorkOrders} for:item="wo">
+                                            <tr key={wo.id} class={wo.rowClass}>
+                                                <td class="col-check">
+                                                    <input type="checkbox"
+                                                        checked={wo.selected}
+                                                        data-id={wo.id}
+                                                        onchange={handleSelectRow} />
+                                                </td>
+                                                <td class="col-num">
+                                                    <span class="wo-number">{wo.number}</span>
+                                                </td>
+                                                <td class="col-fecha">{wo.fecha}</td>
+                                                <td class="col-estado">
+                                                    <span class={wo.statusClass}>{wo.status}</span>
+                                                </td>
+                                                <td class="col-tecnico">
+                                                    <template if:true={wo.technician}>
+                                                        <div class="tech-cell">
+                                                            <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small tech-icon"></lightning-icon>
+                                                            {wo.technician}
+                                                        </div>
+                                                    </template>
+                                                    <template if:false={wo.technician}>
+                                                        <span class="no-assign">Sin asignar</span>
+                                                    </template>
+                                                </td>
+                                                <td class="col-territorio">{wo.territory}</td>
+                                                <td class="col-tipo">
+                                                    <span class="tipo-tag">{wo.tipo}</span>
+                                                </td>
+                                                <td class="col-tratamientos">
+                                                    <span class="treatments-text">{wo.treatments}</span>
+                                                </td>
+                                                <td class="col-acciones">
+                                                    <lightning-button-icon
+                                                        icon-name="utility:preview"
+                                                        variant="border-filled"
+                                                        size="x-small"
+                                                        alternative-text="Ver ODT"
+                                                        title="Ver ODT"
+                                                        data-id={wo.id}
+                                                        onclick={handleViewWorkOrder}>
+                                                    </lightning-button-icon>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
                                 </table>
                             </template>
 
@@ -382,7 +251,7 @@
                     <div class="slds-modal__content">
                         <template if:true={isResolvingOpp}>
                             <div class="slds-is-relative" style="height: 200px;">
-                                <lightning-spinner alternative-text="Cargando..." size="medium"></lightning-spinner>
+                                <lightning-spinner alternative-text="Cargando órdenes..." size="medium"></lightning-spinner>
                             </div>
                         </template>
                         <template if:true={contractModalOppId}>
@@ -421,6 +290,7 @@
                         </p>
 
                         <div class="slds-grid slds-wrap slds-gutters">
+                            <!-- Estado -->
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
                                 <div class="slds-form-element">
                                     <label class="slds-form-element__label">Estado</label>
@@ -440,6 +310,7 @@
                                 </div>
                             </div>
 
+                            <!-- Prioridad -->
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
                                 <div class="slds-form-element">
                                     <label class="slds-form-element__label">Prioridad</label>
@@ -455,6 +326,7 @@
                                 </div>
                             </div>
 
+                            <!-- Fecha inicio -->
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
                                 <div class="slds-form-element">
                                     <label class="slds-form-element__label">Fecha de inicio</label>
@@ -464,6 +336,7 @@
                                 </div>
                             </div>
 
+                            <!-- Contrato -->
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
                                 <div class="slds-form-element">
                                     <label class="slds-form-element__label">Contrato de Servicio</label>
@@ -483,6 +356,7 @@
                                 </div>
                             </div>
 
+                            <!-- Territorio -->
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
                                 <div class="slds-form-element">
                                     <label class="slds-form-element__label">Territorio de Servicio</label>
@@ -502,6 +376,7 @@
                                 </div>
                             </div>
 
+                            <!-- Descripción -->
                             <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
                                 <div class="slds-form-element">
                                     <label class="slds-form-element__label">Descripción / Notas</label>
@@ -552,6 +427,7 @@
                             <lightning-icon icon-name="utility:info" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                             {pendingAssignCount} ODT seleccionadas se vincularán al contrato elegido.
                         </p>
+
                         <div class="slds-form-element">
                             <label class="slds-form-element__label">
                                 <abbr class="slds-required" title="Requerido">*</abbr>

@@ -24,13 +24,13 @@ public with sharing class ServiceReviewController {
         @AuraEnabled public String  name;
         @AuraEnabled public Integer numero;
         @AuraEnabled public String  tipo;
-        @AuraEnabled public String  templateId;
         @AuraEnabled public String  status;
         @AuraEnabled public String  fecha;
         @AuraEnabled public String  tecnico;
         @AuraEnabled public Boolean isCompleted;
-        @AuraEnabled public String  cardClass;
-        @AuraEnabled public String  badgeClass;
+        @AuraEnabled public Integer photoCount;
+        @AuraEnabled public Boolean hasFirma;
+        @AuraEnabled public String  plantillaNombre;
     }
 
     public class PhotoInfo {
@@ -68,12 +68,50 @@ public with sharing class ServiceReviewController {
         }
 
         List<Revision_Cita_Servicio__c> revs = [
-            SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Plantilla_de_Formulario__c,
-                   Status__c, Fecha_Revision__c, Tecnico__r.Name
+            SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c,
+                   Status__c, Fecha_Revision__c, Tecnico__r.Name,
+                   Plantilla_de_Formulario__r.Tipo_Reporte__c
             FROM Revision_Cita_Servicio__c
             WHERE Cita_Servicio__c = :saId
             ORDER BY Numero_Revision__c ASC NULLS LAST
         ];
+
+        // ── Photos & signature counts per revision ────────────────────────────
+        Set<Id> revIds = new Set<Id>();
+        for (Revision_Cita_Servicio__c r : revs) revIds.add(r.Id);
+
+        Map<Id, Integer> photoCountMap = new Map<Id, Integer>();
+        Map<Id, Boolean> hasFirmaMap   = new Map<Id, Boolean>();
+        for (Id rid : revIds) { photoCountMap.put(rid, 0); hasFirmaMap.put(rid, false); }
+
+        if (!revIds.isEmpty()) {
+            List<ContentDocumentLink> cdls = [
+                SELECT ContentDocumentId, LinkedEntityId
+                FROM ContentDocumentLink
+                WHERE LinkedEntityId IN :revIds
+            ];
+            if (!cdls.isEmpty()) {
+                Map<Id, Id> docToRev = new Map<Id, Id>();
+                for (ContentDocumentLink cdl : cdls) docToRev.put(cdl.ContentDocumentId, cdl.LinkedEntityId);
+
+                for (ContentVersion cv : [
+                    SELECT ContentDocumentId, Title
+                    FROM ContentVersion
+                    WHERE ContentDocumentId IN :docToRev.keySet()
+                      AND IsLatest = true
+                ]) {
+                    Id rid = docToRev.get(cv.ContentDocumentId);
+                    if (rid == null) continue;
+                    String t = cv.Title;
+                    if (t.startsWith('GeoFoto_') && !t.startsWith('Thumb_')) {
+                        photoCountMap.put(rid, photoCountMap.get(rid) + 1);
+                    } else if (t.startsWith('Firma_') && !t.startsWith('Thumb_')) {
+                        hasFirmaMap.put(rid, true);
+                    }
+                }
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         Integer completadas = 0;
         List<RevisionSummary> revList = new List<RevisionSummary>();
@@ -83,23 +121,20 @@ public with sharing class ServiceReviewController {
             rs.name        = r.Name;
             rs.numero      = r.Numero_Revision__c != null ? Integer.valueOf(r.Numero_Revision__c) : 0;
             rs.tipo        = r.Tipo_Reporte__c;
-            rs.templateId  = r.Plantilla_de_Formulario__c;
             rs.status      = r.Status__c;
             rs.isCompleted = r.Status__c == 'Completada';
             rs.fecha       = r.Fecha_Revision__c != null
                 ? r.Fecha_Revision__c.format('dd/MM/yyyy HH:mm')
                 : '';
-            rs.tecnico     = r.Tecnico__r != null ? r.Tecnico__r.Name : '';
-            
-            // Estilos para LWC
-            rs.cardClass   = 'rev-card ' + (rs.isCompleted ? 'rev-card--done' : 'rev-card--pending');
-            rs.badgeClass  = 'rev-card__badge ' + (rs.isCompleted ? 'rev-card__badge--done' : 'rev-card__badge--pending');
-            
+            rs.tecnico        = r.Tecnico__r != null ? r.Tecnico__r.Name : '';
+            rs.photoCount     = photoCountMap.get(r.Id);
+            rs.hasFirma       = hasFirmaMap.get(r.Id);
+            rs.plantillaNombre = r.Plantilla_de_Formulario__r != null
+                && r.Plantilla_de_Formulario__r.Tipo_Reporte__c != null
+                ? r.Plantilla_de_Formulario__r.Tipo_Reporte__c : '';
             revList.add(rs);
             if (r.Status__c == 'Completada') completadas++;
         }
-
-        Integer maxRev = sa.Revisiones__c != null ? Integer.valueOf(sa.Revisiones__c) : 0;
 
         User u = [SELECT Name FROM User WHERE Id = :UserInfo.getUserId() LIMIT 1];
         String techName = u.Name;
@@ -116,7 +151,7 @@ public with sharing class ServiceReviewController {
         info.maxRevisiones         = sa.Revisiones__c != null ? sa.Revisiones__c : 0;
         info.revisionesCompletadas = completadas;
         info.revisionesTotales     = revList.size();
-        info.canCreateRevision     = (maxRev > 0 && completadas < maxRev);
+        info.canCreateRevision     = true;
         info.revisionesList        = revList;
         info.techName              = techName;
         info.techInitials          = techInitials;
@@ -124,6 +159,36 @@ public with sharing class ServiceReviewController {
     }
 
     // ─── Revision CRUD ────────────────────────────────────────────────────────
+
+    @AuraEnabled(cacheable=false)
+    public static Map<String, String> getRevisionData(Id revisionId) {
+        Revision_Cita_Servicio__c rev = [
+            SELECT Id, Tipo_Reporte__c, Datos_Formulario__c, Observaciones__c, Status__c,
+                   Plantilla_de_Formulario__c, Plantilla_de_Formulario__r.Tipo_Reporte__c
+            FROM Revision_Cita_Servicio__c
+            WHERE Id = :revisionId
+            LIMIT 1
+        ];
+        Map<String, String> result = new Map<String, String>();
+        result.put('tipoReporte',      rev.Tipo_Reporte__c     != null ? rev.Tipo_Reporte__c     : '');
+        result.put('datosFormulario',  rev.Datos_Formulario__c != null ? rev.Datos_Formulario__c : '');
+        result.put('observaciones',    rev.Observaciones__c   != null ? rev.Observaciones__c   : '');
+        result.put('status',           rev.Status__c          != null ? rev.Status__c          : '');
+        result.put('plantillaId',      rev.Plantilla_de_Formulario__c != null
+                                            ? String.valueOf(rev.Plantilla_de_Formulario__c) : '');
+        result.put('plantillaNombre',  rev.Plantilla_de_Formulario__r != null
+                                       && rev.Plantilla_de_Formulario__r.Tipo_Reporte__c != null
+                                            ? rev.Plantilla_de_Formulario__r.Tipo_Reporte__c : '');
+        return result;
+    }
+
+    @AuraEnabled
+    public static void setRevisionTemplate(Id revisionId, Id templateId) {
+        update new Revision_Cita_Servicio__c(
+            Id = revisionId,
+            Plantilla_de_Formulario__c = templateId
+        );
+    }
 
     @AuraEnabled
     public static Id createRevision(Id saId, Integer revisionNumber) {
@@ -134,7 +199,6 @@ public with sharing class ServiceReviewController {
         rev.Fecha_Revision__c   = Datetime.now();
         rev.Tecnico__c          = UserInfo.getUserId();
         insert rev;
-        updateSAStatusToInProgress(saId);
         return rev.Id;
     }
 
@@ -146,21 +210,11 @@ public with sharing class ServiceReviewController {
             WHERE Id = :revisionId
             LIMIT 1
         ];
-        
-        if (tipoReporte instanceof Id) {
-            rev.Plantilla_de_Formulario__c = (Id)tipoReporte;
-            // Opcional: llenar el nombre en el campo de texto para reportes viejos
-            Form_Template__c temp = [SELECT Tipo_Reporte__c FROM Form_Template__c WHERE Id = :tipoReporte LIMIT 1];
-            rev.Tipo_Reporte__c = temp.Tipo_Reporte__c;
-        } else {
-            rev.Tipo_Reporte__c = tipoReporte;
-        }
-        
+        rev.Tipo_Reporte__c     = tipoReporte;
         rev.Datos_Formulario__c = datosFormulario;
         rev.Observaciones__c    = observaciones;
         rev.Status__c           = 'Completada';
         update rev;
-        updateSAStatus(rev.Cita_Servicio__c);
     }
 
     @AuraEnabled
@@ -280,40 +334,6 @@ public with sharing class ServiceReviewController {
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────
-
-    private static void updateSAStatusToInProgress(Id saId) {
-        ServiceAppointment sa = [SELECT Id, Status FROM ServiceAppointment WHERE Id = :saId LIMIT 1];
-        if (sa.Status != 'En curso' && sa.Status != 'Completado') {
-            sa.Status = 'En curso';
-            update sa;
-        }
-    }
-
-    private static void updateSAStatus(Id saId) {
-        ServiceAppointment sa = [
-            SELECT Id, Revisiones__c
-            FROM ServiceAppointment
-            WHERE Id = :saId
-            LIMIT 1
-        ];
-        Integer total       = sa.Revisiones__c != null ? Integer.valueOf(sa.Revisiones__c) : 0;
-        Integer completadas = [
-            SELECT COUNT() FROM Revision_Cita_Servicio__c
-            WHERE Cita_Servicio__c = :saId AND Status__c = 'Completada'
-        ];
-
-        String newStatus;
-        if (total > 0 && completadas >= total) {
-            newStatus = 'Completado';
-        } else if (completadas > 0) {
-            newStatus = 'En curso';
-        } else {
-            return;
-        }
-
-        sa.Status = newStatus;
-        try { update sa; } catch (Exception e) { /* status transition validation may fail */ }
-    }
 
     private static Id insertCVAndLink(String filename, String base64Data, String description, Id linkedEntityId) {
         ContentVersion cv = new ContentVersion();

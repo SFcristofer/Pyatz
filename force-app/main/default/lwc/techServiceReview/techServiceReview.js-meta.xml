@@ -5,12 +5,18 @@
     <targets>
         <target>lightning__RecordPage</target>
         <target>lightning__AppPage</target>
+        <target>lightning__FlowScreen</target>
+        <target>lightning__RecordAction</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
-            <objects>
-                <object>ServiceAppointment</object>
-            </objects>
+            <property name="recordId" type="String" label="Record Id" description="Id del registro al que se realizará la revisión" />
+            <supportedFormFactors>
+                <supportedFormFactor type="Small"/>
+                <supportedFormFactor type="Large"/>
+            </supportedFormFactors>
+        </targetConfig>
+        <targetConfig targets="lightning__AppPage">
             <supportedFormFactors>
                 <supportedFormFactor type="Small"/>
                 <supportedFormFactor type="Large"/>
