@@ -158,7 +158,7 @@ public with sharing class TechWorkOrderController {
 
     @AuraEnabled(cacheable=true)
     public static List<Zona_Servicio_Pyatz__c> getAccountZonesData(Id accountId, String searchTerm, String nameFilter, String templateFilter, String lobFilter, String codeFilter) {
-        String query = 'SELECT Id, Name, Linea_de_Negocio__c, Tipo_de_Servicio__c, Id_Unico_Zona__c, (SELECT Plantilla__r.Name FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId';
+        String query = 'SELECT Id, Name, Linea_de_Negocio__c, Tipo_de_Servicio__c, Id_Unico_Zona__c, (SELECT Plantilla__c, Plantilla__r.Name FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId';
         if (String.isNotBlank(searchTerm)) {
             String searchKey = '%' + searchTerm + '%';
             query += ' AND (Name LIKE :searchKey OR Tipo_de_Servicio__c LIKE :searchKey OR Id_Unico_Zona__c LIKE :searchKey)';
