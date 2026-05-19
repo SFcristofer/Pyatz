@@ -158,10 +158,10 @@ public with sharing class TechWorkOrderController {
 
     @AuraEnabled(cacheable=true)
     public static List<Zona_Servicio_Pyatz__c> getAccountZonesData(Id accountId, String searchTerm, String nameFilter, String templateFilter, String lobFilter, String codeFilter) {
-        String query = 'SELECT Id, Name, Linea_de_Negocio__c, Tipo_de_Servicio__c, Id_Unico_Zona__c, Plantilla_de_Formulario__r.Name FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId';
+        String query = 'SELECT Id, Name, Linea_de_Negocio__c, Tipo_de_Servicio__c, Id_Unico_Zona__c, (SELECT Plantilla__r.Name FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId';
         if (String.isNotBlank(searchTerm)) {
             String searchKey = '%' + searchTerm + '%';
-            query += ' AND (Name LIKE :searchKey OR Tipo_de_Servicio__c LIKE :searchKey OR Id_Unico_Zona__c LIKE :searchKey OR Plantilla_de_Formulario__r.Name LIKE :searchKey)';
+            query += ' AND (Name LIKE :searchKey OR Tipo_de_Servicio__c LIKE :searchKey OR Id_Unico_Zona__c LIKE :searchKey)';
         }
         query += ' ORDER BY Name ASC LIMIT 500';
         return Database.query(query);
@@ -280,7 +280,19 @@ public with sharing class TechWorkOrderController {
                     if (tra.containsKey('selectedZonesData')) {
                         for (Object zoneObj : (List<Object>)tra.get('selectedZonesData')) {
                             Map<String, Object> zone = (Map<String, Object>)zoneObj;
-                            if (zone.containsKey('Plantilla_de_Formulario__c') && zone.get('Plantilla_de_Formulario__c') != null) {
+                            // Soportar nueva estructura (Plantillas_de_Zona__r)
+                            if (zone.containsKey('Plantillas_de_Zona__r') && zone.get('Plantillas_de_Zona__r') != null) {
+                                List<Object> pzrList = (List<Object>)zone.get('Plantillas_de_Zona__r');
+                                for(Object pzrObj : pzrList) {
+                                    Map<String, Object> pzr = (Map<String, Object>)pzrObj;
+                                    if(pzr.containsKey('Plantilla__c')) {
+                                        String zTemp = (String)pzr.get('Plantilla__c');
+                                        if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
+                                    }
+                                }
+                            } 
+                            // Fallback a estructura vieja por seguridad
+                            else if (zone.containsKey('Plantilla_de_Formulario__c') && zone.get('Plantilla_de_Formulario__c') != null) {
                                 String zTemp = (String)zone.get('Plantilla_de_Formulario__c');
                                 if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
                             }
@@ -388,10 +400,22 @@ public with sharing class TechWorkOrderController {
 
                     if (!revsBySA.containsKey(currentSA.Id) || revsBySA.get(currentSA.Id).isEmpty()) {
                         Integer revCounter = 1;
-                        for (String templateId : templateIndexMap.get(i)) {
+                        List<String> templateIds = templateIndexMap.get(i);
+                        Map<Id, String> templateNamesMap = new Map<Id, String>();
+                        if (!templateIds.isEmpty()) {
+                            List<Id> castedIds = new List<Id>();
+                            for(String s : templateIds) { castedIds.add((Id)s); }
+                            for(Form_Template__c ft : [SELECT Id, Name FROM Form_Template__c WHERE Id IN :castedIds]) {
+                                templateNamesMap.put(ft.Id, ft.Name);
+                            }
+                        }
+
+                        for (String templateId : templateIds) {
+                            String tName = templateNamesMap.get((Id)templateId);
                             revsToIns.add(new Revision_Cita_Servicio__c(
                                 Cita_Servicio__c = currentSA.Id, 
                                 Numero_Revision__c = revCounter++, 
+                                Tipo_Reporte__c = tName,
                                 Status__c = 'En Proceso', 
                                 Plantilla_de_Formulario__c = (Id)templateId, 
                                 Fecha_Revision__c = Datetime.now(), 

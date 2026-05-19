@@ -97,9 +97,14 @@ export default class TechZoneBrowserDrawer extends LightningElement {
                 const rawLOB = (z.Linea_de_Negocio__c || z.Tipo_de_Servicio__c || '').toLowerCase();
                 const isMatch = contextLines.some(cl => rawLOB.includes(cl));
 
+                let templateNames = '';
+                if (z.Plantillas_de_Zona__r && z.Plantillas_de_Zona__r.length > 0) {
+                    templateNames = z.Plantillas_de_Zona__r.map(pz => pz.Plantilla__r && pz.Plantilla__r.Name ? pz.Plantilla__r.Name : '').filter(n => n).join(', ');
+                }
+
                 return {
                     ...z,
-                    TemplateName: (z.Plantilla_de_Formulario__r && z.Plantilla_de_Formulario__r.Name) ? z.Plantilla_de_Formulario__r.Name : '',
+                    TemplateName: templateNames,
                     DisplayLOB: budgetLine, 
                     isContextMatch: isMatch,
                     lobStatusClass: isMatch ? 'slds-text-color_success slds-text-title_bold' : 'slds-text-color_info slds-text-body_small'
