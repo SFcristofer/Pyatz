@@ -173,19 +173,23 @@ export default class TechQuoteItemConfigurator extends LightningElement {
     }
 
     handleToggleZone(event) {
-        const zoneName = event.target.dataset.name;
+        const zoneName = event.target.dataset.name ? event.target.dataset.name.trim() : '';
+        if (!zoneName) return;
+        
         const isChecked = event.target.checked;
         if (isChecked) {
-            const exists = this.zonasAfectadas.some(z => z.toLowerCase().trim() === zoneName.toLowerCase().trim());
+            // Comparación exacta para reuso de maestro
+            const exists = this.zonasAfectadas.some(z => z.trim() === zoneName);
             if (!exists) this.zonasAfectadas = [...this.zonasAfectadas, zoneName];
         } else {
-            this.zonasAfectadas = this.zonasAfectadas.filter(z => z.toLowerCase().trim() !== zoneName.toLowerCase().trim());
+            this.zonasAfectadas = this.zonasAfectadas.filter(z => z.trim() !== zoneName);
         }
     }
 
     removeZona(event) {
-        const zona = event.target.name;
-        this.zonasAfectadas = this.zonasAfectadas.filter(z => z.toLowerCase().trim() !== zona.toLowerCase().trim());
+        const zona = event.target.name ? event.target.name.trim() : '';
+        if (!zona) return;
+        this.zonasAfectadas = this.zonasAfectadas.filter(z => z.trim() !== zona);
     }
 
     handleModalInputChange(event) {

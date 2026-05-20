@@ -29,11 +29,12 @@ public with sharing class TechWorkOrderController {
             // 2. CARGAR TRATAMIENTOS "COMERCIALES"
             List<Map<String, Object>> tratamientosComerciales = new List<Map<String, Object>>();
             if (serviceContractId != null) {
-                for (ContractLineItem cli : [SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Quantity, Description, Levantamiento_Tecnico__c 
+                for (ContractLineItem cli : [SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Quantity, Description, Zonas_a_Tratar__c, Levantamiento_Tecnico__c 
                                             FROM ContractLineItem WHERE ServiceContractId = :serviceContractId]) {
+                    String zonas = String.isNotBlank(cli.Zonas_a_Tratar__c) ? cli.Zonas_a_Tratar__c : cli.Description;
                     tratamientosComerciales.add(new Map<String, Object>{
                         'id' => cli.Id, 'name' => cli.Product2.Name, 'code' => cli.Product2.ProductCode, 'quantity' => cli.Quantity, 
-                        'zonas' => cli.Description, 'levantamientoId' => cli.Levantamiento_Tecnico__c,
+                        'zonas' => zonas, 'levantamientoId' => cli.Levantamiento_Tecnico__c,
                         'productId' => cli.Product2Id
                     });
                 }
@@ -70,31 +71,44 @@ public with sharing class TechWorkOrderController {
                 result.put('notes', existingWO.Description);
 
                 List<ServiceAppointment> sas = [SELECT Id, Duration, SchedStartTime, Status, ServiceNote, ArrivalWindowStartTime, ArrivalWindowEndTime, 
-                                                FSL__Pinned__c, Producto_Relacionado__c, Zonas_a_Tratar__c,
+                                                FSL__Pinned__c, Producto_Relacionado__c, Subject, Zonas_a_Tratar__c,
                                                 (SELECT ServiceResourceId FROM ServiceResources) 
                                                FROM ServiceAppointment WHERE ParentRecordId = :existingWO.Id ORDER BY SchedStartTime ASC];
                 
-                // Mapeo inteligente de citas existentes a tratamientos (evitando duplicados por producto)
+                // Mapeo inteligente de citas existentes a tratamientos
                 Map<Id, List<ServiceAppointment>> availableSAsByProduct = new Map<Id, List<ServiceAppointment>>();
+                Map<String, List<ServiceAppointment>> availableSAsByName = new Map<String, List<ServiceAppointment>>();
+
                 for (ServiceAppointment sa : sas) {
-                    if (sa.Producto_Relacionado__c == null) continue;
-                    if (!availableSAsByProduct.containsKey(sa.Producto_Relacionado__c)) {
-                        availableSAsByProduct.put(sa.Producto_Relacionado__c, new List<ServiceAppointment>());
+                    if (sa.Producto_Relacionado__c != null) {
+                        if (!availableSAsByProduct.containsKey(sa.Producto_Relacionado__c)) availableSAsByProduct.put(sa.Producto_Relacionado__c, new List<ServiceAppointment>());
+                        availableSAsByProduct.get(sa.Producto_Relacionado__c).add(sa);
+                    } else if (String.isNotBlank(sa.Subject)) {
+                        // PLAN B: Mapeo por nombre si el producto está vacío (para recuperar citas viejas)
+                        String cleanName = sa.Subject.replace('Servicio: ', '').trim();
+                        if (!availableSAsByName.containsKey(cleanName)) availableSAsByName.put(cleanName, new List<ServiceAppointment>());
+                        availableSAsByName.get(cleanName).add(sa);
                     }
-                    availableSAsByProduct.get(sa.Producto_Relacionado__c).add(sa);
                 }
 
                 for (Map<String, Object> tra : tratamientosComerciales) {
                     Id pId = (Id)tra.get('productId');
+                    String tName = (String)tra.get('name');
                     Integer qty = Integer.valueOf(tra.get('quantity'));
                     
+                    // Prioridad 1: Match por Producto | Prioridad 2: Match por Nombre
+                    List<ServiceAppointment> pool = new List<ServiceAppointment>();
                     if (availableSAsByProduct.containsKey(pId) && !availableSAsByProduct.get(pId).isEmpty()) {
-                        List<ServiceAppointment> pool = availableSAsByProduct.get(pId);
+                        pool = availableSAsByProduct.get(pId);
+                    } else if (availableSAsByName.containsKey(tName) && !availableSAsByName.get(tName).isEmpty()) {
+                        pool = availableSAsByName.get(tName);
+                    }
+
+                    if (!pool.isEmpty()) {
                         List<Map<String, Object>> rows = new List<Map<String, Object>>();
                         Set<String> techIds = new Set<String>();
                         String lastZonas = '';
 
-                        // Consumimos solo las citas que corresponden a este tratamiento (qty)
                         Integer toConsume = Math.min(qty, pool.size());
                         for (Integer i = 0; i < toConsume; i++) {
                             ServiceAppointment sa = pool.remove(0);
@@ -118,7 +132,10 @@ public with sharing class TechWorkOrderController {
                                 'locked' => sa.FSL__Pinned__c,
                                 'tecnicoId' => firstTechId
                             });
-                            lastZonas = sa.Zonas_a_Tratar__c;
+                            // Solo sobreescribimos zonas si la cita trae algo útil (no vacío o default)
+                            if (String.isNotBlank(sa.Zonas_a_Tratar__c) && sa.Zonas_a_Tratar__c != 'Sin descripción técnica') {
+                                lastZonas = sa.Zonas_a_Tratar__c;
+                            }
                         }
                         tra.put('schedulingRows', rows);
                         tra.put('tecnicosIds', new List<String>(techIds));
@@ -393,8 +410,6 @@ public with sharing class TechWorkOrderController {
                 }
 
                 // 2. BORRAR AssignedResources ANTES del upsert del ServiceAppointment.
-                // Esto es crucial porque FSL borra el SchedStartTime de la cita al eliminar el recurso.
-                // Al hacerlo antes, el upsert posterior volverá a grabar las fechas correctas.
                 if (!modifiableSaIds.isEmpty()) {
                     List<AssignedResource> oldARs = [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId IN :modifiableSaIds];
                     if (!oldARs.isEmpty()) delete oldARs;
@@ -405,6 +420,16 @@ public with sharing class TechWorkOrderController {
                 
                 Set<Id> saIds = new Map<Id, ServiceAppointment>(sasToUpsert).keySet();
                 
+                // --- LIMPIEZA DE HUÉRFANOS ---
+                // Borrar citas que pertenecen a esta WO pero que ya NO están en la pantalla del usuario
+                // Solo borramos las que no han avanzado (Status inicial)
+                if (existingWorkOrderId != null) {
+                    delete [SELECT Id FROM ServiceAppointment 
+                            WHERE ParentRecordId = :wo.Id 
+                            AND Id NOT IN :saIds 
+                            AND Status IN ('Ninguno', 'Cita solicitada', 'New', 'Programado')];
+                }
+
                 // Cargar revisiones existentes para actualización
                 List<Revision_Cita_Servicio__c> allExistingRevs = [SELECT Id, Cita_Servicio__c, Status__c FROM Revision_Cita_Servicio__c WHERE Cita_Servicio__c IN :saIds];
                 Map<Id, List<Revision_Cita_Servicio__c>> revsBySA = new Map<Id, List<Revision_Cita_Servicio__c>>();

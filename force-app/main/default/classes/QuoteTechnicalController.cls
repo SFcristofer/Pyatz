@@ -238,13 +238,13 @@ public with sharing class QuoteTechnicalController {
     public static void syncServiceZones(Id quoteId, String markersBase64) {
         if (String.isBlank(markersBase64) || quoteId == null) return;
         try {
-            // 1. Normalizar ID de cotización a 18 caracteres para consistencia en llaves únicas
             String qId18 = String.valueOf(quoteId);
-            
             Quote q = [SELECT Id, AccountId, Business_Lines_Selected__c FROM Quote WHERE Id = :qId18 LIMIT 1];
-            Map<String, Id> pbeToQliId = new Map<String, Id>();
-            for (QuoteLineItem qli : [SELECT Id, PricebookEntryId FROM QuoteLineItem WHERE QuoteId = :qId18]) {
-                pbeToQliId.put(qli.PricebookEntryId, qli.Id);
+            
+            // 1. CARGAR MAESTRO: Obtener zonas existentes de la cuenta para reuso
+            Map<String, Zona_Servicio_Pyatz__c> maestroZonas = new Map<String, Zona_Servicio_Pyatz__c>();
+            for (Zona_Servicio_Pyatz__c z : [SELECT Id, Name, Id_Unico_Zona__c, Tipo_de_Servicio__c FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :q.AccountId]) {
+                maestroZonas.put(z.Name, z);
             }
 
             // 2. Decodificar y Parsear JSON
@@ -253,64 +253,53 @@ public with sharing class QuoteTechnicalController {
             List<Object> servicios = (List<Object>)root.get('serviciosData');
             if (servicios == null) return;
 
-            // 3. Procesar y Unificar Zonas en Memoria
+            // 3. Procesar y Unificar Zonas con prioridad en el REUSO
             Map<String, Zona_Servicio_Pyatz__c> zonesToSaveMap = new Map<String, Zona_Servicio_Pyatz__c>();
             
             for (Object obj : servicios) {
                 Map<String, Object> s = (Map<String, Object>)obj;
                 String areasStr = (String)s.get('areas');
                 String serviceName = (String)s.get('descripcion');
-                String techDetail = (String)s.get('detalleTecnico');
-                String pbeId = (String)s.get('pbeId');
-                String levantamientoId = (String)s.get('levantamientoId');
-                
                 if (String.isBlank(areasStr)) continue;
 
                 for (String zoneName : areasStr.split(',')) {
                     String trimmedName = zoneName.trim();
                     if (String.isBlank(trimmedName)) continue;
 
-                    // Llave única ultra-robusta: ID18 + nombre normalizado (sin espacios, sin acentos, lowercase)
-                    String normalizedZone = trimmedName.toLowerCase().trim().replaceAll('[áàäâ]', 'a').replaceAll('[éèëê]', 'e').replaceAll('[íìïî]', 'i').replaceAll('[óòöô]', 'o').replaceAll('[úùüû]', 'u').replaceAll('[ñ]', 'n').replaceAll('[^a-z0-9]', '_');
-                    String uniqueKey = qId18 + '_' + normalizedZone;
+                    // Llave única por CUENTA + NOMBRE (para reuso eterno)
+                    String uniqueKey = q.AccountId + '_' + trimmedName;
 
-                    if (zonesToSaveMap.containsKey(uniqueKey)) {
-                        Zona_Servicio_Pyatz__c existing = zonesToSaveMap.get(uniqueKey);
-                        if (String.isNotBlank(serviceName)) {
-                            if (String.isBlank(existing.Tipo_de_Servicio__c)) {
-                                existing.Tipo_de_Servicio__c = serviceName;
-                            } else if (!existing.Tipo_de_Servicio__c.contains(serviceName)) {
-                                existing.Tipo_de_Servicio__c += '; ' + serviceName;
-                            }
-                        }
+                    Zona_Servicio_Pyatz__c z;
+                    if (maestroZonas.containsKey(trimmedName)) {
+                        // REUSO: Usar el registro que ya tiene el cliente (preserva plantillas de reporte)
+                        z = maestroZonas.get(trimmedName);
+                    } else if (zonesToSaveMap.containsKey(uniqueKey)) {
+                        z = zonesToSaveMap.get(uniqueKey);
                     } else {
-                        Zona_Servicio_Pyatz__c z = new Zona_Servicio_Pyatz__c(
-                            Name = trimmedName,
-                            Cotizacion__c = qId18,
-                            Cuenta__c = q.AccountId,
-                            Tipo_de_Servicio__c = serviceName,
-                            Detalle_Tecnico__c = techDetail,
-                            Id_Unico_Zona__c = uniqueKey,
-                            Linea_de_Negocio__c = q.Business_Lines_Selected__c
-                        );
-                        if (String.isNotBlank(levantamientoId)) z.Levantamiento_Tecnico__c = (Id)levantamientoId;
-                        if (pbeToQliId.containsKey(pbeId)) z.Linea_de_Cotizacion__c = pbeToQliId.get(pbeId);
-                        
-                        zonesToSaveMap.put(uniqueKey, z);
+                        // NUEVO: Solo si el cliente no conoce esta zona
+                        z = new Zona_Servicio_Pyatz__c(Name = trimmedName, Cuenta__c = q.AccountId);
                     }
+
+                    // Actualizar vínculos con la cotización actual
+                    z.Cotizacion__c = qId18;
+                    z.Linea_de_Negocio__c = q.Business_Lines_Selected__c;
+                    z.Id_Unico_Zona__c = uniqueKey;
+
+                    if (String.isNotBlank(serviceName)) {
+                        if (String.isBlank(z.Tipo_de_Servicio__c)) {
+                            z.Tipo_de_Servicio__c = serviceName;
+                        } else if (!z.Tipo_de_Servicio__c.contains(serviceName)) {
+                            z.Tipo_de_Servicio__c += '; ' + serviceName;
+                        }
+                    }
+                    
+                    zonesToSaveMap.put(uniqueKey, z);
                 }
             }
 
-            // 4. Ejecutar cambios
+            // 4. Ejecutar cambios: Upsert basado en la llave única del cliente
             if (!zonesToSaveMap.isEmpty()) {
-                // Upsert usando la llave única externa
                 upsert zonesToSaveMap.values() Id_Unico_Zona__c;
-                
-                // Recolectamos las llaves únicas que acabamos de guardar para borrar el resto
-                Set<String> currentUniqueKeys = zonesToSaveMap.keySet();
-                delete [SELECT Id FROM Zona_Servicio_Pyatz__c WHERE Cotizacion__c = :qId18 AND Id_Unico_Zona__c NOT IN :currentUniqueKeys];
-            } else {
-                delete [SELECT Id FROM Zona_Servicio_Pyatz__c WHERE Cotizacion__c = :qId18];
             }
 
         } catch (Exception e) {
