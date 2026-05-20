@@ -20,6 +20,12 @@ public with sharing class TechWorkOrderController {
                 targetQuote = syncingQuotes[0];
             }
 
+            // AUTO-RECUPERACIÓN DE CONTRATO SI NO SE PASÓ
+            if (serviceContractId == null) {
+                List<ServiceContract> scs = [SELECT Id FROM ServiceContract WHERE Quote_Source__c = :targetQuote.Id OR (AccountId = :targetQuote.AccountId AND Name LIKE :('%' + targetQuote.QuoteNumber + '%')) LIMIT 1];
+                if (!scs.isEmpty()) serviceContractId = scs[0].Id;
+            }
+
             // 2. CARGAR TRATAMIENTOS "COMERCIALES"
             List<Map<String, Object>> tratamientosComerciales = new List<Map<String, Object>>();
             if (serviceContractId != null) {
@@ -63,7 +69,7 @@ public with sharing class TechWorkOrderController {
                 result.put('territoryId', existingWO.ServiceTerritoryId);
                 result.put('notes', existingWO.Description);
 
-                List<ServiceAppointment> sas = [SELECT Id, Duration, SchedStartTime, ServiceNote, ArrivalWindowStartTime, ArrivalWindowEndTime, 
+                List<ServiceAppointment> sas = [SELECT Id, Duration, SchedStartTime, Status, ServiceNote, ArrivalWindowStartTime, ArrivalWindowEndTime, 
                                                 FSL__Pinned__c, Producto_Relacionado__c, Zonas_a_Tratar__c,
                                                 (SELECT ServiceResourceId FROM ServiceResources) 
                                                FROM ServiceAppointment WHERE ParentRecordId = :existingWO.Id ORDER BY SchedStartTime ASC];
@@ -80,13 +86,18 @@ public with sharing class TechWorkOrderController {
 
                 for (Map<String, Object> tra : tratamientosComerciales) {
                     Id pId = (Id)tra.get('productId');
+                    Integer qty = Integer.valueOf(tra.get('quantity'));
+                    
                     if (availableSAsByProduct.containsKey(pId) && !availableSAsByProduct.get(pId).isEmpty()) {
-                        List<ServiceAppointment> matchingSAs = availableSAsByProduct.get(pId);
+                        List<ServiceAppointment> pool = availableSAsByProduct.get(pId);
                         List<Map<String, Object>> rows = new List<Map<String, Object>>();
                         Set<String> techIds = new Set<String>();
                         String lastZonas = '';
 
-                        for (ServiceAppointment sa : matchingSAs) {
+                        // Consumimos solo las citas que corresponden a este tratamiento (qty)
+                        Integer toConsume = Math.min(qty, pool.size());
+                        for (Integer i = 0; i < toConsume; i++) {
+                            ServiceAppointment sa = pool.remove(0);
                             String firstTechId = '';
                             for (AssignedResource ar : sa.ServiceResources) {
                                 if (String.isBlank(firstTechId)) firstTechId = ar.ServiceResourceId;
@@ -101,6 +112,7 @@ public with sharing class TechWorkOrderController {
                                 'date' => sa.SchedStartTime != null ? sa.SchedStartTime.format('yyyy-MM-dd') : '',
                                 'startTime' => sa.SchedStartTime != null ? sa.SchedStartTime.format('HH:mm:ss.000') : '08:00:00.000',
                                 'duration' => sa.Duration,
+                                'status' => sa.Status,
                                 'notes' => String.isNotBlank(sa.ServiceNote) ? sa.ServiceNote : '',
                                 'arrivalMargin' => margin,
                                 'locked' => sa.FSL__Pinned__c,
@@ -111,9 +123,6 @@ public with sharing class TechWorkOrderController {
                         tra.put('schedulingRows', rows);
                         tra.put('tecnicosIds', new List<String>(techIds));
                         if (String.isNotBlank(lastZonas)) tra.put('zonas', lastZonas);
-                        
-                        // Consumir las citas para que no se asignen a otro tratamiento del mismo producto
-                        availableSAsByProduct.remove(pId);
                     }
                 }
             }
@@ -224,7 +233,7 @@ public with sharing class TechWorkOrderController {
             wo.Subject = 'Contrato Pyatz: ' + folio;
             wo.AccountId = accountId;
             wo.ServiceContractId = serviceContractId; 
-            wo.Status = 'New';
+            if (wo.Id == null) wo.Status = 'New';
             wo.Priority = String.isNotBlank(priority) ? priority : 'Medium';
             wo.ServiceTerritoryId = String.isNotBlank(territoryId) ? (Id)territoryId : null;
             wo.Street = String.isNotBlank(executionAddress) ? executionAddress : acc.BillingStreet;
@@ -266,6 +275,23 @@ public with sharing class TechWorkOrderController {
                 }
             }
 
+            // Precarga de estados actuales para evitar transiciones inválidas
+            Map<Id, String> saCurrentStatusMap = new Map<Id, String>();
+            Set<Id> saIdsToQuery = new Set<Id>();
+            for (Object sedeObj : sedesPayload) {
+                for (Object traObj : (List<Object>)((Map<String, Object>)sedeObj).get('tratamientos')) {
+                    for (Object rowObj : (List<Object>)((Map<String, Object>)traObj).get('schedulingRows')) {
+                        String sid = (String)((Map<String, Object>)rowObj).get('saId');
+                        if (String.isNotBlank(sid)) saIdsToQuery.add((Id)sid);
+                    }
+                }
+            }
+            if (!saIdsToQuery.isEmpty()) {
+                for (ServiceAppointment existingSa : [SELECT Id, Status FROM ServiceAppointment WHERE Id IN :saIdsToQuery]) {
+                    saCurrentStatusMap.put(existingSa.Id, existingSa.Status);
+                }
+            }
+
             Integer saIdx = 0;
             for (Object sedeObj : sedesPayload) {
                 Map<String, Object> sede = (Map<String, Object>)sedeObj;
@@ -280,7 +306,6 @@ public with sharing class TechWorkOrderController {
                     if (tra.containsKey('selectedZonesData')) {
                         for (Object zoneObj : (List<Object>)tra.get('selectedZonesData')) {
                             Map<String, Object> zone = (Map<String, Object>)zoneObj;
-                            // Soportar nueva estructura (Plantillas_de_Zona__r)
                             if (zone.containsKey('Plantillas_de_Zona__r') && zone.get('Plantillas_de_Zona__r') != null) {
                                 List<Object> pzrList = (List<Object>)zone.get('Plantillas_de_Zona__r');
                                 for(Object pzrObj : pzrList) {
@@ -290,9 +315,7 @@ public with sharing class TechWorkOrderController {
                                         if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
                                     }
                                 }
-                            } 
-                            // Fallback a estructura vieja por seguridad
-                            else if (zone.containsKey('Plantilla_de_Formulario__c') && zone.get('Plantilla_de_Formulario__c') != null) {
+                            } else if (zone.containsKey('Plantilla_de_Formulario__c') && zone.get('Plantilla_de_Formulario__c') != null) {
                                 String zTemp = (String)zone.get('Plantilla_de_Formulario__c');
                                 if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
                             }
@@ -328,9 +351,8 @@ public with sharing class TechWorkOrderController {
                         sa.SchedStartTime = Datetime.newInstance(d, Time.newInstance(h, m, 0, 0));
                         sa.SchedEndTime = sa.SchedStartTime.addMinutes(Integer.valueOf(sa.Duration));
                         sa.DueDate = Datetime.newInstance(d, Time.newInstance(23, 59, 59, 0));
-                        sa.EarliestStartTime = sa.SchedStartTime.addMinutes(-60); // 1 hour before as buffer
+                        sa.EarliestStartTime = sa.SchedStartTime.addMinutes(-60);
 
-                        // Set Arrival Windows (Standard FSL requirement)
                         Integer margin = row.get('arrivalMargin') != null ? Integer.valueOf(String.valueOf(row.get('arrivalMargin'))) : 0;
                         sa.ArrivalWindowStartTime = sa.SchedStartTime.addMinutes(-margin);
                         sa.ArrivalWindowEndTime = sa.SchedStartTime.addMinutes(margin);
@@ -338,14 +360,18 @@ public with sharing class TechWorkOrderController {
                         if (row.get('locked') == true) sa.FSL__Pinned__c = true;
                         if (String.isNotBlank((String)row.get('notes'))) sa.ServiceNote = (String)row.get('notes');
                         
-                        // Prepare Tech Data for this row
                         List<String> techs = new List<String>();
                         if (String.isNotBlank((String)row.get('tecnicoId'))) techs.add((String)row.get('tecnicoId'));
                         else if (tra.containsKey('tecnicosIds')) for (Object tId : (List<Object>)tra.get('tecnicosIds')) techs.add((String)tId);
                         
-                        // If techs are assigned, set status to Programado immediately
-                        if (!techs.isEmpty()) sa.Status = 'Programado';
-                        else if (sa.Id == null) sa.Status = 'Ninguno';
+                        // PROTECCIÓN DE ESTADO
+                        String currentStatus = saId != null ? saCurrentStatusMap.get(saId) : 'Ninguno';
+                        if (!techs.isEmpty()) {
+                            // Solo pasamos a Programado si el estado actual lo permite
+                            if (currentStatus == 'Ninguno' || currentStatus == 'Cita solicitada' || currentStatus == 'New') {
+                                sa.Status = 'Programado';
+                            }
+                        }
 
                         sasToUpsert.add(sa);
                         techIndexMap.put(saIdx, techs);
@@ -357,24 +383,36 @@ public with sharing class TechWorkOrderController {
             }
 
             if (!sasToUpsert.isEmpty()) {
+                // 1. Identificar citas existentes que son modificables (No están en curso ni completadas)
+                Set<Id> modifiableSaIds = new Set<Id>();
+                for (Id sid : incomingSaIds) {
+                    String currentStatus = saCurrentStatusMap.get(sid);
+                    if (currentStatus == null || currentStatus == 'Ninguno' || currentStatus == 'Cita solicitada' || currentStatus == 'New' || currentStatus == 'Programado') {
+                        modifiableSaIds.add(sid);
+                    }
+                }
+
+                // 2. BORRAR AssignedResources ANTES del upsert del ServiceAppointment.
+                // Esto es crucial porque FSL borra el SchedStartTime de la cita al eliminar el recurso.
+                // Al hacerlo antes, el upsert posterior volverá a grabar las fechas correctas.
+                if (!modifiableSaIds.isEmpty()) {
+                    List<AssignedResource> oldARs = [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId IN :modifiableSaIds];
+                    if (!oldARs.isEmpty()) delete oldARs;
+                }
+
                 System.debug('Upserting ' + sasToUpsert.size() + ' ServiceAppointments...');
                 upsert sasToUpsert;
                 
                 Set<Id> saIds = new Map<Id, ServiceAppointment>(sasToUpsert).keySet();
                 
-                // Debug verify state
-                for (ServiceAppointment vsa : [SELECT Id, Status, SchedStartTime, EarliestStartTime FROM ServiceAppointment WHERE Id IN :saIds]) {
-                    System.debug('SA Verificado: ' + vsa.Id + ' | Status: ' + vsa.Status + ' | SchedStart: ' + vsa.SchedStartTime + ' | Earliest: ' + vsa.EarliestStartTime);
-                }
-
-                List<Revision_Cita_Servicio__c> allExistingRevs = [SELECT Id, Cita_Servicio__c FROM Revision_Cita_Servicio__c WHERE Cita_Servicio__c IN :saIds];
+                // Cargar revisiones existentes para actualización
+                List<Revision_Cita_Servicio__c> allExistingRevs = [SELECT Id, Cita_Servicio__c, Status__c FROM Revision_Cita_Servicio__c WHERE Cita_Servicio__c IN :saIds];
                 Map<Id, List<Revision_Cita_Servicio__c>> revsBySA = new Map<Id, List<Revision_Cita_Servicio__c>>();
                 for (Revision_Cita_Servicio__c r : allExistingRevs) {
                     if (!revsBySA.containsKey(r.Cita_Servicio__c)) revsBySA.put(r.Cita_Servicio__c, new List<Revision_Cita_Servicio__c>());
                     revsBySA.get(r.Cita_Servicio__c).add(r);
                 }
 
-                // Map ServiceResource to UserID
                 Set<Id> allTechSRIds = new Set<Id>();
                 for (List<String> tList : techIndexMap.values()) for (String tId : tList) allTechSRIds.add((Id)tId);
                 
@@ -383,13 +421,8 @@ public with sharing class TechWorkOrderController {
                     srToUserId.put(sr.Id, sr.RelatedRecordId);
                 }
 
-                List<Revision_Cita_Servicio__c> revsToIns = new List<Revision_Cita_Servicio__c>();
+                List<Revision_Cita_Servicio__c> revsToUpsert = new List<Revision_Cita_Servicio__c>();
                 List<AssignedResource> arsToIns = new List<AssignedResource>();
-                
-                if (!incomingSaIds.isEmpty()) {
-                    List<AssignedResource> oldARs = [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId IN :incomingSaIds];
-                    if (!oldARs.isEmpty()) delete oldARs;
-                }
 
                 Id firstUserOwnerId = null;
                 for (Integer i = 0; i < sasToUpsert.size(); i++) {
@@ -398,6 +431,7 @@ public with sharing class TechWorkOrderController {
                     Id saPrimaryUserId = (!saTechSRIds.isEmpty() && srToUserId.containsKey((Id)saTechSRIds[0])) ? srToUserId.get((Id)saTechSRIds[0]) : UserInfo.getUserId();
                     if (firstUserOwnerId == null && !saTechSRIds.isEmpty()) firstUserOwnerId = srToUserId.get((Id)saTechSRIds[0]);
 
+                    // Si no tiene revisiones, creamos nuevas
                     if (!revsBySA.containsKey(currentSA.Id) || revsBySA.get(currentSA.Id).isEmpty()) {
                         Integer revCounter = 1;
                         List<String> templateIds = templateIndexMap.get(i);
@@ -409,10 +443,9 @@ public with sharing class TechWorkOrderController {
                                 templateNamesMap.put(ft.Id, ft.Name);
                             }
                         }
-
                         for (String templateId : templateIds) {
                             String tName = templateNamesMap.get((Id)templateId);
-                            revsToIns.add(new Revision_Cita_Servicio__c(
+                            revsToUpsert.add(new Revision_Cita_Servicio__c(
                                 Cita_Servicio__c = currentSA.Id, 
                                 Numero_Revision__c = revCounter++, 
                                 Tipo_Reporte__c = tName,
@@ -422,9 +455,23 @@ public with sharing class TechWorkOrderController {
                                 Tecnico__c = saPrimaryUserId
                             ));
                         }
+                    } 
+                    // Si ya tiene revisiones, actualizamos el técnico si no está completada
+                    else {
+                        for (Revision_Cita_Servicio__c r : revsBySA.get(currentSA.Id)) {
+                            if (r.Status__c != 'Completada') {
+                                r.Tecnico__c = saPrimaryUserId;
+                                revsToUpsert.add(r);
+                            }
+                        }
                     }
-                    for (String tId : saTechSRIds) {
-                        arsToIns.add(new AssignedResource(ServiceAppointmentId = currentSA.Id, ServiceResourceId = (Id)tId));
+                    
+                    // Solo asignamos los técnicos nuevos si la cita era nueva o estaba en un estado modificable
+                    Boolean canChangeTech = (!incomingSaIds.contains(currentSA.Id)) || modifiableSaIds.contains(currentSA.Id);
+                    if (canChangeTech) {
+                        for (String tId : saTechSRIds) {
+                            arsToIns.add(new AssignedResource(ServiceAppointmentId = currentSA.Id, ServiceResourceId = (Id)tId));
+                        }
                     }
                 }
                 
@@ -432,16 +479,10 @@ public with sharing class TechWorkOrderController {
                     try { wo.OwnerId = firstUserOwnerId; update wo; } catch (Exception e) { }
                 }
 
-                if (!revsToIns.isEmpty()) insert revsToIns;
+                if (!revsToUpsert.isEmpty()) upsert revsToUpsert;
                 if (!arsToIns.isEmpty()) { 
-                    try { 
-                        System.debug('Insertando ' + arsToIns.size() + ' AssignedResources...');
-                        insert arsToIns; 
-                    } 
-                    catch (Exception e) { 
-                        System.debug('Error DML en AssignedResource: ' + e.getMessage());
-                        throw new AuraHandledException('Error al asignar técnicos: ' + e.getMessage()); 
-                    } 
+                    try { insert arsToIns; } 
+                    catch (Exception e) { throw new AuraHandledException('Error al asignar técnicos: ' + e.getMessage()); } 
                 }
             }
             System.debug('--- TechWorkOrder - Fin exitoso ---');
@@ -449,9 +490,6 @@ public with sharing class TechWorkOrderController {
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) { 
-            System.debug('!!! ERROR EN TechWorkOrderController !!!');
-            System.debug('Mensaje: ' + e.getMessage());
-            System.debug('Stack Trace: ' + e.getStackTraceString());
             throw new AuraHandledException('Error Técnico: ' + e.getMessage() + ' (Línea: ' + e.getLineNumber() + ')'); 
         }
     }
