@@ -123,6 +123,82 @@ public with sharing class TechCitasServicioController {
         return result;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static Map<String, Object> getVerificationStatus(Id workOrderId) {
+        WorkOrder wo = [
+            SELECT Verificado__c, Verificado_Por__c, Fecha_Verificacion__c,
+                   Nombre_Firmante__c, Cargo_Firmante__c
+            FROM WorkOrder WHERE Id = :workOrderId LIMIT 1
+        ];
+        String fechaFmt = null;
+        if (wo.Fecha_Verificacion__c != null) {
+            String[] meses = new String[]{
+                'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+            };
+            Datetime d = wo.Fecha_Verificacion__c;
+            fechaFmt = d.day() + ' / ' + meses[d.month() - 1] + ' / ' + d.year()
+                     + ' ' + String.valueOf(d.hour()).leftPad(2,'0')
+                     + ':' + String.valueOf(d.minute()).leftPad(2,'0');
+        }
+        return new Map<String, Object>{
+            'verificado'         => wo.Verificado__c,
+            'verificadoPor'      => wo.Verificado_Por__c,
+            'fechaVerificacion'  => fechaFmt,
+            'nombreFirmante'     => wo.Nombre_Firmante__c,
+            'cargoFirmante'      => wo.Cargo_Firmante__c
+        };
+    }
+
+    @AuraEnabled
+    public static void verificarODT(Id workOrderId, String nombreFirmante, String cargoFirmante) {
+        update new WorkOrder(
+            Id                    = workOrderId,
+            Verificado__c         = true,
+            Verificado_Por__c     = UserInfo.getName(),
+            Fecha_Verificacion__c = Datetime.now(),
+            Nombre_Firmante__c    = nombreFirmante,
+            Cargo_Firmante__c     = cargoFirmante
+        );
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static List<Map<String, Object>> getSAHistory(Id saId) {
+        List<Map<String, Object>> result = new List<Map<String, Object>>();
+        try {
+            for (ServiceAppointmentHistory h : [
+                SELECT CreatedDate, CreatedBy.Name, Field, OldValue, NewValue
+                FROM ServiceAppointmentHistory
+                WHERE ServiceAppointmentId = :saId
+                  AND Field = 'Status'
+                ORDER BY CreatedDate DESC
+                LIMIT 50
+            ]) {
+                result.add(new Map<String, Object>{
+                    'fecha'    => h.CreatedDate.format('dd/MM/yyyy HH:mm'),
+                    'usuario'  => h.CreatedBy.Name,
+                    'anterior' => h.OldValue != null ? String.valueOf(h.OldValue) : '—',
+                    'nuevo'    => h.NewValue != null ? String.valueOf(h.NewValue) : '—'
+                });
+            }
+        } catch (Exception e) {
+            // Historial no disponible o sin permisos
+        }
+        return result;
+    }
+
+    @AuraEnabled
+    public static void desverificarODT(Id workOrderId) {
+        update new WorkOrder(
+            Id                    = workOrderId,
+            Verificado__c         = false,
+            Verificado_Por__c     = null,
+            Fecha_Verificacion__c = null,
+            Nombre_Firmante__c    = null,
+            Cargo_Firmante__c     = null
+        );
+    }
+
     private static Integer countNoConformidades(String jsonStr) {
         if (String.isBlank(jsonStr)) return 0;
         try {

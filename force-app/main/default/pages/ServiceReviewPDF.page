@@ -1,4 +1,4 @@
-<apex:page controller="ServiceReviewPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+<!-- v2026-05-23d fix-trat-hdr-blank-deploy --><apex:page controller="ServiceReviewPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
     <html>
         <head>
             <style type="text/css">
@@ -95,10 +95,38 @@
                 .photo-cap    { font-size:6pt; color:#aaa; text-align:center; margin-top:1pt; word-break:break-all; }
                 .no-photos    { font-size:7.5pt; color:#bbb; font-style:italic; text-align:center; padding:10pt; }
 
+                /* ── Certificado de Servicio (modo consolidado) ── */
+                .cert-svc-title { font-size:22pt; font-weight:bold; color:#1a2035; line-height:1.3; margin-bottom:4pt; }
+                .cert-svc-type  { font-size:11pt; color:#555; margin-bottom:14pt; }
+                .cert-data-hdr  { background:#0070d2; color:#fff; font-size:8pt; font-weight:bold;
+                                  text-transform:uppercase; letter-spacing:1pt; padding:5pt 8pt; }
+                .cert-data-body { border:0.5pt solid #ddd; border-top:none; padding:8pt 10pt; background:#fff; }
+                .cert-fld-lbl   { font-size:8pt; font-weight:bold; color:#333; vertical-align:top; }
+                .cert-fld-val   { font-size:8.5pt; color:#222; }
+                .prod-sep-hdr   { background:#1a2035; color:#a5d6a7; font-size:8pt; font-weight:bold;
+                                  padding:4pt 8pt; margin-top:4pt; margin-bottom:4pt; }
+                .prod-item-hdr  { font-size:8pt; font-weight:bold; color:#1a2035; padding:4pt 0 2pt 0;
+                                  border-bottom:0.5pt solid #e0e0e0; margin-bottom:3pt; }
+                .prod-desc      { font-size:7pt; color:#444; line-height:1.4; padding-left:8pt;
+                                  border-left:2pt solid #0070d2; margin-bottom:5pt; }
+                .prod-desc img  { max-width:100% !important; height:auto !important; }
+                .fc-hdr         { background:#0070d2; color:#fff; font-size:8pt; font-weight:bold;
+                                  text-transform:uppercase; letter-spacing:0.5pt; padding:4pt 8pt; }
+                .fc-val         { font-size:9pt; color:#222; border:0.5pt solid #ddd; border-top:none;
+                                  padding:6pt 8pt; background:#f9f9f9; }
+
                 /* ── KPIs ── */
                 .kpi-cell { border:0.5pt solid #e0e0e0; text-align:center; padding:8pt; background:#fff; }
                 .kpi-num  { font-size:20pt; font-weight:bold; color:#1b5e20; }
                 .kpi-lbl  { font-size:7pt; text-transform:uppercase; color:#888; margin-top:2pt; letter-spacing:0.5pt; }
+
+                /* ── Cabeceras Tratamiento / Zona ── */
+                .trat-hdr { background:#1b5e20; color:#fff; padding:5pt 10pt; margin-bottom:3pt; border-radius:2pt; }
+                .trat-hdr__label { font-size:5.5pt; text-transform:uppercase; letter-spacing:1pt; color:#a5d6a7; display:block; }
+                .trat-hdr__name  { font-size:10pt; font-weight:bold; color:#fff; }
+                .zona-hdr { background:#f3f8f3; border-left:3pt solid #4caf50; padding:3pt 10pt; margin-bottom:4pt; }
+                .zona-hdr__label { font-size:5.5pt; text-transform:uppercase; letter-spacing:0.5pt; color:#888; display:block; }
+                .zona-hdr__name  { font-size:8pt; font-weight:bold; color:#1b5e20; white-space:pre-line; }
 
                 /* ── Certificado ── */
                 .cert-text     { font-size:8.5pt; text-align:justify; line-height:1.7; color:#444; margin:10pt 0; }
@@ -116,11 +144,152 @@
             <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
             <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
 
+            <!-- ══ CERTIFICADO DE SERVICIO (solo modo consolidado) ════════════════ -->
+            <apex:outputPanel rendered="{!isConsolidated}" layout="none">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
+                <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
+                <tbody><tr><td style="padding:0; vertical-align:top;">
+                <div style="padding:0 28pt;">
+
+                    <!-- Título -->
+                    <div class="cert-svc-title">CERTIFICADO DE SERVICIO N&#176;<br/>{!workOrderNum}</div>
+                    <apex:outputPanel rendered="{!NOT(ISBLANK(woSubject))}" layout="none">
+                        <div class="cert-svc-type">{!woSubject}</div>
+                    </apex:outputPanel>
+
+                    <!-- Cliente + Pyatz -->
+                    <table style="width:100%; border-collapse:collapse; margin-top:8pt;">
+                        <tr>
+                            <td width="50%" style="vertical-align:top; padding-right:6pt;">
+                                <div class="cert-data-hdr">Datos del Cliente y su Sede</div>
+                                <div class="cert-data-body">
+                                    <table style="width:100%; border-collapse:collapse;">
+                                        <tr>
+                                            <td class="cert-fld-lbl" width="38%" style="padding-bottom:5pt;">Raz&#243;n Social:</td>
+                                            <td class="cert-fld-val" style="padding-bottom:5pt;"><strong>{!accountName}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cert-fld-lbl" style="padding-bottom:5pt;">Sede:</td>
+                                            <td class="cert-fld-val" style="padding-bottom:5pt;">{!accountSede}</td>
+                                        </tr>
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(accountDireccion))}" layout="none">
+                                        <tr>
+                                            <td class="cert-fld-lbl" style="padding-bottom:5pt;">Direcci&#243;n:</td>
+                                            <td class="cert-fld-val" style="padding-bottom:5pt;">{!accountDireccion}</td>
+                                        </tr>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(accountMunicipio))}" layout="none">
+                                        <tr>
+                                            <td class="cert-fld-lbl" style="padding-bottom:5pt;">Municipio:</td>
+                                            <td class="cert-fld-val" style="padding-bottom:5pt;">{!accountMunicipio}</td>
+                                        </tr>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(accountEstado))}" layout="none">
+                                        <tr>
+                                            <td class="cert-fld-lbl" style="padding-bottom:5pt;">Estado/Entidad:</td>
+                                            <td class="cert-fld-val" style="padding-bottom:5pt;">{!accountEstado}</td>
+                                        </tr>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(accountActividad))}" layout="none">
+                                        <tr>
+                                            <td class="cert-fld-lbl" style="padding-bottom:5pt;">Actividad:</td>
+                                            <td class="cert-fld-val" style="padding-bottom:5pt;">{!accountActividad}</td>
+                                        </tr>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(accountPhone))}" layout="none">
+                                        <tr>
+                                            <td class="cert-fld-lbl">Tel.:</td>
+                                            <td class="cert-fld-val">{!accountPhone}</td>
+                                        </tr>
+                                        </apex:outputPanel>
+                                    </table>
+                                </div>
+                            </td>
+                            <td width="50%" style="vertical-align:top; padding-left:6pt;">
+                                <div class="cert-data-hdr">Presta el Servicio</div>
+                                <div class="cert-data-body">
+                                    <p style="font-size:9.5pt; font-weight:bold; color:#1a2035; margin:0 0 5pt 0;">
+                                        PYATZ INGENIER&#205;A BIOTECNOL&#211;GICA S.A. DE C.V.
+                                    </p>
+                                    <p style="font-size:9pt; color:#333; margin:0 0 2pt 0;">Callej&#243;n General Anaya #11</p>
+                                    <p style="font-size:9pt; color:#333; margin:0 0 2pt 0;">04120 Coyoac&#225;n &#183; Ciudad De M&#233;xico</p>
+                                    <p style="font-size:9pt; color:#333; margin:0 0 8pt 0;">
+                                        <strong>Registro COFEPRIS:</strong> 193300518X1519
+                                    </p>
+                                    <p style="font-size:8.5pt; color:#666; margin:0 0 2pt 0;">www.pyatz.com.mx &#183; Tel: 5556878837</p>
+                                    <p style="font-size:8.5pt; color:#666; margin:0;">g.garciadealba@pyatz.com.mx</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Fecha / Contrato -->
+                    <table style="width:100%; border-collapse:collapse; margin-top:10pt;">
+                        <tr>
+                            <td width="42%" style="vertical-align:top; padding-right:6pt;">
+                                <div class="fc-hdr">Fecha y Horario</div>
+                                <div class="fc-val">
+                                    <apex:outputPanel rendered="{!NOT(ISBLANK(firstSaSchedule))}" layout="none">{!firstSaSchedule}</apex:outputPanel>
+                                    <apex:outputPanel rendered="{!ISBLANK(firstSaSchedule)}" layout="none">{!fechaSA}</apex:outputPanel>
+                                </div>
+                            </td>
+                            <td width="58%" style="vertical-align:top; padding-left:6pt;">
+                                <div class="fc-hdr">Contrato</div>
+                                <div class="fc-val">
+                                    <apex:outputPanel rendered="{!NOT(ISBLANK(contractNumber))}" layout="none">
+                                        <strong>Contrato N&#176;:</strong>&#160;{!contractNumber}
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(contractEndDate))}" layout="none">
+                                            &#160;&#160;<strong>Caduca:</strong>&#160;{!contractEndDate}
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!ISBLANK(contractNumber)}" layout="none">Sin contrato vinculado</apex:outputPanel>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+                </td></tr></tbody>
+            </table>
+            </apex:outputPanel>
+
+            <!-- ══ PRODUCTOS CONTRATADOS — una página por producto (solo consolidado) ══ -->
+            <apex:outputPanel rendered="{!isConsolidated}" layout="none">
+            <apex:outputPanel rendered="{!hasLineItems}" layout="none">
+            <apex:repeat value="{!lineItems}" var="li">
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
+                <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
+                <tbody><tr><td style="padding:0; vertical-align:top;">
+                <div style="padding:0 28pt;">
+                    <div class="section-title">P R O D U C T O S &nbsp; C O N T R A T A D O S</div>
+                    <apex:outputPanel rendered="{!li.hasSectionHeader}" layout="none">
+                        <div class="prod-sep-hdr">{!li.sectionHeader}</div>
+                    </apex:outputPanel>
+                    <div class="prod-item-hdr">
+                        <apex:outputPanel rendered="{!NOT(ISBLANK(li.code))}" layout="none">
+                            <span style="color:#0070d2;">{!li.code}</span>&#160;
+                        </apex:outputPanel>
+                        {!li.nombre}
+                    </div>
+                    <apex:outputPanel rendered="{!li.hasDescripcion}" layout="none">
+                        <div class="prod-desc">
+                            <apex:outputText value="{!li.descripcion}" escape="false"/>
+                        </div>
+                    </apex:outputPanel>
+                </div>
+                </td></tr></tbody>
+            </table>
+            </apex:repeat>
+            </apex:outputPanel>
+            </apex:outputPanel>
+
             <!-- ══ Cada revisión en su propia tabla outer con thead/tfoot propios ══
                  La primera tabla incluye también el banner del documento.
                  Las siguientes usan page-break-before:always en la tabla outer.   -->
             <apex:repeat value="{!revWrappers}" var="w">
-            <table style="width:100%; border-collapse:collapse; {!IF(w.isFirst,'','page-break-before:always;')}">
+            <table style="width:100%; border-collapse:collapse; {!IF(AND(w.isFirst, NOT(isConsolidated)),'','page-break-before:always;')}">
                 <thead>
                     <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
                 </thead>
@@ -132,45 +301,101 @@
                         <td style="padding:0; vertical-align:top;">
                         <div style="padding:0 24pt;">
 
-                            <!-- Banner del documento — solo en la primera revisión -->
+                            <!-- Banner — solo en la primera revisión -->
                             <apex:outputPanel rendered="{!w.isFirst}" layout="none">
-                                <div class="banner-bar">
-                                    <table style="width:100%; border-collapse:collapse;">
-                                        <tr>
-                                            <td class="banner-td-main" width="28%">
-                                                <span class="banner-label">Reporte de Revisiones</span>
-                                                <span class="banner-sa">{!docTitle}</span>
-                                            </td>
-                                            <td class="banner-td" width="26%">
-                                                <span class="banner-lbl">Cliente / Cuenta</span>
-                                                <span class="banner-val">{!accountName}</span>
-                                            </td>
-                                            <td class="banner-td" width="18%">
-                                                <span class="banner-lbl">Fecha</span>
-                                                <span class="banner-val">{!fechaSA}</span>
-                                            </td>
-                                            <td class="banner-td" width="14%">
-                                                <span class="banner-lbl">Revisiones</span>
-                                                <span class="banner-val">{!totalRevs} reg.</span>
-                                            </td>
-                                            <td class="banner-td" width="7%">
-                                                <span class="banner-lbl">Fotos</span>
-                                                <span class="banner-val">{!totalFotos}</span>
-                                            </td>
-                                            <td class="banner-td-last" width="7%">
-                                                <span class="banner-lbl">Estado</span>
-                                                <span class="banner-val">{!docStatus}</span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <apex:outputPanel rendered="{!NOT(ISBLANK(zonasTratar))}" layout="none">
-                                    <div style="background:#f4f6fb; border:0.5pt solid #dde3ee; border-radius:3pt; padding:4pt 10pt; margin-bottom:5pt; display:table; width:100%;">
-                                        <span style="font-size:6pt; text-transform:uppercase; letter-spacing:0.8pt; color:#888; font-weight:bold;">Zonas a Tratar&#160;&#160;</span>
-                                        <span style="font-size:8pt; color:#1a2035; font-weight:bold;">{!zonasTratar}</span>
+
+                                <!-- Banner individual (SA único) -->
+                                <apex:outputPanel rendered="{!NOT(isConsolidated)}" layout="none">
+                                    <div class="banner-bar">
+                                        <table style="width:100%; border-collapse:collapse;">
+                                            <tr>
+                                                <td class="banner-td-main" width="28%">
+                                                    <span class="banner-label">Reporte de Revisiones</span>
+                                                    <span class="banner-sa">{!saRecord.AppointmentNumber}</span>
+                                                </td>
+                                                <td class="banner-td" width="26%">
+                                                    <span class="banner-lbl">Cliente / Cuenta</span>
+                                                    <span class="banner-val">{!accountName}</span>
+                                                </td>
+                                                <td class="banner-td" width="18%">
+                                                    <span class="banner-lbl">Fecha</span>
+                                                    <span class="banner-val">{!fechaSA}</span>
+                                                </td>
+                                                <td class="banner-td" width="14%">
+                                                    <span class="banner-lbl">Revisiones</span>
+                                                    <span class="banner-val">{!totalRevs} reg.</span>
+                                                </td>
+                                                <td class="banner-td" width="7%">
+                                                    <span class="banner-lbl">Fotos</span>
+                                                    <span class="banner-val">{!totalFotos}</span>
+                                                </td>
+                                                <td class="banner-td-last" width="7%">
+                                                    <span class="banner-lbl">Estado</span>
+                                                    <span class="banner-val">{!saRecord.Status}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
+                                    <div class="section-title">R E V I S I O N E S &nbsp; D E &nbsp; S E R V I C I O</div>
                                 </apex:outputPanel>
-                                <div class="section-title">R E V I S I O N E S &nbsp; D E &nbsp; S E R V I C I O</div>
+
+                                <!-- Banner consolidado (WorkOrder completo) -->
+                                <apex:outputPanel rendered="{!isConsolidated}" layout="none">
+                                    <div class="banner-bar">
+                                        <table style="width:100%; border-collapse:collapse;">
+                                            <tr>
+                                                <td class="banner-td-main" width="22%">
+                                                    <span class="banner-label">Reporte Consolidado</span>
+                                                    <span class="banner-sa">OT {!workOrderNum}</span>
+                                                </td>
+                                                <td class="banner-td" width="22%">
+                                                    <span class="banner-lbl">Cliente / Cuenta</span>
+                                                    <span class="banner-val">{!accountName}</span>
+                                                </td>
+                                                <td class="banner-td" width="18%">
+                                                    <span class="banner-lbl">Inicio ODT</span>
+                                                    <span class="banner-val">
+                                                        <apex:outputPanel rendered="{!NOT(ISBLANK(fechaInicio))}" layout="none">{!fechaInicio}</apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!ISBLANK(fechaInicio)}" layout="none">—</apex:outputPanel>
+                                                    </span>
+                                                </td>
+                                                <td class="banner-td" width="18%">
+                                                    <span class="banner-lbl">T&#233;rmino ODT</span>
+                                                    <span class="banner-val">
+                                                        <apex:outputPanel rendered="{!NOT(ISBLANK(fechaTermino))}" layout="none">{!fechaTermino}</apex:outputPanel>
+                                                        <apex:outputPanel rendered="{!ISBLANK(fechaTermino)}" layout="none">—</apex:outputPanel>
+                                                    </span>
+                                                </td>
+                                                <td class="banner-td" width="10%">
+                                                    <span class="banner-lbl">Citas</span>
+                                                    <span class="banner-val">{!totalSAs}</span>
+                                                </td>
+                                                <td class="banner-td-last" width="10%">
+                                                    <span class="banner-lbl">Revisiones</span>
+                                                    <span class="banner-val">{!totalRevs}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="section-title">R E V I S I O N E S &nbsp; C O N S O L I D A D A S &nbsp; D E &nbsp; S E R V I C I O</div>
+                                </apex:outputPanel>
+
+                            </apex:outputPanel>
+
+                            <!-- Cabecera de Zona (agrupador principal) -->
+                            <apex:outputPanel rendered="{!AND(w.showZonaHeader, NOT(ISBLANK(w.zona)))}" layout="none">
+                                <div class="zona-hdr">
+                                    <span class="zona-hdr__label">Zona</span>
+                                    <span class="zona-hdr__name">{!w.zona}</span>
+                                </div>
+                            </apex:outputPanel>
+
+                            <!-- Cabecera de Tratamiento (agrupador secundario) -->
+                            <apex:outputPanel rendered="{!AND(w.showTratHeader, w.hasTratamiento)}" layout="none">
+                                <div class="trat-hdr">
+                                    <span class="trat-hdr__label">Tipo de Reporte</span>
+                                    <span class="trat-hdr__name">{!w.tratamiento}</span>
+                                </div>
                             </apex:outputPanel>
 
                             <!-- Tarjeta de revisión -->
@@ -181,9 +406,9 @@
                                     <td class="rev-id-bar">
                                         <table style="width:100%; border-collapse:collapse;">
                                             <tr>
-                                                <td width="8%" style="vertical-align:middle; padding:0;">
-                                                    <div style="font-size:5.5pt; color:#a5d6a7; text-transform:uppercase; letter-spacing:0.8pt;">Rev.</div>
-                                                    <div class="rev-id-num">#{!w.rev.Numero_Revision__c}</div>
+                                                <td width="10%" style="vertical-align:middle; padding:0;">
+                                                    <div style="font-size:5.5pt; color:#a5d6a7; text-transform:uppercase; letter-spacing:0.8pt;">Folio</div>
+                                                    <div class="rev-id-num">{!w.rev.Name}</div>
                                                 </td>
                                                 <td width="44%" style="vertical-align:middle; padding:0 8pt;">
                                                     <div class="rev-id-tipo">{!w.rev.Tipo_Reporte__c}</div>
@@ -438,39 +663,80 @@
 
                             <table style="width:100%; border-collapse:collapse; margin-top:30pt;">
                                 <tr>
-                                    <td style="text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt;">
+                                    <!-- Izquierda: Recibió del Cliente -->
+                                    <td style="text-align:center; vertical-align:top; width:33.33%; padding:0 8pt;">
+                                        <div style="font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:1pt; color:#555; margin-bottom:6pt; border-bottom:0.5pt solid #ccc; padding-bottom:2pt;">Recibi&#243; del Cliente</div>
                                         <span style="height:55pt; display:block;">
                                             <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigUrl))}" layout="none">
                                                 <img src="{!clientSigUrl}" style="height:44pt; width:auto;" alt="Firma cliente"/>
                                             </apex:outputPanel>
                                         </span>
                                         <div class="cert-sig-line">
-                                            <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigName))}" layout="none">{!clientSigName}</apex:outputPanel>
-                                            <apex:outputPanel rendered="{!ISBLANK(clientSigName)}" layout="none">&#160;</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(nombreFirmante))}" layout="none">{!nombreFirmante}</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!AND(ISBLANK(nombreFirmante), NOT(ISBLANK(clientSigName)))}" layout="none">{!clientSigName}</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!AND(ISBLANK(nombreFirmante), ISBLANK(clientSigName))}" layout="none">&#160;</apex:outputPanel>
                                         </div>
-                                        <div class="cert-sig-role">Recibi&#243; del Cliente</div>
+                                        <div class="cert-sig-role">
+                                            <apex:outputPanel rendered="{!NOT(ISBLANK(cargoFirmante))}" layout="none">{!cargoFirmante}</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!ISBLANK(cargoFirmante)}" layout="none">&#160;</apex:outputPanel>
+                                        </div>
                                     </td>
-                                    <td style="text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt;">
+                                    <!-- Centro: Firma Autorizada Pyatz -->
+                                    <td style="text-align:center; vertical-align:top; width:33.33%; padding:0 8pt;">
+                                        <div style="font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:1pt; color:#555; margin-bottom:6pt; border-bottom:0.5pt solid #ccc; padding-bottom:2pt;">Firma Autorizada Pyatz</div>
                                         <span style="height:55pt; display:block;">
-                                            <apex:outputPanel rendered="{!NOT(ISBLANK(pyatzSignatureUrl))}" layout="none">
+                                            <apex:outputPanel rendered="{!AND(verificado, NOT(ISBLANK(pyatzSignatureUrl)))}" layout="none">
                                                 <img src="{!pyatzSignatureUrl}" style="height:44pt; width:auto;" alt="Firma Pyatz"/>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!NOT(verificado)}" layout="none">
+                                                <div style="height:44pt; border:0.5pt dashed #ccc; margin:4pt auto; width:100pt; display:block;"></div>
                                             </apex:outputPanel>
                                         </span>
                                         <div class="cert-sig-line">
-                                            <apex:outputPanel rendered="{!NOT(ISBLANK(techName))}" layout="none">{!techName}</apex:outputPanel>
-                                            <apex:outputPanel rendered="{!ISBLANK(techName)}" layout="none">&#160;</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!AND(verificado, NOT(ISBLANK(techName)))}" layout="none">{!techName}</apex:outputPanel>
+                                            <apex:outputPanel rendered="{!NOT(AND(verificado, NOT(ISBLANK(techName))))}" layout="none">&#160;</apex:outputPanel>
                                         </div>
-                                        <div class="cert-sig-role">Firma Autorizada Pyatz</div>
+                                        <div class="cert-sig-role">T&#233;cnico Aplicador</div>
                                     </td>
-                                    <td style="text-align:center; vertical-align:bottom; width:33.33%; padding:0 8pt;">
+                                    <!-- Derecha: Sello de la Empresa -->
+                                    <td style="text-align:center; vertical-align:top; width:33.33%; padding:0 8pt;">
+                                        <div style="font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:1pt; color:#555; margin-bottom:6pt; border-bottom:0.5pt solid #ccc; padding-bottom:2pt;">Sello de la Empresa</div>
                                         <span style="height:55pt; display:block;">
                                             <img src="{!$Resource.sello}" style="height:50pt; width:auto;" alt="Sello Pyatz"/>
                                         </span>
-                                        <div class="cert-sig-line">&#160;</div>
-                                        <div class="cert-sig-role">T&#233;cnico Aplicador</div>
                                     </td>
                                 </tr>
                             </table>
+
+                            <!-- ── Sello de verificación (solo si el WO está verificado) ── -->
+                            <apex:outputPanel rendered="{!verificado}" layout="none">
+                                <table style="width:100%; border-collapse:collapse; margin-top:16pt;">
+                                    <tr>
+                                        <td width="30%" style="padding:0;"></td>
+                                        <td width="40%" style="text-align:center; padding:0 8pt;">
+                                            <div style="border:2pt solid #1b5e20; border-radius:6pt; padding:8pt 16pt; background:#fff;">
+                                                <div style="font-size:7.5pt; font-weight:bold; color:#1b5e20; text-transform:uppercase; letter-spacing:1.5pt; margin-bottom:6pt;">&#10003; DOCUMENTO VERIFICADO</div>
+                                                <apex:outputPanel rendered="{!NOT(ISBLANK(verificacionSigUrl))}" layout="none">
+                                                    <table style="width:100%; border-collapse:collapse; margin-bottom:4pt;">
+                                                        <tr><td style="text-align:center;">
+                                                            <img src="{!verificacionSigUrl}" style="height:36pt; width:auto;" alt="Firma verificador"/>
+                                                        </td></tr>
+                                                    </table>
+                                                </apex:outputPanel>
+                                                <div style="border-top:0.5pt solid #bbb; padding-top:4pt; margin-top:4pt;">
+                                                    <apex:outputPanel rendered="{!NOT(ISBLANK(verificadoPor))}" layout="none">
+                                                        <div style="font-size:8pt; font-weight:bold; color:#222;">{!verificadoPor}</div>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel rendered="{!NOT(ISBLANK(fechaVerificacion))}" layout="none">
+                                                        <div style="font-size:7pt; color:#777; margin-top:2pt;">{!fechaVerificacion}</div>
+                                                    </apex:outputPanel>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td width="30%" style="padding:0;"></td>
+                                    </tr>
+                                </table>
+                            </apex:outputPanel>
 
                         </div>
                         </td>

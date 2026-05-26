@@ -14,8 +14,11 @@ import saveSignature             from '@salesforce/apex/ServiceReviewController.
 import getRevisionSignature      from '@salesforce/apex/ServiceReviewController.getRevisionSignature';
 import getRevisionData           from '@salesforce/apex/ServiceReviewController.getRevisionData';
 import setRevisionTemplate       from '@salesforce/apex/ServiceReviewController.setRevisionTemplate';
+import pauseRevision             from '@salesforce/apex/ServiceReviewController.pauseRevision';
+import getRevisionHistory        from '@salesforce/apex/ServiceReviewController.getRevisionHistory';
 
 import getTemplateById  from '@salesforce/apex/FormTemplateController.getTemplateById';
+import getSAHistory     from '@salesforce/apex/TechCitasServicioController.getSAHistory';
 
 import getFormTemplates from '@salesforce/apex/FormTemplateController.getFormTemplates';
 import getFormTemplate  from '@salesforce/apex/FormTemplateController.getFormTemplate';
@@ -77,6 +80,8 @@ export default class TechServiceReview extends LightningElement {
     // ── Signature ─────────────────────────────────────────────────────────────
     @track sigState        = SIG_IDLE;
     @track signerName      = '';
+    @track signerCargo     = '';
+    @track savedSigCargo   = '';
     @track canvasEmpty     = true;
     @track signatureSaved  = false;
     @track savingSignature = false;
@@ -106,6 +111,24 @@ export default class TechServiceReview extends LightningElement {
     @track plantillaId     = null;
     @track plantillaNombre = '';
     @track resumeMode      = false;
+
+    // ── Pause ─────────────────────────────────────────────────────────────────
+    @track showPauseConfirm = false;
+    @track pausingRevision  = false;
+    @track wasPaused        = false;
+
+    // ── SA History ────────────────────────────────────────────────────────────
+    @track showSAHistory    = false;
+    @track loadingSAHistory = false;
+    @track saHistoryData    = [];
+    get hasSAHistoryData() { return this.saHistoryData && this.saHistoryData.length > 0; }
+
+    // ── Revision History ──────────────────────────────────────────────────────
+    @track showRevHistory    = false;
+    @track loadingRevHistory = false;
+    @track revHistoryData    = [];
+    @track revHistoryTitle   = '';
+    get hasRevHistoryData() { return this.revHistoryData && this.revHistoryData.length > 0; }
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -138,6 +161,8 @@ export default class TechServiceReview extends LightningElement {
     get isStepFormSelect(){ return this.currentStep === STEP_FORM_SEL; }
     get isStepFormFill()  { return this.currentStep === STEP_FORM_FILL; }
     get isDone()          { return this.currentStep === STEP_DONE; }
+    get isDoneCompleted() { return this.isDone && !this.wasPaused; }
+    get isDonePaused()    { return this.isDone && this.wasPaused; }
     get hasFormQuestions(){ return this.formQuestions && this.formQuestions.length > 0; }
     get hasPlantilla()    { return !!this.plantillaId; }
     get noPlantilla()     { return !this.plantillaId; }
@@ -249,12 +274,20 @@ export default class TechServiceReview extends LightningElement {
         if (!data || !data.revisionesList) return data;
         return {
             ...data,
-            revisionesList: data.revisionesList.map(r => ({
-                ...r,
-                isPending:  !r.isCompleted,
-                cardClass:  r.isCompleted ? 'rev-card rev-card--done' : 'rev-card rev-card--pending',
-                badgeClass: r.isCompleted ? 'rev-card__badge rev-card__badge--done' : 'rev-card__badge rev-card__badge--pending',
-            }))
+            revisionesList: data.revisionesList.map(r => {
+                const isPaused = r.status === 'Pausado';
+                return {
+                    ...r,
+                    isPaused,
+                    isPending:  !r.isCompleted && !isPaused,
+                    cardClass:  r.isCompleted ? 'rev-card rev-card--done'
+                               : isPaused     ? 'rev-card rev-card--paused'
+                               :                'rev-card rev-card--pending',
+                    badgeClass: r.isCompleted ? 'rev-card__badge rev-card__badge--done'
+                               : isPaused     ? 'rev-card__badge rev-card__badge--paused'
+                               :                'rev-card__badge rev-card__badge--pending',
+                };
+            })
         };
     }
 
@@ -283,12 +316,17 @@ export default class TechServiceReview extends LightningElement {
                 this.revisionPhotos = [];
                 this.signatureSaved = false;
                 this.savedSigName   = '';
+                this.savedSigCargo  = '';
                 this.savedSigThumb  = null;
+                this.signerName     = '';
+                this.signerCargo    = '';
                 this.selectedFormType = '';
                 this.formQuestions    = [];
                 this.observaciones    = '';
                 this.photoReady       = false;
                 this.sigState         = SIG_IDLE;
+                this.wasPaused        = false;
+                this.showPauseConfirm = false;
                 this._loadSAInfo_silent();
                 this._startGPS();
                 this.currentStep = STEP_PHOTOS;
@@ -313,6 +351,33 @@ export default class TechServiceReview extends LightningElement {
         this.resumeMode = false;
         this._loadSAInfo();
     }
+
+    handleShowSAHistory() {
+        this.showSAHistory    = true;
+        this.loadingSAHistory = true;
+        this.saHistoryData    = [];
+        getSAHistory({ saId: this.recordId })
+            .then(data => { this.saHistoryData = data; })
+            .catch(() => {})
+            .finally(() => { this.loadingSAHistory = false; });
+    }
+
+    handleCloseSAHistory() { this.showSAHistory = false; }
+
+    handleShowRevHistory(event) {
+        const id   = event.currentTarget.dataset.revId;
+        const name = event.currentTarget.dataset.revName;
+        this.revHistoryTitle   = name;
+        this.showRevHistory    = true;
+        this.loadingRevHistory = true;
+        this.revHistoryData    = [];
+        getRevisionHistory({ revisionId: id })
+            .then(data => { this.revHistoryData = data; })
+            .catch(() => {})
+            .finally(() => { this.loadingRevHistory = false; });
+    }
+
+    handleCloseRevHistory() { this.showRevHistory = false; }
 
     handleResumeRevision(event) {
         const id  = event.currentTarget.dataset.id;
@@ -346,7 +411,8 @@ export default class TechServiceReview extends LightningElement {
             this.selectedFormType = this.plantillaNombre;
             if (sigData && sigData.thumbBase64) {
                 this.signatureSaved = true;
-                this.savedSigName   = sigData.signerName || '';
+                this.savedSigName   = sigData.signerName  || '';
+                this.savedSigCargo  = sigData.signerCargo || '';
                 this.savedSigThumb  = `data:image/png;base64,${sigData.thumbBase64}`;
             }
             if (data.plantillaId) {
@@ -715,7 +781,8 @@ export default class TechServiceReview extends LightningElement {
         );
     }
 
-    handleSignerNameChange(event) { this.signerName = event.target.value; }
+    handleSignerNameChange(event)  { this.signerName  = event.target.value; }
+    handleSignerCargoChange(event) { this.signerCargo = event.target.value; }
 
     handleGoSign() {
         this._canvasReady     = false;
@@ -782,11 +849,13 @@ export default class TechServiceReview extends LightningElement {
             filenameClean: `SignClean_${safeName}_${ts}.png`,
             filenameInfo:  `Firma_${safeName}_${ts}.png`,
             signerName:    this.signerName,
+            signerCargo:   this.signerCargo,
         })
         .then(() => {
             this._toast('Firma guardada', `Firma de ${this.signerName} registrada.`, 'success');
             this.signatureSaved = true;
             this.savedSigName   = this.signerName;
+            this.savedSigCargo  = this.signerCargo;
             this.savedSigThumb  = `data:image/png;base64,${thumbB64}`;
             this.sigState       = SIG_IDLE;
             this._canvasReady   = false;
@@ -967,12 +1036,58 @@ export default class TechServiceReview extends LightningElement {
         this.observaciones = event.target.value;
     }
 
+    // ─── Pause ────────────────────────────────────────────────────────────────
+
+    handleShowPauseConfirm()  { this.showPauseConfirm = true; }
+    handleCancelPause()       { this.showPauseConfirm = false; }
+
+    handlePauseRevision() {
+        if (!this.revisionId) return;
+        this.pausingRevision  = true;
+        this.showPauseConfirm = false;
+
+        const respuestas = this.formQuestions.map(q => ({
+            id:          q.id,
+            label:       q.label,
+            respuesta:   q.value || '',
+            deficiencia: q.showDeficiencia ? q.deficienciaText : null,
+        }));
+
+        const datosJSON = JSON.stringify({ tipo: this.selectedFormType, respuestas });
+
+        saveRevisionData({
+            revisionId:      this.revisionId,
+            tipoReporte:     this.selectedFormType,
+            datosFormulario: datosJSON,
+            observaciones:   this.observaciones,
+            paused:          true,
+        })
+        .then(() => {
+            this.wasPaused = true;
+            this._loadSAInfo_silent();
+            this.currentStep = STEP_DONE;
+        })
+        .catch(() => {
+            // Fallback: only mark Pausado without form data
+            pauseRevision({ revisionId: this.revisionId })
+                .then(() => {
+                    this.wasPaused = true;
+                    this._loadSAInfo_silent();
+                    this.currentStep = STEP_DONE;
+                })
+                .catch(err => {
+                    this._toast('Error', err.body?.message || 'No se pudo pausar la revisión.', 'error');
+                });
+        })
+        .finally(() => { this.pausingRevision = false; });
+    }
+
     // ─── Save revision ────────────────────────────────────────────────────────
 
     handleSaveRevision() {
         if (!this.revisionId) return;
         if (!this.signatureSaved) {
-            this._toast('Firma requerida', 'Debes registrar la firma del cliente antes de guardar.', 'warning');
+            this._toast('Firma requerida', 'Debes registrar la firma del cliente antes de guardar. Para guardar sin firma usa "Guardar como Pausado".', 'warning');
             return;
         }
         this.savingRevision = true;
@@ -994,8 +1109,10 @@ export default class TechServiceReview extends LightningElement {
             tipoReporte:     this.selectedFormType,
             datosFormulario: datosJSON,
             observaciones:   this.observaciones,
+            paused:          false,
         })
         .then(() => {
+            this.wasPaused = false;
             this._loadSAInfo_silent();
             this.currentStep = STEP_DONE;
         })

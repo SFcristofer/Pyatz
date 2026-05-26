@@ -15,7 +15,12 @@
 
             <!-- Banner SA -->
             <div class="rev-banner">
-                <div class="rev-banner__account">{saInfo.accountName}</div>
+                <div class="rev-banner__top">
+                    <div class="rev-banner__account">{saInfo.accountName}</div>
+                    <button class="btn-history-sa" onclick={handleShowSAHistory} title="Historial de estados">
+                        <lightning-icon icon-name="utility:clock" size="x-small" variant="inverse"></lightning-icon>
+                    </button>
+                </div>
                 <div class="rev-banner__meta">Cita: {saInfo.saNumber} · OT: {saInfo.workOrderNumber}</div>
                 <div class="rev-banner__progress">
                     <div class="progress-bar-wrap">
@@ -30,11 +35,12 @@
                 <div class="rev-list-header">Revisiones registradas</div>
                 <template for:each={saInfo.revisionesList} for:item="rev">
                     <div key={rev.id} class={rev.cardClass}>
-                        <div class="rev-card__num">{rev.numero}</div>
+                        <div class="rev-card__name">{rev.name}</div>
                         <div class="rev-card__body">
                             <div class="rev-card__tipo">{rev.plantillaNombre}</div>
                             <div class="rev-card__meta">{rev.fecha} · {rev.tecnico}</div>
                             <div class="rev-card__chips">
+                                <span class={rev.badgeClass}>{rev.status}</span>
                                 <span class="rev-chip rev-chip--photo">
                                     <lightning-icon icon-name="utility:photo" size="xx-small"></lightning-icon>
                                     {rev.photoCount}
@@ -52,15 +58,29 @@
                                     <span class="rev-chip rev-chip--warn">Sin formulario</span>
                                 </template>
                             </div>
+                            <template if:true={rev.hasFirma}>
+                                <div class="rev-firmante">
+                                    <lightning-icon icon-name="utility:user" size="xx-small" class="rev-firmante__icon"></lightning-icon>
+                                    <span class="rev-firmante__nombre">{rev.nombreFirmante}</span>
+                                    <template if:true={rev.cargoFirmante}>
+                                        <span class="rev-firmante__cargo"> · {rev.cargoFirmante}</span>
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                         <template if:true={rev.isPending}>
                             <button class="btn-resume" data-id={rev.id} data-num={rev.numero} onclick={handleResumeRevision}>
                                 Continuar
                             </button>
                         </template>
-                        <template if:false={rev.isPending}>
-                            <span class={rev.badgeClass}>{rev.status}</span>
+                        <template if:true={rev.isPaused}>
+                            <button class="btn-resume btn-resume--sm" data-id={rev.id} data-num={rev.numero} onclick={handleResumeRevision}>
+                                Continuar
+                            </button>
                         </template>
+                        <button class="btn-rev-history" data-rev-id={rev.id} data-rev-name={rev.name} onclick={handleShowRevHistory} title="Historial de estados">
+                            <lightning-icon icon-name="utility:clock" size="x-small"></lightning-icon>
+                        </button>
                     </div>
                 </template>
             </template>
@@ -211,8 +231,12 @@
                         <template if:false={signatureSaved}>
                             <div class="sig-required-hint">
                                 <lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon>
-                                Se requiere la firma del cliente para guardar
+                                Se requiere la firma para <strong>completar</strong>. Sin firma se guardará como <strong>Pausado</strong>.
                             </div>
+                            <button class="btn-pause-outline btn-full" onclick={handleShowPauseConfirm} disabled={pausingRevision}>
+                                <lightning-icon icon-name="utility:pause" size="x-small"></lightning-icon>
+                                Guardar como Pausado
+                            </button>
                         </template>
                         <button class="btn-start" onclick={handleSaveRevision} disabled={cantSaveRevision}>
                             <template if:true={savingRevision}>
@@ -375,21 +399,32 @@
                                 <img src={savedSigThumb} class="sig-saved-thumb" alt="Firma" />
                             </template>
                             <div>
-                                <div class="sig-saved-name">✓ Firma de {savedSigName} registrada</div>
+                                <div class="sig-saved-name">✓ {savedSigName}</div>
+                                <template if:true={savedSigCargo}>
+                                    <div class="sig-saved-cargo">{savedSigCargo}</div>
+                                </template>
                                 <button class="sig-saved-btn" onclick={handleResign}>Volver a firmar</button>
                             </div>
                         </div>
                     </template>
 
-                    <!-- Idle: pedir nombre -->
+                    <!-- Idle: pedir nombre y cargo -->
                     <template if:true={sigStateIdle}>
                         <div class="sig-intro">
-                            <div class="sig-intro__label">Nombre del firmante</div>
+                            <div class="sig-intro__label">Nombre completo del Firmante</div>
                             <lightning-input
                                 type="text"
-                                placeholder="Nombre completo del cliente"
+                                placeholder="Nombre completo del Firmante"
                                 value={signerName}
                                 onchange={handleSignerNameChange}
+                                variant="label-hidden">
+                            </lightning-input>
+                            <div class="sig-intro__label" style="margin-top:10px;">Cargo del Firmante</div>
+                            <lightning-input
+                                type="text"
+                                placeholder="Cargo del Firmante"
+                                value={signerCargo}
+                                onchange={handleSignerCargoChange}
                                 variant="label-hidden">
                             </lightning-input>
                         </div>
@@ -522,12 +557,30 @@
                 <!-- ── DONE ───────────────────────────────────────────────── -->
                 <template if:true={isDone}>
                     <div class="done-screen">
-                        <div class="done-check">
-                            <lightning-icon icon-name="utility:success" size="large" style="color:#2e7d32;"></lightning-icon>
-                        </div>
-                        <div class="done-title">Revisión guardada</div>
-                        <div class="done-subtitle">La revisión #{savedRevNumber} fue registrada correctamente</div>
+
+                        <!-- Completada -->
+                        <template if:true={isDoneCompleted}>
+                            <div class="done-check">
+                                <lightning-icon icon-name="utility:success" size="large" style="color:#2e7d32;"></lightning-icon>
+                            </div>
+                            <div class="done-title">Revisión completada</div>
+                            <div class="done-subtitle">La revisión #{savedRevNumber} fue registrada correctamente</div>
+                        </template>
+
+                        <!-- Pausada -->
+                        <template if:true={isDonePaused}>
+                            <div class="done-check done-check--paused">
+                                <lightning-icon icon-name="utility:pause" size="large" style="color:#7c4dff;"></lightning-icon>
+                            </div>
+                            <div class="done-title done-title--paused">Revisión pausada</div>
+                            <div class="done-subtitle">La revisión #{savedRevNumber} quedó en estado <strong>Pausado</strong>. Puedes retomarla cuando el cliente pueda firmar.</div>
+                        </template>
+
                         <div class="done-summary">
+                            <div class="done-summary__row">
+                                <span class="done-summary__label">Estado</span>
+                                <span class="done-summary__val">{saInfo.saStatus}</span>
+                            </div>
                             <div class="done-summary__row">
                                 <span class="done-summary__label">Tipo</span>
                                 <span class="done-summary__val">{selectedFormType}</span>
@@ -539,10 +592,6 @@
                             <div class="done-summary__row">
                                 <span class="done-summary__label">Firma</span>
                                 <span class="done-summary__val">{savedSigName}</span>
-                            </div>
-                            <div class="done-summary__row">
-                                <span class="done-summary__label">Estado cita</span>
-                                <span class="done-summary__val">{saInfo.saStatus}</span>
                             </div>
                         </div>
                         <button class="btn-secondary btn-full" onclick={handleBackToOverview}>
@@ -594,6 +643,12 @@
                             </template>
                         </template>
                         <template if:false={isResumeMode}>
+                            <template if:false={signatureSaved}>
+                                <button class="btn-pause-outline" onclick={handleShowPauseConfirm} disabled={pausingRevision}>
+                                    <lightning-icon icon-name="utility:pause" size="x-small"></lightning-icon>
+                                    Guardar como Pausado
+                                </button>
+                            </template>
                             <template if:true={signatureSaved}>
                                 <button class="btn-primary" onclick={handleSaveRevision} disabled={savingRevision}>
                                     <template if:true={savingRevision}>
@@ -615,6 +670,118 @@
     </template>
 
 </div>
+
+<!-- ══ MODAL PAUSE CONFIRM ════════════════════════════════════════════════ -->
+<template if:true={showPauseConfirm}>
+    <div class="modal-overlay" onclick={handleCancelPause}></div>
+    <div class="pause-confirm-sheet">
+        <div class="pause-confirm-title">
+            <lightning-icon icon-name="utility:pause" size="small" style="color:#7c4dff;"></lightning-icon>
+            Guardar como Pausado
+        </div>
+        <p class="pause-confirm-text">
+            La revisión <strong>no puede completarse sin la firma del cliente</strong>.
+            Al pausar, se guardará el progreso actual y podrás retomarla cuando el cliente esté disponible para firmar.
+        </p>
+        <div class="pause-confirm-actions">
+            <button class="btn-secondary" onclick={handleCancelPause} disabled={pausingRevision}>Cancelar</button>
+            <button class="btn-pause" onclick={handlePauseRevision} disabled={pausingRevision}>
+                <template if:true={pausingRevision}>
+                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                </template>
+                <template if:false={pausingRevision}>Guardar como Pausado</template>
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- ══ MODAL HISTORIAL SA ══════════════════════════════════════════════════ -->
+<template if:true={showSAHistory}>
+    <div class="modal-overlay" onclick={handleCloseSAHistory}></div>
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="modal-meta__title">Historial de estados — {saInfo.saNumber}</p>
+        <template if:true={loadingSAHistory}>
+            <div style="display:flex;justify-content:center;padding:24px;">
+                <lightning-spinner size="small" alternative-text="Cargando"></lightning-spinner>
+            </div>
+        </template>
+        <template if:false={loadingSAHistory}>
+            <template if:true={hasSAHistoryData}>
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered" style="width:100%;font-size:13px;">
+                    <thead>
+                        <tr>
+                            <th><div class="slds-truncate">Fecha</div></th>
+                            <th><div class="slds-truncate">Usuario</div></th>
+                            <th><div class="slds-truncate">Anterior</div></th>
+                            <th><div class="slds-truncate">Nuevo</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={saHistoryData} for:item="h">
+                            <tr key={h.fecha}>
+                                <td><div class="slds-truncate" style="font-size:11px;">{h.fecha}</div></td>
+                                <td><div class="slds-truncate">{h.usuario}</div></td>
+                                <td><div class="history-badge history-badge--old">{h.anterior}</div></td>
+                                <td><div class="history-badge history-badge--new">{h.nuevo}</div></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasSAHistoryData}>
+                <p style="text-align:center;color:#aaa;padding:20px;">Sin historial disponible.</p>
+            </template>
+        </template>
+        <div style="margin-top:16px;">
+            <button class="modal-close-pill" onclick={handleCloseSAHistory}>Cerrar</button>
+        </div>
+    </div>
+</template>
+
+<!-- ══ MODAL HISTORIAL REVISIÓN ════════════════════════════════════════════ -->
+<template if:true={showRevHistory}>
+    <div class="modal-overlay" onclick={handleCloseRevHistory}></div>
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="modal-meta__title">Historial — {revHistoryTitle}</p>
+        <template if:true={loadingRevHistory}>
+            <div style="display:flex;justify-content:center;padding:24px;">
+                <lightning-spinner size="small" alternative-text="Cargando"></lightning-spinner>
+            </div>
+        </template>
+        <template if:false={loadingRevHistory}>
+            <template if:true={hasRevHistoryData}>
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered" style="width:100%;font-size:13px;">
+                    <thead>
+                        <tr>
+                            <th><div class="slds-truncate">Fecha</div></th>
+                            <th><div class="slds-truncate">Usuario</div></th>
+                            <th><div class="slds-truncate">Anterior</div></th>
+                            <th><div class="slds-truncate">Nuevo</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={revHistoryData} for:item="h">
+                            <tr key={h.fecha}>
+                                <td><div class="slds-truncate" style="font-size:11px;">{h.fecha}</div></td>
+                                <td><div class="slds-truncate">{h.usuario}</div></td>
+                                <td><div class="history-badge history-badge--old">{h.anterior}</div></td>
+                                <td><div class="history-badge history-badge--new">{h.nuevo}</div></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasRevHistoryData}>
+                <p style="text-align:center;color:#aaa;padding:20px;">Sin historial disponible.</p>
+            </template>
+        </template>
+        <div style="margin-top:16px;">
+            <button class="modal-close-pill" onclick={handleCloseRevHistory}>Cerrar</button>
+        </div>
+    </div>
+</template>
 
 <!-- ══ MODAL FOTO ══════════════════════════════════════════════════════════ -->
 <template if:true={showPhotoModal}>

@@ -7,8 +7,10 @@
 /* ─── Overview ─────────────────────────────────────────────────────────── */
 .rev-overview { padding: 16px; }
 .rev-banner { background: linear-gradient(135deg, #1a2035 0%, #2d3a5e 100%); color: #fff; padding: 20px 18px; border-radius: 14px; margin-bottom: 16px; }
-.rev-banner__account { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.rev-banner__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.rev-banner__account { font-size: 20px; font-weight: 700; }
 .rev-banner__meta { font-size: 13px; color: #aab; margin-bottom: 14px; }
+.btn-history-sa { background: rgba(255,255,255,0.15); border: none; border-radius: 8px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 34px; min-height: 34px; flex-shrink: 0; }
 .rev-banner__progress { display: flex; align-items: center; gap: 12px; }
 .progress-bar-wrap { flex: 1; background: rgba(255,255,255,0.2); border-radius: 6px; height: 10px; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: #4caf50; border-radius: 6px; transition: width 0.4s ease; }
@@ -19,6 +21,7 @@
 .rev-card--done { border-left-color: #4caf50; }
 .rev-card--pending { border-left-color: #ff9800; }
 .rev-card__num { width: 36px; height: 36px; border-radius: 50%; background: #f0f4ff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #3c5a9a; flex-shrink: 0; }
+.rev-card__name { background: #f0f4ff; border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 700; color: #3c5a9a; flex-shrink: 0; white-space: nowrap; }
 .rev-card__body { flex: 1; min-width: 0; }
 .rev-card__tipo { font-size: 14px; font-weight: 600; color: #222; }
 .rev-card__meta { font-size: 12px; color: #888; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -31,8 +34,15 @@
 .rev-chip--sig    { background: #e8f5e9; color: #2e7d32; }
 .rev-chip--nosig  { background: #fafafa; color: #aaa; border: 1px solid #e0e0e0; }
 .rev-chip--warn   { background: #fff3e0; color: #e65100; }
+.rev-firmante { display: flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 12px; color: #2e7d32; }
+.rev-firmante__icon { flex-shrink: 0; }
+.rev-firmante__nombre { font-weight: 600; }
+.rev-firmante__cargo  { color: #555; }
 
 .btn-resume { background: #ff9800; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; min-height: 44px; }
+.btn-resume--sm { padding: 5px 10px; font-size: 12px; min-height: 32px; }
+.btn-rev-history { background: none; border: none; padding: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; border-radius: 6px; flex-shrink: 0; }
+.btn-rev-history:hover { background: #f0f0f0; }
 
 .rev-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
 .btn-start { background: #1b5e20; color: #fff; border: none; border-radius: 10px; padding: 16px 20px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; width: 100%; min-height: 54px; }
@@ -125,7 +135,8 @@
 .sig-saved-preview { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px; }
 .sig-saved-thumb { width: 72px; height: 48px; object-fit: contain; border: 1px solid #ddd; border-radius: 6px; background: #fff; }
 .sig-saved-name { font-size: 14px; font-weight: 600; color: #2e7d32; }
-.sig-saved-btn { background: none; border: none; font-size: 13px; color: #1b5e20; text-decoration: underline; cursor: pointer; margin-top: 4px; min-height: 36px; }
+.sig-saved-btn   { background: none; border: none; font-size: 13px; color: #1b5e20; text-decoration: underline; cursor: pointer; margin-top: 4px; min-height: 36px; }
+.sig-saved-cargo { font-size: 12px; color: #555; margin-top: 2px; }
 .sign-canvas-wrap { border: 2px solid #1b5e20; border-radius: 10px; overflow: hidden; background: #fff; margin-bottom: 14px; touch-action: none; }
 .sign-canvas { width: 100%; display: block; height: 240px; }
 .sign-actions { display: flex; gap: 10px; margin-bottom: 14px; }
@@ -185,3 +196,24 @@
 .modal-action-btn--confirm-delete { background: #c62828; color: #fff; }
 .modal-confirm__text { font-size: 14px; color: #555; margin-bottom: 14px; text-align: center; line-height: 1.5; }
 .modal-close-pill { width: 100%; background: #f5f5f5; border: none; border-radius: 10px; padding: 14px; font-size: 15px; color: #555; font-weight: 600; cursor: pointer; min-height: 50px; }
+
+/* ─── Paused state ─────────────────────────────────────────────────────── */
+.rev-card--paused { border-left-color: #7c4dff; }
+.rev-card__badge--paused { background: #ede7f6; color: #4527a0; }
+.done-check--paused { background: #ede7f6; }
+.done-title--paused { color: #4527a0; }
+
+/* ─── Pause buttons ────────────────────────────────────────────────────── */
+.btn-pause { flex: 1; background: #7c4dff; color: #fff; border: none; border-radius: 10px; padding: 14px 16px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; }
+.btn-pause:disabled { background: #b39ddb; cursor: not-allowed; }
+.btn-pause-outline { flex: 1; background: #fff; color: #7c4dff; border: 2px solid #7c4dff; border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 50px; }
+.btn-pause-outline:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Pause confirm sheet ──────────────────────────────────────────────── */
+.pause-confirm-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 20px 20px 0 0; z-index: 901; padding: 20px 16px; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+.pause-confirm-title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; color: #4527a0; margin-bottom: 12px; }
+.pause-confirm-text { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 18px; }
+.pause-confirm-actions { display: flex; gap: 10px; }
+
+/* ─── Pause info banner ────────────────────────────────────────────────── */
+.pause-info-banner { display: flex; align-items: center; gap: 8px; background: #ede7f6; border: 1px solid #b39ddb; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #4527a0; font-weight: 600; margin-bottom: 10px; }
