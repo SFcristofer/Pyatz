@@ -173,6 +173,7 @@ public with sharing class ServiceReviewPDFController {
                      ? this.saRecord.Producto_Relacionado__r.ProductCode
                      : this.saRecord.Producto_Relacionado__r.Name;
         }
+        /*
         for (ServiceAppointment hija : [
             SELECT Id, Zonas_a_Tratar__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode
             FROM ServiceAppointment WHERE Cita_Padre__c = :saId
@@ -187,6 +188,7 @@ public with sharing class ServiceReviewPDFController {
                     saTrat += (String.isNotBlank(saTrat) ? ', ' : '') + ht;
             }
         }
+        */
         Map<Id, String> saZonaMap = new Map<Id, String>{ saId => saZona };
         Map<Id, String> saTratMap = new Map<Id, String>{ saId => saTrat };
 
@@ -417,10 +419,13 @@ public with sharing class ServiceReviewPDFController {
                 FROM ServiceAppointment WHERE Cita_Padre__c IN :parentCandidates
             ]) {
                 if (!saZonaMap.containsKey(hija.Cita_Padre__c)) continue;
+                /* 
+                // COMENTADO PARA EVITAR AGRUPACIÓN DE ZONAS EN UNA SOLA LÍNEA
                 String hz = hija.Zonas_a_Tratar__c != null ? hija.Zonas_a_Tratar__c : '';
                 String pz = saZonaMap.get(hija.Cita_Padre__c);
                 if (String.isNotBlank(hz) && !pz.contains(hz))
                     saZonaMap.put(hija.Cita_Padre__c, pz + (String.isNotBlank(pz) ? '\n' : '') + hz);
+                */
                 if (hija.Producto_Relacionado__r != null) {
                     String ht = String.isNotBlank(hija.Producto_Relacionado__r.ProductCode)
                                 ? hija.Producto_Relacionado__r.ProductCode : hija.Producto_Relacionado__r.Name;
@@ -611,7 +616,24 @@ public with sharing class ServiceReviewPDFController {
             if (w.hasDefics)    this.totalDeficiencias++;
             if (w.hasSignature) this.totalFirmadas++;
 
-            w.zona           = saZonaMap.containsKey(r.Cita_Servicio__c) ? saZonaMap.get(r.Cita_Servicio__c) : '';
+            String fullZona = saZonaMap.containsKey(r.Cita_Servicio__c) ? saZonaMap.get(r.Cita_Servicio__c) : '';
+            if (String.isNotBlank(fullZona)) {
+                // Dividir por saltos de línea, punto y coma, o coma seguida de espacio
+                String[] parts = fullZona.split('\n|;|, ');
+                Integer idx = (r.Numero_Revision__c != null) ? (Integer)r.Numero_Revision__c.longValue() - 1 : 0;
+                if (idx < 0) idx = 0;
+                
+                if (parts.size() > 1 && idx < parts.size()) {
+                    w.zona = parts[idx].trim();
+                } else if (parts.size() > 1 && idx >= parts.size()) {
+                    w.zona = parts[parts.size() - 1].trim();
+                } else {
+                    w.zona = fullZona;
+                }
+            } else {
+                w.zona = '';
+            }
+
             w.tratamiento    = saTratMap.containsKey(r.Cita_Servicio__c) ? saTratMap.get(r.Cita_Servicio__c) : '';
             w.hasTratamiento = String.isNotBlank(w.tratamiento);
             w.showTratHeader = false;
