@@ -7,6 +7,7 @@
     <relationshipLabel>Revisiones de Cita de Servicio</relationshipLabel>
     <relationshipName>Revisiones_Cita_Servicio</relationshipName>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

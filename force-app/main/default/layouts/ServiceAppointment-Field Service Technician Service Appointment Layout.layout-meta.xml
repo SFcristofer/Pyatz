@@ -38,6 +38,10 @@
                 <behavior>Edit</behavior>
                 <field>Revisiones__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Cita_Padre__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
@@ -417,6 +421,15 @@
         <fields>Actor</fields>
         <fields>Comments</fields>
         <relatedList>RelatedProcessHistoryList</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <fields>Name</fields>
+        <fields>ParentRecord</fields>
+        <fields>ParentRecordType</fields>
+        <fields>Status</fields>
+        <fields>ArrivalWindowStartTime</fields>
+        <fields>ArrivalWindowEndTime</fields>
+        <relatedList>ServiceAppointment.Cita_Padre__c</relatedList>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>

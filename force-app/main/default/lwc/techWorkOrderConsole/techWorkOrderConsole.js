@@ -163,9 +163,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                         code: t.code || 'N/A',
                         quantity: t.quantity || 1,
                         numTecnicos: t.tecnicosIds ? t.tecnicosIds.length : 1,
-                        durationHours: t.schedulingRows && t.schedulingRows[0] ? Math.floor((t.schedulingRows[0].duration || 60) / 60) : 1,
-                        durationMinutes: t.schedulingRows && t.schedulingRows[0] ? (t.schedulingRows[0].duration || 60) % 60 : 0,
-                        durationSeconds: 0,
+                        duration: t.schedulingRows && t.schedulingRows[0] ? t.schedulingRows[0].duration : 60,
                         zonas: t.zonas || 'Sin descripción técnica',
                         numTecnicosSeleccionados: t.tecnicosIds ? t.tecnicosIds.length : 0,
                         tecnicosIds: t.tecnicosIds || [],
@@ -239,8 +237,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 if (tra.id === traId) {
                     const updatedTra = { ...tra, [field]: val };
                     
-                    if (field === 'durationHours' || field === 'durationMinutes') {
-                        const totalMinutes = (parseInt(updatedTra.durationHours) || 0) * 60 + (parseInt(updatedTra.durationMinutes) || 0);
+                    if (field === 'duration') {
+                        const totalMinutes = parseInt(val) || 0;
                         updatedTra.schedulingRows = updatedTra.schedulingRows.map(row => {
                             if (!row.locked) return { ...row, duration: totalMinutes };
                             return row;
@@ -375,18 +373,18 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         this.isSaving = true;
 
         const payload = {
-            existingWorkOrderId: this.existingWorkOrderId,
-            quoteId: this.internalQuoteId,
-            serviceContractId: this.internalServiceContractId,
-            oppId: this.oppId,
-            accountId: this.accountId,
+            existingWorkOrderId: this.existingWorkOrderId || null,
+            quoteId: this.internalQuoteId || null,
+            serviceContractId: this.internalServiceContractId || null,
+            oppId: this.oppId || null,
+            accountId: this.accountId || null,
             folio: this.contractFolio,
             notes: '',
             priority: this.contractData.prioridad,
             territoryId: this.contractData.territoryId,
             executionAddress: this.contractData.direccionSede,
             contactPerson: this.contractData.contactoPerson,
-            sedesList: this.sedesList,
+            sedesList: JSON.parse(JSON.stringify(this.sedesList)),
             daysAllowed: this.daysOfWeek.filter(d => d.checked).map(d => d.label)
         };
 

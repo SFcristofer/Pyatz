@@ -93,17 +93,33 @@ export default class TechZoneBrowserDrawer extends LightningElement {
             const budgetLine = this.currentBusinessLines || 'Línea de Negocio';
             const contextLines = budgetLine.toLowerCase().split(';').map(l => l.trim());
 
-            let processedData = result.map(z => {
+            // EXPLOSIÓN DE FILAS: Creamos un registro por cada tipo (plantilla) vinculado a la zona
+            let processedData = result.flatMap(z => {
                 const rawLOB = (z.Linea_de_Negocio__c || z.Tipo_de_Servicio__c || '').toLowerCase();
                 const isMatch = contextLines.some(cl => rawLOB.includes(cl));
 
-                return {
-                    ...z,
-                    TemplateName: (z.Plantilla_de_Formulario__r && z.Plantilla_de_Formulario__r.Name) ? z.Plantilla_de_Formulario__r.Name : '',
-                    DisplayLOB: budgetLine, 
-                    isContextMatch: isMatch,
-                    lobStatusClass: isMatch ? 'slds-text-color_success slds-text-title_bold' : 'slds-text-color_info slds-text-body_small'
-                };
+                if (z.Plantillas_de_Zona__r && z.Plantillas_de_Zona__r.length > 0) {
+                    return z.Plantillas_de_Zona__r.map(pz => {
+                        const tName = pz.Plantilla__r && pz.Plantilla__r.Name ? pz.Plantilla__r.Name : '';
+                        return {
+                            ...z,
+                            Id: `${z.Id}-${pz.Id}`, // ID Único para el datatable
+                            RealZoneId: z.Id,       // ID Original de Salesforce
+                            TemplateName: tName,
+                            DisplayLOB: budgetLine, 
+                            isContextMatch: isMatch,
+                            lobStatusClass: isMatch ? 'slds-text-color_success slds-text-title_bold' : 'slds-text-color_info slds-text-body_small'
+                        };
+                    });
+                } else {
+                    return [{
+                        ...z,
+                        TemplateName: 'Sin Tipo Definido',
+                        DisplayLOB: budgetLine, 
+                        isContextMatch: isMatch,
+                        lobStatusClass: isMatch ? 'slds-text-color_success slds-text-title_bold' : 'slds-text-color_info slds-text-body_small'
+                    }];
+                }
             });
 
             if (this.onlyContextZones) {

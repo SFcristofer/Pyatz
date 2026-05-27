@@ -3,6 +3,7 @@
     <fullName>Datos_Formulario__c</fullName>
     <label>Datos del Formulario</label>
     <length>131072</length>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
     <visibleLines>5</visibleLines>

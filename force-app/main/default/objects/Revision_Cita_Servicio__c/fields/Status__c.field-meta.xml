@@ -11,8 +11,13 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>En Proceso</fullName>
+                <fullName>No iniciada</fullName>
                 <default>true</default>
+                <label>No iniciada</label>
+            </value>
+            <value>
+                <fullName>En Proceso</fullName>
+                <default>false</default>
                 <label>En Proceso</label>
             </value>
             <value>

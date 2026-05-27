@@ -3,6 +3,7 @@
     <fullName>Tipo_Reporte__c</fullName>
     <label>Tipo de Reporte</label>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
