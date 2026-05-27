@@ -4,6 +4,23 @@ public with sharing class AccountDashboardController {
     public static Map<String, Object> getDashboardData(Id accountId) {
         Map<String, Object> result = new Map<String, Object>();
 
+        // OPORTUNIDADES
+        Integer oppOpen = 0, oppWon = 0;
+        for (AggregateResult ar : [
+            SELECT IsClosed, IsWon, COUNT(Id) cnt
+            FROM Opportunity
+            WHERE AccountId = :accountId
+            GROUP BY IsClosed, IsWon
+        ]) {
+            Integer cnt = (Integer) ar.get('cnt');
+            Boolean isClosed = (Boolean) ar.get('IsClosed');
+            Boolean isWon    = (Boolean) ar.get('IsWon');
+            if (!isClosed) oppOpen += cnt;
+            else if (isWon) oppWon  += cnt;
+        }
+        result.put('oppOpen', oppOpen);
+        result.put('oppWon',  oppWon);
+
         // ÓRDENES DE TRABAJO
         Integer woTotal = 0, woOpen = 0, woPending = 0;
         for (AggregateResult ar : [
@@ -58,12 +75,50 @@ public with sharing class AccountDashboardController {
         result.put('scActive', scActive);
         result.put('scInactive', scDraft);
 
-        // ZONAS DE SERVICIO
-        Integer zonaCount = [
-            SELECT COUNT() FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId
-        ];
-        result.put('zonaCount', zonaCount);
-
         return result;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Opportunity> getOpportunities(Id accountId) {
+        return [
+            SELECT Id, Name, StageName, Amount, CloseDate, Probability
+            FROM Opportunity
+            WHERE AccountId = :accountId
+            ORDER BY CloseDate DESC NULLS LAST
+            LIMIT 200
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Quote> getQuotes(Id accountId) {
+        return [
+            SELECT Id, Name, Status, TotalPrice, ExpirationDate, Opportunity.Name
+            FROM Quote
+            WHERE AccountId = :accountId
+            ORDER BY CreatedDate DESC
+            LIMIT 200
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<ServiceContract> getContracts(Id accountId) {
+        return [
+            SELECT Id, Name, ApprovalStatus, StartDate, EndDate, TotalPrice
+            FROM ServiceContract
+            WHERE AccountId = :accountId
+            ORDER BY StartDate DESC NULLS LAST
+            LIMIT 200
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<WorkOrder> getWorkOrders(Id accountId) {
+        return [
+            SELECT Id, WorkOrderNumber, Subject, Status, Priority, CreatedDate
+            FROM WorkOrder
+            WHERE AccountId = :accountId
+            ORDER BY CreatedDate DESC
+            LIMIT 200
+        ];
     }
 }

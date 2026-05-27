@@ -31,6 +31,13 @@ public with sharing class ServiceReviewController {
         @AuraEnabled public Boolean isCompleted;
         @AuraEnabled public String  cardClass;
         @AuraEnabled public String  badgeClass;
+        @AuraEnabled public Boolean hasFirma;
+        @AuraEnabled public String  nombreFirmante;
+        @AuraEnabled public String  cargoFirmante;
+        @AuraEnabled public Integer photoCount;
+        @AuraEnabled public Long    tiempoEnProcesoSeg;
+        @AuraEnabled public Long    tiempoPausadoSeg;
+        @AuraEnabled public String  ultimaTransicionISO;
     }
 
     public class PhotoInfo {
@@ -69,7 +76,10 @@ public with sharing class ServiceReviewController {
 
         List<Revision_Cita_Servicio__c> revs = [
             SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Plantilla_de_Formulario__c,
-                   Status__c, Fecha_Revision__c, Tecnico__r.Name
+                   Status__c, Fecha_Revision__c, Tecnico__r.Name,
+                   Nombre_Firmante__c, Cargo_Firmante__c,
+                   Tiempo_En_Proceso_Segundos__c, Tiempo_Pausado_Segundos__c, Ultima_Transicion__c,
+                   (SELECT Id FROM ContentDocumentLinks WHERE ContentDocument.LatestPublishedVersion.Title LIKE 'GeoFoto_%' LIMIT 50)
             FROM Revision_Cita_Servicio__c
             WHERE Cita_Servicio__c = :saId
             ORDER BY Numero_Revision__c ASC NULLS LAST
@@ -79,22 +89,31 @@ public with sharing class ServiceReviewController {
         List<RevisionSummary> revList = new List<RevisionSummary>();
         for (Revision_Cita_Servicio__c r : revs) {
             RevisionSummary rs = new RevisionSummary();
-            rs.id          = r.Id;
-            rs.name        = r.Name;
-            rs.numero      = r.Numero_Revision__c != null ? Integer.valueOf(r.Numero_Revision__c) : 0;
-            rs.tipo        = r.Tipo_Reporte__c;
-            rs.templateId  = r.Plantilla_de_Formulario__c;
-            rs.status      = r.Status__c;
-            rs.isCompleted = r.Status__c == 'Completada';
-            rs.fecha       = r.Fecha_Revision__c != null
+            rs.id             = r.Id;
+            rs.name           = r.Name;
+            rs.numero         = r.Numero_Revision__c != null ? Integer.valueOf(r.Numero_Revision__c) : 0;
+            rs.tipo           = r.Tipo_Reporte__c;
+            rs.templateId     = r.Plantilla_de_Formulario__c;
+            rs.status         = r.Status__c;
+            rs.isCompleted    = r.Status__c == 'Completada';
+            rs.fecha          = r.Fecha_Revision__c != null
                 ? r.Fecha_Revision__c.format('dd/MM/yyyy HH:mm')
                 : '';
-            rs.tecnico     = r.Tecnico__r != null ? r.Tecnico__r.Name : '';
-            
-            // Estilos para LWC
+            rs.tecnico        = r.Tecnico__r != null ? r.Tecnico__r.Name : '';
+            rs.nombreFirmante = r.Nombre_Firmante__c;
+            rs.cargoFirmante  = r.Cargo_Firmante__c;
+            rs.hasFirma       = String.isNotBlank(r.Nombre_Firmante__c);
+            rs.photoCount     = r.ContentDocumentLinks != null ? r.ContentDocumentLinks.size() : 0;
+
+            rs.tiempoEnProcesoSeg = r.Tiempo_En_Proceso_Segundos__c != null ? (Long)r.Tiempo_En_Proceso_Segundos__c : 0L;
+            rs.tiempoPausadoSeg   = r.Tiempo_Pausado_Segundos__c   != null ? (Long)r.Tiempo_Pausado_Segundos__c   : 0L;
+            rs.ultimaTransicionISO = r.Ultima_Transicion__c != null
+                ? r.Ultima_Transicion__c.formatGmt('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'')
+                : null;
+
             rs.cardClass   = 'rev-card ' + (rs.isCompleted ? 'rev-card--done' : 'rev-card--pending');
             rs.badgeClass  = 'rev-card__badge ' + (rs.isCompleted ? 'rev-card__badge--done' : 'rev-card__badge--pending');
-            
+
             revList.add(rs);
             if (r.Status__c == 'Completada') completadas++;
         }
@@ -128,39 +147,86 @@ public with sharing class ServiceReviewController {
     @AuraEnabled
     public static Id createRevision(Id saId, Integer revisionNumber) {
         Revision_Cita_Servicio__c rev = new Revision_Cita_Servicio__c();
-        rev.Cita_Servicio__c    = saId;
-        rev.Numero_Revision__c  = revisionNumber;
-        rev.Status__c           = 'En Proceso';
-        rev.Fecha_Revision__c   = Datetime.now();
-        rev.Tecnico__c          = UserInfo.getUserId();
+        rev.Cita_Servicio__c              = saId;
+        rev.Numero_Revision__c            = revisionNumber;
+        rev.Status__c                     = 'En Proceso';
+        rev.Fecha_Revision__c             = Datetime.now();
+        rev.Tecnico__c                    = UserInfo.getUserId();
+        rev.Tiempo_En_Proceso_Segundos__c = 0;
+        rev.Tiempo_Pausado_Segundos__c    = 0;
+        rev.Ultima_Transicion__c          = Datetime.now();
         insert rev;
         updateSAStatusToInProgress(saId);
         return rev.Id;
     }
 
     @AuraEnabled
-    public static void saveRevisionData(Id revisionId, String tipoReporte, String datosFormulario, String observaciones) {
+    public static void saveRevisionData(Id revisionId, String tipoReporte, String datosFormulario, String observaciones, Boolean paused) {
         Revision_Cita_Servicio__c rev = [
-            SELECT Id, Cita_Servicio__c
+            SELECT Id, Cita_Servicio__c, Status__c, Ultima_Transicion__c, Tiempo_En_Proceso_Segundos__c
             FROM Revision_Cita_Servicio__c
             WHERE Id = :revisionId
             LIMIT 1
         ];
-        
+        if (rev.Status__c == 'En Proceso' && rev.Ultima_Transicion__c != null) {
+            Long elapsed = (Datetime.now().getTime() - rev.Ultima_Transicion__c.getTime()) / 1000;
+            rev.Tiempo_En_Proceso_Segundos__c = (rev.Tiempo_En_Proceso_Segundos__c != null ? rev.Tiempo_En_Proceso_Segundos__c : 0) + elapsed;
+        }
+        rev.Ultima_Transicion__c = Datetime.now();
+
         if (tipoReporte instanceof Id) {
             rev.Plantilla_de_Formulario__c = (Id)tipoReporte;
-            // Opcional: llenar el nombre en el campo de texto para reportes viejos
             Form_Template__c temp = [SELECT Tipo_Reporte__c FROM Form_Template__c WHERE Id = :tipoReporte LIMIT 1];
             rev.Tipo_Reporte__c = temp.Tipo_Reporte__c;
         } else {
             rev.Tipo_Reporte__c = tipoReporte;
         }
-        
+
         rev.Datos_Formulario__c = datosFormulario;
         rev.Observaciones__c    = observaciones;
-        rev.Status__c           = 'Completada';
+        rev.Status__c           = (paused != null && paused) ? 'Pausado' : 'Completada';
         update rev;
-        updateSAStatus(rev.Cita_Servicio__c);
+        if (paused != null && paused) {
+            updateSAStatusToPaused(rev.Cita_Servicio__c);
+        } else {
+            updateSAStatus(rev.Cita_Servicio__c);
+        }
+    }
+
+    @AuraEnabled
+    public static void pauseRevision(Id revisionId) {
+        Revision_Cita_Servicio__c rev = [
+            SELECT Id, Cita_Servicio__c, Status__c, Ultima_Transicion__c, Tiempo_En_Proceso_Segundos__c
+            FROM Revision_Cita_Servicio__c
+            WHERE Id = :revisionId
+            LIMIT 1
+        ];
+        if (rev.Status__c == 'En Proceso' && rev.Ultima_Transicion__c != null) {
+            Long elapsed = (Datetime.now().getTime() - rev.Ultima_Transicion__c.getTime()) / 1000;
+            rev.Tiempo_En_Proceso_Segundos__c = (rev.Tiempo_En_Proceso_Segundos__c != null ? rev.Tiempo_En_Proceso_Segundos__c : 0) + elapsed;
+        }
+        rev.Status__c            = 'Pausado';
+        rev.Ultima_Transicion__c = Datetime.now();
+        update rev;
+        updateSAStatusToPaused(rev.Cita_Servicio__c);
+    }
+
+    @AuraEnabled
+    public static void resumeRevision(Id revisionId) {
+        Revision_Cita_Servicio__c rev = [
+            SELECT Id, Cita_Servicio__c, Status__c, Ultima_Transicion__c, Tiempo_Pausado_Segundos__c
+            FROM Revision_Cita_Servicio__c
+            WHERE Id = :revisionId
+            LIMIT 1
+        ];
+        if (rev.Status__c == 'Pausado' && rev.Ultima_Transicion__c != null) {
+            Long elapsed = (Datetime.now().getTime() - rev.Ultima_Transicion__c.getTime()) / 1000;
+            rev.Tiempo_Pausado_Segundos__c = (rev.Tiempo_Pausado_Segundos__c != null ? rev.Tiempo_Pausado_Segundos__c : 0) + elapsed;
+        }
+        rev.Status__c            = 'En Proceso';
+        rev.Ultima_Transicion__c = Datetime.now();
+        update rev;
+        updateSAStatusToInProgress(rev.Cita_Servicio__c);
     }
 
     @AuraEnabled
@@ -168,6 +234,62 @@ public with sharing class ServiceReviewController {
         try {
             delete [SELECT Id FROM Revision_Cita_Servicio__c WHERE Id = :revisionId LIMIT 1];
         } catch (Exception e) { /* already deleted or no permission */ }
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static List<Map<String, Object>> getRevisionHistory(Id revisionId) {
+        List<Map<String, Object>> result = new List<Map<String, Object>>();
+        try {
+            for (Revision_Cita_Servicio__History h : [
+                SELECT CreatedDate, CreatedBy.Name, Field, OldValue, NewValue
+                FROM Revision_Cita_Servicio__History
+                WHERE ParentId = :revisionId AND Field = 'Status__c'
+                ORDER BY CreatedDate DESC LIMIT 50
+            ]) {
+                result.add(new Map<String, Object>{
+                    'fecha'    => h.CreatedDate.format('dd/MM/yyyy HH:mm'),
+                    'usuario'  => h.CreatedBy.Name,
+                    'anterior' => h.OldValue != null ? String.valueOf(h.OldValue) : '—',
+                    'nuevo'    => h.NewValue != null ? String.valueOf(h.NewValue) : '—'
+                });
+            }
+        } catch (Exception e) {}
+        return result;
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static Map<String, Object> getRevisionData(Id revisionId) {
+        Revision_Cita_Servicio__c rev = [
+            SELECT Id, Tipo_Reporte__c, Plantilla_de_Formulario__c, Datos_Formulario__c, Observaciones__c
+            FROM Revision_Cita_Servicio__c
+            WHERE Id = :revisionId
+            LIMIT 1
+        ];
+        Map<String, Object> result = new Map<String, Object>{
+            'tipoReporte'     => rev.Tipo_Reporte__c,
+            'plantillaId'     => rev.Plantilla_de_Formulario__c,
+            'plantillaNombre' => rev.Tipo_Reporte__c,
+            'datosFormulario' => rev.Datos_Formulario__c,
+            'observaciones'   => rev.Observaciones__c
+        };
+        if (rev.Plantilla_de_Formulario__c != null) {
+            try {
+                Form_Template__c temp = [SELECT Tipo_Reporte__c FROM Form_Template__c WHERE Id = :rev.Plantilla_de_Formulario__c LIMIT 1];
+                result.put('plantillaNombre', temp.Tipo_Reporte__c);
+            } catch (Exception e) {}
+        }
+        return result;
+    }
+
+    @AuraEnabled
+    public static void setRevisionTemplate(Id revisionId, String templateId) {
+        Revision_Cita_Servicio__c rev = [SELECT Id FROM Revision_Cita_Servicio__c WHERE Id = :revisionId LIMIT 1];
+        rev.Plantilla_de_Formulario__c = (Id)templateId;
+        try {
+            Form_Template__c temp = [SELECT Tipo_Reporte__c FROM Form_Template__c WHERE Id = :templateId LIMIT 1];
+            rev.Tipo_Reporte__c = temp.Tipo_Reporte__c;
+        } catch (Exception e) {}
+        update rev;
     }
 
     // ─── Photos ───────────────────────────────────────────────────────────────
@@ -245,41 +367,76 @@ public with sharing class ServiceReviewController {
     @AuraEnabled
     public static void saveSignature(Id revisionId, String base64Clean, String base64Info,
                                      String base64Thumb, String filenameClean,
-                                     String filenameInfo, String signerName) {
-        insertCVAndLink(filenameClean, base64Clean, signerName, revisionId);
-        insertCVAndLink(filenameInfo,  base64Info,  signerName, revisionId);
+                                     String filenameInfo, String signerName, String signerCargo) {
+        String description = String.isNotBlank(signerCargo)
+            ? signerName + ' | ' + signerCargo
+            : signerName;
+        insertCVAndLink(filenameClean, base64Clean, description, revisionId);
+        insertCVAndLink(filenameInfo,  base64Info,  description, revisionId);
         if (String.isNotBlank(base64Thumb)) {
-            insertCVAndLink('Thumb_' + filenameInfo, base64Thumb, signerName, revisionId);
+            insertCVAndLink('Thumb_' + filenameInfo, base64Thumb, description, revisionId);
         }
+        Revision_Cita_Servicio__c rev = new Revision_Cita_Servicio__c(
+            Id                 = revisionId,
+            Nombre_Firmante__c = signerName,
+            Cargo_Firmante__c  = signerCargo
+        );
+        update rev;
     }
 
     @AuraEnabled(cacheable=false)
     public static Map<String, String> getRevisionSignature(Id revisionId) {
+        Map<String, String> result = new Map<String, String>();
+
+        // Obtener nombre y cargo desde el registro
+        try {
+            Revision_Cita_Servicio__c rev = [
+                SELECT Nombre_Firmante__c, Cargo_Firmante__c
+                FROM Revision_Cita_Servicio__c
+                WHERE Id = :revisionId LIMIT 1
+            ];
+            if (String.isNotBlank(rev.Nombre_Firmante__c)) {
+                result.put('signerName',  rev.Nombre_Firmante__c);
+                result.put('signerCargo', rev.Cargo_Firmante__c != null ? rev.Cargo_Firmante__c : '');
+            }
+        } catch (Exception e) {}
+
+        // Obtener thumbnail de la firma
         List<ContentDocumentLink> links = [
             SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :revisionId
         ];
-        if (links.isEmpty()) return new Map<String, String>();
-
-        Set<Id> docIds = new Set<Id>();
-        for (ContentDocumentLink l : links) docIds.add(l.ContentDocumentId);
-
-        Map<String, String> result = new Map<String, String>();
-        for (ContentVersion cv : [
-            SELECT Id, Title, Description, VersionData
-            FROM ContentVersion
-            WHERE ContentDocumentId IN :docIds
-              AND Title LIKE 'Thumb_Firma_%'
-              AND IsLatest = true
-            ORDER BY CreatedDate DESC
-            LIMIT 1
-        ]) {
-            result.put('thumbBase64',  EncodingUtil.base64Encode(cv.VersionData));
-            result.put('signerName',   cv.Description);
+        if (!links.isEmpty()) {
+            Set<Id> docIds = new Set<Id>();
+            for (ContentDocumentLink l : links) docIds.add(l.ContentDocumentId);
+            for (ContentVersion cv : [
+                SELECT Id, Title, Description, VersionData
+                FROM ContentVersion
+                WHERE ContentDocumentId IN :docIds
+                  AND Title LIKE 'Thumb_Firma_%'
+                  AND IsLatest = true
+                ORDER BY CreatedDate DESC
+                LIMIT 1
+            ]) {
+                result.put('thumbBase64', EncodingUtil.base64Encode(cv.VersionData));
+                // fallback para registros anteriores sin campos
+                if (!result.containsKey('signerName') && String.isNotBlank(cv.Description)) {
+                    result.put('signerName',  cv.Description);
+                    result.put('signerCargo', '');
+                }
+            }
         }
         return result;
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────
+
+    private static void updateSAStatusToPaused(Id saId) {
+        ServiceAppointment sa = [SELECT Id, Status FROM ServiceAppointment WHERE Id = :saId LIMIT 1];
+        if (sa.Status != 'Completado') {
+            sa.Status = 'Pausado';
+            try { update sa; } catch (Exception e) { /* status transition may not be valid */ }
+        }
+    }
 
     private static void updateSAStatusToInProgress(Id saId) {
         ServiceAppointment sa = [SELECT Id, Status FROM ServiceAppointment WHERE Id = :saId LIMIT 1];

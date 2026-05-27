@@ -87,6 +87,15 @@
                 <lightning-icon icon-name="utility:clear" size="x-small"></lightning-icon>
                 Limpiar
             </button>
+            <button class="refresh-btn" onclick={handleRefresh} disabled={isRefreshing} title="Actualizar datos">
+                <template if:true={isRefreshing}>
+                    <lightning-spinner size="x-small" alternative-text="Actualizando..."></lightning-spinner>
+                </template>
+                <template if:false={isRefreshing}>
+                    <lightning-icon icon-name="utility:refresh" size="x-small"></lightning-icon>
+                </template>
+                Actualizar
+            </button>
         </div>
 
         <!-- LOADING -->
@@ -121,7 +130,18 @@
                         </div>
                         <div class="slds-grid slds-grid_vertical-align-center">
                             <span class="contract-meta slds-m-right_medium">{group.startDate} — {group.endDate}</span>
-                            <span class="odt-count-badge">{group.filteredCount} ODT</span>
+                            <span class="odt-count-badge slds-m-right_small">{group.filteredCount} ODT</span>
+                            <template if:true={group.hasContractId}>
+                                <lightning-button
+                                    label="Fusionar Citas"
+                                    icon-name="utility:merge"
+                                    variant="neutral"
+                                    size="small"
+                                    data-contract-id={group.id}
+                                    data-contract-name={group.displayName}
+                                    onclick={handleOpenFusionWizard}>
+                                </lightning-button>
+                            </template>
                         </div>
                     </div>
 
@@ -189,7 +209,7 @@
 
                                                     <!-- Número -->
                                                     <td class="col-num">
-                                                        <span class="wo-number">{wo.number}</span>
+                                                        <a class="wo-number-link" href={wo.woUrl} target="_blank" title="Abrir ODT">{wo.number}</a>
                                                     </td>
 
                                                     <!-- Fecha (editable) -->
@@ -238,7 +258,23 @@
                                                         </template>
                                                     </td>
 
-                                                    <td class="col-territorio">{wo.territory}</td>
+                                                    <td class="col-territorio">
+                                                        <template if:true={wo.isEditing}>
+                                                            <lightning-combobox
+                                                                label="Territorio"
+                                                                variant="label-hidden"
+                                                                value={wo.editTerritoryId}
+                                                                options={territoryOptions}
+                                                                class="inline-combobox"
+                                                                data-id={wo.id}
+                                                                data-field="territoryId"
+                                                                onchange={handleInlineFieldChange}>
+                                                            </lightning-combobox>
+                                                        </template>
+                                                        <template if:false={wo.isEditing}>
+                                                            {wo.territory}
+                                                        </template>
+                                                    </td>
                                                     <td class="col-tipo"><span class="tipo-tag">{wo.tipo}</span></td>
                                                     <td class="col-tratamientos"><span class="treatments-text">{wo.treatments}</span></td>
 
@@ -303,38 +339,415 @@
                                                                 <table class="sa-table">
                                                                     <thead>
                                                                         <tr>
+                                                                            <th class="col-sa-expand"></th>
                                                                             <th>Núm.</th>
                                                                             <th>Fecha programada</th>
                                                                             <th>Estado</th>
                                                                             <th>Técnico</th>
+                                                                            <th class="col-sa-tratamiento">Tratamiento</th>
+                                                                            <th>Rev./Tipos</th>
                                                                             <th>Duración</th>
                                                                             <th>Notas</th>
+                                                                            <th class="col-sa-actions"></th>
                                                                         </tr>
                                                                     </thead>
-                                                                    <tbody>
-                                                                        <template for:each={wo.appointments} for:item="sa">
-                                                                            <tr key={sa.id} class="sa-row">
-                                                                                <td class="sa-num">{sa.number}</td>
-                                                                                <td>{sa.schedDate}</td>
-                                                                                <td>
-                                                                                    <span class="sa-status-tag">{sa.status}</span>
+                                                                    <template for:each={wo.appointments} for:item="sa">
+                                                                        <tbody key={sa.id}>
+                                                                            <tr class="sa-row">
+                                                                                <td class="col-sa-expand">
+                                                                                    <template if:true={sa.hasRevisiones}>
+                                                                                        <lightning-button-icon
+                                                                                            icon-name={sa.revChevronIcon}
+                                                                                            variant="bare"
+                                                                                            size="x-small"
+                                                                                            alternative-text="Revisiones"
+                                                                                            title="Ver revisiones"
+                                                                                            data-sa-id={sa.id}
+                                                                                            onclick={handleToggleSaRevExpand}>
+                                                                                        </lightning-button-icon>
+                                                                                    </template>
                                                                                 </td>
+                                                                                <td class="sa-num">
+                                                                    <a class="sa-num-link" href={sa.saUrl} target="_blank" title="Abrir Cita de Servicio">{sa.number}</a>
+                                                                </td>
                                                                                 <td>
-                                                                                    <template if:true={sa.technician}>
-                                                                                        <div class="tech-cell">
-                                                                                            <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small tech-icon"></lightning-icon>
-                                                                                            {sa.technician}
+                                                                                    <template if:true={sa.isEditingDate}>
+                                                                                        <div class="sa-date-edit-wrap">
+                                                                                            <input type="datetime-local"
+                                                                                                class="sa-date-input"
+                                                                                                value={sa.editDateValue}
+                                                                                                data-sa-id={sa.id}
+                                                                                                onchange={handleSaDateChange} />
+                                                                                            <lightning-button-icon
+                                                                                                icon-name="utility:save"
+                                                                                                variant="brand"
+                                                                                                size="x-small"
+                                                                                                alternative-text="Guardar"
+                                                                                                title="Guardar"
+                                                                                                data-sa-id={sa.id}
+                                                                                                onclick={handleSaveSaDate}>
+                                                                                            </lightning-button-icon>
+                                                                                            <lightning-button-icon
+                                                                                                icon-name="utility:close"
+                                                                                                variant="bare"
+                                                                                                size="x-small"
+                                                                                                alternative-text="Cancelar"
+                                                                                                title="Cancelar"
+                                                                                                onclick={handleCancelSaDate}>
+                                                                                            </lightning-button-icon>
                                                                                         </div>
                                                                                     </template>
-                                                                                    <template if:false={sa.technician}>
-                                                                                        <span class="no-assign">Sin asignar</span>
+                                                                                    <template if:false={sa.isEditingDate}>
+                                                                                        <div class="sa-date-display"
+                                                                                             data-sa-id={sa.id}
+                                                                                             onclick={handleEditSaDate}
+                                                                                             title="Clic para editar fecha">
+                                                                                            {sa.schedDate}
+                                                                                            <lightning-icon icon-name="utility:edit" size="xx-small" class="sa-date-edit-icon"></lightning-icon>
+                                                                                        </div>
                                                                                     </template>
                                                                                 </td>
-                                                                                <td>{sa.duration}</td>
-                                                                                <td class="sa-notes">{sa.notes}</td>
+                                                                                <td>
+                                                                                    <template if:true={sa.isEditingStatus}>
+                                                                                        <div class="sa-date-edit-wrap">
+                                                                                            <lightning-combobox
+                                                                                                label="Estado"
+                                                                                                variant="label-hidden"
+                                                                                                value={sa.editSaStatusValue}
+                                                                                                options={saStatusOptions}
+                                                                                                class="sa-status-combobox"
+                                                                                                data-sa-id={sa.id}
+                                                                                                onchange={handleSaStatusChange}>
+                                                                                            </lightning-combobox>
+                                                                                            <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small" alternative-text="Guardar" title="Guardar" disabled={isSavingSaStatus} data-sa-id={sa.id} onclick={handleSaveSaStatus}></lightning-button-icon>
+                                                                                            <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small" alternative-text="Cancelar" title="Cancelar" onclick={handleCancelSaStatus}></lightning-button-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                    <template if:false={sa.isEditingStatus}>
+                                                                                        <div class="sa-detail-display" data-sa-id={sa.id} onclick={handleEditSaStatus} title="Clic para editar">
+                                                                                            <span class="sa-status-tag">{sa.status}</span>
+                                                                                            <lightning-icon icon-name="utility:edit" size="xx-small" class="sa-detail-edit-icon"></lightning-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </td>
+                                                                                <td class="sa-tech-cell">
+                                                                                    <div class="sa-tech-multi-wrap">
+                                                                                        <template for:each={sa.technicians} for:item="tech">
+                                                                                            <span key={tech.arId} class="tech-pill">
+                                                                                                <lightning-icon icon-name="utility:user" size="xx-small" class="tech-pill-icon"></lightning-icon>
+                                                                                                {tech.name}
+                                                                                                <button class="tech-remove-btn" data-ar-id={tech.arId} onclick={handleRemoveTech} title="Remover">×</button>
+                                                                                            </span>
+                                                                                        </template>
+                                                                                        <template if:false={sa.hasTechnicians}>
+                                                                                            <template if:false={sa.isAddingTech}>
+                                                                                                <span class="no-assign">Sin asignar</span>
+                                                                                            </template>
+                                                                                        </template>
+                                                                                        <template if:true={sa.isAddingTech}>
+                                                                                            <div class="add-tech-inline">
+                                                                                                <lightning-combobox
+                                                                                                    label="Técnico"
+                                                                                                    variant="label-hidden"
+                                                                                                    value={sa.newTechVal}
+                                                                                                    options={saResourceOptions}
+                                                                                                    placeholder="Seleccionar..."
+                                                                                                    class="sa-tech-combobox"
+                                                                                                    data-sa-id={sa.id}
+                                                                                                    onchange={handleNewTechChange}>
+                                                                                                </lightning-combobox>
+                                                                                                <lightning-button-icon icon-name="utility:check" variant="brand" size="x-small" alternative-text="Confirmar" title="Confirmar" disabled={isSavingAddTech} data-sa-id={sa.id} onclick={handleConfirmAddTech}></lightning-button-icon>
+                                                                                                <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small" alternative-text="Cancelar" title="Cancelar" onclick={handleCancelAddTech}></lightning-button-icon>
+                                                                                            </div>
+                                                                                        </template>
+                                                                                        <template if:false={sa.isAddingTech}>
+                                                                                            <button class="add-tech-btn" data-sa-id={sa.id} onclick={handleShowAddTech} title="Agregar técnico">+ Técnico</button>
+                                                                                        </template>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <!-- Tratamiento inline -->
+                                                                                <td class="col-sa-tratamiento">
+                                                                                    <template if:true={sa.isEditingProducto}>
+                                                                                        <div class="sa-date-edit-wrap">
+                                                                                            <template if:true={sa.loadingProductos}>
+                                                                                                <lightning-spinner size="x-small" alternative-text="Cargando..."></lightning-spinner>
+                                                                                            </template>
+                                                                                            <template if:false={sa.loadingProductos}>
+                                                                                                <lightning-combobox
+                                                                                                    label="Tratamiento"
+                                                                                                    variant="label-hidden"
+                                                                                                    value={sa.editProductoValue}
+                                                                                                    options={sa.productoOptions}
+                                                                                                    class="sa-status-combobox"
+                                                                                                    data-sa-id={sa.id}
+                                                                                                    onchange={handleSaProductoChange}>
+                                                                                                </lightning-combobox>
+                                                                                            </template>
+                                                                                            <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small" alternative-text="Guardar" title="Guardar" disabled={isSavingSaProducto} data-sa-id={sa.id} onclick={handleSaveSaProducto}></lightning-button-icon>
+                                                                                            <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small" alternative-text="Cancelar" title="Cancelar" onclick={handleCancelSaProducto}></lightning-button-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                    <template if:false={sa.isEditingProducto}>
+                                                                                        <div class="sa-detail-display" data-sa-id={sa.id} data-contract-id={sa.contractId} onclick={handleEditSaProducto} title="Clic para editar tratamiento">
+                                                                                            <span class="sa-tratamiento-label">{sa.productoLabel}</span>
+                                                                                            <lightning-icon icon-name="utility:edit" size="xx-small" class="sa-detail-edit-icon"></lightning-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </td>
+                                                                                <td class="sa-rev-tipos-cell">
+                                                                                    <span class="sa-rev-count">{sa.revCount}</span>
+                                                                                    <span class="sa-rev-sep"> / </span>
+                                                                                    <span class="sa-tipos-count">{sa.tiposCount}</span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <template if:true={sa.isEditingDetails}>
+                                                                                        <input type="number" min="0" class="sa-detail-input"
+                                                                                            value={sa.editDuration}
+                                                                                            data-sa-id={sa.id}
+                                                                                            data-field="duration"
+                                                                                            onchange={handleSaDetailsChange} />
+                                                                                    </template>
+                                                                                    <template if:false={sa.isEditingDetails}>
+                                                                                        <div class="sa-detail-display"
+                                                                                             data-sa-id={sa.id}
+                                                                                             onclick={handleEditSaDetails}
+                                                                                             title="Clic para editar">
+                                                                                            {sa.duration}
+                                                                                            <lightning-icon icon-name="utility:edit" size="xx-small" class="sa-detail-edit-icon"></lightning-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </td>
+                                                                                <td class="sa-notes">
+                                                                                    <template if:true={sa.isEditingDetails}>
+                                                                                        <input type="text" class="sa-detail-input sa-detail-notes-input"
+                                                                                            value={sa.editNotes}
+                                                                                            data-sa-id={sa.id}
+                                                                                            data-field="notes"
+                                                                                            onchange={handleSaDetailsChange} />
+                                                                                    </template>
+                                                                                    <template if:false={sa.isEditingDetails}>
+                                                                                        <div class="sa-detail-display"
+                                                                                             data-sa-id={sa.id}
+                                                                                             onclick={handleEditSaDetails}
+                                                                                             title="Clic para editar">
+                                                                                            {sa.notes}
+                                                                                            <lightning-icon icon-name="utility:edit" size="xx-small" class="sa-detail-edit-icon"></lightning-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </td>
+                                                                                <td class="sa-actions-cell">
+                                                                                    <template if:true={sa.isEditingDetails}>
+                                                                                        <div class="sa-actions-wrap">
+                                                                                            <lightning-button-icon
+                                                                                                icon-name="utility:save"
+                                                                                                variant="brand"
+                                                                                                size="x-small"
+                                                                                                alternative-text="Guardar"
+                                                                                                title="Guardar"
+                                                                                                data-sa-id={sa.id}
+                                                                                                onclick={handleSaveSaDetails}>
+                                                                                            </lightning-button-icon>
+                                                                                            <lightning-button-icon
+                                                                                                icon-name="utility:close"
+                                                                                                variant="bare"
+                                                                                                size="x-small"
+                                                                                                alternative-text="Cancelar"
+                                                                                                title="Cancelar"
+                                                                                                onclick={handleCancelSaDetails}>
+                                                                                            </lightning-button-icon>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </td>
                                                                             </tr>
-                                                                        </template>
-                                                                    </tbody>
+                                                                            <template if:true={sa.revExpanded}>
+                                                                                <tr class="rev-accordion-row">
+                                                                                    <td colspan="9">
+                                                                                        <div class="rev-accordion-content">
+                                                                                            <div class="rev-accordion-header">
+                                                                                                <lightning-icon icon-name="standard:entity" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                                                                                Revisiones de Cita de Servicio
+                                                                                                <button class="add-rev-btn" data-sa-id={sa.id} onclick={handleCreateRevision} disabled={isCreatingRev} title="Agregar revisión">+ Nueva Revisión</button>
+                                                                                                <button class="hist-btn" data-sa-id={sa.id} onclick={handleToggleSaHistory} title="Ver historial de estado">Historial SA</button>
+                                                                                            </div>
+                                                                                            <!-- SA history timeline -->
+                                                                                            <template if:true={sa.saHistExpanded}>
+                                                                                                <div class="hist-timeline">
+                                                                                                    <template if:true={sa.saHistLoading}>
+                                                                                                        <lightning-spinner size="x-small" alternative-text="Cargando..."></lightning-spinner>
+                                                                                                    </template>
+                                                                                                    <template if:false={sa.saHistLoading}>
+                                                                                                        <template if:true={sa.hasSaHistory}>
+                                                                                                            <template for:each={sa.saHistory} for:item="h">
+                                                                                                                <div key={h.fecha} class="hist-row">
+                                                                                                                    <span class="hist-fecha">{h.fecha}</span>
+                                                                                                                    <span class="hist-user">{h.usuario}</span>
+                                                                                                                    <span class="hist-old">{h.anterior}</span>
+                                                                                                                    <span class="hist-arrow">→</span>
+                                                                                                                    <span class="hist-new">{h.nuevo}</span>
+                                                                                                                </div>
+                                                                                                            </template>
+                                                                                                        </template>
+                                                                                                        <template if:false={sa.hasSaHistory}>
+                                                                                                            <span class="hist-empty">Sin historial de estado.</span>
+                                                                                                        </template>
+                                                                                                    </template>
+                                                                                                </div>
+                                                                                            </template>
+                                                                                            <table class="rev-table">
+                                                                                                <thead>
+                                                                                                    <tr>
+                                                                                                        <th class="col-rev-folio">Folio</th>
+                                                                                                        <th class="col-rev-tipo">Tipo</th>
+                                                                                                        <th class="col-rev-estado">Estado</th>
+                                                                                                        <th class="col-rev-formulario">Formulario</th>
+                                                                                                        <th class="col-rev-badge">Fotos</th>
+                                                                                                        <th class="col-rev-badge">NC</th>
+                                                                                                        <th class="col-rev-actions"></th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <template for:each={sa.revisiones} for:item="rev">
+                                                                                                    <tbody key={rev.id}>
+                                                                                                        <tr class="rev-row">
+                                                                                                            <!-- Folio -->
+                                                                                                            <td class="rev-num"><span class="rev-folio-chip">{rev.folio}</span></td>
+
+                                                                                                            <!-- Tipo (editable) -->
+                                                                                                            <td class="col-rev-tipo">
+                                                                                                                <template if:true={rev.isEditing}>
+                                                                                                                    <lightning-combobox
+                                                                                                                        label="Tipo"
+                                                                                                                        variant="label-hidden"
+                                                                                                                        value={rev.editTipo}
+                                                                                                                        options={revTipoOptions}
+                                                                                                                        class="rev-inline-combobox"
+                                                                                                                        data-rev-id={rev.id}
+                                                                                                                        data-field="tipo"
+                                                                                                                        onchange={handleRevFieldChange}>
+                                                                                                                    </lightning-combobox>
+                                                                                                                </template>
+                                                                                                                <template if:false={rev.isEditing}>
+                                                                                                                    {rev.tipo}
+                                                                                                                </template>
+                                                                                                            </td>
+
+                                                                                                            <!-- Estado (editable) -->
+                                                                                                            <td class="col-rev-estado">
+                                                                                                                <template if:true={rev.isEditing}>
+                                                                                                                    <lightning-combobox
+                                                                                                                        label="Estado"
+                                                                                                                        variant="label-hidden"
+                                                                                                                        value={rev.editStatus}
+                                                                                                                        options={revStatusOptions}
+                                                                                                                        class="rev-inline-combobox"
+                                                                                                                        data-rev-id={rev.id}
+                                                                                                                        data-field="status"
+                                                                                                                        onchange={handleRevFieldChange}>
+                                                                                                                    </lightning-combobox>
+                                                                                                                </template>
+                                                                                                                <template if:false={rev.isEditing}>
+                                                                                                                    <span class={rev.statusClass}>{rev.status}</span>
+                                                                                                                </template>
+                                                                                                            </td>
+
+                                                                                                            <!-- Formulario (editable) -->
+                                                                                                            <td class="col-rev-formulario">
+                                                                                                                <template if:true={rev.isEditing}>
+                                                                                                                    <lightning-combobox
+                                                                                                                        label="Formulario"
+                                                                                                                        variant="label-hidden"
+                                                                                                                        value={rev.editFormularioId}
+                                                                                                                        options={formularioOptions}
+                                                                                                                        class="rev-inline-combobox"
+                                                                                                                        data-rev-id={rev.id}
+                                                                                                                        data-field="formularioId"
+                                                                                                                        onchange={handleRevFieldChange}>
+                                                                                                                    </lightning-combobox>
+                                                                                                                </template>
+                                                                                                                <template if:false={rev.isEditing}>
+                                                                                                                    {rev.formularioLabel}
+                                                                                                                </template>
+                                                                                                            </td>
+
+                                                                                                            <!-- Fotos -->
+                                                                                                            <td class="col-rev-badge">
+                                                                                                                <template if:true={rev.fotos}>
+                                                                                                                    <span class="rev-badge-fotos">📷 {rev.fotos}</span>
+                                                                                                                </template>
+                                                                                                                <template if:false={rev.fotos}>
+                                                                                                                    <span class="rev-badge-zero">—</span>
+                                                                                                                </template>
+                                                                                                            </td>
+
+                                                                                                            <!-- NC -->
+                                                                                                            <td class="col-rev-badge">
+                                                                                                                <template if:true={rev.nc}>
+                                                                                                                    <span class="rev-badge-nc">⚠ {rev.nc}</span>
+                                                                                                                </template>
+                                                                                                                <template if:false={rev.nc}>
+                                                                                                                    <span class="rev-badge-zero">—</span>
+                                                                                                                </template>
+                                                                                                            </td>
+
+                                                                                                            <!-- Acciones -->
+                                                                                                            <td class="col-rev-actions">
+                                                                                                                <template if:true={rev.isEditing}>
+                                                                                                                    <div class="rev-actions-wrap">
+                                                                                                                        <button class="rev-action-btn rev-save-btn" data-rev-id={rev.id} onclick={handleSaveRev} disabled={isSavingRev} title="Guardar">✓</button>
+                                                                                                                        <button class="rev-action-btn rev-cancel-edit-btn" onclick={handleCancelEditRev} title="Cancelar edición">✕</button>
+                                                                                                                    </div>
+                                                                                                                </template>
+                                                                                                                <template if:false={rev.isEditing}>
+                                                                                                                    <div class="rev-actions-wrap">
+                                                                                                                        <template if:true={rev.canPause}>
+                                                                                                                            <button class="rev-action-btn rev-pause-btn" data-rev-id={rev.id} onclick={handlePauseRevision} disabled={isSavingRevAction} title="Pausar">⏸</button>
+                                                                                                                        </template>
+                                                                                                                        <template if:true={rev.canCancel}>
+                                                                                                                            <button class="rev-action-btn rev-cancel-btn" data-rev-id={rev.id} onclick={handleCancelRevision} disabled={isSavingRevAction} title="Cancelar">✕</button>
+                                                                                                                        </template>
+                                                                                                                        <button class="rev-action-btn rev-hist-btn" data-rev-id={rev.id} onclick={handleToggleRevHistory} title="Ver historial">⏱</button>
+                                                                                                                        <button class="rev-action-btn rev-edit-btn" data-rev-id={rev.id} onclick={handleEditRev} title="Editar revisión">✎</button>
+                                                                                                                    </div>
+                                                                                                                </template>
+                                                                                                            </td>
+                                                                                                        </tr>
+
+                                                                                                        <!-- Fila historial: span completo -->
+                                                                                                        <template if:true={rev.revHistExpanded}>
+                                                                                                            <tr class="rev-hist-row">
+                                                                                                                <td colspan="7" class="rev-hist-cell">
+                                                                                                                    <template if:true={rev.revHistLoading}>
+                                                                                                                        <lightning-spinner size="x-small" alternative-text="Cargando..."></lightning-spinner>
+                                                                                                                    </template>
+                                                                                                                    <template if:false={rev.revHistLoading}>
+                                                                                                                        <div class="hist-timeline hist-timeline-rev">
+                                                                                                                            <template if:true={rev.hasRevHistory}>
+                                                                                                                                <template for:each={rev.revHistory} for:item="h">
+                                                                                                                                    <div key={h.fecha} class="hist-row">
+                                                                                                                                        <span class="hist-fecha">{h.fecha}</span>
+                                                                                                                                        <span class="hist-user">{h.usuario}</span>
+                                                                                                                                        <span class="hist-old">{h.anterior}</span>
+                                                                                                                                        <span class="hist-arrow">→</span>
+                                                                                                                                        <span class="hist-new">{h.nuevo}</span>
+                                                                                                                                    </div>
+                                                                                                                                </template>
+                                                                                                                            </template>
+                                                                                                                            <template if:false={rev.hasRevHistory}>
+                                                                                                                                <span class="hist-empty">Sin historial.</span>
+                                                                                                                            </template>
+                                                                                                                        </div>
+                                                                                                                    </template>
+                                                                                                                </td>
+                                                                                                            </tr>
+                                                                                                        </template>
+                                                                                                    </tbody>
+                                                                                                </template>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </template>
+                                                                        </tbody>
+                                                                    </template>
                                                                 </table>
                                                             </div>
                                                         </td>
@@ -530,6 +943,16 @@
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- MODAL: FUSIONAR CITAS DE SERVICIO -->
+        <template if:true={showFusionWizard}>
+            <c-tech-fusion-wizard
+                contract-id={fusionContractId}
+                contract-name={fusionContractName}
+                onfusioncomplete={handleFusionComplete}
+                onclose={handleCloseFusionWizard}>
+            </c-tech-fusion-wizard>
         </template>
 
         <!-- MODAL: ASIGNAR A CONTRATO -->

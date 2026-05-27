@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diagrama — ServiceReviewPDF</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a2035; padding: 24px; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+
+  /* ─── Page wrapper ─── */
+  .page { width: 760px; margin: 0 auto; }
+
+  /* ─── Blocks ─── */
+  .block {
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    position: relative;
+  }
+  .block-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+    opacity: 0.75;
+  }
+  .block-desc { font-size: 12px; color: #444; margin-top: 3px; }
+
+  /* ─── Colors ─── */
+  .bg-header   { background: #1a2035; color: #fff; }
+  .bg-footer   { background: #263050; color: #a5d6a7; }
+  .bg-cert     { background: #e8eaf6; border: 1px solid #9fa8da; }
+  .bg-banner   { background: #1b5e20; color: #fff; }
+  .bg-trat     { background: #e8f5e9; border: 1px solid #81c784; }
+  .bg-zona     { background: #f1f8e9; border: 1px solid #aed581; }
+  .bg-rev      { background: #fff; border: 1px solid #ddd; }
+  .bg-row-id   { background: #1b5e20; color: #fff; }
+  .bg-form     { background: #fafafa; border: 1px dashed #ccc; }
+  .bg-obs      { background: #fff8e1; border: 1px solid #ffe082; }
+  .bg-photos   { background: #e3f2fd; border: 1px solid #90caf9; }
+  .bg-sig-client { background: #fff; border: 1px solid #ddd; }
+  .bg-sigs     { background: #f5f5f5; border: 1px solid #e0e0e0; }
+  .bg-verificado { background: #fff; border: 2px solid #1b5e20; }
+  .bg-repeat   { background: #fff3e0; border: 1px dashed #ffb74d; }
+  .bg-pagebreak { background: #ffccbc; border: 1px dashed #ff7043; font-size: 11px; color: #bf360c; text-align: center; padding: 4px; border-radius: 4px; margin: 6px 0; }
+
+  /* ─── Grid ─── */
+  .row { display: flex; gap: 6px; align-items: stretch; }
+  .col { flex: 1; }
+  .col-2 { flex: 2; }
+
+  /* ─── Badges ─── */
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-right: 4px; }
+  .badge-fixed  { background: #ff7043; color: #fff; }
+  .badge-first  { background: #7e57c2; color: #fff; }
+  .badge-each   { background: #26a69a; color: #fff; }
+  .badge-cond   { background: #78909c; color: #fff; }
+  .badge-mode   { background: #1b5e20; color: #fff; }
+
+  /* ─── Separators ─── */
+  .separator { border: none; border-top: 2px dashed #b0bec5; margin: 16px 0; }
+  .label-separator { text-align: center; font-size: 11px; color: #90a4ae; margin: -8px 0 12px; position: relative; }
+  .label-separator span { background: #f0f2f5; padding: 0 8px; }
+
+  /* ─── Nested ─── */
+  .nested { margin-left: 20px; border-left: 3px solid #e0e0e0; padding-left: 10px; }
+
+  /* ─── Legend ─── */
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; font-size: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+  .arrow { text-align: center; color: #90a4ae; font-size: 18px; margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Diagrama — ServiceReviewPDF</h1>
+  <p class="subtitle">Estructura y orden de elementos en el PDF generado por ServiceReviewPDFController.cls + ServiceReviewPDF.page</p>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#ff7043"></div> Aparece en <strong>cada página</strong> (fijo)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7e57c2"></div> Solo en la <strong>primera revisión</strong></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#26a69a"></div> Se repite por <strong>cada RevWrapper</strong></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#78909c"></div> Aparece <strong>condicionalmente</strong></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1b5e20"></div> Diferente según <strong>modo</strong> (individual / consolidado)</div>
+  </div>
+
+  <!-- HEADER FIJO -->
+  <div class="block bg-header">
+    <div class="block-title"><span class="badge badge-fixed">Fijo — cada página</span> Encabezado de página (thead)</div>
+    <div class="row" style="margin-top:6px;">
+      <div class="col"><strong>Logo Pyatz</strong></div>
+      <div class="col"><strong>Datos de empresa</strong> (RFC, dirección, teléfono)</div>
+      <div class="col"><strong>Número de página</strong></div>
+    </div>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- SECCIÓN CERTIFICADO — solo en modo individual, antes de las revisiones -->
+  <div class="block bg-cert">
+    <div class="block-title"><span class="badge badge-first">Primera vez — modo individual</span> Sección Certificado de Servicio</div>
+    <div class="row" style="margin-top:6px; gap:10px;">
+      <div class="col">
+        <div style="background:#fff;border:1px solid #c5cae9;border-radius:4px;padding:8px;font-size:12px;">
+          <strong>CERTIFICADO DE SERVICIO N° {workOrderNum}</strong><br>
+          <span style="color:#666">{woSubject}</span>
+        </div>
+      </div>
+      <div class="col">
+        <div style="background:#fff;border:1px solid #c5cae9;border-radius:4px;padding:8px;font-size:12px;">
+          Razón Social / Sede / Dirección / Municipio<br>
+          Fecha / Técnico / Número de visita
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- REPEAT por cada RevWrapper -->
+  <div class="block bg-repeat">
+    <div class="block-title"><span class="badge badge-each">apex:repeat</span> Se repite por cada Revisión — ordenadas por: Tratamiento → Zona → Número</div>
+    <div class="block-desc">Controller ordena con <code>RevSortKey.compareTo()</code>: trat ~~~ zona ~~~ numero. Cada revisión tiene <code>page-break-before:always</code> (excepto la primera).</div>
+  </div>
+
+  <div class="nested">
+
+    <!-- PAGE BREAK -->
+    <div class="bg-pagebreak">⊳ page-break-before:always (a partir de la 2ª revisión)</div>
+
+    <!-- BANNER — solo primera revisión -->
+    <div class="block bg-banner" style="margin-top:8px;">
+      <div class="block-title"><span class="badge badge-first">Solo primera revisión</span> Banner del documento</div>
+      <div class="row" style="margin-top:6px; gap:6px;">
+        <div class="col" style="background:rgba(255,255,255,0.1);padding:6px;border-radius:4px;font-size:12px;">
+          <span class="badge badge-mode">Individual</span><br>
+          Reporte de Revisiones<br>
+          <strong>{SA number}</strong> · Cuenta · Fecha · # Revisiones · Estado
+        </div>
+        <div class="col" style="background:rgba(255,255,255,0.1);padding:6px;border-radius:4px;font-size:12px;">
+          <span class="badge badge-mode">Consolidado (WO)</span><br>
+          Reporte Consolidado<br>
+          <strong>OT {workOrderNum}</strong> · Cuenta · Fecha · # Citas · # Revisiones · Fotos
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <!-- CABECERA TRATAMIENTO -->
+    <div class="block bg-trat">
+      <div class="block-title"><span class="badge badge-cond">Condicional</span> Cabecera de Tratamiento</div>
+      <div class="block-desc">Aparece cuando <code>showTratHeader = true</code> y el tratamiento no está en blanco. Agrupa revisiones del mismo producto/servicio.</div>
+      <div style="margin-top:6px;background:#c8e6c9;padding:5px 10px;border-radius:20px;font-size:12px;display:inline-block;">
+        <strong>Tratamiento:</strong> Nombre del producto (ej. Bioenzmático, Desazolve)
+      </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <!-- CABECERA ZONA -->
+    <div class="block bg-zona">
+      <div class="block-title"><span class="badge badge-cond">Condicional</span> Cabecera de Zona</div>
+      <div class="block-desc">Aparece cuando <code>showZonaHeader = true</code> y la zona no está en blanco. Agrupa revisiones de la misma zona.</div>
+      <div style="margin-top:6px;background:#dcedc8;padding:5px 10px;border-radius:20px;font-size:12px;display:inline-block;">
+        <strong>Zona(s):</strong> Nombre de zona (ej. COCINA INDUSTRIAL, BAÑOS PLANTA BAJA)
+      </div>
+    </div>
+
+    <div class="arrow">▼</div>
+
+    <!-- REV CARD -->
+    <div class="block bg-rev">
+      <div class="block-title"><span class="badge badge-each">Por cada revisión</span> Tarjeta de Revisión (rev-card)</div>
+
+      <!-- ROW 1: ID BAR -->
+      <div class="block bg-row-id" style="border-radius:4px;padding:8px;margin-top:8px;">
+        <div class="block-title" style="color:#a5d6a7;">Fila 1 — Barra de identificación</div>
+        <div class="row" style="margin-top:4px;font-size:12px;">
+          <div class="col" style="background:rgba(255,255,255,0.1);padding:6px;border-radius:4px;">
+            <div style="color:#a5d6a7;font-size:10px;">FOLIO</div>
+            <strong>{w.rev.Name}</strong><br>
+            <span style="font-size:10px;color:#a5d6a7;">(ej. REV-0001)</span>
+          </div>
+          <div class="col-2" style="background:rgba(255,255,255,0.1);padding:6px;border-radius:4px;">
+            <strong>{w.rev.Tipo_Reporte__c}</strong><br>
+            <span style="font-size:11px;color:#a5d6a7;">{w.fecha} · Técnico: {w.tecnico}</span>
+          </div>
+          <div class="col" style="background:rgba(255,255,255,0.1);padding:6px;border-radius:4px;">
+            <div style="color:#a5d6a7;font-size:10px;">CUENTA</div>
+            <strong style="font-size:11px;">{accountName}</strong>
+          </div>
+          <div class="col" style="background:rgba(255,255,255,0.1);padding:6px;border-radius:4px;">
+            <div style="color:#a5d6a7;font-size:10px;">OT</div>
+            <strong style="font-size:11px;">{workOrderNum}</strong><br>
+            <span style="font-size:10px;color:#a5d6a7;">Rev. #{numero}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: FORMULARIO -->
+      <div class="block bg-form" style="border-radius:4px;padding:8px;margin-top:6px;">
+        <div class="block-title">Fila 2 — Contenido del formulario (Datos_Formulario__c)</div>
+        <div class="block-desc">Se parsea el JSON de la revisión y se renderizan preguntas y respuestas según el tipo de plantilla.</div>
+        <div class="row" style="margin-top:6px;gap:6px;">
+          <div class="col" style="background:#fff;border:1px solid #e0e0e0;padding:6px;border-radius:4px;font-size:11px;">
+            <strong>ACTIVIDADES REALIZADAS</strong><br>
+            Respuestas del formulario (q1, q2 … qN)<br>
+            Checkboxes / opciones seleccionadas
+          </div>
+          <div class="col" style="background:#fff;border:1px solid #e0e0e0;padding:6px;border-radius:4px;font-size:11px;">
+            <strong>CONDICIÓN ENCONTRADA</strong><br>
+            Observaciones del formulario (obs)<br>
+            Texto libre o respuestas adicionales
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: OBSERVACIONES -->
+      <div class="block bg-obs" style="border-radius:4px;padding:8px;margin-top:6px;">
+        <div class="block-title"><span class="badge badge-cond">Si tiene observaciones</span> Fila 3 — Observaciones generales</div>
+        <div class="block-desc">{w.rev.Observaciones__c} — texto libre del técnico</div>
+      </div>
+
+      <!-- ROW 4: FOTOS -->
+      <div class="block bg-photos" style="border-radius:4px;padding:8px;margin-top:6px;">
+        <div class="block-title"><span class="badge badge-cond">Si tiene fotos</span> Fila 4 — Evidencia fotográfica</div>
+        <div class="block-desc">Grid de imágenes geoetiquetadas (máx. según configuración). Cada foto incluye coordenadas GPS, fecha y nombre del técnico.</div>
+      </div>
+
+      <!-- ROW 5: FIRMA DEL CLIENTE POR REVISIÓN -->
+      <div class="block bg-sig-client" style="border:1px solid #ddd;border-radius:4px;padding:8px;margin-top:6px;">
+        <div class="block-title"><span class="badge badge-cond">Si tiene firma guardada</span> Fila 5 — Firma del cliente (por revisión)</div>
+        <div class="block-desc">Imagen de firma capturada durante la revisión individual. <em>No confundir con la firma final del documento.</em></div>
+      </div>
+
+    </div><!-- /rev-card -->
+
+  </div><!-- /nested -->
+
+  <hr class="separator">
+  <div class="label-separator"><span>▼ Después de todas las revisiones — sección final ▼</span></div>
+
+  <!-- SECCIÓN DE FIRMAS FINALES -->
+  <div class="block bg-sigs">
+    <div class="block-title">Sección final — Firmas del documento</div>
+    <div class="row" style="margin-top:8px;gap:8px;">
+      <div class="col" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px;font-size:12px;text-align:center;">
+        <strong>RECIBIÓ DEL CLIENTE</strong><br>
+        <div style="height:32px;border:1px dashed #ccc;margin:6px auto;width:80px;"></div>
+        Imagen firma del cliente<br>
+        <span style="color:#666;">{nombreFirmante}<br>{cargoFirmante}</span>
+      </div>
+      <div class="col" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px;font-size:12px;text-align:center;">
+        <strong>FIRMA AUTORIZADA PYATZ</strong><br>
+        <div style="height:32px;border:1px dashed #ccc;margin:6px auto;width:80px;"></div>
+        Imagen firma del técnico<br>
+        <span style="color:#666;">{techName}<br>Técnico Aplicador</span>
+      </div>
+      <div class="col" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px;font-size:12px;text-align:center;">
+        <strong>SELLO DE LA EMPRESA</strong><br>
+        <div style="height:32px;border:1px dashed #ccc;margin:6px auto;width:80px;background:#e8f5e9;"></div>
+        Logo / sello Pyatz
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow" style="margin:4px 0;">▼</div>
+
+  <!-- DOCUMENTO VERIFICADO -->
+  <div class="block bg-verificado">
+    <div class="block-title"><span class="badge badge-cond">Solo si está verificado</span> DOCUMENTO VERIFICADO</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
+      <div style="flex:1;font-size:12px;color:#1b5e20;">
+        Validación administrativa interna.<br>
+        Contiene firma del verificador y fecha de verificación.
+      </div>
+      <div style="text-align:center;font-size:12px;">
+        <div style="height:40px;border:1px solid #1b5e20;width:90px;margin:0 auto 4px;border-radius:4px;background:#f1f8e9;"></div>
+        Firma del verificador<br>
+        <span style="color:#666;font-size:11px;">{techName} / {fechaVerif}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">▼</div>
+
+  <!-- FOOTER FIJO -->
+  <div class="block bg-footer">
+    <div class="block-title"><span class="badge badge-fixed">Fijo — cada página</span> Pie de página (tfoot)</div>
+    <div class="row" style="margin-top:4px;font-size:12px;">
+      <div class="col">Número de página / total de páginas</div>
+      <div class="col" style="text-align:right;">Folio del documento · Fecha de emisión</div>
+    </div>
+  </div>
+
+  <!-- ── Notas técnicas ── -->
+  <hr class="separator" style="margin-top:24px;">
+  <div style="font-size:12px;color:#546e7a;line-height:1.8;">
+    <strong>Notas técnicas:</strong>
+    <ul style="margin-left:20px;margin-top:6px;">
+      <li><strong>Modos:</strong> <code>isConsolidated=false</code> → PDF por SA individual (1 Cita) · <code>isConsolidated=true</code> → PDF por WorkOrder completo (todas las Citas)</li>
+      <li><strong>Orden de revisiones:</strong> <code>RevSortKey</code> ordena por: Tratamiento (Producto_Relacionado__r.Name) → Zona (Zonas_a_Tratar__c, fusión padre+hija) → Numero_Revision__c</li>
+      <li><strong>Folio:</strong> Campo <code>Name</code> auto-numérico del objeto Revision_Cita_Servicio__c (formato <code>REV-{0000}</code>)</li>
+      <li><strong>Agrupación:</strong> <code>showTratHeader</code> y <code>showZonaHeader</code> se calculan post-sort en <code>buildRevWrappers()</code> comparando con el registro anterior</li>
+      <li><strong>Citas fusionadas:</strong> Si una SA tiene hijas (<code>Cita_Padre__c != null</code>), sus zonas y tratamientos se fusionan al padre</li>
+    </ul>
+  </div>
+
+</div><!-- /page -->
+</body>
+</html>

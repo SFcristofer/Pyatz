@@ -86,6 +86,16 @@
     <!-- ==================== Revision_Cita_Servicio__c ==================== -->
     <fieldPermissions>
         <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Cargo_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Nombre_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Revision_Cita_Servicio__c.Cita_Servicio__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -122,6 +132,21 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Revision_Cita_Servicio__c.Tipo_Reporte__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Tiempo_En_Proceso_Segundos__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Tiempo_Pausado_Segundos__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Ultima_Transicion__c</field>
         <readable>true</readable>
     </fieldPermissions>
 
@@ -192,6 +217,18 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Zona_Servicio_Pyatz__c.Tipo_de_Servicio__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- ==================== WorkOrder — Firmante ==================== -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrder.Cargo_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrder.Nombre_Firmante__c</field>
         <readable>true</readable>
     </fieldPermissions>
 

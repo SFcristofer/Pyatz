@@ -100,6 +100,17 @@
         <field>WorkOrderLineItem.Levantamiento_Tecnico__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <!-- ==================== WorkOrder — Firmante ==================== -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrder.Cargo_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrder.Nombre_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Pyatz - Reportabilidad Levantamientos</label>
     <objectPermissions>

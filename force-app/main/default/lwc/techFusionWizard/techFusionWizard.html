@@ -1,0 +1,427 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true"
+             class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+
+            <!-- HEADER -->
+            <header class="slds-modal__header slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name="utility:merge" size="small"
+                                    class="slds-m-right_small" variant="inverse"></lightning-icon>
+                    <h2 class="slds-text-heading_medium slds-text-color_inverse">
+                        Fusionar Citas de Servicio
+                    </h2>
+                    <template if:false={isLoad}>
+                        <span class="fusion-contract-label slds-m-left_small">{contractName}</span>
+                    </template>
+                </div>
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Cerrar" onclick={handleClose}>
+                    <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                </button>
+            </header>
+
+            <!-- BODY -->
+            <div class="slds-modal__content slds-p-around_medium fusion-body">
+
+                <!-- LOADING -->
+                <template if:true={isLoad}>
+                    <div class="fusion-center">
+                        <lightning-spinner size="medium" alternative-text="Cargando citas..."></lightning-spinner>
+                        <p class="fusion-hint">Buscando citas con la misma fecha...</p>
+                    </div>
+                </template>
+
+                <!-- SIN CANDIDATOS -->
+                <template if:true={isEmpty}>
+                    <div class="fusion-center">
+                        <lightning-icon icon-name="utility:success" size="large"
+                                        class="slds-m-bottom_small" style="color:#2e7d32"></lightning-icon>
+                        <p class="fusion-empty-title">Sin citas para fusionar</p>
+                        <p class="fusion-hint">No hay dos o más citas en la misma fecha para este contrato.</p>
+                    </div>
+                </template>
+
+                <!-- STEP 1: SELECCIÓN DE PADRE -->
+                <template if:true={isSelect}>
+                    <p class="fusion-step-hint">
+                        <lightning-icon icon-name="utility:info" size="x-small"
+                                        class="slds-m-right_x-small"></lightning-icon>
+                        Elige cuál cita quedará como <strong>padre</strong> en cada grupo.
+                        Las demás se marcarán como hijas y sus revisiones pasarán al padre.
+                    </p>
+
+                    <template for:each={gruposConSeleccion} for:item="grupo">
+                        <div key={grupo.fecha} class="fusion-group">
+                            <div class="fusion-group-header">
+                                <lightning-icon icon-name="utility:event" size="x-small"
+                                                class="slds-m-right_x-small"></lightning-icon>
+                                <span class="fusion-group-date">{grupo.label}</span>
+                                <span class="fusion-group-count">{grupo.citas.length} citas</span>
+                            </div>
+
+                            <table class="fusion-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-padre">Padre</th>
+                                        <th class="col-fusion-expand"></th>
+                                        <th>Número</th>
+                                        <th>Hora</th>
+                                        <th>Estado</th>
+                                        <th>Rev. esp.</th>
+                                        <th>Rev. exist.</th>
+                                        <th>Técnico</th>
+                                        <th class="col-fusion-treatments">Tratamiento</th>
+                                    </tr>
+                                </thead>
+                                <template for:each={grupo.citas} for:item="cita">
+                                    <tbody key={cita.id}>
+                                        <tr class="fusion-row">
+                                            <!-- Radio padre -->
+                                            <td class="col-padre">
+                                                <input type="radio"
+                                                    name={grupo.fecha}
+                                                    checked={cita.isSelected}
+                                                    data-fecha={grupo.fecha}
+                                                    data-id={cita.id}
+                                                    onchange={handleSelectPadre} />
+                                            </td>
+                                            <!-- Expand revisiones -->
+                                            <td class="col-fusion-expand">
+                                                <template if:true={cita.hasRevisiones}>
+                                                    <lightning-button-icon
+                                                        icon-name={cita.revChevronIcon}
+                                                        variant="bare" size="x-small"
+                                                        alternative-text="Revisiones"
+                                                        data-cita-id={cita.id}
+                                                        onclick={handleToggleFusionRev}>
+                                                    </lightning-button-icon>
+                                                </template>
+                                            </td>
+                                            <!-- Número -->
+                                            <td class="fusion-sa-num">{cita.number}</td>
+
+                                            <!-- Hora (editable) -->
+                                            <td>
+                                                <template if:true={cita.isEditingTime}>
+                                                    <div class="fusion-inline-edit">
+                                                        <input type="datetime-local" class="fusion-time-input"
+                                                               value={cita.editTimeValue}
+                                                               onchange={handleTimeChange} />
+                                                        <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small"
+                                                            disabled={isSavingTime} data-cita-id={cita.id} onclick={handleSaveTime}></lightning-button-icon>
+                                                        <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small"
+                                                            onclick={handleCancelTime}></lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                                <template if:false={cita.isEditingTime}>
+                                                    <div class="fusion-cell-display" data-cita-id={cita.id} onclick={handleEditTime} title="Clic para editar hora">
+                                                        {cita.time}
+                                                        <lightning-icon icon-name="utility:edit" size="xx-small" class="fusion-edit-icon"></lightning-icon>
+                                                    </div>
+                                                </template>
+                                            </td>
+
+                                            <!-- Estado (editable) -->
+                                            <td>
+                                                <template if:true={cita.isEditingStatus}>
+                                                    <div class="fusion-inline-edit">
+                                                        <lightning-combobox label="Estado" variant="label-hidden"
+                                                            value={cita.editStatusValue}
+                                                            options={saStatusOptions}
+                                                            class="fusion-mini-combobox"
+                                                            data-cita-id={cita.id}
+                                                            onchange={handleStatusChange}>
+                                                        </lightning-combobox>
+                                                        <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small"
+                                                            disabled={isSavingStatus} data-cita-id={cita.id} onclick={handleSaveStatus}></lightning-button-icon>
+                                                        <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small"
+                                                            onclick={handleCancelStatus}></lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                                <template if:false={cita.isEditingStatus}>
+                                                    <div class="fusion-cell-display" data-cita-id={cita.id} onclick={handleEditStatus} title="Clic para editar estado">
+                                                        <span class="fusion-status-tag">{cita.status}</span>
+                                                        <lightning-icon icon-name="utility:edit" size="xx-small" class="fusion-edit-icon"></lightning-icon>
+                                                    </div>
+                                                </template>
+                                            </td>
+
+                                            <!-- Rev. esperadas / existentes -->
+                                            <td class="fusion-num-center">{cita.maxRevisiones}</td>
+                                            <td class="fusion-num-center">{cita.revCount}</td>
+
+                                            <!-- Técnico (editable) -->
+                                            <td>
+                                                <template if:true={cita.hasTechnicians}>
+                                                    <template for:each={cita.technicians} for:item="tech">
+                                                        <div key={tech.arId} class="fusion-tech-chip">
+                                                            <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                            {tech.name}
+                                                            <button class="fusion-tech-remove"
+                                                                    data-ar-id={tech.arId}
+                                                                    data-cita-id={cita.id}
+                                                                    onclick={handleRemoveTech}
+                                                                    title="Quitar técnico">×</button>
+                                                        </div>
+                                                    </template>
+                                                </template>
+                                                <template if:false={cita.hasTechnicians}>
+                                                    <span class="fusion-no-tech">Sin asignar</span>
+                                                </template>
+                                                <template if:true={cita.isAddingTech}>
+                                                    <div class="fusion-inline-edit fusion-add-tech">
+                                                        <lightning-combobox label="Técnico" variant="label-hidden"
+                                                            value={newTechValue}
+                                                            options={resourceOptions}
+                                                            class="fusion-mini-combobox"
+                                                            onchange={handleNewTechChange}>
+                                                        </lightning-combobox>
+                                                        <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small"
+                                                            data-cita-id={cita.id} onclick={handleAddTech}></lightning-button-icon>
+                                                        <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small"
+                                                            onclick={handleCancelAddTech}></lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                                <template if:false={cita.isAddingTech}>
+                                                    <button class="fusion-add-tech-btn"
+                                                            data-cita-id={cita.id}
+                                                            onclick={handleStartAddTech}
+                                                            title="Agregar técnico">+ Técnico</button>
+                                                </template>
+                                            </td>
+
+                                            <!-- Tratamiento (editable) -->
+                                            <td class="col-fusion-treatments">
+                                                <template if:true={cita.isEditingTratamiento}>
+                                                    <div class="fusion-inline-edit">
+                                                        <template if:true={loadingProductos}>
+                                                            <lightning-spinner size="x-small" alternative-text="Cargando..."></lightning-spinner>
+                                                        </template>
+                                                        <template if:false={loadingProductos}>
+                                                            <lightning-combobox label="Tratamiento" variant="label-hidden"
+                                                                value={cita.editTratamientoValue}
+                                                                options={productosOptions}
+                                                                class="fusion-mini-combobox"
+                                                                data-cita-id={cita.id}
+                                                                onchange={handleTratamientoChange}>
+                                                            </lightning-combobox>
+                                                        </template>
+                                                        <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small"
+                                                            disabled={isSavingTratamiento} data-cita-id={cita.id} onclick={handleSaveTratamiento}></lightning-button-icon>
+                                                        <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small"
+                                                            onclick={handleCancelTratamiento}></lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                                <template if:false={cita.isEditingTratamiento}>
+                                                    <div class="fusion-cell-display" data-cita-id={cita.id} onclick={handleEditTratamiento} title="Clic para editar tratamiento">
+                                                        <template if:true={cita.treatments}>
+                                                            <span class="fusion-treatments-text">{cita.treatments}</span>
+                                                        </template>
+                                                        <template if:false={cita.treatments}>
+                                                            <span class="fusion-no-tech">—</span>
+                                                        </template>
+                                                        <lightning-icon icon-name="utility:edit" size="xx-small" class="fusion-edit-icon"></lightning-icon>
+                                                    </div>
+                                                </template>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Revisiones expandibles -->
+                                        <template if:true={cita.revExpanded}>
+                                            <tr class="fusion-rev-row">
+                                                <td colspan="9">
+                                                    <div class="fusion-rev-content">
+                                                        <table class="fusion-rev-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="col-rev-folio">Folio</th>
+                                                                    <th>Tipo</th>
+                                                                    <th>Estado</th>
+                                                                    <th>Formulario</th>
+                                                                    <th class="col-rev-badge">Fotos</th>
+                                                                    <th class="col-rev-badge">NC</th>
+                                                                    <th class="col-rev-actions"></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <template for:each={cita.revisiones} for:item="rev">
+                                                                    <tr key={rev.id} class="fusion-rev-detail-row">
+                                                                        <td class="fusion-rev-num"><span class="rev-folio-chip">{rev.folio}</span></td>
+
+                                                                        <!-- Tipo -->
+                                                                        <td>
+                                                                            <template if:true={rev.isEditing}>
+                                                                                <lightning-combobox label="Tipo" variant="label-hidden"
+                                                                                    value={rev.editTipo}
+                                                                                    options={revTipoOptions}
+                                                                                    class="fusion-rev-combobox"
+                                                                                    onchange={handleRevTipoChange}>
+                                                                                </lightning-combobox>
+                                                                            </template>
+                                                                            <template if:false={rev.isEditing}>
+                                                                                {rev.tipo}
+                                                                            </template>
+                                                                        </td>
+
+                                                                        <!-- Estado -->
+                                                                        <td>
+                                                                            <template if:true={rev.isEditing}>
+                                                                                <lightning-combobox label="Estado" variant="label-hidden"
+                                                                                    value={rev.editStatus}
+                                                                                    options={revStatusOptions}
+                                                                                    class="fusion-rev-combobox"
+                                                                                    onchange={handleRevStatusChange}>
+                                                                                </lightning-combobox>
+                                                                            </template>
+                                                                            <template if:false={rev.isEditing}>
+                                                                                <span class="fusion-rev-status">{rev.status}</span>
+                                                                            </template>
+                                                                        </td>
+
+                                                                        <!-- Formulario -->
+                                                                        <td>
+                                                                            <template if:true={rev.isEditing}>
+                                                                                <lightning-combobox label="Formulario" variant="label-hidden"
+                                                                                    value={rev.editFormularioId}
+                                                                                    options={formularioOptions}
+                                                                                    class="fusion-rev-combobox"
+                                                                                    onchange={handleRevFormularioChange}>
+                                                                                </lightning-combobox>
+                                                                            </template>
+                                                                            <template if:false={rev.isEditing}>
+                                                                                {rev.formularioName}
+                                                                            </template>
+                                                                        </td>
+
+                                                                        <!-- Fotos / NC -->
+                                                                        <td class="col-rev-badge">
+                                                                            <template if:true={rev.fotos}>
+                                                                                <span class="rev-badge-fotos">📷 {rev.fotos}</span>
+                                                                            </template>
+                                                                            <template if:false={rev.fotos}>
+                                                                                <span class="rev-badge-zero">—</span>
+                                                                            </template>
+                                                                        </td>
+                                                                        <td class="col-rev-badge">
+                                                                            <template if:true={rev.nc}>
+                                                                                <span class="rev-badge-nc">⚠ {rev.nc}</span>
+                                                                            </template>
+                                                                            <template if:false={rev.nc}>
+                                                                                <span class="rev-badge-zero">—</span>
+                                                                            </template>
+                                                                        </td>
+
+                                                                        <!-- Acciones revisión -->
+                                                                        <td class="col-rev-actions">
+                                                                            <template if:true={rev.isEditing}>
+                                                                                <lightning-button-icon icon-name="utility:save" variant="brand" size="x-small"
+                                                                                    disabled={isSavingRev} data-rev-id={rev.id} onclick={handleSaveRev}></lightning-button-icon>
+                                                                                <lightning-button-icon icon-name="utility:close" variant="bare" size="x-small"
+                                                                                    onclick={handleCancelRevEdit}></lightning-button-icon>
+                                                                            </template>
+                                                                            <template if:false={rev.isEditing}>
+                                                                                <lightning-button-icon icon-name="utility:edit" variant="bare" size="x-small"
+                                                                                    alternative-text="Editar" title="Editar revisión"
+                                                                                    data-rev-id={rev.id} onclick={handleEditRev}></lightning-button-icon>
+                                                                            </template>
+                                                                        </td>
+                                                                    </tr>
+                                                                </template>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </template>
+                            </table>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- STEP 2: CONFIRMACIÓN -->
+                <template if:true={isConfirm}>
+                    <p class="fusion-step-hint">
+                        <lightning-icon icon-name="utility:warning" size="x-small"
+                                        class="slds-m-right_x-small"></lightning-icon>
+                        Revisa el resumen antes de confirmar. Esta acción <strong>no se puede deshacer</strong>.
+                    </p>
+                    <template for:each={confirmRows} for:item="row">
+                        <div key={row.fecha} class="fusion-confirm-card">
+                            <div class="fusion-confirm-header">
+                                <lightning-icon icon-name="utility:event" size="x-small"
+                                                class="slds-m-right_x-small"></lightning-icon>
+                                {row.fecha}
+                            </div>
+                            <div class="fusion-confirm-body">
+                                <div class="fusion-confirm-padre">
+                                    <lightning-icon icon-name="utility:apex_plugin" size="x-small"
+                                                    class="slds-m-right_xx-small" style="color:#0176d3"></lightning-icon>
+                                    <strong>Padre:</strong>&nbsp;{row.padreNum}&nbsp;
+                                    <span class="fusion-confirm-time">({row.padreTime})</span>
+                                    &nbsp;→&nbsp;
+                                    <span class="fusion-confirm-rev">Revisiones__c quedará en {row.maxRevNuevo}</span>
+                                </div>
+                                <template for:each={row.hijas} for:item="hija">
+                                    <div key={hija.number} class="fusion-confirm-hija">
+                                        <lightning-icon icon-name="utility:level_down" size="x-small"
+                                                        class="slds-m-right_xx-small"></lightning-icon>
+                                        Hija:&nbsp;<strong>{hija.number}</strong>&nbsp;
+                                        <span class="fusion-confirm-time">({hija.time})</span>
+                                        &nbsp;·&nbsp;
+                                        <span class="fusion-confirm-rev">{hija.revCount} revisiones a migrar</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- STEP 3: LISTO -->
+                <template if:true={isDone}>
+                    <div class="fusion-center">
+                        <lightning-icon icon-name="utility:success" size="large"
+                                        class="slds-m-bottom_small" style="color:#2e7d32"></lightning-icon>
+                        <p class="fusion-done-title">Fusión completada</p>
+                        <div class="fusion-done-stats">
+                            <div class="fusion-done-stat">
+                                <span class="fusion-stat-num">{gruposFusionados}</span>
+                                <span class="fusion-stat-label">grupos fusionados</span>
+                            </div>
+                            <div class="fusion-done-stat">
+                                <span class="fusion-stat-num">{revisionesMigradas}</span>
+                                <span class="fusion-stat-label">revisiones migradas</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+            </div><!-- /body -->
+
+            <!-- FOOTER -->
+            <footer class="slds-modal__footer">
+                <template if:true={isSelect}>
+                    <lightning-button label="Cancelar" onclick={handleClose} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Siguiente →" variant="brand" disabled={cannotConfirm} onclick={handleNext}></lightning-button>
+                </template>
+                <template if:true={isConfirm}>
+                    <lightning-button label="← Volver" onclick={handleBack} class="slds-m-right_small" disabled={isFusing}></lightning-button>
+                    <lightning-button label="Confirmar fusión" variant="destructive" icon-name="utility:merge" disabled={isFusing} onclick={handleConfirm}></lightning-button>
+                    <template if:true={isFusing}>
+                        <lightning-spinner size="small" alternative-text="Fusionando..." class="slds-m-left_small"></lightning-spinner>
+                    </template>
+                </template>
+                <template if:true={isEmpty}>
+                    <lightning-button label="Cerrar" variant="brand" onclick={handleClose}></lightning-button>
+                </template>
+                <template if:true={isDone}>
+                    <lightning-button label="Cerrar y actualizar" variant="brand" onclick={handleDone}></lightning-button>
+                </template>
+            </footer>
+
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

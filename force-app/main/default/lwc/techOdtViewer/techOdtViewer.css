@@ -135,6 +135,27 @@
 }
 .clear-btn:hover { background: #f0f2f6; color: #16325c; }
 
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 4px;
+    background: #0176d3;
+    font-size: 0.78rem;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.12s;
+    position: relative;
+    min-width: 90px;
+    justify-content: center;
+    font-weight: 600;
+}
+.refresh-btn:hover  { background: #014486; }
+.refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* ── SPINNER ─────────────────────────────────── */
 .odt-spinner-wrap { height: 150px; position: relative; }
 
@@ -371,3 +392,376 @@
     padding: 60px 20px;
     color: #a8b7c7;
 }
+
+/* ── TÉCNICO INLINE EN SA ────────────────────── */
+.sa-tech-cell { min-width: 160px; }
+
+.sa-tech-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+}
+.sa-tech-display:hover { background: #e8f0fe; }
+
+.sa-tech-edit-icon {
+    opacity: 0;
+    transition: opacity 0.15s;
+    color: #0176d3;
+}
+.sa-tech-display:hover .sa-tech-edit-icon { opacity: 1; }
+
+.sa-tech-edit-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.sa-tech-combobox { flex: 1; }
+
+/* ── FECHA INLINE EN SA ──────────────────────── */
+.sa-date-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+.sa-date-display:hover { background: #e8f0fe; }
+
+.sa-date-edit-icon {
+    opacity: 0;
+    transition: opacity 0.15s;
+    color: #0176d3;
+}
+.sa-date-display:hover .sa-date-edit-icon { opacity: 1; }
+
+.sa-date-edit-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.sa-date-input {
+    font-size: 0.75rem;
+    border: 1px solid #0176d3;
+    border-radius: 4px;
+    padding: 2px 4px;
+    outline: none;
+}
+
+/* ── EXPAND SA ───────────────────────────────── */
+.col-sa-expand { width: 28px; padding: 0 2px; }
+
+/* ── REVISIONES ACORDEÓN ─────────────────────── */
+.rev-accordion-row { background: #f0f4ff; }
+
+.rev-accordion-content {
+    padding: 8px 12px 12px 24px;
+}
+
+.rev-accordion-header {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #3e3e3c;
+    margin-bottom: 6px;
+}
+
+.rev-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+.rev-table thead tr { background: #e8eaf6; }
+.rev-table th {
+    padding: 4px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #3e3e3c;
+    border-bottom: 1px solid #c5cae9;
+}
+.rev-row { border-bottom: 1px solid #e8eaf6; }
+.rev-row:last-child { border-bottom: none; }
+.rev-row td { padding: 4px 8px; color: #3e3e3c; }
+.rev-num { font-weight: 600; width: 48px; }
+
+.rev-status-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.rev-folio-chip {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #16325c;
+    background: #e8edf6;
+    border: 1px solid #c9d4e8;
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.col-rev-folio     { width: 80px; }
+.col-rev-tipo      { min-width: 120px; }
+.col-rev-estado    { min-width: 110px; }
+.col-rev-formulario{ min-width: 140px; }
+.col-rev-badge     { width: 52px; text-align: center; }
+
+.rev-inline-combobox {
+    --slds-c-input-sizing-height: 24px;
+    --slds-c-input-color-border: #0070d2;
+    font-size: 0.72rem;
+}
+
+.rev-badge-fotos {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #1565c0;
+    background: #e3f2fd;
+    border-radius: 10px;
+    padding: 1px 6px;
+    white-space: nowrap;
+}
+
+.rev-badge-nc {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #b45309;
+    background: #fef3c7;
+    border-radius: 10px;
+    padding: 1px 6px;
+    white-space: nowrap;
+}
+
+.rev-badge-zero { color: #bbb; font-size: 0.75rem; }
+
+/* ── REV/TIPOS COLUMNA SA ────────────────────── */
+.sa-rev-tipos-cell { text-align: center; white-space: nowrap; font-size: 0.75rem; }
+.sa-rev-count  { font-weight: 600; color: #0176d3; }
+.sa-rev-sep    { color: #aaa; margin: 0 2px; }
+.sa-tipos-count { color: #5a6470; }
+
+/* ── DURACIÓN / NOTAS INLINE SA ─────────────── */
+.sa-detail-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+}
+.sa-detail-display:hover { background: #e8f0fe; }
+
+.sa-detail-edit-icon {
+    opacity: 0;
+    transition: opacity 0.15s;
+    color: #0176d3;
+}
+.sa-detail-display:hover .sa-detail-edit-icon { opacity: 1; }
+
+.sa-detail-input {
+    font-size: 0.75rem;
+    border: 1px solid #0176d3;
+    border-radius: 4px;
+    padding: 2px 4px;
+    outline: none;
+}
+.sa-status-combobox { min-width: 120px; --slds-c-input-sizing-height: 24px; }
+.col-sa-tratamiento { min-width: 160px; }
+.sa-tratamiento-label { font-size: 0.75rem; color: #16325c; font-weight: 600; }
+.sa-detail-input[type="number"] { width: 64px; }
+.sa-detail-notes-input { width: 100%; min-width: 120px; }
+
+.col-sa-actions { width: 56px; }
+.sa-actions-cell { padding: 0 4px; }
+.sa-actions-wrap { display: flex; align-items: center; gap: 2px; }
+
+/* ── WO / SA NUMBER LINKS ───────────────────────── */
+.wo-number-link, .sa-num-link {
+    color: #0070d2;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.78rem;
+}
+.wo-number-link:hover, .sa-num-link:hover { text-decoration: underline; }
+
+/* ── MULTI-TECH PILLS ────────────────────────────── */
+.sa-tech-multi-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.tech-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #e8f0fe;
+    border: 1px solid #b3cfff;
+    border-radius: 12px;
+    padding: 2px 6px 2px 5px;
+    font-size: 0.72rem;
+    color: #16325c;
+    white-space: nowrap;
+}
+
+.tech-pill-icon { color: #0070d2; flex-shrink: 0; }
+
+.tech-remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #706e6b;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0 1px;
+    transition: color 0.12s;
+}
+.tech-remove-btn:hover { color: #c23934; }
+
+.add-tech-btn {
+    background: none;
+    border: 1px dashed #0070d2;
+    border-radius: 10px;
+    color: #0070d2;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 1px 7px;
+    cursor: pointer;
+    transition: background 0.12s;
+    white-space: nowrap;
+}
+.add-tech-btn:hover { background: #e8f0fe; }
+
+.add-tech-inline {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* ── REV STATUS BADGE COLORS ─────────────────────── */
+.rev-status-tag { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+.rev-inprogress { background: #fff3e0; color: #e65100; }
+.rev-completed  { background: #e8f5e9; color: #1b5e20; }
+.rev-paused     { background: #fff8e1; color: #f57f17; }
+.rev-cancelled  { background: #fce4ec; color: #880e4f; }
+
+/* ── ADD REVISION BUTTON ─────────────────────────── */
+.add-rev-btn {
+    margin-left: auto;
+    background: #0070d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.add-rev-btn:hover:not(:disabled) { background: #005fb2; }
+.add-rev-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ── HIST BUTTON ─────────────────────────────────── */
+.hist-btn {
+    margin-left: 6px;
+    background: none;
+    border: 1px solid #c9d4e8;
+    border-radius: 6px;
+    color: #54698d;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.hist-btn:hover { background: #f0f2f6; }
+
+/* ── REV ACTION BUTTONS ──────────────────────────── */
+.col-rev-actions { width: 100px; }
+.rev-actions-wrap {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.rev-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 1px 4px;
+    border-radius: 4px;
+    transition: background 0.12s, color 0.12s;
+    line-height: 1.2;
+}
+.rev-action-btn:disabled { opacity: 0.4; cursor: default; }
+.rev-pause-btn  { color: #f57f17; }
+.rev-pause-btn:hover:not(:disabled)  { background: #fff8e1; }
+.rev-cancel-btn { color: #c23934; }
+.rev-cancel-btn:hover:not(:disabled) { background: #fce4ec; }
+.rev-hist-btn   { color: #54698d; }
+.rev-hist-btn:hover:not(:disabled)   { background: #f0f2f6; }
+
+/* ── HISTORY TIMELINE ─────────────────────────────── */
+.hist-timeline {
+    background: #f8f9fb;
+    border: 1px solid #e0e5ee;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+}
+.hist-timeline-rev {
+    margin-top: 4px;
+}
+
+/* ── FILA HISTORIAL REVISIÓN ──────────────────────── */
+.rev-hist-row { background: #f5f7ff; }
+.rev-hist-cell {
+    padding: 6px 16px 10px 16px !important;
+    border-bottom: 1px solid #dde5f7;
+}
+.hist-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+    border-bottom: 1px dotted #e0e5ee;
+}
+.hist-row:last-child { border-bottom: none; }
+.hist-fecha  { color: #706e6b; min-width: 96px; flex-shrink: 0; }
+.hist-user   { color: #16325c; font-weight: 600; min-width: 80px; }
+.hist-old    { color: #c23934; }
+.hist-arrow  { color: #aaa; }
+.hist-new    { color: #1b5e20; font-weight: 600; }
+.hist-empty  { color: #aaa; font-style: italic; font-size: 0.7rem; }
+
+/* ── REV EDIT / SAVE BUTTONS ─────────────────────── */
+.rev-edit-btn        { color: #0070d2; }
+.rev-edit-btn:hover:not(:disabled)        { background: #e8f0fe; }
+.rev-save-btn        { color: #1b5e20; font-weight: 700; }
+.rev-save-btn:hover:not(:disabled)        { background: #e8f5e9; }
+.rev-cancel-edit-btn { color: #c23934; }
+.rev-cancel-edit-btn:hover:not(:disabled) { background: #fce4ec; }
+.rev-save-btn:disabled { opacity: 0.5; cursor: default; }
