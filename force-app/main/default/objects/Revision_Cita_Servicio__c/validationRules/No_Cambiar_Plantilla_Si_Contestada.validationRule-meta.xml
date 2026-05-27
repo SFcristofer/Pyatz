@@ -7,7 +7,7 @@
     ISCHANGED(Plantilla_de_Formulario__c),
     OR(
         NOT(ISBLANK(Datos_Formulario__c)),
-        ISPICKVAL(Status__c, "Completada")
+        ISPICKVAL(Status__c, &quot;Completada&quot;)
     )
 )</errorConditionFormula>
     <errorDisplayField>Plantilla_de_Formulario__c</errorDisplayField>

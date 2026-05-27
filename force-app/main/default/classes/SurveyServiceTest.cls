@@ -1,0 +1,102 @@
+@isTest
+private class SurveyServiceTest {
+
+    @TestSetup
+    static void makeData() {
+        Account acc = new Account(Name = 'Survey Svc Account');
+        insert acc;
+        Opportunity opp = new Opportunity(
+            Name = 'Survey Svc Opp', AccountId = acc.Id,
+            StageName = 'Prospecting', CloseDate = Date.today().addDays(30)
+        );
+        insert opp;
+        Levantamiento_Tecnico__c lev = new Levantamiento_Tecnico__c(
+            Oportunidad__c = opp.Id, Tipo_Servicio__c = 'TEST'
+        );
+        insert lev;
+    }
+
+    @isTest
+    static void testGetOpportunitySolutions_empty() {
+        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
+        Test.startTest();
+        List<Map<String, Object>> result = SurveyService.getOpportunitySolutions(opp.Id);
+        Test.stopTest();
+        System.assertEquals(0, result.size());
+    }
+
+    @isTest
+    static void testGetOpportunitySolutions_withData() {
+        Levantamiento_Tecnico__c lev = [SELECT Id FROM Levantamiento_Tecnico__c LIMIT 1];
+        insert new Solucion_Tecnica__c(
+            Levantamiento_Tecnico__c = lev.Id,
+            Name = 'Sol Test',
+            Descripcion_Detallada__c = 'desc'
+        );
+        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
+        Test.startTest();
+        List<Map<String, Object>> result = SurveyService.getOpportunitySolutions(opp.Id);
+        Test.stopTest();
+        System.assertEquals(1, result.size());
+    }
+
+    @isTest
+    static void testSaveSolucion_insert() {
+        Levantamiento_Tecnico__c lev = [SELECT Id FROM Levantamiento_Tecnico__c LIMIT 1];
+        Test.startTest();
+        Id solId = SurveyService.saveSolucion(lev.Id, null, 'New Solution', 'Tech desc', 'Obs');
+        Test.stopTest();
+        Solucion_Tecnica__c sol = [SELECT Name FROM Solucion_Tecnica__c WHERE Id = :solId];
+        System.assertEquals('New Solution', sol.Name);
+    }
+
+    @isTest
+    static void testSaveSolucion_update() {
+        Levantamiento_Tecnico__c lev = [SELECT Id FROM Levantamiento_Tecnico__c LIMIT 1];
+        Id firstId = SurveyService.saveSolucion(lev.Id, null, 'Original', 'desc1', 'obs1');
+        Test.startTest();
+        SurveyService.saveSolucion(lev.Id, firstId, 'Updated', 'desc2', 'obs2');
+        Test.stopTest();
+        Solucion_Tecnica__c sol = [SELECT Name FROM Solucion_Tecnica__c WHERE Id = :firstId];
+        System.assertEquals('Updated', sol.Name);
+    }
+
+    @isTest
+    static void testDeleteSolucion() {
+        Levantamiento_Tecnico__c lev = [SELECT Id FROM Levantamiento_Tecnico__c LIMIT 1];
+        Id solId = SurveyService.saveSolucion(lev.Id, null, 'ToDelete', 'desc', 'obs');
+        Test.startTest();
+        SurveyService.deleteSolucion(solId);
+        Test.stopTest();
+        List<Solucion_Tecnica__c> remaining = [SELECT Id FROM Solucion_Tecnica__c WHERE Id = :solId];
+        System.assertEquals(0, remaining.size());
+    }
+
+    @isTest
+    static void testGetInspectionQuestions() {
+        Test.startTest();
+        List<Map<String, Object>> result = SurveyService.getInspectionQuestions('BIOENZIMÁTICO');
+        Test.stopTest();
+        System.assertNotEquals(null, result);
+    }
+
+    @isTest
+    static void testTagLatestPhotos() {
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+        ContentVersion cv = new ContentVersion(
+            Title = 'photo.jpg', PathOnClient = 'photo.jpg',
+            VersionData = Blob.valueOf('img'), IsMajorVersion = true
+        );
+        insert cv;
+        Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+        insert new ContentDocumentLink(
+            ContentDocumentId = docId, LinkedEntityId = acc.Id,
+            ShareType = 'V', Visibility = 'AllUsers'
+        );
+        Test.startTest();
+        SurveyService.tagLatestPhotos(acc.Id, 'FOTO');
+        Test.stopTest();
+        ContentVersion updated = [SELECT Title FROM ContentVersion WHERE Id = :cv.Id];
+        System.assert(updated.Title.contains('[FOTO]'));
+    }
+}

@@ -3,6 +3,7 @@
     <fullName>Fecha_Revision__c</fullName>
     <label>Fecha de Revisión</label>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>DateTime</type>
 </CustomField>

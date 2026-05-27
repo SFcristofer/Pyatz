@@ -15,6 +15,7 @@ import getRevisionSignature      from '@salesforce/apex/ServiceReviewController.
 import getRevisionData           from '@salesforce/apex/ServiceReviewController.getRevisionData';
 import setRevisionTemplate       from '@salesforce/apex/ServiceReviewController.setRevisionTemplate';
 import pauseRevision             from '@salesforce/apex/ServiceReviewController.pauseRevision';
+import resumeRevisionApex        from '@salesforce/apex/ServiceReviewController.resumeRevision';
 import getRevisionHistory        from '@salesforce/apex/ServiceReviewController.getRevisionHistory';
 
 import getTemplateById  from '@salesforce/apex/FormTemplateController.getTemplateById';
@@ -76,6 +77,7 @@ export default class TechServiceReview extends LightningElement {
     _woInfo          = {};
     _pendingImg      = null;
     photoTimestamp   = '';
+    _timerInterval   = null;
 
     // ── Signature ─────────────────────────────────────────────────────────────
     @track sigState        = SIG_IDLE;
@@ -135,6 +137,15 @@ export default class TechServiceReview extends LightningElement {
     connectedCallback() {
         this._loadSAInfo();
         this._loadTemplatesMeta();
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this._timerInterval = setInterval(() => this._tickTimers(), 1000);
+    }
+
+    disconnectedCallback() {
+        if (this._timerInterval) {
+            clearInterval(this._timerInterval);
+            this._timerInterval = null;
+        }
     }
 
     renderedCallback() {
@@ -272,14 +283,27 @@ export default class TechServiceReview extends LightningElement {
 
     _enrichRevList(data) {
         if (!data || !data.revisionesList) return data;
+        const now = Date.now();
         return {
             ...data,
             revisionesList: data.revisionesList.map(r => {
-                const isPaused = r.status === 'Pausado';
+                const isPaused    = r.status === 'Pausado';
+                const isEnProceso = r.status === 'En Proceso';
+                const ultimaMs    = r.ultimaTransicionISO ? new Date(r.ultimaTransicionISO).getTime() : null;
+                const elapsedSeg  = ultimaMs ? Math.floor((now - ultimaMs) / 1000) : 0;
+                const enProcesoSeg = (r.tiempoEnProcesoSeg || 0) + (isEnProceso ? elapsedSeg : 0);
+                const pausadoSeg   = (r.tiempoPausadoSeg   || 0) + (isPaused    ? elapsedSeg : 0);
                 return {
                     ...r,
                     isPaused,
-                    isPending:  !r.isCompleted && !isPaused,
+                    isPending:              !r.isCompleted && !isPaused,
+                    ultimaTransicionMs:     ultimaMs,
+                    tiempoEnProcesoSeg:     r.tiempoEnProcesoSeg || 0,
+                    tiempoPausadoSeg:       r.tiempoPausadoSeg   || 0,
+                    tiempoEnProcesoDisplay: this._fmtSeg(enProcesoSeg),
+                    tiempoPausadoDisplay:   this._fmtSeg(pausadoSeg),
+                    showTimer:              r.status !== 'Cancelada' && (r.status !== 'Completada' || (r.tiempoEnProcesoSeg || 0) > 0),
+                    showPausaTimer:         isPaused || (r.tiempoPausadoSeg || 0) > 0,
                     cardClass:  r.isCompleted ? 'rev-card rev-card--done'
                                : isPaused     ? 'rev-card rev-card--paused'
                                :                'rev-card rev-card--pending',
@@ -289,6 +313,32 @@ export default class TechServiceReview extends LightningElement {
                 };
             })
         };
+    }
+
+    _tickTimers() {
+        if (!this.saInfo || !this.saInfo.revisionesList) return;
+        const now = Date.now();
+        let hasActive = false;
+        const updated = this.saInfo.revisionesList.map(r => {
+            if (r.status !== 'En Proceso' && r.status !== 'Pausado') return r;
+            hasActive = true;
+            const extra = r.ultimaTransicionMs ? Math.floor((now - r.ultimaTransicionMs) / 1000) : 0;
+            if (r.status === 'En Proceso') {
+                return { ...r, tiempoEnProcesoDisplay: this._fmtSeg((r.tiempoEnProcesoSeg || 0) + extra) };
+            }
+            return { ...r, tiempoPausadoDisplay: this._fmtSeg((r.tiempoPausadoSeg || 0) + extra) };
+        });
+        if (hasActive) {
+            this.saInfo = { ...this.saInfo, revisionesList: updated };
+        }
+    }
+
+    _fmtSeg(s) {
+        const totalSec = Math.max(0, s);
+        const h   = Math.floor(totalSec / 3600);
+        const m   = Math.floor((totalSec % 3600) / 60);
+        const sec = totalSec % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     }
 
     _loadRevisionPhotos() {
@@ -380,8 +430,10 @@ export default class TechServiceReview extends LightningElement {
     handleCloseRevHistory() { this.showRevHistory = false; }
 
     handleResumeRevision(event) {
-        const id  = event.currentTarget.dataset.id;
-        const num = parseInt(event.currentTarget.dataset.num, 10);
+        const id     = event.currentTarget.dataset.id;
+        const num    = parseInt(event.currentTarget.dataset.num, 10);
+        const status = event.currentTarget.dataset.status;
+
         this.revisionId       = id;
         this.savedRevNumber   = num;
         this.revisionPhotos   = [];
@@ -401,25 +453,33 @@ export default class TechServiceReview extends LightningElement {
         this._loadRevisionPhotos();
         this._startGPS();
 
-        Promise.all([
-            getRevisionData({ revisionId: id }),
-            getRevisionSignature({ revisionId: id }),
-        ]).then(([data, sigData]) => {
-            this.observaciones   = data.observaciones   || '';
-            this.plantillaId     = data.plantillaId     || null;
-            this.plantillaNombre = data.plantillaNombre || data.tipoReporte || '';
-            this.selectedFormType = this.plantillaNombre;
-            if (sigData && sigData.thumbBase64) {
-                this.signatureSaved = true;
-                this.savedSigName   = sigData.signerName  || '';
-                this.savedSigCargo  = sigData.signerCargo || '';
-                this.savedSigThumb  = `data:image/png;base64,${sigData.thumbBase64}`;
-            }
-            if (data.plantillaId) {
-                return this._restoreFormQuestions(data.plantillaId, data.datosFormulario || '');
-            }
-            return Promise.resolve();
-        }).catch(() => {}).finally(() => { this.resumeLoading = false; });
+        const resumeP = status === 'Pausado'
+            ? resumeRevisionApex({ revisionId: id }).then(() => { this._loadSAInfo_silent(); })
+            : Promise.resolve();
+
+        resumeP
+            .then(() => Promise.all([
+                getRevisionData({ revisionId: id }),
+                getRevisionSignature({ revisionId: id }),
+            ]))
+            .then(([data, sigData]) => {
+                this.observaciones   = data.observaciones   || '';
+                this.plantillaId     = data.plantillaId     || null;
+                this.plantillaNombre = data.plantillaNombre || data.tipoReporte || '';
+                this.selectedFormType = this.plantillaNombre;
+                if (sigData && sigData.thumbBase64) {
+                    this.signatureSaved = true;
+                    this.savedSigName   = sigData.signerName  || '';
+                    this.savedSigCargo  = sigData.signerCargo || '';
+                    this.savedSigThumb  = `data:image/png;base64,${sigData.thumbBase64}`;
+                }
+                if (data.plantillaId) {
+                    return this._restoreFormQuestions(data.plantillaId, data.datosFormulario || '');
+                }
+                return Promise.resolve();
+            })
+            .catch(() => {})
+            .finally(() => { this.resumeLoading = false; });
     }
 
     _restoreFormQuestions(templateId, datosJson) {

@@ -217,3 +217,9 @@
 
 /* ─── Pause info banner ────────────────────────────────────────────────── */
 .pause-info-banner { display: flex; align-items: center; gap: 8px; background: #ede7f6; border: 1px solid #b39ddb; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #4527a0; font-weight: 600; margin-bottom: 10px; }
+
+/* ─── Time counters ────────────────────────────────────────────────────── */
+.rev-timers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.rev-timer { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; font-family: 'Courier New', monospace; white-space: nowrap; }
+.rev-timer--proceso { background: #e3f2fd; color: #0d47a1; }
+.rev-timer--pausa   { background: #ede7f6; color: #4527a0; }

@@ -67,14 +67,28 @@
                                     </template>
                                 </div>
                             </template>
+                            <template if:true={rev.showTimer}>
+                                <div class="rev-timers">
+                                    <span class="rev-timer rev-timer--proceso">
+                                        <lightning-icon icon-name="utility:clock" size="xx-small"></lightning-icon>
+                                        En proceso: {rev.tiempoEnProcesoDisplay}
+                                    </span>
+                                    <template if:true={rev.showPausaTimer}>
+                                        <span class="rev-timer rev-timer--pausa">
+                                            <lightning-icon icon-name="utility:pause" size="xx-small"></lightning-icon>
+                                            En pausa: {rev.tiempoPausadoDisplay}
+                                        </span>
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                         <template if:true={rev.isPending}>
-                            <button class="btn-resume" data-id={rev.id} data-num={rev.numero} onclick={handleResumeRevision}>
+                            <button class="btn-resume" data-id={rev.id} data-num={rev.numero} data-status={rev.status} onclick={handleResumeRevision}>
                                 Continuar
                             </button>
                         </template>
                         <template if:true={rev.isPaused}>
-                            <button class="btn-resume btn-resume--sm" data-id={rev.id} data-num={rev.numero} onclick={handleResumeRevision}>
+                            <button class="btn-resume btn-resume--sm" data-id={rev.id} data-num={rev.numero} data-status={rev.status} onclick={handleResumeRevision}>
                                 Continuar
                             </button>
                         </template>

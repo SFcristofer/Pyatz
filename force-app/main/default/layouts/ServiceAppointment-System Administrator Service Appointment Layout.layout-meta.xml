@@ -38,6 +38,10 @@
                 <behavior>Edit</behavior>
                 <field>Revisiones__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Cita_Padre__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
@@ -384,6 +388,16 @@
         </quickActionListItems>
     </quickActionList>
     <relatedLists>
+        <excludeButtons>MassChangeOwner</excludeButtons>
+        <excludeButtons>New</excludeButtons>
+        <fields>NAME</fields>
+        <fields>Datos_Formulario__c</fields>
+        <fields>Fecha_Revision__c</fields>
+        <fields>Tipo_Reporte__c</fields>
+        <fields>Tecnico__c</fields>
+        <relatedList>Revision_Cita_Servicio__c.Cita_Servicio__c</relatedList>
+    </relatedLists>
+    <relatedLists>
         <fields>ServiceResource</fields>
         <fields>Name</fields>
         <fields>EstimatedTravelTime</fields>
@@ -422,6 +436,15 @@
         <fields>Actor</fields>
         <fields>Comments</fields>
         <relatedList>RelatedProcessHistoryList</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <fields>Name</fields>
+        <fields>ParentRecord</fields>
+        <fields>ParentRecordType</fields>
+        <fields>Status</fields>
+        <fields>ArrivalWindowStartTime</fields>
+        <fields>ArrivalWindowEndTime</fields>
+        <relatedList>ServiceAppointment.Cita_Padre__c</relatedList>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>

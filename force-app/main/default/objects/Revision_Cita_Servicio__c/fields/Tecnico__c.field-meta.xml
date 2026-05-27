@@ -7,6 +7,7 @@
     <relationshipLabel>Revisiones realizadas</relationshipLabel>
     <relationshipName>Revisiones_Realizadas</relationshipName>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

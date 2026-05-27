@@ -35,6 +35,9 @@ public with sharing class ServiceReviewController {
         @AuraEnabled public String  nombreFirmante;
         @AuraEnabled public String  cargoFirmante;
         @AuraEnabled public Integer photoCount;
+        @AuraEnabled public Long    tiempoEnProcesoSeg;
+        @AuraEnabled public Long    tiempoPausadoSeg;
+        @AuraEnabled public String  ultimaTransicionISO;
     }
 
     public class PhotoInfo {
@@ -75,6 +78,7 @@ public with sharing class ServiceReviewController {
             SELECT Id, Name, Numero_Revision__c, Tipo_Reporte__c, Plantilla_de_Formulario__c,
                    Status__c, Fecha_Revision__c, Tecnico__r.Name,
                    Nombre_Firmante__c, Cargo_Firmante__c,
+                   Tiempo_En_Proceso_Segundos__c, Tiempo_Pausado_Segundos__c, Ultima_Transicion__c,
                    (SELECT Id FROM ContentDocumentLinks WHERE ContentDocument.LatestPublishedVersion.Title LIKE 'GeoFoto_%' LIMIT 50)
             FROM Revision_Cita_Servicio__c
             WHERE Cita_Servicio__c = :saId
@@ -100,6 +104,12 @@ public with sharing class ServiceReviewController {
             rs.cargoFirmante  = r.Cargo_Firmante__c;
             rs.hasFirma       = String.isNotBlank(r.Nombre_Firmante__c);
             rs.photoCount     = r.ContentDocumentLinks != null ? r.ContentDocumentLinks.size() : 0;
+
+            rs.tiempoEnProcesoSeg = r.Tiempo_En_Proceso_Segundos__c != null ? (Long)r.Tiempo_En_Proceso_Segundos__c : 0L;
+            rs.tiempoPausadoSeg   = r.Tiempo_Pausado_Segundos__c   != null ? (Long)r.Tiempo_Pausado_Segundos__c   : 0L;
+            rs.ultimaTransicionISO = r.Ultima_Transicion__c != null
+                ? r.Ultima_Transicion__c.formatGmt('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'')
+                : null;
 
             rs.cardClass   = 'rev-card ' + (rs.isCompleted ? 'rev-card--done' : 'rev-card--pending');
             rs.badgeClass  = 'rev-card__badge ' + (rs.isCompleted ? 'rev-card__badge--done' : 'rev-card__badge--pending');
@@ -137,11 +147,14 @@ public with sharing class ServiceReviewController {
     @AuraEnabled
     public static Id createRevision(Id saId, Integer revisionNumber) {
         Revision_Cita_Servicio__c rev = new Revision_Cita_Servicio__c();
-        rev.Cita_Servicio__c    = saId;
-        rev.Numero_Revision__c  = revisionNumber;
-        rev.Status__c           = 'En Proceso';
-        rev.Fecha_Revision__c   = Datetime.now();
-        rev.Tecnico__c          = UserInfo.getUserId();
+        rev.Cita_Servicio__c              = saId;
+        rev.Numero_Revision__c            = revisionNumber;
+        rev.Status__c                     = 'En Proceso';
+        rev.Fecha_Revision__c             = Datetime.now();
+        rev.Tecnico__c                    = UserInfo.getUserId();
+        rev.Tiempo_En_Proceso_Segundos__c = 0;
+        rev.Tiempo_Pausado_Segundos__c    = 0;
+        rev.Ultima_Transicion__c          = Datetime.now();
         insert rev;
         updateSAStatusToInProgress(saId);
         return rev.Id;
@@ -150,11 +163,16 @@ public with sharing class ServiceReviewController {
     @AuraEnabled
     public static void saveRevisionData(Id revisionId, String tipoReporte, String datosFormulario, String observaciones, Boolean paused) {
         Revision_Cita_Servicio__c rev = [
-            SELECT Id, Cita_Servicio__c
+            SELECT Id, Cita_Servicio__c, Status__c, Ultima_Transicion__c, Tiempo_En_Proceso_Segundos__c
             FROM Revision_Cita_Servicio__c
             WHERE Id = :revisionId
             LIMIT 1
         ];
+        if (rev.Status__c == 'En Proceso' && rev.Ultima_Transicion__c != null) {
+            Long elapsed = (Datetime.now().getTime() - rev.Ultima_Transicion__c.getTime()) / 1000;
+            rev.Tiempo_En_Proceso_Segundos__c = (rev.Tiempo_En_Proceso_Segundos__c != null ? rev.Tiempo_En_Proceso_Segundos__c : 0) + elapsed;
+        }
+        rev.Ultima_Transicion__c = Datetime.now();
 
         if (tipoReporte instanceof Id) {
             rev.Plantilla_de_Formulario__c = (Id)tipoReporte;
@@ -178,14 +196,37 @@ public with sharing class ServiceReviewController {
     @AuraEnabled
     public static void pauseRevision(Id revisionId) {
         Revision_Cita_Servicio__c rev = [
-            SELECT Id, Cita_Servicio__c
+            SELECT Id, Cita_Servicio__c, Status__c, Ultima_Transicion__c, Tiempo_En_Proceso_Segundos__c
             FROM Revision_Cita_Servicio__c
             WHERE Id = :revisionId
             LIMIT 1
         ];
-        rev.Status__c = 'Pausado';
+        if (rev.Status__c == 'En Proceso' && rev.Ultima_Transicion__c != null) {
+            Long elapsed = (Datetime.now().getTime() - rev.Ultima_Transicion__c.getTime()) / 1000;
+            rev.Tiempo_En_Proceso_Segundos__c = (rev.Tiempo_En_Proceso_Segundos__c != null ? rev.Tiempo_En_Proceso_Segundos__c : 0) + elapsed;
+        }
+        rev.Status__c            = 'Pausado';
+        rev.Ultima_Transicion__c = Datetime.now();
         update rev;
         updateSAStatusToPaused(rev.Cita_Servicio__c);
+    }
+
+    @AuraEnabled
+    public static void resumeRevision(Id revisionId) {
+        Revision_Cita_Servicio__c rev = [
+            SELECT Id, Cita_Servicio__c, Status__c, Ultima_Transicion__c, Tiempo_Pausado_Segundos__c
+            FROM Revision_Cita_Servicio__c
+            WHERE Id = :revisionId
+            LIMIT 1
+        ];
+        if (rev.Status__c == 'Pausado' && rev.Ultima_Transicion__c != null) {
+            Long elapsed = (Datetime.now().getTime() - rev.Ultima_Transicion__c.getTime()) / 1000;
+            rev.Tiempo_Pausado_Segundos__c = (rev.Tiempo_Pausado_Segundos__c != null ? rev.Tiempo_Pausado_Segundos__c : 0) + elapsed;
+        }
+        rev.Status__c            = 'En Proceso';
+        rev.Ultima_Transicion__c = Datetime.now();
+        update rev;
+        updateSAStatusToInProgress(rev.Cita_Servicio__c);
     }
 
     @AuraEnabled

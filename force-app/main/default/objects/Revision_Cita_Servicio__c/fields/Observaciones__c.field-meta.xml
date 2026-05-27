@@ -3,6 +3,7 @@
     <fullName>Observaciones__c</fullName>
     <label>Observaciones</label>
     <length>32768</length>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
     <visibleLines>4</visibleLines>

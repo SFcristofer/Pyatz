@@ -1,44 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <description>Acceso completo a objetos operativos del area de Servicio Tecnico: Revision de Cita, Control Points, Floor Plans, Zonas de Servicio y Seguimiento de Etapas.</description>
-    <hasActivationRequired>false</hasActivationRequired>
-    <label>Pyatz - Servicio Tecnico</label>
-
-    <!-- ==================== ControlPoint__c ==================== -->
-    <!-- FloorPlan__c es master-detail (requerido), se omite -->
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ControlPoint__c.LastVisitDate__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ControlPoint__c.Notes__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ControlPoint__c.PointType__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ControlPoint__c.Status__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ControlPoint__c.XPercent__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ControlPoint__c.YPercent__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-
-    <!-- ==================== ControlPointVisit__c ==================== -->
-    <!-- ControlPoint__c es master-detail (requerido), se omite -->
     <fieldPermissions>
         <editable>true</editable>
         <field>ControlPointVisit__c.Observations__c</field>
@@ -69,9 +31,36 @@
         <field>ControlPointVisit__c.WorkOrderId__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
-    <!-- ==================== FloorPlan__c ==================== -->
-    <!-- Account__c es master-detail (requerido), se omite -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ControlPoint__c.LastVisitDate__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ControlPoint__c.Notes__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ControlPoint__c.PointType__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ControlPoint__c.Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ControlPoint__c.XPercent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ControlPoint__c.YPercent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>FloorPlan__c.Description__c</field>
@@ -82,8 +71,11 @@
         <field>FloorPlan__c.IsActive__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
-    <!-- ==================== Revision_Cita_Servicio__c ==================== -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Cargo_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Revision_Cita_Servicio__c.Cita_Servicio__c</field>
@@ -97,6 +89,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Revision_Cita_Servicio__c.Fecha_Revision__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Nombre_Firmante__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -121,12 +118,24 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Tiempo_En_Proceso_Segundos__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Tiempo_Pausado_Segundos__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Revision_Cita_Servicio__c.Tipo_Reporte__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
-    <!-- ==================== Seguimiento_Etapas_Pyatz__c ==================== -->
-    <!-- Clave_Unica__c y Oportunidad__c son requeridos, se omiten -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Revision_Cita_Servicio__c.Ultima_Transicion__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Seguimiento_Etapas_Pyatz__c.Estado__c</field>
@@ -142,8 +151,16 @@
         <field>Seguimiento_Etapas_Pyatz__c.Subetapa__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
-    <!-- ==================== Zona_Servicio_Pyatz__c ==================== -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrder.Cargo_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>WorkOrder.Nombre_Firmante__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Zona_Servicio_Pyatz__c.Cotizacion__c</field>
@@ -194,8 +211,8 @@
         <field>Zona_Servicio_Pyatz__c.Tipo_de_Servicio__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
-    <!-- ==================== Object Permissions ==================== -->
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Pyatz - Servicio Tecnico</label>
     <objectPermissions>
         <allowCreate>false</allowCreate>
         <allowDelete>false</allowDelete>
@@ -203,24 +220,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Account</object>
-        <viewAllRecords>false</viewAllRecords>
-    </objectPermissions>
-    <objectPermissions>
-        <allowCreate>false</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>false</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>Opportunity</object>
-        <viewAllRecords>false</viewAllRecords>
-    </objectPermissions>
-    <objectPermissions>
-        <allowCreate>true</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>ControlPoint__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -230,6 +230,17 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>ControlPointVisit__c</object>
+        <viewAllFields>false</viewAllFields>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>ControlPoint__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -239,6 +250,17 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>FloorPlan__c</object>
+        <viewAllFields>false</viewAllFields>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Opportunity</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -248,6 +270,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Revision_Cita_Servicio__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -257,6 +280,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Seguimiento_Etapas_Pyatz__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -266,6 +290,7 @@
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
         <object>Zona_Servicio_Pyatz__c</object>
+        <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
 </PermissionSet>
