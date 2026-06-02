@@ -4,9 +4,15 @@
 public with sharing class OperationsController {
 
     @AuraEnabled(cacheable=true)
-    public static List<Map<String, Object>> getOpportunitiesList() {
+    public static List<Map<String, Object>> getOpportunitiesList(String searchTerm) {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
-        for(Opportunity o : [SELECT Id, Name, Account.Name, StageName, Amount, CloseDate, Owner.Name FROM Opportunity ORDER BY CreatedDate DESC LIMIT 50]) {
+        String query = 'SELECT Id, Name, Account.Name, StageName, Amount, CloseDate, Owner.Name FROM Opportunity ';
+        if (String.isNotBlank(searchTerm)) {
+            String key = '%' + searchTerm + '%';
+            query += 'WHERE (Name LIKE :key OR Account.Name LIKE :key) ';
+        }
+        query += 'ORDER BY CreatedDate DESC LIMIT 200';
+        for(Opportunity o : Database.query(query)) {
             result.add(new Map<String, Object>{ 'id' => o.Id, 'name' => o.Name, 'account' => o.Account.Name, 'owner' => o.Owner.Name, 'closeDate' => o.CloseDate, 'amount' => o.Amount, 'stageName' => o.StageName });
         }
         return result;

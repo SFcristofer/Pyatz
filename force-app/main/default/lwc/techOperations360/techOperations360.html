@@ -11,6 +11,15 @@
                         <p class="slds-text-color_weak slds-text-body_small">Seleccione la oportunidad</p>
                     </div>
                 </div>
+                <div class="slds-col_bump-left slds-m-right_medium" style="width: 300px;">
+                    <lightning-input 
+                        type="search" 
+                        variant="label-hidden" 
+                        placeholder="Buscar por nombre o cliente..." 
+                        onchange={handleSearchChange}
+                        is-loading={isLoading}>
+                    </lightning-input>
+                </div>
                 <div>
                     <lightning-button label="Nueva Oportunidad" variant="brand" icon-name="utility:add" onclick={handleNewOpportunity}></lightning-button>
                 </div>

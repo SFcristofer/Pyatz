@@ -70,7 +70,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     // --- ESTADO DEL DASHBOARD ---
     @track opportunities = [];
     @track isLoading = false;
-    
+    @track searchTerm = '';
+
     columns = [
         { label: 'Oportunidad', fieldName: 'name', type: 'button', initialWidth: 250,
             typeAttributes: { label: { fieldName: 'name' }, name: 'open_360', variant: 'base', class: 'opportunity-link' }
@@ -85,7 +86,27 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             { label: 'Eliminar', name: 'delete', iconName: 'utility:delete', variant: 'destructive' }
         ] } }
     ];
+    
+    @wire(getOpportunitiesList, { searchTerm: '$searchTerm' })
+    wiredOpps({ error, data }) {
+        if (this.isAccountContext) return; // Si estamos en cuenta, usamos loadOpportunities manual
+        this.isLoading = true;
+        if (data) {
+            this.opportunities = data;
+        } else if (error) {
+            console.error('Error fetching opps:', error);
+        }
+        this.isLoading = false;
+    }
 
+    handleSearchChange(event) {
+        window.clearTimeout(this.delayTimeout);
+        const searchKey = event.target.value;
+        this.delayTimeout = setTimeout(() => {
+            this.searchTerm = searchKey;
+        }, 400);
+    }
+    
     // --- MOTOR HÍBRIDO DE ETAPAS ---
     @track stages = [];
     @track currentStep = '';
@@ -256,7 +277,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             }
         } else {
             this.activeOppId = null;
-            this.loadOpportunities();
+            this.viewingDashboard = true;
+            // No llamamos a loadOpportunities manual aquí, el @wire se encarga del dashboard global
         }
     }
 
@@ -269,12 +291,18 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     loadOpportunities() {
         this.isLoading = true;
-        const action = this.isAccountContext ? getOpportunitiesByAccount({ accountId: this.recordId }) : getOpportunitiesList();
-        action.then(data => { 
-                this.opportunities = data; 
-                this.isLoading = false; 
-            })
-            .catch(error => { console.error('Error:', error); this.isLoading = false; });
+        if (this.isAccountContext) {
+            getOpportunitiesByAccount({ accountId: this.recordId })
+                .then(data => { 
+                    this.opportunities = data; 
+                })
+                .catch(error => { console.error('Error:', error); })
+                .finally(() => { this.isLoading = false; });
+        } else {
+            // El @wire de getOpportunitiesList se dispara automáticamente al cambiar searchTerm
+            // Si necesitamos forzar recarga, el @wire ya maneja la reactividad
+            this.isLoading = false; 
+        }
     }
 
     handleRowAction(event) {
