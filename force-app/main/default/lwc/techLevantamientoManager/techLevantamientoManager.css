@@ -58,54 +58,73 @@
 }
 
 .survey-table thead tr th { 
-    background: var(--slate-900); 
+    background: #1e293b; 
     color: white; 
-    font-size: 0.72rem; 
+    font-size: 0.81rem; 
     font-weight: 600; 
     text-transform: uppercase; 
     letter-spacing: 0.5px; 
-    padding: 12px 8px; 
-    border-right: 1px solid rgba(255,255,255,0.1); 
-    border-bottom: 2px solid var(--slate-700);
+    padding: 14px 10px; 
+    border-right: 1px solid rgba(255,255,255,0.08); 
+    border-bottom: 3px solid #0070d2;
     text-align: center; 
     white-space: normal;
     overflow-wrap: break-word;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 
 /* Color diferenciado para grupos */
 .survey-header-group th { 
     background: #334155; 
+    font-size: 0.75rem;
+    padding: 8px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
 }
 
 /* FILAS DE DATOS: ALTURA FLEXIBLE PARA SOPORTAR RENGLONES */
 .survey-table tbody tr td { 
-    border-bottom: 1px solid var(--slate-200); 
-    border-right: 1px solid var(--slate-100); 
+    border-bottom: 1px solid #e2e8f0; 
+    border-right: 1px solid #f1f5f9; 
     padding: 0 !important;
     vertical-align: top; 
     background: white;
     min-height: 55px;
+    transition: background-color 0.2s ease;
 }
 
 .survey-table tbody tr:hover td { 
-    background-color: var(--slate-50); 
+    background-color: #fcfdfe; 
 }
 
-/* Inputs y Textareas Estilo Excel */
+/* Inputs y Textareas Estilo Excel Profesional */
 .cell-input { 
     width: 100%; 
     min-height: 55px;
-    border: none; 
-    padding: 12px 8px; 
-    font-size: 0.85rem; 
+    border: 1px solid transparent; 
+    padding: 12px 10px; 
+    font-size: 0.88rem; 
     background: transparent; 
-    color: var(--slate-700); 
+    color: #334155; 
     text-align: left; 
     resize: none;
     display: block;
-    line-height: 1.4;
+    line-height: 1.5;
     font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.cell-input:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.cell-input:focus { 
+    outline: none;
+    border-color: #0070d2;
+    background: white; 
+    box-shadow: inset 0 0 0 1px #0070d2;
+    z-index: 2; 
+    position: relative; 
 }
 
 /* CELDAS ESPECIALES: CENTRADO DE ICONOS Y NÚMEROS */
@@ -114,55 +133,60 @@
     vertical-align: middle !important;
     width: 50px;
     padding: 4px !important;
+    background: #f8fafc !important;
 }
 
 .row-number-cell {
     text-align: center !important;
     vertical-align: middle !important;
     font-weight: 700;
-    color: var(--slate-600);
-    background: var(--slate-50) !important;
+    color: #64748b;
+    background: #f1f5f9 !important;
     width: 45px;
-}
-
-.cell-input:focus { 
-    outline: 2px solid var(--indigo-600); 
-    outline-offset: -2px; 
-    background: white; 
-    z-index: 2; 
-    position: relative; 
+    border-right: 2px solid #e2e8f0 !important;
 }
 
 .cell-select { 
     width: 100%; 
     height: 100%;
-    border: none; 
+    border: 1px solid transparent; 
     padding: 8px; 
-    font-size: 0.8rem; 
+    font-size: 0.85rem; 
     background: transparent; 
     cursor: pointer; 
     text-align: center; 
     appearance: none; 
+    transition: all 0.2s ease;
+}
+
+.cell-select:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 .cell-select:focus { 
-    outline: 2px solid var(--indigo-600); 
+    outline: none;
+    border-color: #0070d2;
+    background: white;
 }
 
-/* Totales Dash */
+/* Totales Dash con impacto visual */
 .survey-row-totals td { 
-    background: var(--slate-100); 
+    background: #f8fafc; 
     font-weight: 800; 
-    color: var(--slate-900);
-    border-top: 2px solid var(--slate-200); 
-    padding: 15px 8px !important; 
+    color: #1e293b;
+    border-top: 2px solid #cbd5e1; 
+    border-bottom: 2px solid #cbd5e1;
+    padding: 18px 10px !important; 
     text-align: center; 
+    font-size: 0.95rem;
 }
 
 .total-label-cell { 
     text-align: left !important; 
-    padding-left: 1rem !important; 
-    background: var(--slate-200) !important; 
+    padding-left: 1.5rem !important; 
+    background: #f1f5f9 !important; 
+    letter-spacing: 1px;
 }
 
 /* Estados Colores Profesionales */

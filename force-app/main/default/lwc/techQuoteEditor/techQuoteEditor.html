@@ -57,6 +57,41 @@
                         <div class="section-card slds-m-bottom_large">
                             <div class="section-header slds-grid slds-grid_align-spread">
                                 <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="standard:location" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <h2 class="slds-text-heading_small">Selección de Clientes</h2>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <span class="slds-m-right_small slds-text-title_bold" style="color: #0070d2;">{sedeScopeLabel}</span>
+                                    <lightning-input type="toggle" label="Búsqueda Global" variant="label-hidden" 
+                                        checked={isGlobalSedeSearch} onchange={handleSedeScopeChange}
+                                        message-toggle-active="Global" message-toggle-inactive="Cliente">
+                                    </lightning-input>
+                                </div>
+                            </div>
+
+                            <div class="slds-p-around_medium bg-blue-soft border-bottom">
+                                <p class="slds-text-title_bold slds-m-bottom_x-small">Clientes Seleccionados ({selectedSedesObjects.length}):</p>
+                                <div class="pills-container slds-grid slds-wrap">
+                                    <template for:each={selectedSedesObjects} for:item="s">
+                                        <lightning-pill key={s.Id} label={s.Name} name={s.Id} onremove={handleRemoveSedePill} class="slds-m-around_xx-small"></lightning-pill>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="slds-p-around_medium bg-light-gray border-bottom">
+                                <lightning-input type="search" placeholder={sedeSearchPlaceholder} 
+                                    variant="label-hidden" value={sedeSearchTerm} onchange={handleSedeSearch}>
+                                </lightning-input>
+                            </div>
+
+                            <div class="datatable-container" style="height: 400px;">
+                                <lightning-datatable key-field="Id" data={sedesData} columns={sedesColumns} selected-rows={selectedSedesIds} onrowselection={handleSedeSelection} max-row-selection={maxRowSelection}></lightning-datatable>
+                            </div>
+                        </div>
+
+                        <div class="section-card slds-m-bottom_large">
+                            <div class="section-header slds-grid slds-grid_align-spread">
+                                <div class="slds-grid slds-grid_vertical-align-center">
                                     <lightning-icon icon-name="utility:announcement" size="small" class="slds-m-right_small"></lightning-icon>
                                     <h2 class="slds-text-heading_small">Introducción Técnica</h2>
                                 </div>
@@ -87,7 +122,7 @@
                             </div>
                         </div>
 
-                        <div class="section-card slds-m-bottom_large">
+                        <div class="section-card">
                             <div class="section-header">
                                 <lightning-icon icon-name="utility:tower" size="small" class="slds-m-right_small"></lightning-icon>
                                 <h2 class="slds-text-heading_small">Líneas de Negocio</h2>
@@ -102,41 +137,6 @@
                                         </div>
                                     </template>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="section-card">
-                            <div class="section-header slds-grid slds-grid_align-spread">
-                                <div class="slds-grid slds-grid_vertical-align-center">
-                                    <lightning-icon icon-name="standard:location" size="small" class="slds-m-right_small"></lightning-icon>
-                                    <h2 class="slds-text-heading_small">Selección de Sedes</h2>
-                                </div>
-                                <div class="slds-grid slds-grid_vertical-align-center">
-                                    <span class="slds-m-right_small slds-text-title_bold" style="color: #0070d2;">{sedeScopeLabel}</span>
-                                    <lightning-input type="toggle" label="Búsqueda Global" variant="label-hidden" 
-                                        checked={isGlobalSedeSearch} onchange={handleSedeScopeChange}
-                                        message-toggle-active="Global" message-toggle-inactive="Cliente">
-                                    </lightning-input>
-                                </div>
-                            </div>
-
-                            <div class="slds-p-around_medium bg-blue-soft border-bottom">
-                                <p class="slds-text-title_bold slds-m-bottom_x-small">Sedes Seleccionadas ({selectedSedesObjects.length}):</p>
-                                <div class="pills-container slds-grid slds-wrap">
-                                    <template for:each={selectedSedesObjects} for:item="s">
-                                        <lightning-pill key={s.Id} label={s.Name} name={s.Id} onremove={handleRemoveSedePill} class="slds-m-around_xx-small"></lightning-pill>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <div class="slds-p-around_medium bg-light-gray border-bottom">
-                                <lightning-input type="search" placeholder={sedeSearchPlaceholder} 
-                                    variant="label-hidden" value={sedeSearchTerm} onchange={handleSedeSearch}>
-                                </lightning-input>
-                            </div>
-
-                            <div class="datatable-container" style="height: 400px;">
-                                <lightning-datatable key-field="Id" data={sedesData} columns={sedesColumns} selected-rows={selectedSedesIds} onrowselection={handleSedeSelection} max-row-selection={maxRowSelection}></lightning-datatable>
                             </div>
                         </div>
                     </div>

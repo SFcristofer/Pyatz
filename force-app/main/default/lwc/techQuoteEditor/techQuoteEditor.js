@@ -94,7 +94,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track separatorStyle = 'header';
 
     sedesColumns = [
-        { label: 'Sede', fieldName: 'Name', type: 'text' },
+        { label: 'Cliente', fieldName: 'Name', type: 'text' },
         { label: 'Cuenta Padre', fieldName: 'ParentName', type: 'text' },
         { label: 'Dirección', fieldName: 'BillingStreet', type: 'text' },
         { label: 'Ciudad', fieldName: 'BillingCity', type: 'text' }
@@ -224,7 +224,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
 
     get sedeScopeLabel() { return this.isGlobalSedeSearch ? 'Búsqueda Global' : 'Solo este Cliente'; }
-    get sedeSearchPlaceholder() { return this.isGlobalSedeSearch ? 'Buscar en todo Salesforce...' : 'Filtrar sedes de este cliente...'; }
+    get sedeSearchPlaceholder() { return this.isGlobalSedeSearch ? 'Buscar en todo Salesforce...' : 'Filtrar registros de este cliente...'; }
     get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
     get technicalSedesString() { return this.selectedSedesObjects.map(s => s.Name).join(', '); }
 
