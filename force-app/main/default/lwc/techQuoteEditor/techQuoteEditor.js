@@ -74,7 +74,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track selectedSedesIds = [];
     @track selectedSedesObjects = [];
     @track sedeSearchTerm = '';
-    @track isGlobalSedeSearch = false;
+    @track isGlobalSedeSearch = true;
 
     // --- SERVICIOS Y ARTÍCULOS ---
     @track serviciosData = [];

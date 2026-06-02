@@ -64,7 +64,7 @@
                                     <span class="slds-m-right_small slds-text-title_bold" style="color: #0070d2;">{sedeScopeLabel}</span>
                                     <lightning-input type="toggle" label="Búsqueda Global" variant="label-hidden" 
                                         checked={isGlobalSedeSearch} onchange={handleSedeScopeChange}
-                                        message-toggle-active="Global" message-toggle-inactive="Cliente">
+                                        message-toggle-active="Cliente" message-toggle-inactive="Global">
                                     </lightning-input>
                                 </div>
                             </div>
@@ -95,11 +95,13 @@
                                     <lightning-icon icon-name="utility:announcement" size="small" class="slds-m-right_small"></lightning-icon>
                                     <h2 class="slds-text-heading_small">Introducción Técnica</h2>
                                 </div>
-                                <lightning-button-menu label="Cargar Plantilla" icon-name="utility:insert_tag_field" variant="border-filled" onselect={handleApplyTemplate} data-field="introduccion">
-                                    <template for:each={introTemplates} for:item="tpl">
-                                        <lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item>
-                                    </template>
-                                </lightning-button-menu>
+                                <div class="template-menu-container">
+                                    <lightning-button-menu label="Cargar Plantilla" icon-name="utility:insert_tag_field" variant="border-filled" onselect={handleApplyTemplate} data-field="introduccion" class="template-button">
+                                        <template for:each={introTemplates} for:item="tpl">
+                                            <lightning-menu-item key={tpl.id} value={tpl.id} label={tpl.name}></lightning-menu-item>
+                                        </template>
+                                    </lightning-button-menu>
+                                </div>
                             </div>
                             <div class="slds-p-around_large">
                                 <div class="slds-grid slds-gutters slds-m-bottom_small">
