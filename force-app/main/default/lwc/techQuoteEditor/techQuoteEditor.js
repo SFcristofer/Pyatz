@@ -169,7 +169,14 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             .catch(error => { console.error(error); this.isLoading = false; });
     }
 
-    loadBusinessLines() { getBusinessLineOptions().then(res => { this.lineaNegocioOptions = res; }); }
+    loadBusinessLines() { 
+        getBusinessLineOptions().then(res => { 
+            this.lineaNegocioOptions = res.map(opt => ({
+                ...opt,
+                checked: (this.selectedLines || []).includes(opt.value)
+            })); 
+        }); 
+    }
     loadTemplates() {
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Introducciones' }).then(res => this.introTemplates = res);
         getEmailTemplatesByFolder({ folderName: 'Pyatz - Clausulas y Anexos' }).then(res => this.warrantyTemplates = res);
