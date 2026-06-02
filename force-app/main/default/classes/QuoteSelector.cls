@@ -56,7 +56,8 @@ public with sharing class QuoteSelector {
      */
     public static List<Analisis_PL__c> getPLAnalysisByQuoteId(Id quoteId) {
         return [SELECT Anio__c, Costo_Inversion__c, Margen_Esperado__c, Gastos_Indirectos__c,
-                       Comision_Venta__c, Comision_Venta_2__c, Regalias__c, Dias_Financiamiento__c
+                       Comision_Venta__c, Comision_Venta_2__c, Regalias__c, Dias_Financiamiento__c,
+                       ISR_Pct__c, RU_Pct__c
                 FROM Analisis_PL__c
                 WHERE Presupuesto__c = :quoteId
                 ORDER BY Anio__c ASC];

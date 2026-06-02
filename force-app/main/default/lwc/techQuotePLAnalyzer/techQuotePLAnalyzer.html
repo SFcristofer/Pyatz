@@ -103,14 +103,18 @@
                                 <td colspan="4" style="color: #9f1239;">3. OBLIGACIONES FISCALES Y RESERVAS</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large" style="color: #9f1239;">ISR s/ Utilidad Bruta (Simulado 6%)</td>
-                                <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2;">6%</td>
+                                <td class="slds-p-left_large" style="color: #9f1239;">ISR s/ Utilidad Bruta (%)</td>
+                                <td class="pl-input-cell">
+                                    <lightning-input type="number" variant="label-hidden" value={pl1.isr} data-field="isr" onchange={handleGlobalPLChange} step="any"></lightning-input>
+                                </td>
                                 <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.isr}</td>
                                 <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.isr}</td>
                             </tr>
                             <tr class="pl-row-hover">
-                                <td class="slds-p-left_large" style="color: #9f1239;">Reserva de Utilidad (RU 5%)</td>
-                                <td style="text-align: center; font-weight: 800; color: #9f1239; background: #fff1f2;">5%</td>
+                                <td class="slds-p-left_large" style="color: #9f1239;">Reserva de Utilidad (RU %)</td>
+                                <td class="pl-input-cell">
+                                    <lightning-input type="number" variant="label-hidden" value={pl1.ru} data-field="ru" onchange={handleGlobalPLChange} step="any"></lightning-input>
+                                </td>
                                 <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res1.ru}</td>
                                 <td class="negative-value" style="text-align: right; padding-right: 30px;">- ${res2.ru}</td>
                             </tr>

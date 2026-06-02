@@ -10,8 +10,8 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
     @api costoBase;
     
     @track isLoading = false;
-    @track pl1 = { anio: 1, costo: 0, margen: 30, indirecto: 10, comision1: 3, comision2: 0, regalia: 5, dias: 30 };
-    @track pl2 = { anio: 2, costo: 0, margen: 30, indirecto: 10, comision1: 3, comision2: 0, regalia: 5, dias: 30 };
+    @track pl1 = { anio: 1, costo: 0, margen: 30, indirecto: 10, comision1: 3, comision2: 0, regalia: 5, dias: 30, isr: 6, ru: 5 };
+    @track pl2 = { anio: 2, costo: 0, margen: 30, indirecto: 10, comision1: 3, comision2: 0, regalia: 5, dias: 30, isr: 6, ru: 5 };
     @track res1 = {};
     @track res2 = {};
     @track relatedFiles = [];
@@ -57,7 +57,9 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
                             comision1: rec.Comision_Venta__c,
                             comision2: rec.Comision_Venta_2__c || 0,
                             regalia: rec.Regalias__c,
-                            dias: rec.Dias_Financiamiento__c
+                            dias: rec.Dias_Financiamiento__c,
+                            isr: rec.ISR_Pct__c || 6,
+                            ru: rec.RU_Pct__c || 5
                         };
                         if (rec.Anio__c === 1) this.pl1 = data;
                         else this.pl2 = data;
@@ -100,18 +102,28 @@ export default class TechQuotePLAnalyzer extends NavigationMixin(LightningElemen
         const comision2Val = parseFloat(data.comision2 || 0);
         const regaliaVal = parseFloat(data.regalia || 0);
         const diasVal = parseFloat(data.dias || 0);
+        const isrPct = parseFloat(data.isr || 6);
+        const ruPct = parseFloat(data.ru || 5);
 
+        // 1. Calcular Precio de Venta Sugerido
         const venta = margenVal >= 100 ? 0 : (costoVal / (1 - (margenVal / 100)));
+        
+        // 2. Calcular Deducciones Operativas
         const ind = venta * (indirectoVal / 100);
         const com1 = venta * (comision1Val / 100);
         const com2 = venta * (comision2Val / 100);
         const reg = venta * (regaliaVal / 100);
         const fin = venta * 0.000611 * diasVal;
 
-        const utilidadBruta = venta - costoVal - ind - com1 - com2 - reg - fin;
-        const isr = utilidadBruta > 0 ? (utilidadBruta * 0.06) : 0;
-        const ru = utilidadBruta > 0 ? (utilidadBruta * 0.05) : 0;
+        // 3. Definir Base de Utilidad (Venta - Suma de todas las deducciones operativas)
+        // Según requerimiento: Precio de venta - (Costo inversión + suma de todas las deducciones)
+        const utilidadBase = venta - (costoVal + ind + com1 + com2 + reg + fin);
+        
+        // 4. Aplicar ISR y RU sobre la Utilidad Base (Independientes, no en cascada)
+        const isr = utilidadBase > 0 ? (utilidadBase * (isrPct / 100)) : 0;
+        const ru = utilidadBase > 0 ? (utilidadBase * (ruPct / 100)) : 0;
 
+        // 5. Egreso Total y Utilidad Neta
         const egresoTotal = costoVal + ind + com1 + com2 + reg + fin + isr + ru;
         const utilidadNeta = venta - egresoTotal;
         const margenRealPct = venta > 0 ? (utilidadNeta / venta) * 100 : 0;

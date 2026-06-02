@@ -105,7 +105,20 @@ public with sharing class QuoteController {
             for (Object obj : data) {
                 Map<String, Object> row = (Map<String, Object>)obj;
                 Integer anio = Integer.valueOf(row.get('anio'));
-                Analisis_PL__c pl = new Analisis_PL__c(Presupuesto__c = quoteId, Anio__c = anio, Costo_Inversion__c = Decimal.valueOf(String.valueOf(row.get('costo'))), Margen_Esperado__c = Decimal.valueOf(String.valueOf(row.get('margen'))), Gastos_Indirectos__c = Decimal.valueOf(String.valueOf(row.get('indirecto'))), Comision_Venta__c = Decimal.valueOf(String.valueOf(row.get('comision1'))), Comision_Venta_2__c = Decimal.valueOf(String.valueOf(row.get('comision2'))), Regalias__c = Decimal.valueOf(String.valueOf(row.get('regalia'))), Dias_Financiamiento__c = Decimal.valueOf(String.valueOf(row.get('dias'))), Clave_Unica__c = quoteId + '_' + anio);
+                Analisis_PL__c pl = new Analisis_PL__c(
+                    Presupuesto__c = quoteId, 
+                    Anio__c = anio, 
+                    Costo_Inversion__c = Decimal.valueOf(String.valueOf(row.get('costo'))), 
+                    Margen_Esperado__c = Decimal.valueOf(String.valueOf(row.get('margen'))), 
+                    Gastos_Indirectos__c = Decimal.valueOf(String.valueOf(row.get('indirecto'))), 
+                    Comision_Venta__c = Decimal.valueOf(String.valueOf(row.get('comision1'))), 
+                    Comision_Venta_2__c = Decimal.valueOf(String.valueOf(row.get('comision2'))), 
+                    Regalias__c = Decimal.valueOf(String.valueOf(row.get('regalia'))), 
+                    Dias_Financiamiento__c = Decimal.valueOf(String.valueOf(row.get('dias'))), 
+                    ISR_Pct__c = Decimal.valueOf(String.valueOf(row.get('isr'))),
+                    RU_Pct__c = Decimal.valueOf(String.valueOf(row.get('ru'))),
+                    Clave_Unica__c = quoteId + '_' + anio
+                );
                 toUpsert.add(pl);
             }
             if (!toUpsert.isEmpty()) upsert toUpsert Clave_Unica__c;
