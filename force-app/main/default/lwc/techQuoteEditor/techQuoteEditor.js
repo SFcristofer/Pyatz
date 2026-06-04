@@ -130,6 +130,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.asunto = q.Name;
                     this.introduccion = q.Introduction_Text__c;
                     this.warranty = q.Warranty_Text__c;
+                    this.observacionesPago = q.Description;
                     this.accountId = q.AccountId;
                     this.parentOpportunityId = q.OpportunityId;
                     this.showSubtotal = q.Show_Subtotal__c !== undefined ? q.Show_Subtotal__c : true;
@@ -153,6 +154,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                             if (decoded.trabajoPuntual !== undefined) this.trabajoPuntual = decoded.trabajoPuntual;
                             if (decoded.ventaProducto !== undefined) this.ventaProducto = decoded.ventaProducto;
                             if (decoded.trabajoMantenimiento !== undefined) this.trabajoMantenimiento = decoded.trabajoMantenimiento;
+                            if (decoded.observacionesPago) this.observacionesPago = decoded.observacionesPago;
                             if (decoded.necesidadId) {
                                 this.necesidadId = decoded.necesidadId;
                                 this.necesidadNombre = decoded.necesidadNombre;
