@@ -48,7 +48,6 @@
                 .sig-space        { height:65pt; display:block; }
                 .sig-line         { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; margin:0 8pt; }
                 
-                /* SURGICAL FIX: Spacer classes for repeating headers/footers */
                 .hdr-spacer { height:3.3cm; padding:0; line-height:0; font-size:0; border:none; }
                 .ftr-spacer { height:2.3cm; padding:0; line-height:0; font-size:0; border:none; }
             </style>
@@ -88,13 +87,12 @@
                 </tbody>
             </table>
 
-            <!-- SECCIÓN 2: SERVICIOS (Surgical Fix for long rows) -->
+            <!-- SECCIÓN 2 y 3 UNIFICADAS: SERVICIOS, TOTALES Y FIRMAS -->
             <div class="content-body" style="page-break-before:always;">
-                <table class="tbl-svc">
-                    <thead>
-                        <tr><td colspan="4" class="hdr-spacer"></td></tr>
-                    </thead>
+                <table class="tbl-svc" style="width:100%; border-collapse:collapse;">
+                    <thead><tr><td colspan="4" class="hdr-spacer"></td></tr></thead>
                     <tbody>
+                        <!-- BLOQUE: SERVICIOS -->
                         <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
                             <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
                                 <tr class="row-sep"><td colspan="4" style="padding:8pt;">{!item.Product2.Name}</td></tr>
@@ -113,30 +111,13 @@
                                     <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
                                 </tr>
                                 <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
-                                    <tr class="row-detail">
-                                        <td colspan="4">
-                                            <div class="detail-inner">
-                                                <apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <tr class="row-detail"><td colspan="4"><div class="detail-inner"><apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/></div></td></tr>
                                 </apex:outputPanel>
                             </apex:outputPanel>
                         </apex:repeat>
-                    </tbody>
-                    <tfoot>
-                        <tr><td colspan="4" class="ftr-spacer"></td></tr>
-                    </tfoot>
-                </table>
-            </div>
 
-            <!-- SECCIÓN 2b: TOTALES Y PAGO -->
-            <table style="width:100%; border-collapse:collapse;">
-                <thead><tr><td class="hdr-spacer">&#160;</td></tr></thead>
-                <tfoot><tr><td class="ftr-spacer">&#160;</td></tr></tfoot>
-                <tbody>
-                    <tr><td style="padding:0; vertical-align:top;">
-                        <div class="content-body">
+                        <!-- BLOQUE: TOTALES (Inyectados como fila de la misma tabla) -->
+                        <tr><td colspan="4" style="padding-top:20pt;">
                             <table class="tbl-totals">
                                 <apex:outputPanel rendered="{!technicalQuote.Show_Subtotal__c}" layout="none">
                                     <tr><td class="tot-lbl">SUBTOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}"/></apex:outputText></td></tr>
@@ -146,43 +127,25 @@
                                 </apex:outputPanel>
                                 <tr class="row-grand"><td class="tot-lbl">TOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}"/></apex:outputText></td></tr>
                             </table>
-                            
-                            <!-- TABLA DE DATOS DE PAGO CONSOLIDADA -->
-                            <table class="tbl-payment" style="width:100%;">
+                            <table class="tbl-payment" style="width:100%; margin-top:10pt;">
                                 <thead>
-                                    <tr>
-                                        <th colspan="3" style="text-align:center; font-size:10pt; background-color:#0070d2; color:#fff; border-bottom:none;">Datos de Pago</th>
-                                    </tr>
-                                    <tr>
-                                        <th width="25%">Método de Pago</th>
-                                        <th width="50%" style="text-align:center;">Descripción</th>
-                                        <th width="25%">Tipo de Trabajo</th>
-                                    </tr>
+                                    <tr><th colspan="3" style="text-align:center; font-size:10pt; background-color:#0070d2; color:#fff; border-bottom:none;">Datos de Pago</th></tr>
+                                    <tr><th width="25%">Método de Pago</th><th width="50%" style="text-align:center;">Descripción</th><th width="25%">Tipo de Trabajo</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td style="text-align:left;">{!metodoPago}</td>
-                                        <td style="text-align:center; font-size:8.5pt;"><apex:outputText value="{!descripcionPago}" escape="false"/></td>
-                                        <td style="text-align:left;">{!tipoTrabajo}</td>
-                                    </tr>
+                                    <tr><td style="text-align:left;">{!metodoPago}</td><td style="text-align:center; font-size:8.5pt;"><apex:outputText value="{!descripcionPago}" escape="false"/></td><td style="text-align:left;">{!tipoTrabajo}</td></tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </td></tr>
-                </tbody>
-            </table>
+                        </td></tr>
 
-            <!-- SECCIÓN 3: FIRMAS -->
-            <table style="width:100%; border-collapse:collapse; margin-top:20pt;">
-                <thead><tr><td class="hdr-spacer">&#160;</td></tr></thead>
-                <tfoot><tr><td class="ftr-spacer">&#160;</td></tr></tfoot>
-                <tbody>
-                    <tr><td style="padding:0; vertical-align:top;">
-                        <div class="content-body" style="page-break-inside:avoid;">
-                            <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Warranty_Text__c))}">
+                        <!-- BLOQUE: GARANTÍA Y FIRMAS (Inyectados como fila de la misma tabla) -->
+                        <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Warranty_Text__c))}" layout="none">
+                            <tr><td colspan="4" style="padding-top:24pt;">
                                 <div class="warranty-block"><div style="font-weight:bold; font-size:11pt; margin-bottom:6pt; text-transform:uppercase;">Condiciones / Anexos / Cl&#225;usulas</div><apex:outputText escape="false" value="{!technicalQuote.Warranty_Text__c}"/></div>
-                            </apex:outputPanel>
-                            <div class="sig-section">
+                            </td></tr>
+                        </apex:outputPanel>
+                        <tr><td colspan="4" style="padding-top:40pt;">
+                            <div style="page-break-inside:avoid;">
                                 <table class="tbl-sig">
                                     <tr>
                                         <td><div class="sig-space"></div><div class="sig-line">Firma del CLIENTE</div></td>
@@ -194,10 +157,11 @@
                                     </tr>
                                 </table>
                             </div>
-                        </div>
-                    </td></tr>
-                </tbody>
-            </table>
+                        </td></tr>
+                    </tbody>
+                    <tfoot><tr><td colspan="4" class="ftr-spacer"></td></tr></tfoot>
+                </table>
+            </div>
             <img src="{!$Resource.FooterPDF}" class="footer-img"/>
         </body>
     </html>
