@@ -84,30 +84,38 @@
             </table>
 
             <!-- SECCIÓN 2: SERVICIOS -->
-            <table class="tbl-svc" style="width:100%; page-break-before:always;">
-                <thead><tr><td colspan="4" style="height:3.3cm;">&#160;</td></tr></thead>
-                <tfoot><tr><td colspan="4" style="height:2.3cm;">&#160;</td></tr></tfoot>
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead><tr><td style="height:3.3cm;">&#160;</td></tr></thead>
+                <tfoot><tr><td style="height:2.3cm;">&#160;</td></tr></tfoot>
                 <tbody>
-                    <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                        <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
-                            <tr class="row-sep"><td colspan="4" style="padding:8pt 32pt;">{!item.Product2.Name}</td></tr>
-                        </apex:outputPanel>
-                        <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
-                            <tr style="page-break-inside:avoid;">
-                                <th width="50%" style="text-align:left; padding-left:32pt;">Concepto / Servicio</th>
-                                <th width="10%">Cant</th><th width="20%" style="text-align:right;">P. Unitario</th><th width="20%" style="text-align:right; padding-right:32pt;">Importe</th>
-                            </tr>
-                            <tr class="row-item">
-                                <td style="padding-left:32pt;"><strong>{!item.Product2.Name}</strong></td>
-                                <td style="text-align:center;">{!item.Quantity}</td>
-                                <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
-                                <td style="text-align:right; padding-right:32pt;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
-                            </tr>
-                            <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
-                                <tr class="row-detail"><td colspan="4" style="padding:3pt 32pt 10pt 32pt;"><div class="detail-inner"><apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/></div></td></tr>
-                            </apex:outputPanel>
-                        </apex:outputPanel>
-                    </apex:repeat>
+                    <tr><td style="padding:0; vertical-align:top;">
+                        <div class="content-body">
+                            <table class="tbl-svc" style="width:100%; border-collapse:collapse;">
+                                <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
+                                    <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
+                                        <tr class="row-sep"><td colspan="4" style="padding:8pt;">{!item.Product2.Name}</td></tr>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
+                                        <tr style="page-break-inside:avoid;">
+                                            <th width="50%" style="text-align:left;">Concepto / Servicio</th>
+                                            <th width="10%">Cant</th>
+                                            <th width="20%" style="text-align:right;">P. Unitario</th>
+                                            <th width="20%" style="text-align:right;">Importe</th>
+                                        </tr>
+                                        <tr class="row-item">
+                                            <td style="text-align:left;"><strong>{!item.Product2.Name}</strong></td>
+                                            <td style="text-align:center;">{!item.Quantity}</td>
+                                            <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
+                                            <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
+                                        </tr>
+                                        <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
+                                            <tr class="row-detail"><td colspan="4"><div class="detail-inner"><apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/></div></td></tr>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                </apex:repeat>
+                            </table>
+                        </div>
+                    </td></tr>
                 </tbody>
             </table>
 
