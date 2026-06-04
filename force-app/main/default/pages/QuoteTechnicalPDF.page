@@ -18,14 +18,15 @@
 
                 .hdr-table      { width:100%; border-collapse:collapse; }
                 .quote-number   { font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; }
-                .nombre-comercial { font-size:11pt; font-weight:normal; margin-top:4pt; }                .asunto         { margin-top:5pt; font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
+                .nombre-comercial { font-size:11pt; font-weight:normal; margin-top:4pt; }
+                .asunto         { margin-top:5pt; font-size:11pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
                 .sede-title     { font-size:13pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
 
                 .tbl-svc              { width:100%; border-collapse:collapse; margin-top:4pt; -fs-table-paginate: paginate; }
                 .tbl-svc th           { background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; }
                 .row-sep td           { background-color:#eef2f9; color:#0070d2; font-weight:bold; font-size:9.5pt; padding:8pt; border-top:2pt solid #0070d2; }
                 .row-item td          { padding:7pt 6pt; font-size:10pt; border-bottom:0.5pt solid #f0f0f0; background-color:#fff; vertical-align:middle; }
-                .row-detail td        { padding:3pt 32pt 10pt 16pt; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.5; }
+                .row-detail td        { padding:3pt 0 10pt 0; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.5; }
                 .detail-inner         { border-left:2pt solid #dde; padding-left:10pt; }
 
                 .tbl-totals           { width:210pt; border-collapse:collapse; margin-left:auto; margin-top:14pt; }
@@ -46,6 +47,10 @@
                 .tbl-sig td       { text-align:center; vertical-align:bottom; width:33.33%; padding:0 10pt; }
                 .sig-space        { height:65pt; display:block; }
                 .sig-line         { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; margin:0 8pt; }
+                
+                /* SURGICAL FIX: Spacer classes for repeating headers/footers */
+                .hdr-spacer { height:3.3cm; padding:0; line-height:0; font-size:0; border:none; }
+                .ftr-spacer { height:2.3cm; padding:0; line-height:0; font-size:0; border:none; }
             </style>
         </head>
         <body>
@@ -55,8 +60,8 @@
 
             <!-- SECCIÓN 1: INTRODUCCIÓN -->
             <table style="width:100%; border-collapse:collapse;">
-                <thead><tr><td style="height:3.3cm;">&#160;</td></tr></thead>
-                <tfoot><tr><td style="height:2.3cm;">&#160;</td></tr></tfoot>
+                <thead><tr><td class="hdr-spacer">&#160;</td></tr></thead>
+                <tfoot><tr><td class="ftr-spacer">&#160;</td></tr></tfoot>
                 <tbody>
                     <tr><td style="padding:0; vertical-align:top;">
                         <div class="content-body">
@@ -83,46 +88,52 @@
                 </tbody>
             </table>
 
-            <!-- SECCIÓN 2: SERVICIOS -->
-            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
-                <thead><tr><td style="height:3.3cm;">&#160;</td></tr></thead>
-                <tfoot><tr><td style="height:2.3cm;">&#160;</td></tr></tfoot>
-                <tbody>
-                    <tr><td style="padding:0; vertical-align:top;">
-                        <div class="content-body">
-                            <table class="tbl-svc" style="width:100%; border-collapse:collapse;">
-                                <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
-                                    <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
-                                        <tr class="row-sep"><td colspan="4" style="padding:8pt;">{!item.Product2.Name}</td></tr>
-                                    </apex:outputPanel>
-                                    <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
-                                        <tr style="page-break-inside:avoid;">
-                                            <th width="50%" style="text-align:left;">Concepto / Servicio</th>
-                                            <th width="10%">Cant</th>
-                                            <th width="20%" style="text-align:right;">P. Unitario</th>
-                                            <th width="20%" style="text-align:right;">Importe</th>
-                                        </tr>
-                                        <tr class="row-item">
-                                            <td style="text-align:left;"><strong>{!item.Product2.Name}</strong></td>
-                                            <td style="text-align:center;">{!item.Quantity}</td>
-                                            <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
-                                            <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
-                                        </tr>
-                                        <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
-                                            <tr class="row-detail"><td colspan="4"><div class="detail-inner"><apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/></div></td></tr>
-                                        </apex:outputPanel>
-                                    </apex:outputPanel>
-                                </apex:repeat>
-                            </table>
-                        </div>
-                    </td></tr>
-                </tbody>
-            </table>
+            <!-- SECCIÓN 2: SERVICIOS (Surgical Fix for long rows) -->
+            <div class="content-body" style="page-break-before:always;">
+                <table class="tbl-svc">
+                    <thead>
+                        <tr><td colspan="4" class="hdr-spacer"></td></tr>
+                    </thead>
+                    <tbody>
+                        <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
+                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) == 0}" layout="none">
+                                <tr class="row-sep"><td colspan="4" style="padding:8pt;">{!item.Product2.Name}</td></tr>
+                            </apex:outputPanel>
+                            <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
+                                <tr style="page-break-inside:avoid;">
+                                    <th width="50%" style="text-align:left;">Concepto / Servicio</th>
+                                    <th width="10%">Cant</th>
+                                    <th width="20%" style="text-align:right;">P. Unitario</th>
+                                    <th width="20%" style="text-align:right;">Importe</th>
+                                </tr>
+                                <tr class="row-item">
+                                    <td style="text-align:left;"><strong>{!item.Product2.Name}</strong></td>
+                                    <td style="text-align:center;">{!item.Quantity}</td>
+                                    <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
+                                    <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
+                                </tr>
+                                <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
+                                    <tr class="row-detail">
+                                        <td colspan="4">
+                                            <div class="detail-inner">
+                                                <apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:repeat>
+                    </tbody>
+                    <tfoot>
+                        <tr><td colspan="4" class="ftr-spacer"></td></tr>
+                    </tfoot>
+                </table>
+            </div>
 
             <!-- SECCIÓN 2b: TOTALES Y PAGO -->
             <table style="width:100%; border-collapse:collapse;">
-                <thead><tr><td style="height:3.3cm;">&#160;</td></tr></thead>
-                <tfoot><tr><td style="height:2.3cm;">&#160;</td></tr></tfoot>
+                <thead><tr><td class="hdr-spacer">&#160;</td></tr></thead>
+                <tfoot><tr><td class="ftr-spacer">&#160;</td></tr></tfoot>
                 <tbody>
                     <tr><td style="padding:0; vertical-align:top;">
                         <div class="content-body">
@@ -137,7 +148,7 @@
                             </table>
                             
                             <!-- TABLA DE DATOS DE PAGO CONSOLIDADA -->
-                            <table class="tbl-payment">
+                            <table class="tbl-payment" style="width:100%;">
                                 <thead>
                                     <tr>
                                         <th colspan="3" style="text-align:center; font-size:10pt; background-color:#0070d2; color:#fff; border-bottom:none;">Datos de Pago</th>
@@ -161,10 +172,10 @@
                 </tbody>
             </table>
 
-            <!-- SECCIÓN 3: FIRMAS (Sin salto forzado para evitar hojas vacías) -->
+            <!-- SECCIÓN 3: FIRMAS -->
             <table style="width:100%; border-collapse:collapse; margin-top:20pt;">
-                <thead><tr><td style="height:3.3cm;">&#160;</td></tr></thead>
-                <tfoot><tr><td style="height:2.3cm;">&#160;</td></tr></tfoot>
+                <thead><tr><td class="hdr-spacer">&#160;</td></tr></thead>
+                <tfoot><tr><td class="ftr-spacer">&#160;</td></tr></tfoot>
                 <tbody>
                     <tr><td style="padding:0; vertical-align:top;">
                         <div class="content-body" style="page-break-inside:avoid;">
