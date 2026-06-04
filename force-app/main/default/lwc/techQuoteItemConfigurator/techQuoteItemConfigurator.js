@@ -93,9 +93,12 @@ export default class TechQuoteItemConfigurator extends LightningElement {
 
     formatDescription(text) {
         if (!text) return '';
-        let cleanText = text.replace(/<br\s*\/?>/gi, '\n');
-        cleanText = cleanText.replace(/<[^>]*>?/gm, '');
-        return cleanText;
+        // Si ya parece HTML (contiene etiquetas), lo dejamos pasar tal cual
+        if (/<[a-z][\s\S]*>/i.test(text)) {
+            return text;
+        }
+        // Si es texto plano, convertimos los saltos de línea \n a <br/> para el editor rich text
+        return text.replace(/\n/g, '<br/>');
     }
 
     loadEditData(item) {
