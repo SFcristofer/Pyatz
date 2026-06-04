@@ -196,7 +196,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
                 templateId: this.selectedTemplateId, 
                 quoteId: contextId 
             });
-            this.emailBody = this.formatDescription(content);
+            this.emailBody = content;
             
             // Actualizar asunto automáticamente si la plantilla lo tiene o usar el nombre de la plantilla
             const tpl = this.templates.find(t => t.id === this.selectedTemplateId);
@@ -210,14 +210,6 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
                 variant: 'warning'
             }));
         }
-    }
-
-    formatDescription(text) {
-        if (!text) return '';
-        if (/<[a-z][\s\S]*>/i.test(text)) {
-            return text;
-        }
-        return text.replace(/\n/g, '<br/>');
     }
 
     handleAttachmentToggle(event) {
