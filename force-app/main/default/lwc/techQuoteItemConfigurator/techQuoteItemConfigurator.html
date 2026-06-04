@@ -127,16 +127,12 @@
                                         <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
                                             <p class="slds-text-title_bold">4. Detalle Técnico Especializado</p>
                                             <span class="slds-text-color_weak slds-text-body_small">Este detalle aparecerá en el PDF final</span>
-                                        </div>
-                                        <lightning-textarea 
-                                            value={modalDescription} 
-                                            variant="label-hidden" 
-                                            placeholder="Describa las especificaciones técnicas, alcances o condiciones especiales para esta partida..." 
-                                            style="--slds-c-textarea-shadow-focus: #001a33;"
-                                            rows="40"
+                                            </div>
+                                            <lightning-input-rich-text
+                                            value={modalDescription}
                                             onchange={handleDescriptionChange}>
-                                        </lightning-textarea>
-                                    </div>
+                                            </lightning-input-rich-text>
+                                            </div>
                                 </div>
                             </div>
 

@@ -92,16 +92,13 @@ export default class TechQuoteItemConfigurator extends LightningElement {
     get discountOptions() { return [ { label: '$', value: 'monto' }, { label: '%', value: 'porcentaje' } ]; }
 
     formatDescription(text) {
-        if (!text) return '';
-        let cleanText = text.replace(/<br\s*\/?>/gi, '\n');
-        cleanText = cleanText.replace(/<[^>]*>?/gm, '');
-        return cleanText;
+        return text || '';
     }
 
     loadEditData(item) {
         this.selectedPbeId = item.pbeId;
         this.selectedProductName = item.descripcion;
-        this.modalDescription = this.formatDescription(item.detalleTecnico);
+        this.modalDescription = item.detalleTecnico || '';
         const rawAreas = item.areas ? item.areas.split(',').map(a => a.trim()).filter(a => a !== '') : [];
         this.zonasAfectadas = [...new Set(rawAreas)];
         if (this.allHistoricalZones && this.allHistoricalZones.length > 0) this.normalizeExistingZones();
@@ -140,7 +137,7 @@ export default class TechQuoteItemConfigurator extends LightningElement {
         const res = this.searchResults.find(x => x.id === selectedId);
         if (res) {
             this.selectedPbeId = selectedId; this.selectedProductId = res.productId; this.selectedProductName = res.name; this.selectedProductPrice = res.unitPrice;
-            this.modalDescription = this.formatDescription(res.description); this.searchResults = []; this.loadProductPrices(); this.initModalTable();
+            this.modalDescription = res.description || ''; this.searchResults = []; this.loadProductPrices(); this.initModalTable();
         }
     }
 
