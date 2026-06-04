@@ -273,6 +273,18 @@ lightning-input-rich-text table td {
     padding: 8px !important;
 }
 
+/* ESTILO PARA LOS CHECKBOXES EN EL HEADER (FONDO OSCURO) */
+.header-toggle {
+    --sds-c-checkbox-label-text-color: #ffffff;
+    --slds-c-checkbox-label-text-color: #ffffff;
+    color: white !important;
+}
+
+.header-toggle lightning-input {
+    --sds-c-checkbox-label-text-color: #ffffff;
+    --slds-c-checkbox-label-text-color: #ffffff;
+}
+
 /* ETAPA 4: PDF WORKSPACE PROFESIONAL */
 .bg-dark-workspace { background-color: #1e293b !important; }
 .bg-slate-header { background-color: #0f172a; border-bottom: 1px solid #334155; }

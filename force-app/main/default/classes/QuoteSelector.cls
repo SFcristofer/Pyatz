@@ -12,7 +12,7 @@ public with sharing class QuoteSelector {
         return [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Status, 
                        Description, Markers_Data__c, Introduction_Text__c, Warranty_Text__c, 
                        Business_Lines_Selected__c, Technical_Sedes__c, Show_Introduction__c, 
-                       Show_Warranty__c, CreatedBy.Name, CreatedDate, OpportunityId, Opportunity.Name,
+                       Show_Warranty__c, Show_Subtotal__c, Show_Tax__c, CreatedBy.Name, CreatedDate, OpportunityId, Opportunity.Name,
                        Pricebook2Id, GrandTotal, ExpirationDate
                 FROM Quote 
                 WHERE Id = :quoteId 

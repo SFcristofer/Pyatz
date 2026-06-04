@@ -1,4 +1,4 @@
-<apex:page standardController="Quote" extensions="QuoteTechnicalPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false">
+<apex:page standardController="Quote" extensions="QuoteTechnicalPDFController" renderAs="pdf" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" cache="false">
     <html>
         <head>
             <style type="text/css">
@@ -119,8 +119,12 @@
                     <tr><td style="padding:0; vertical-align:top;">
                         <div class="content-body">
                             <table class="tbl-totals">
-                                <tr><td class="tot-lbl">SUBTOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}"/></apex:outputText></td></tr>
-                                <tr><td class="tot-lbl">I.V.A. (16%)</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}"/></apex:outputText></td></tr>
+                                <apex:outputPanel rendered="{!technicalQuote.Show_Subtotal__c}" layout="none">
+                                    <tr><td class="tot-lbl">SUBTOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}"/></apex:outputText></td></tr>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!technicalQuote.Show_Tax__c}" layout="none">
+                                    <tr><td class="tot-lbl">I.V.A. (16%)</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}"/></apex:outputText></td></tr>
+                                </apex:outputPanel>
                                 <tr class="row-grand"><td class="tot-lbl">TOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}"/></apex:outputText></td></tr>
                             </table>
                             

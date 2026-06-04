@@ -82,6 +82,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track selectedLines = [];
     @track lineaNegocioOptions = [];
     @track allowOtherLines = false;
+    @track showSubtotal = true;
+    @track showTax = true;
     
     // --- MODALES ---
     @track showModal = false;
@@ -130,6 +132,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.warranty = q.Warranty_Text__c;
                     this.accountId = q.AccountId;
                     this.parentOpportunityId = q.OpportunityId;
+                    this.showSubtotal = q.Show_Subtotal__c !== undefined ? q.Show_Subtotal__c : true;
+                    this.showTax = q.Show_Tax__c !== undefined ? q.Show_Tax__c : true;
                     if (q.Account) this.clienteNombre = q.Account.Name;
                     if (q.Markers_Data__c) {
                         try {
@@ -332,7 +336,9 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             markersData: encoded, technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
             lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true,
             estrategiaVenta: this.estrategiaVenta,
-            businessLines: this.selectedLines.join(', ')
+            businessLines: this.selectedLines.join(', '),
+            showSubtotal: this.showSubtotal,
+            showTax: this.showTax
         };
 
         try {
@@ -435,6 +441,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
     handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
     handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
+    handleShowSubtotalChange(event) { this.showSubtotal = event.target.checked; }
+    handleShowTaxChange(event) { this.showTax = event.target.checked; }
 
     handleOpenSeparatorModal() { this.showSeparatorModal = true; }
     handleCloseSeparatorModal() { this.showSeparatorModal = false; }

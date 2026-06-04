@@ -372,14 +372,16 @@
 
                                 <apex:outputPanel rendered="{!config['show_total']}">
                                     <table class="tbl-totals">
-                                        <tr>
-                                            <td class="tot-lbl">SUBTOTAL</td>
-                                            <td class="tot-val">
-                                                <apex:outputText value="{0, number, currency}">
-                                                    <apex:param value="{!BLANKVALUE(quoteRecord.Subtotal, 0)}"/>
-                                                </apex:outputText>
-                                            </td>
-                                        </tr>
+                                        <apex:outputPanel rendered="{!quoteRecord.Show_Subtotal__c}" layout="none">
+                                            <tr>
+                                                <td class="tot-lbl">SUBTOTAL</td>
+                                                <td class="tot-val">
+                                                    <apex:outputText value="{0, number, currency}">
+                                                        <apex:param value="{!BLANKVALUE(quoteRecord.Subtotal, 0)}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
                                         <apex:outputPanel rendered="{!NOT(ISNULL(quoteRecord.Discount)) && quoteRecord.Discount > 0}" layout="none">
                                             <tr>
                                                 <td class="tot-lbl" style="color:#d8000c;">DESCUENTO</td>
@@ -390,14 +392,16 @@
                                                 </td>
                                             </tr>
                                         </apex:outputPanel>
-                                        <tr>
-                                            <td class="tot-lbl">I.V.A. (16%)</td>
-                                            <td class="tot-val">
-                                                <apex:outputText value="{0, number, currency}">
-                                                    <apex:param value="{!BLANKVALUE(quoteRecord.Tax, 0)}"/>
-                                                </apex:outputText>
-                                            </td>
-                                        </tr>
+                                        <apex:outputPanel rendered="{!quoteRecord.Show_Tax__c}" layout="none">
+                                            <tr>
+                                                <td class="tot-lbl">I.V.A. (16%)</td>
+                                                <td class="tot-val">
+                                                    <apex:outputText value="{0, number, currency}">
+                                                        <apex:param value="{!BLANKVALUE(quoteRecord.Tax, 0)}"/>
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </apex:outputPanel>
                                         <tr class="row-grand">
                                             <td class="tot-lbl">TOTAL</td>
                                             <td class="tot-val">

@@ -16,7 +16,7 @@ public with sharing class QuoteTechnicalPDFController {
         // 1. Cargamos datos
         this.technicalQuote = [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Opportunity.Name, 
                                      Show_Introduction__c, Introduction_Text__c, Phone, Email, Discount,
-                                     Show_Warranty__c, Warranty_Text__c, Markers_Data__c,
+                                     Show_Warranty__c, Warranty_Text__c, Markers_Data__c, Show_Subtotal__c, Show_Tax__c,
                                      Business_Lines_Selected__c, Technical_Sedes__c, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                      Subtotal, Tax, TotalPrice, Description,
                                      (SELECT Id, Product2.Name, Product2.ProductCode, Description, Pyatz_Technical_Description__c, Descripcion_Detallada__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice

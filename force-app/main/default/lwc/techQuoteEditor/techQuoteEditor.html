@@ -213,7 +213,17 @@
                 </div>
 
                 <div class="section-card slds-m-bottom_large">
-                    <div class="section-header"><h2>Resumen de Totales</h2></div>
+                    <div class="section-header">
+                        <h2>Resumen de Totales</h2>
+                    </div>
+                    <!-- Toolbar de opciones de PDF sobre fondo blanco -->
+                    <div class="slds-p-around_small slds-border_bottom slds-theme_shade slds-grid slds-grid_align-end">
+                        <div class="slds-grid slds-grid_vertical-align-center">
+                            <span class="slds-m-right_small slds-text-title_bold" style="color: #475569;">Opciones de PDF:</span>
+                            <lightning-input type="checkbox" label="Mostrar Subtotal" checked={showSubtotal} onchange={handleShowSubtotalChange} class="slds-m-right_medium"></lightning-input>
+                            <lightning-input type="checkbox" label="Mostrar Impuestos" checked={showTax} onchange={handleShowTaxChange}></lightning-input>
+                        </div>
+                    </div>
                     <div class="datatable-container">
                         <lightning-datatable key-field="id" data={totalesData} columns={totalesColumns} hide-checkbox-column></lightning-datatable>
                     </div>

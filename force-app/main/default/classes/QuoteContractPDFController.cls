@@ -40,7 +40,8 @@ public with sharing class QuoteContractPDFController {
                                    Account.Proceso_liberacion_pedidos__c, Account.Proceso_ingreso_de_facturas__c,
                                    Contact.Name, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                    TotalPrice, Business_Lines_Selected__c, Technical_Sedes__c,
-                                   Introduction_Text__c, Warranty_Text__c, Description, Subtotal, Tax, Discount
+                                   Introduction_Text__c, Warranty_Text__c, Description, Subtotal, Tax, Discount,
+                                   Show_Subtotal__c, Show_Tax__c
                             FROM Quote WHERE Id = :quoteId];
 
         // Folio sin ceros iniciales
