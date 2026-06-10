@@ -61,8 +61,8 @@ public with sharing class EmailService {
                 Integer endIdx = lowerBody.lastIndexOf('</body>');
                 body = body.substring(0, endIdx);
             }
-            // Eliminar bloques de estilo residuales (CSS) que Salesforce inyecta a veces al inicio del body
-            body = body.replaceAll('(?i)<style.*?>[\\s\\S]*?</style>', '');
+            // NOTA: No eliminamos <style> de forma agresiva para permitir plantillas con diseño, 
+            // a menos que sean estilos inyectados por Salesforce que rompan el LWC.
         }
         return body != null ? body.trim() : '';
     }
@@ -90,7 +90,17 @@ public with sharing class EmailService {
                     pr.getParameters().put('id', type == 'Quote' ? attId : oppId);
                     if (type == 'Survey') pr.getParameters().put('surveyOnly', 'true');
                     efa.setFileName(att.get('name') + '.pdf'); 
-                    efa.setBody(!Test.isRunningTest() ? pr.getContentAsPDF() : Blob.valueOf('Test Content'));
+                    
+                    Blob pdfBlob = !Test.isRunningTest() ? pr.getContentAsPDF() : Blob.valueOf('Test Content');
+                    
+                    // VALIDACIÓN CRÍTICA: ¿Es realmente un PDF binario o un HTML de error?
+                    // Los PDFs empiezan con %PDF (en Base64: JVBERi)
+                    String base64Content = EncodingUtil.base64Encode(pdfBlob);
+                    if (!base64Content.startsWith('JVBERi')) {
+                        throw new AuraHandledException('Error al generar el PDF para "' + att.get('name') + '". El servidor devolvió un error. Verifique la configuración técnica.');
+                    }
+                    
+                    efa.setBody(pdfBlob);
                 } else if (type == 'File') {
                     ContentVersion cv = [SELECT VersionData, Title, FileExtension FROM ContentVersion WHERE ContentDocumentId = :attId AND IsLatest = true LIMIT 1];
                     efa.setFileName(cv.Title + '.' + cv.FileExtension); 

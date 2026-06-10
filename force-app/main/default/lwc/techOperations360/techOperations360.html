@@ -131,7 +131,7 @@
                     </template>
                 </template>
                 <template if:true={isEnvioPhase}>
-                    <c-tech-communication-hub record-id={effectiveRecordId}></c-tech-communication-hub>
+                    <c-tech-communication-hub record-id={effectiveRecordId} onfasesuccess={handlePhaseSuccess}></c-tech-communication-hub>
                 </template>
                 <template if:true={isSeguimientoPhase}>
                     <c-tech-tactical-follow-up record-id={effectiveRecordId}></c-tech-tactical-follow-up>

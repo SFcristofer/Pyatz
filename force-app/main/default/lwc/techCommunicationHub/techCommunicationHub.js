@@ -7,6 +7,7 @@ import sendEmailWithAttachments from '@salesforce/apex/CommunicationController.s
 import renderTemplate from '@salesforce/apex/CommunicationController.renderTemplate';
 import getEmailEngagementDetails from '@salesforce/apex/CommunicationController.getEmailEngagementDetails';
 import getContactsFromLatestQuoteSedes from '@salesforce/apex/CommunicationController.getContactsFromLatestQuoteSedes';
+import getInternalTeam from '@salesforce/apex/CommunicationController.getInternalTeam';
 
 export default class TechCommunicationHub extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
@@ -18,6 +19,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     @track availableAttachments = { quotes: [], surveys: [], files: [] };
     @track selectedAttachments = [];
     @track sedeContacts = [];
+    @track internalContacts = [];
     
     @track toEmail = '';
     @track ccEmail = '';
@@ -140,6 +142,15 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
         }
     }
 
+    @wire(getInternalTeam, { oppId: '$recordId' })
+    wiredInternalTeam({ error, data }) {
+        if (data) {
+            this.internalContacts = data;
+        } else if (error) {
+            console.error('Error loading internal team:', error);
+        }
+    }
+
     handleQuickAddContact(event) {
         const email = event.target.dataset.email;
         const checked = event.target.checked;
@@ -248,16 +259,45 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
                 variant: 'success'
             }));
             this.isSending = false;
-            // Limpiar formulario o notificar al padre
+            
+            // LIMPIEZA DE FORMULARIO
+            this.clearForm();
+
+            // NOTIFICAR AVANCE DE FASE
+            this.dispatchEvent(new CustomEvent('fasesuccess', {
+                detail: { phase: 'Negociación' }
+            }));
         })
         .catch(error => {
             this.isSending = false;
             console.error('Error enviando:', error);
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Error',
-                message: error.body.message,
+                message: error.body ? error.body.message : error.message,
                 variant: 'error'
             }));
+        });
+    }
+
+    clearForm() {
+        this.toEmail = '';
+        this.ccEmail = '';
+        this.subject = '';
+        this.emailBody = '';
+        this.selectedAttachments = [];
+        this.selectedTemplateId = '';
+        this.selectedFolder = '';
+        
+        // Desmarcar checkboxes de adjuntos en el DOM
+        const checkboxes = this.template.querySelectorAll('lightning-input[data-type]');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+        });
+
+        // Desmarcar contactos
+        const contactChecks = this.template.querySelectorAll('lightning-input[data-email]');
+        contactChecks.forEach(cb => {
+            cb.checked = false;
         });
     }
 }

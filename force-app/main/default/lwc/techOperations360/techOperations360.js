@@ -1,6 +1,6 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import { updateRecord, deleteRecord } from 'lightning/uiRecordApi';
+import { updateRecord, deleteRecord, getRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getPicklistValuesByRecordType, getObjectInfo } from 'lightning/uiObjectInfoApi';
 import OPPORTUNITY_OBJECT from '@salesforce/schema/Opportunity';
@@ -8,6 +8,8 @@ import ID_FIELD from '@salesforce/schema/Opportunity.Id';
 import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
 import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
+
+const OPPORTUNITY_FIELDS = [STAGE_FIELD, SUBSTAGE_FIELD, STATUS_FIELD];
 import getOpportunitiesList from '@salesforce/apex/OperationsController.getOpportunitiesList';
 import getOpportunitiesByAccount from '@salesforce/apex/OperationsController.getOpportunitiesByAccount';
 import saveStageTracking from '@salesforce/apex/OperationsController.saveStageTracking';
@@ -267,8 +269,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (this.recordId) {
             if (this.objectApiName === 'Opportunity') {
                 this.activeOppId = this.recordId;
-                this.currentStep = 'Definición';
-                this.currentSubStep = '1';
+                // Eliminamos el hardcodeo de etapa inicial para permitir persistencia
                 this.quoteViewMode = 'list';
                 this.loadProcessHistory();
             } else if (this.isAccountContext) {
@@ -288,6 +289,32 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     @track viewingDashboard = false;
+
+    // --- PERSISTENCIA DE NAVEGACIÓN ---
+    @wire(getRecord, { recordId: '$activeOppId', fields: OPPORTUNITY_FIELDS })
+    wiredOppRecord({ error, data }) {
+        if (data && this.activeOppId && !this.viewingDashboard) {
+            const stage = data.fields.StageName.value;
+            const subStage = data.fields.Subetapa__c.value;
+            const status = data.fields.Estado_Subetapa__c.value;
+
+            // Solo actualizar si hay datos válidos y las etapas híbridas ya se cargaron
+            if (stage && subStage && this.stages.length > 0) {
+                const foundStage = this.stages.find(s => s.value === stage || s.label === stage);
+                if (foundStage) {
+                    this.currentStep = foundStage.value;
+                    const foundSub = foundStage.subStages.find(ss => ss.label === subStage);
+                    if (foundSub) {
+                        this.currentSubStep = foundSub.value;
+                    }
+                }
+                this.currentStatus = status || '';
+                this.updateCurrentStatusFromHistory();
+            }
+        } else if (error) {
+            console.error('Error loading navigation state:', error);
+        }
+    }
 
     loadOpportunities() {
         this.isLoading = true;
@@ -476,6 +503,24 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
     handleContractGenerated(event) { this.selectedContractId = event.detail; }
+
+    /**
+     * Automatización tras envío de correo exitoso.
+     */
+    async handlePhaseSuccess(event) {
+        const phase = event.detail.phase;
+        if (phase === 'Negociación') {
+            this.currentStatus = 'Realizado';
+            this.currentSubStep = '2'; // Salto a Seguimiento Táctico
+            await this.syncOpportunityStatus();
+            
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Flujo Automatizado',
+                message: 'Correo enviado. Avanzando a Seguimiento Táctico...',
+                variant: 'info'
+            }));
+        }
+    }
 
     /**
      * MEJORA: Navegación Automática tras Finalizar Contrato

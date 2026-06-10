@@ -66,7 +66,14 @@ public with sharing class CommunicationController {
             if (latestQuotes.isEmpty() || String.isBlank(latestQuotes[0].Markers_Data__c)) return contacts;
 
             // 2. Extraer IDs de sedes del JSON
-            String decodedJson = EncodingUtil.base64Decode(latestQuotes[0].Markers_Data__c).toString();
+            String decodedJson = '';
+            try {
+                decodedJson = EncodingUtil.base64Decode(latestQuotes[0].Markers_Data__c).toString();
+            } catch (Exception e) {
+                // Fallback si no está en Base64
+                decodedJson = latestQuotes[0].Markers_Data__c;
+            }
+            
             Map<String, Object> fullState = (Map<String, Object>)JSON.deserializeUntyped(decodedJson);
             
             Set<Id> sedeIds = new Set<Id>();
@@ -84,10 +91,39 @@ public with sharing class CommunicationController {
                     'name' => c.Name,
                     'email' => c.Email,
                     'title' => c.Title != null ? c.Title : '',
-                    'sede' => c.Account.Name
+                    'sede' => c.Account.Name,
+                    'group' => 'CLIENTE'
                 });
             }
         } catch (Exception e) { System.debug('Error en getContactsFromLatestQuoteSedes: ' + e.getMessage()); }
         return contacts;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getInternalTeam(Id oppId) {
+        List<Map<String, String>> team = new List<Map<String, String>>();
+        try {
+            Opportunity opp = [SELECT Owner.Name, Owner.Email, Account.Owner.Name, Account.Owner.Email, OwnerId, Account.OwnerId FROM Opportunity WHERE Id = :oppId];
+            
+            team.add(new Map<String, String>{
+                'id' => opp.OwnerId,
+                'name' => opp.Owner.Name + ' (Dueño)',
+                'email' => opp.Owner.Email,
+                'group' => 'INTERNO',
+                'role' => 'Ventas'
+            });
+            
+            if (opp.Account.Owner.Email != opp.Owner.Email) {
+                team.add(new Map<String, String>{
+                    'id' => opp.Account.OwnerId,
+                    'name' => opp.Account.Owner.Name + ' (Cuenta)',
+                    'email' => opp.Account.Owner.Email,
+                    'group' => 'INTERNO',
+                    'role' => 'Admin'
+                });
+            }
+            // MEJORA FUTURA: Se requiere campo personalizado en WorkOrder para vincular técnicos automáticamente.
+        } catch (Exception e) { System.debug('Error en getInternalTeam: ' + e.getMessage()); }
+        return team;
     }
 }
