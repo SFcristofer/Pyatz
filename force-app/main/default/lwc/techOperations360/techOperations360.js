@@ -52,7 +52,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     // --- ACCIÓN GLOBAL: SLACK 360 ---
     async handleOpenSlack() {
         const targetId = this.effectiveRecordId;
-        const result = await TechSlackModal.open({
+        await TechSlackModal.open({
             size: 'large',
             description: 'Modal de comunicación Slack 360',
             recordId: targetId,
@@ -121,6 +121,13 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track selectedQuoteId = null;
     @track selectedContractId = null;
 
+    // Control de sincronización para evitar reinicio involuntario
+    _metadataLoaded = false;
+    _recordLoaded = false;
+    _pendingStage = null;
+    _pendingSubStage = null;
+    _pendingStatus = null;
+
     OPERATIONAL_STAGES = [
         {
             value: 'Altas', label: 'Altas',
@@ -152,8 +159,46 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             this.allStatusOptions = data.picklistFieldValues.Estado_Subetapa__c.values;
             this.statusControllerValues = data.picklistFieldValues.Estado_Subetapa__c.controllerValues;
             this.buildHybridStages(data.picklistFieldValues);
+            this._metadataLoaded = true;
+            this.applyPersistence();
             if (this.effectiveRecordId) this.loadProcessHistory();
         } else if (error) console.error('Error metadatos:', error);
+    }
+
+    // --- PERSISTENCIA DE NAVEGACIÓN ---
+    @wire(getRecord, { recordId: '$activeOppId', fields: OPPORTUNITY_FIELDS })
+    wiredOppRecord({ error, data }) {
+        if (data && this.activeOppId && !this.viewingDashboard) {
+            this._pendingStage = data.fields.StageName.value;
+            this._pendingSubStage = data.fields.Subetapa__c.value;
+            this._pendingStatus = data.fields.Estado_Subetapa__c.value;
+            this._recordLoaded = true;
+            this.applyPersistence();
+        } else if (error) {
+            console.error('Error loading navigation state:', error);
+        }
+    }
+
+    /**
+     * Lógica de Sincronización Segura:
+     * Solo aplica la posición del wizard cuando tenemos metadatos (etapas) y datos de registro.
+     */
+    applyPersistence() {
+        if (!this._metadataLoaded || !this._recordLoaded || !this._pendingStage) return;
+
+        const foundStage = this.stages.find(s => s.value === this._pendingStage || s.label === this._pendingStage);
+        if (foundStage) {
+            this.currentStep = foundStage.value;
+            const foundSub = foundStage.subStages.find(ss => ss.label === this._pendingSubStage);
+            if (foundSub) {
+                this.currentSubStep = foundSub.value;
+            }
+        }
+        this.currentStatus = this._pendingStatus || '';
+        this.updateCurrentStatusFromHistory();
+        
+        // Limpiar para evitar reprocesos innecesarios
+        this._recordLoaded = false; 
     }
 
     loadProcessHistory() {
@@ -161,7 +206,6 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (!targetId) return;
         getProcessHistory({ opportunityId: targetId })
             .then(data => {
-                // Guardamos los datos tal cual vienen (read-only por defecto)
                 this.processHistory = data || [];
                 this.updateCurrentStatusFromHistory();
             })
@@ -169,7 +213,6 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     updateCurrentStatusFromHistory() {
-        // Blindaje contra nulos y listas vacías
         if (!this.processHistory || !this.processHistory.length || !this.subPhase) {
             this.currentStatus = '';
             return;
@@ -204,33 +247,26 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             });
 
         this.stages = [...dynamicStages, ...this.OPERATIONAL_STAGES];
-        if (!this.currentStep && this.stages.length > 0) this.currentStep = this.stages[0].value;
+        if (!this.currentStep && this.stages.length > 0 && !this._pendingStage) {
+            this.currentStep = this.stages[0].value;
+        }
     }
 
     handleStatusChange(event) {
         const newValue = event.detail.value;
         this.currentStatus = newValue;
-        
         const step = this.currentStep || '';
         const phase = this.subPhase || '';
 
-        // PATRÓN DE INMUTABILIDAD: Creamos una nueva referencia del array
         let history = this.processHistory ? [...this.processHistory] : [];
         const idx = history.findIndex(h => h && h.Etapa__c === step && h.Subetapa__c === phase);
 
         if (idx !== -1) {
-            // Reemplazamos el objeto por uno nuevo con el cambio
-            // Esto evita modificar el objeto original congelado
             history[idx] = { ...history[idx], Estado__c: newValue };
         } else {
-            history.push({ 
-                Etapa__c: step, 
-                Subetapa__c: phase, 
-                Estado__c: newValue 
-            });
+            history.push({ Etapa__c: step, Subetapa__c: phase, Estado__c: newValue });
         }
         
-        // Asignamos la nueva referencia para disparar la reactividad de LWC
         this.processHistory = history;
         this.syncOpportunityStatus();
     }
@@ -269,7 +305,6 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (this.recordId) {
             if (this.objectApiName === 'Opportunity') {
                 this.activeOppId = this.recordId;
-                // Eliminamos el hardcodeo de etapa inicial para permitir persistencia
                 this.quoteViewMode = 'list';
                 this.loadProcessHistory();
             } else if (this.isAccountContext) {
@@ -279,7 +314,6 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         } else {
             this.activeOppId = null;
             this.viewingDashboard = true;
-            // No llamamos a loadOpportunities manual aquí, el @wire se encarga del dashboard global
         }
     }
 
@@ -288,46 +322,14 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         return !this.recordId || (this.recordId && this.viewingDashboard); 
     }
 
-    @track viewingDashboard = false;
-
-    // --- PERSISTENCIA DE NAVEGACIÓN ---
-    @wire(getRecord, { recordId: '$activeOppId', fields: OPPORTUNITY_FIELDS })
-    wiredOppRecord({ error, data }) {
-        if (data && this.activeOppId && !this.viewingDashboard) {
-            const stage = data.fields.StageName.value;
-            const subStage = data.fields.Subetapa__c.value;
-            const status = data.fields.Estado_Subetapa__c.value;
-
-            // Solo actualizar si hay datos válidos y las etapas híbridas ya se cargaron
-            if (stage && subStage && this.stages.length > 0) {
-                const foundStage = this.stages.find(s => s.value === stage || s.label === stage);
-                if (foundStage) {
-                    this.currentStep = foundStage.value;
-                    const foundSub = foundStage.subStages.find(ss => ss.label === subStage);
-                    if (foundSub) {
-                        this.currentSubStep = foundSub.value;
-                    }
-                }
-                this.currentStatus = status || '';
-                this.updateCurrentStatusFromHistory();
-            }
-        } else if (error) {
-            console.error('Error loading navigation state:', error);
-        }
-    }
-
     loadOpportunities() {
         this.isLoading = true;
         if (this.isAccountContext) {
             getOpportunitiesByAccount({ accountId: this.recordId })
-                .then(data => { 
-                    this.opportunities = data; 
-                })
+                .then(data => { this.opportunities = data; })
                 .catch(error => { console.error('Error:', error); })
                 .finally(() => { this.isLoading = false; });
         } else {
-            // El @wire de getOpportunitiesList se dispara automáticamente al cambiar searchTerm
-            // Si necesitamos forzar recarga, el @wire ya maneja la reactividad
             this.isLoading = false; 
         }
     }
@@ -339,8 +341,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         if (actionName === 'open_360') {
             this.activeOppId = row.id;
             this.viewingDashboard = false;
-            this.currentStep = 'Definición';
-            this.currentSubStep = '1';
+            // No reseteamos currentStep aquí, dejamos que la persistencia actúe
             this.quoteViewMode = 'list';
             this.loadProcessHistory();
         } else if (actionName === 'delete') {
@@ -348,23 +349,11 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
                 this.isLoading = true;
                 deleteRecord(row.id)
                     .then(() => {
-                        this.dispatchEvent(
-                            new ShowToastEvent({
-                                title: 'Éxito',
-                                message: 'Oportunidad eliminada correctamente',
-                                variant: 'success'
-                            })
-                        );
+                        this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Oportunidad eliminada', variant: 'success' }));
                         this.loadOpportunities();
                     })
                     .catch(error => {
-                        this.dispatchEvent(
-                            new ShowToastEvent({
-                                title: 'Error al eliminar',
-                                message: error.body.message,
-                                variant: 'error'
-                            })
-                        );
+                        this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: error.body.message, variant: 'error' }));
                         this.isLoading = false;
                     });
             }
@@ -397,16 +386,10 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     get statusOptions() {
         if (!this.allStatusOptions || !this.statusControllerValues) return [];
-        
         const controllerIndex = this.statusControllerValues[this.subPhase];
-        
-        // Caso 1: La subetapa existe en los metadatos de Salesforce (Etapas comerciales)
         if (controllerIndex !== undefined) {
             return this.allStatusOptions.filter(opt => opt.validFor.includes(controllerIndex));
         }
-        
-        // Caso 2: Etapas operativas/manuales (Altas, Organización)
-        // Devolvemos opciones genéricas para permitir el avance del flujo
         return [
             { label: 'En proceso', value: 'En proceso' },
             { label: 'Realizado', value: 'Realizado' },
@@ -433,13 +416,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleLogCall() { this.navigateToGlobalAction('LogACall'); }
     handleNewTask() { this.navigateToGlobalAction('NewTask'); }
 
-    handleNewOpportunity() {
-        this.isCreationModalOpen = true;
-    }
-
-    closeCreationModal() {
-        this.isCreationModalOpen = false;
-    }
+    handleNewOpportunity() { this.isCreationModalOpen = true; }
+    closeCreationModal() { this.isCreationModalOpen = false; }
 
     handleOpportunitySuccess(event) {
         const newOppId = event.detail.id;
@@ -470,32 +448,14 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.isLoading = true;
         const targetId = this.effectiveRecordId;
         try {
-            // 1. Guardar el tracking de la etapa
-            await saveStageTracking({ 
-                opportunityId: targetId, 
-                stage: this.currentStep, 
-                subStage: this.subPhase, 
-                status: 'En proceso' 
-            });
-
-            // 2. Crear la cotización técnica
-            const payload = {
-                opportunityId: targetId,
-                name: 'Nuevo Presupuesto Técnico',
-                status: 'Borrador',
-                lineItems: '[]'
-            };
+            await saveStageTracking({ opportunityId: targetId, stage: this.currentStep, subStage: this.subPhase, status: 'En proceso' });
+            const payload = { opportunityId: targetId, name: 'Nuevo Presupuesto Técnico', status: 'Borrador', lineItems: '[]' };
             const newQuoteId = await saveTechnicalData({ data: payload });
-
             this.selectedQuoteId = newQuoteId;
             this.quoteViewMode = 'edit';
         } catch (error) {
             console.error('Error creando cotización:', error);
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Error',
-                message: 'No se pudo crear la cotización. Revise la consola.',
-                variant: 'error'
-            }));
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo crear la cotización.', variant: 'error' }));
         } finally {
             this.isLoading = false;
         }
@@ -504,32 +464,20 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleBackToQuoteList() { this.quoteViewMode = 'list'; this.selectedQuoteId = null; }
     handleContractGenerated(event) { this.selectedContractId = event.detail; }
 
-    /**
-     * Automatización tras envío de correo exitoso.
-     */
     async handlePhaseSuccess(event) {
         const phase = event.detail.phase;
         if (phase === 'Negociación') {
             this.currentStatus = 'Realizado';
-            this.currentSubStep = '2'; // Salto a Seguimiento Táctico
+            this.currentSubStep = '2'; 
             await this.syncOpportunityStatus();
-            
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Flujo Automatizado',
-                message: 'Correo enviado. Avanzando a Seguimiento Táctico...',
-                variant: 'info'
-            }));
+            this.dispatchEvent(new ShowToastEvent({ title: 'Flujo Automatizado', message: 'Correo enviado. Avanzando...', variant: 'info' }));
         }
     }
 
-    /**
-     * MEJORA: Navegación Automática tras Finalizar Contrato
-     * Marca el estado como 'Realizado' y salta a la subetapa 3 (ODTs)
-     */
     async handleContractFinalized(event) {
         this.selectedContractId = event.detail;
         this.currentStatus = 'Realizado';
-        this.currentSubStep = '3'; // Salto a Creación ODT's
+        this.currentSubStep = '3'; 
         await this.syncOpportunityStatus();
     }
 
@@ -562,7 +510,6 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         let totalSubStages = 0;
         let completedSubStages = 0;
         let foundCurrent = false;
-
         this.stages.forEach(stage => {
             stage.subStages.forEach(sub => {
                 totalSubStages++;
@@ -584,26 +531,17 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             statusCombo.reportValidity();
             return;
         }
-
         this.isLoading = true;
-
         try {
-            // 1. Guardar componentes específicos si es necesario
             if (this.isLevantamientoPhase) {
                 const surveyComp = this.template.querySelector('c-tech-levantamiento-manager');
                 if (surveyComp) {
                     const saved = await surveyComp.save();
-                    if (!saved) {
-                        this.isLoading = false;
-                        return;
-                    }
+                    if (!saved) { this.isLoading = false; return; }
                 }
             }
-
-            // 2. Calcular siguiente paso
             const maxSubSteps = this.currentSubStages.length;
             let nextSub = parseInt(this.currentSubStep) + 1;
-
             if (nextSub <= maxSubSteps) {
                 this.currentSubStep = nextSub.toString();
             } else {
@@ -613,24 +551,13 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
                     this.currentSubStep = '1';
                 }
             }
-
-            // 3. Limpiar estado y sincronizar
             this.currentStatus = '';
             this.quoteViewMode = 'list';
             await this.syncOpportunityStatus();
-
-            // Auto-navegación si entramos a presupuesto
-            if (this.isPresupuestoPhase) {
-                await this.autoNavigateQuote();
-            }
-
+            if (this.isPresupuestoPhase) await this.autoNavigateQuote();
         } catch (error) {
             console.error('Error en navegación:', error);
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Error',
-                message: 'Ocurrió un error al avanzar. Revise la consola.',
-                variant: 'error'
-            }));
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'Ocurrió un error al avanzar.', variant: 'error' }));
         } finally {
             this.isLoading = false;
         }
@@ -655,21 +582,18 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     async autoNavigateQuote() {
         const targetId = this.effectiveRecordId;
         if (!targetId) return;
-
         this.isLoading = true;
         try {
             const result = await getQuotesList({ opportunityId: targetId });
             if (result && result.length > 0) {
-                // Caso Lineal/Existente: Tomamos el último (o sincronizado) y entramos al editor
                 this.selectedQuoteId = result[0].id;
                 this.quoteViewMode = 'edit';
             } else {
-                // Caso Inicial: No hay nada, creamos el primer presupuesto automáticamente
                 await this.handleCreateNewQuote();
             }
         } catch (error) {
-            console.error('Error en auto-navegación de presupuesto:', error);
-            this.quoteViewMode = 'list'; // Fallback a la lista si algo falla
+            console.error('Error en auto-navegación:', error);
+            this.quoteViewMode = 'list';
         } finally {
             this.isLoading = false;
         }
