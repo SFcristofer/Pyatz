@@ -162,29 +162,32 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
             message: uploadedFiles.length + ' archivos subidos al expediente.',
             variant: 'success'
         }));
-        if (this.showFullHistory) this.loadHistory();
+        // REFRESCO REACTIVO: Actualizar historial inmediatamente
+        this.loadHistory();
     }
 
     // --- MANEJADORES DE HISTORIAL ---
-    handleToggleHistory(event) {
-        this.showFullHistory = event.target.checked;
-        if (this.showFullHistory) {
-            this.loadHistory();
-        }
-    }
-
     loadHistory() {
         this.isLoadingHistory = true;
         getTacticalHistory({ oppId: this.recordId })
             .then(result => {
-                // ORDENAMIENTO CRONOLÓGICO INTEGRAL (Descendente)
-                this.historyItems = [...result].sort((a, b) => {
-                    return new Date(b.date) - new Date(a.date);
+                // PROCESAMIENTO SEGURO: Mapeamos los campos para asegurar que siempre haya valores para renderizar
+                this.historyItems = result.map(item => {
+                    return {
+                        ...item,
+                        // Si es una tarea no completada, permitimos edición rápida
+                        isPendingTask: item.isTask && item.status !== 'Completed',
+                        // Aseguramos que la descripción no sea nula para evitar fallos de renderizado
+                        desc: item.desc || 'Sin descripción adicional.'
+                    };
+                }).sort((a, b) => {
+                    // Ordenamiento descendente (más reciente primero) basado en milisegundos
+                    return (b.date || 0) - (a.date || 0);
                 });
                 this.isLoadingHistory = false;
             })
             .catch(error => {
-                console.error('Error loading history:', error);
+                console.error('Error loading 360 history:', error);
                 this.isLoadingHistory = false;
             });
     }

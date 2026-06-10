@@ -52,7 +52,7 @@ public with sharing class OperationsController {
         return CalendarService.getCalendarData(startDate, endDate);
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Map<String, Object>> getTacticalHistory(Id oppId) {
         return OperationsService.getTacticalHistory(oppId);
     }
