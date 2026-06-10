@@ -88,7 +88,18 @@
                                     <lightning-icon icon-name={item.icon} size="small" class="slds-m-right_small"></lightning-icon>
                                     <div>
                                         <div class="slds-text-title_bold">{item.subject}</div>
-                                        <div class="slds-text-body_small">{item.label} • <lightning-formatted-date-time value={item.date} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
+                                        <div class="slds-text-body_small">
+                                            <span class="slds-text-color_weak">{item.label} • </span>
+                                            <lightning-formatted-date-time value={item.date} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                            
+                                            <!-- VISIBILIDAD DE PROPIETARIO (NUEVO) -->
+                                            <template if:true={item.owner}>
+                                                <span class="slds-m-left_small slds-badge slds-theme_lightest" style="font-weight: normal; text-transform: none;">
+                                                    <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                    {item.owner}
+                                                </span>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
