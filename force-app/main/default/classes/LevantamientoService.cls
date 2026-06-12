@@ -99,12 +99,33 @@ public with sharing class LevantamientoService {
         if (recordId != null && recordId.getSObjectType().getDescribe().getName() == 'Quote') {
             oppId = [SELECT OpportunityId FROM Quote WHERE Id = :recordId].OpportunityId;
         }
-        return [SELECT Id, Name, Tipo_Servicio__c, Nivel__c, Area_Cocina_Banos__c, Zona_Genero__c, Cantidad_Principal__c, Estado_Instalacion__c, Frecuencia__c, Metros_Lineales__c, Observaciones_Tecnicas__c, CreatedDate,
-                VE__c, VP__c, Bidon_10L__c, Bidon_20L__c, Bidon_25L__c, Piso__c, Mueble__c, Pared__c, Fotografia__c, Residuos_Tarja__c, Escamoche__c, Instalaciones__c, Azolves__c, Coladeras__c, Tapon_Registro__c, Tarja__c, Tinas_por_Tarja__c, Trampa_Grasa__c, Modelo_TG_Bio__c, ST_1__c, Ovalines_Lavabo__c,
-                SP__c, ENT__c, Modelo_Grasas__c, Frecuencia_Limpieza__c, Estado_Trampa__c, Tornillo__c, Sello__c, Mampara__c, Canastilla__c, Ret_Salida__c,
-                Vactor_Descripcion__c, Vactor_Medida__c, Vactor_Material__c, Vactor_Servicio_Requerido__c, Vactor_Largo__c, Vactor_Ancho__c, Vactor_Profundidad__c, Vactor_Distancia_Camion__c, Vactor_Permiso_Delegacion__c, Vactor_Permiso_Plaza__c, Vactor_Dificultad__c, Vactor_Alcance_Pyatz__c,
-                Elemento__c, Metros_Cuadrados__c, Dimensiones_Generales__c, Materiales_Insumos__c, EPP_Requerido__c, Notas__c, WC__c
-                FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId ORDER BY Tipo_Servicio__c, CreatedDate ASC];
+
+        // Construcción Dinámica de SOQL para traer todos los campos (Opción A)
+        Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Levantamiento_Tecnico__c.fields.getMap();
+        List<String> fieldNames = new List<String>();
+        
+        // Siempre traer los campos estándar requeridos
+        fieldNames.add('Id');
+        fieldNames.add('Name');
+        fieldNames.add('CreatedDate');
+        
+        // Traer todos los campos personalizados (__c)
+        for (String fieldName : fieldMap.keySet()) {
+            if (fieldName.endsWith('__c')) {
+                fieldNames.add(fieldName);
+            }
+        }
+        
+        // Evitar duplicados (por si acaso un campo __c se agregó dos veces)
+        Set<String> uniqueFields = new Set<String>(fieldNames);
+        List<String> queryFields = new List<String>(uniqueFields);
+        
+        String query = 'SELECT ' + String.join(queryFields, ', ') + 
+                       ' FROM Levantamiento_Tecnico__c' + 
+                       ' WHERE Oportunidad__c = :oppId' + 
+                       ' ORDER BY Tipo_Servicio__c, CreatedDate ASC';
+
+        return Database.query(query);
     }
 
     public static void processLevantamientos(Id quoteId, String markersBase64) {
