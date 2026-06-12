@@ -6,14 +6,23 @@ public with sharing class OperationsController {
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getOpportunitiesList(String searchTerm) {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
-        String query = 'SELECT Id, Name, Account.Name, StageName, Amount, CloseDate, Owner.Name FROM Opportunity ';
+        String query = 'SELECT Id, Name, Account.Name, StageName, Amount, CloseDate, Owner.Name, Estado_Oportunidad__c FROM Opportunity ';
         if (String.isNotBlank(searchTerm)) {
             String key = '%' + searchTerm + '%';
             query += 'WHERE (Name LIKE :key OR Account.Name LIKE :key) ';
         }
         query += 'ORDER BY CreatedDate DESC LIMIT 200';
         for(Opportunity o : Database.query(query)) {
-            result.add(new Map<String, Object>{ 'id' => o.Id, 'name' => o.Name, 'account' => o.Account.Name, 'owner' => o.Owner.Name, 'closeDate' => o.CloseDate, 'amount' => o.Amount, 'stageName' => o.StageName });
+            result.add(new Map<String, Object>{ 
+                'id' => o.Id, 
+                'name' => o.Name, 
+                'account' => o.Account.Name, 
+                'owner' => o.Owner.Name, 
+                'closeDate' => o.CloseDate, 
+                'amount' => o.Amount, 
+                'stageName' => o.StageName,
+                'statusOpp' => o.Estado_Oportunidad__c
+            });
         }
         return result;
     }
@@ -21,8 +30,19 @@ public with sharing class OperationsController {
     @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getOpportunitiesByAccount(Id accountId) {
         List<Map<String, Object>> results = new List<Map<String, Object>>();
-        for (Opportunity o : [SELECT Id, Name, StageName, Amount, CloseDate, Owner.Name, Account.Name, Subetapa__c, Estado_Subetapa__c FROM Opportunity WHERE AccountId = :accountId ORDER BY CreatedDate DESC]) {
-            results.add(new Map<String, Object>{ 'id' => o.Id, 'name' => o.Name, 'account' => o.Account.Name, 'stageName' => o.StageName, 'amount' => o.Amount != null ? o.Amount : 0, 'closeDate' => o.CloseDate, 'owner' => o.Owner.Name, 'subetapa' => o.Subetapa__c, 'estado' => o.Estado_Subetapa__c });
+        for (Opportunity o : [SELECT Id, Name, StageName, Amount, CloseDate, Owner.Name, Account.Name, Subetapa__c, Estado_Subetapa__c, Estado_Oportunidad__c FROM Opportunity WHERE AccountId = :accountId ORDER BY CreatedDate DESC]) {
+            results.add(new Map<String, Object>{ 
+                'id' => o.Id, 
+                'name' => o.Name, 
+                'account' => o.Account.Name, 
+                'stageName' => o.StageName, 
+                'amount' => o.Amount != null ? o.Amount : 0, 
+                'closeDate' => o.CloseDate, 
+                'owner' => o.Owner.Name, 
+                'subetapa' => o.Subetapa__c, 
+                'estado' => o.Estado_Subetapa__c,
+                'statusOpp' => o.Estado_Oportunidad__c
+            });
         }
         return results;
     }

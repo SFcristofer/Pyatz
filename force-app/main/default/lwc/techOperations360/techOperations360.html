@@ -32,13 +32,16 @@
 
             <!-- TABLA DE OPORTUNIDADES -->
             <div if:false={isLoading} style="height: 600px;">
-                <lightning-datatable
+                <c-tech-custom-datatable
                     key-field="id"
                     data={opportunities}
                     columns={columns}
                     hide-checkbox-column
-                    onrowaction={handleRowAction}>
-                </lightning-datatable>
+                    onrowaction={handleRowAction}
+                    onsave={handleSave}
+                    draft-values={draftValues}
+                    onpicklistchanged={handlePicklistChange}>
+                </c-tech-custom-datatable>
             </div>
         </div>
     </template>
@@ -68,12 +71,21 @@
                 <h3 class="slds-text-heading_small slds-m-bottom_small slds-p-horizontal_small" style="color: #0070d2; font-weight: bold; border-left: 3px solid #0070d2;">
                     Información de la Oportunidad
                 </h3>
-                <lightning-record-view-form record-id={effectiveRecordId} object-api-name="Opportunity">
+                <lightning-record-edit-form record-id={effectiveRecordId} object-api-name="Opportunity" onsuccess={handleHeaderSuccess} class="header-edit-form">
                     <div class="slds-grid slds-wrap slds-p-horizontal_small">
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                             <lightning-output-field field-name="AccountId"></lightning-output-field>
                             <lightning-output-field field-name="Name"></lightning-output-field>
                             <lightning-output-field field-name="Amount"></lightning-output-field>
+                            
+                            <!-- Custom formatted input field to match standard output field styling -->
+                            <div class="slds-form-element slds-form-element_readonly slds-grid slds-m-bottom_xx-small" style="padding-top: 4px; padding-bottom: 4px;">
+                                <span class="slds-form-element__label slds-col slds-size_1-of-3" style="color: var(--slds-c-input-text-color, #444444); padding-left: 2px;">Estado Oportunidad</span>
+                                <div class="slds-form-element__control slds-col slds-size_2-of-3">
+                                    <lightning-input-field field-name="Estado_Oportunidad__c" variant="label-hidden" onchange={handleHeaderStatusChange} style="margin-top: -6px; margin-left: -12px;"></lightning-input-field>
+                                </div>
+                            </div>
+                            
                             <lightning-output-field field-name="Linea_de_negocio__c"></lightning-output-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
@@ -89,7 +101,7 @@
                             </div>
                         </div>
                     </div>
-                </lightning-record-view-form>
+                </lightning-record-edit-form>
             </div>
 
             <!-- NAVEGACIÓN -->

@@ -32,6 +32,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         'CloseDate', 
         'Name', 
         'StageName', 
+        'Estado_Oportunidad__c',
         'Amount', 
         'Linea_de_negocio__c',
         'Tipo_de_venta__c',
@@ -73,6 +74,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track opportunities = [];
     @track isLoading = false;
     @track searchTerm = '';
+    @track draftValues = []; // Para edición en tabla
 
     columns = [
         { label: 'Oportunidad', fieldName: 'name', type: 'button', initialWidth: 250,
@@ -80,6 +82,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         },
         { label: 'Cliente', fieldName: 'account', type: 'text' },
         { label: 'Etapa', fieldName: 'stageName', type: 'text' },
+        { label: 'Estado Oportunidad', fieldName: 'statusOpp', type: 'text' },
         { label: 'Monto', fieldName: 'amount', type: 'currency', cellAttributes: { alignment: 'left' } },
         { label: 'Fecha de Cierre', fieldName: 'closeDate', type: 'date' },
         { label: 'Propietario', fieldName: 'owner', type: 'text' },
@@ -88,10 +91,13 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             { label: 'Eliminar', name: 'delete', iconName: 'utility:delete', variant: 'destructive' }
         ] } }
     ];
-    
+
+    wiredOppsResult;
     @wire(getOpportunitiesList, { searchTerm: '$searchTerm' })
-    wiredOpps({ error, data }) {
-        if (this.isAccountContext) return; // Si estamos en cuenta, usamos loadOpportunities manual
+    wiredOpps(result) {
+        this.wiredOppsResult = result;
+        const { error, data } = result;
+        if (this.isAccountContext) return;
         this.isLoading = true;
         if (data) {
             this.opportunities = data;
@@ -99,6 +105,50 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             console.error('Error fetching opps:', error);
         }
         this.isLoading = false;
+    }
+
+    async handleSave(event) {
+        const recordInputs = event.detail.draftValues.map(draft => {
+            const fields = { ...draft };
+            // Mapear fieldName de la tabla al API Name de Salesforce
+            if (fields.statusOpp) {
+                fields['Estado_Oportunidad__c'] = fields.statusOpp;
+                delete fields.statusOpp;
+            }
+            return { fields };
+        });
+
+        const promises = recordInputs.map(recordInput => updateRecord(recordInput));
+        try {
+            await Promise.all(promises);
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Oportunidad actualizada', variant: 'success' }));
+            this.draftValues = [];
+            // Forzar recarga de datos
+            if (this.isAccountContext) {
+                this.loadOpportunities();
+            } else {
+                // Si estamos en dashboard, el wire se refresca con refreshApex (necesitaríamos importar refreshApex)
+                location.reload(); // Opción simple para asegurar refresco global
+            }
+        } catch (error) {
+            console.error('Error al guardar:', error);
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo actualizar el estado.', variant: 'error' }));
+        }
+    }
+
+    // Handler para cambios rápidos en el encabezado
+    handleHeaderStatusChange() {
+        this.template.querySelector('.header-edit-form').submit();
+    }
+
+    handleHeaderSuccess() {
+        this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Estado actualizado correctamente', variant: 'success' }));
+        if (this.isAccountContext) this.loadOpportunities();
+    }
+
+    handlePicklistChange(event) {
+        // Placeholder para futura implementación de picklist en datatable
+        console.log('Picklist changed:', event.detail);
     }
 
     handleSearchChange(event) {
