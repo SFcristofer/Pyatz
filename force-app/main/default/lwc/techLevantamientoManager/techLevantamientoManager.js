@@ -156,10 +156,14 @@ export default class TechLevantamientoManager extends LightningElement {
         return { 
             id: Date.now() + Math.random(), 
             rowNumber: num, nivel: '', area: '', zona: '', obs: '', cells: [],
-            ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, 
-            coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, st1: 0, ovalines: 0, 
-            sp: 0, ent: 0, tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, 
-            wc: 0, mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, largo: 0, ancho: 0, prof: 0
+            ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, foto: '',
+            residuos: '', escamoche: '', instala: '', azolves: '',
+            coladeras: 0, tapon: 0, tarja: 0, tinas: 0, tgrasa: 0, modelo: '', st1: 0, ovalines: 0, 
+            sp: 0, ent: 0, frecuencia: '', estado: '',
+            tornillo: 0, sello: 0, mampara: 0, canastilla: 0, retSalida: 0, 
+            wc: 0, dias: '', mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, 
+            descripcion: '', medida: '', material: '', servicio: '', largo: 0, ancho: 0, prof: 0,
+            distancia: '', permDelegacion: '', permPlaza: '', dificultad: '', alcance: ''
         };
     }
 

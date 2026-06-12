@@ -397,7 +397,7 @@
                                                 <td class="tot-lbl">I.V.A. (16%)</td>
                                                 <td class="tot-val">
                                                     <apex:outputText value="{0, number, currency}">
-                                                        <apex:param value="{!BLANKVALUE(quoteRecord.Tax, 0)}"/>
+                                                        <apex:param value="{!BLANKVALUE(totalTax, 0)}"/>
                                                     </apex:outputText>
                                                 </td>
                                             </tr>

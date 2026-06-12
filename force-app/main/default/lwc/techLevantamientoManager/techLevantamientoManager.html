@@ -355,17 +355,17 @@
                                     <td><input type="number" class="cell-input" data-index={index} data-field="sp" value={row.sp} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ent" value={row.ent} onchange={handleSurveyChange}></td>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="modelo" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="modelo" value={row.modelo} onchange={handleSurveyChange}>
                                             <option value="">-</option><option value="IG-20">IG-20</option><option value="IG-40">IG-40</option><option value="CORIAT">CORIAT</option><option value="INTERNATIONAL">INTERNATIONAL</option><option value="OTRO">OTRO</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="frecuencia" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="frecuencia" value={row.frecuencia} onchange={handleSurveyChange}>
                                             <option value="">-</option><option value="1 VEZ A LA SEMANA">1 VEZ A LA SEMANA</option><option value="1 VEZ A LA QUINCENA">1 VEZ A LA QUINCENA</option><option value="1 VEZ AL MES">1 VEZ AL MES</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <select class={row.estadoClass} data-index={index} data-field="estado" onchange={handleSurveyChange}>
+                                        <select class={row.estadoClass} data-index={index} data-field="estado" value={row.estado} onchange={handleSurveyChange}>
                                             <option value="">-</option><option value="EN BUEN ESTADO">EN BUEN ESTADO</option><option value="EN MAL ESTADO">EN MAL ESTADO</option><option value="EN PESIMO ESTADO">EN PESIMO ESTADO</option>
                                         </select>
                                     </td>
@@ -584,12 +584,12 @@
                             <template for:each={surveyData} for:item="row" for:index="index">
                                 <tr key={row.id}>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="descripcion" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="descripcion" value={row.descripcion} onchange={handleSurveyChange}>
                                             <option value="">-</option><option value="Cárcamo">Cárcamo</option><option value="Registro">Registro</option><option value="Tub. elevada Horizontal">Tub. elevada Horiz.</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <select class="cell-select" data-index={index} data-field="medida" onchange={handleSurveyChange}>
+                                        <select class="cell-select" data-index={index} data-field="medida" value={row.medida} onchange={handleSurveyChange}>
                                             <option value="">-</option><option value='1"'>1"</option><option value='4"'>4"</option>
                                         </select>
                                     </td>

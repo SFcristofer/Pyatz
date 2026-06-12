@@ -4,6 +4,7 @@ public with sharing class QuoteContractPDFController {
     public Map<String, Boolean> config {get; set;}
     public String fechaHoy {get; set;}
     public Decimal totalContrato {get; set;}
+    public Decimal totalTax {get; set;}
     
     public String quoteNumberShort {get; set;}
     public String firmanteNombre {get; set;}
@@ -64,9 +65,19 @@ public with sharing class QuoteContractPDFController {
             this.selectedLineItems = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
                                              Discount, Description, Descripcion_Detallada__c, Zonas_a_Tratar__c FROM QuoteLineItem 
                                       WHERE QuoteId = :quoteId AND Id IN :selectedIdsParam.split(',')];
-            for(QuoteLineItem item : this.selectedLineItems) {
-                this.totalContrato += (item.TotalPrice != null ? item.TotalPrice : 0) * 1.16;
-            }
+        } else {
+            this.selectedLineItems = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
+                                             Discount, Description, Descripcion_Detallada__c, Zonas_a_Tratar__c FROM QuoteLineItem 
+                                      WHERE QuoteId = :quoteId];
+        }
+
+        // El Total del Contrato debe ser consistente con el Total del Presupuesto
+        if (this.quoteRecord.Tax != null && this.quoteRecord.Tax > 0) {
+            this.totalTax = this.quoteRecord.Tax;
+            this.totalContrato = (this.quoteRecord.GrandTotal != null ? this.quoteRecord.GrandTotal : 0);
+        } else {
+            this.totalTax = (this.quoteRecord.Subtotal != null ? this.quoteRecord.Subtotal : 0) * 0.16;
+            this.totalContrato = (this.quoteRecord.Subtotal != null ? this.quoteRecord.Subtotal : 0) * 1.16;
         }
 
         // 2. Lógica de Firmas Dinámica

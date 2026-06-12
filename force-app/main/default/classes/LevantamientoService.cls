@@ -83,11 +83,42 @@ public with sharing class LevantamientoService {
             lev.Bidon_10L__c = getDec(row.get('c10l')); lev.Bidon_20L__c = getDec(row.get('c20l')); lev.Bidon_25L__c = getDec(row.get('c25l'));
             lev.Piso__c = getDec(row.get('piso')); lev.Mueble__c = getDec(row.get('mueble')); lev.Pared__c = getDec(row.get('pared'));
             lev.Escamoche__c = (String)row.get('escamoche'); lev.Azolves__c = (String)row.get('azolves');
+            lev.Fotografia__c = (String)row.get('foto'); lev.Residuos_Tarja__c = (String)row.get('residuos');
+            lev.Estado_Instalacion__c = (String)row.get('instala'); lev.Coladeras__c = getDec(row.get('coladeras'));
+            lev.Tapon_Registro__c = getDec(row.get('tapon')); lev.Tarja__c = getDec(row.get('tarja'));
+            lev.Tinas_por_Tarja__c = getDec(row.get('tinas')); lev.Trampa_Grasa__c = getDec(row.get('tgrasa'));
+            lev.Modelo_TG_Bio__c = (String)row.get('modelo'); lev.ST_1__c = getDec(row.get('st1'));
+            lev.Ovalines_Lavabo__c = getDec(row.get('ovalines'));
         } else if (type == 'VACTOR') {
             lev.Vactor_Largo__c = getDec(row.get('largo')); lev.Vactor_Ancho__c = getDec(row.get('ancho')); lev.Vactor_Profundidad__c = getDec(row.get('prof'));
             lev.Vactor_Material__c = (String)row.get('material'); lev.Vactor_Dificultad__c = (String)row.get('dificultad');
+            lev.Vactor_Descripcion__c = (String)row.get('descripcion'); lev.Vactor_Medida__c = (String)row.get('medida');
+            lev.Vactor_Servicio_Requerido__c = (String)row.get('servicio'); lev.Vactor_Distancia_Camion__c = (String)row.get('distancia');
+            lev.Vactor_Permiso_Delegacion__c = (String)row.get('permDelegacion'); lev.Vactor_Permiso_Plaza__c = (String)row.get('permPlaza');
+            lev.Vactor_Alcance_Pyatz__c = (String)row.get('alcance');
+        } else if (type == 'GRASAS') {
+            lev.SP__c = getDec(row.get('sp')); lev.ENT__c = getDec(row.get('ent'));
+            lev.Frecuencia_Limpieza__c = (String)row.get('frecuencia'); lev.Estado_Trampa__c = (String)row.get('estado');
+            lev.Modelo_Grasas__c = (String)row.get('modelo'); lev.Estado_Instalacion__c = (String)row.get('instala');
+            lev.Fotografia__c = (String)row.get('foto');
+        } else if (type == 'INTIMA') {
+            lev.Tornillo__c = getDec(row.get('tornillo')); lev.Sello__c = getDec(row.get('sello'));
+            lev.Mampara__c = getDec(row.get('mampara')); lev.Canastilla__c = getDec(row.get('canastilla'));
+            lev.Ret_Salida__c = getDec(row.get('retSalida')); lev.WC__c = getDec(row.get('wc'));
+            lev.Estado_Instalacion__c = (String)row.get('instala'); lev.Fotografia__c = (String)row.get('foto');
+            lev.Frecuencia__c = (String)row.get('frecuencia'); lev.Dias_Servicio_Censo__c = (String)row.get('dias');
+        } else if (type == 'DESAZOLVE MECANICO') {
+            lev.WC__c = getDec(row.get('wc')); lev.Mingitorios__c = getDec(row.get('mingitorios'));
+            lev.Metros_Lineales__c = getDec(row.get('mtLineal')); lev.Tarjas_Servicios__c = getDec(row.get('tarjas'));
+            lev.Cuarto_Humado__c = getDec(row.get('cuartoHumado')); lev.Equipos_ARM__c = getDec(row.get('arm'));
+            lev.Ovalines_Lavabo__c = getDec(row.get('ovalines')); lev.Coladeras__c = getDec(row.get('coladeras'));
+            lev.Tapon_Registro__c = getDec(row.get('tapon')); lev.SP__c = getDec(row.get('sp'));
+            lev.ENT__c = getDec(row.get('ent')); lev.Estado_Instalacion__c = (String)row.get('instala');
+            lev.Fotografia__c = (String)row.get('foto');
+        } else if (type == 'AROMATIZANTES') {
+            lev.WC__c = getDec(row.get('wc')); lev.Estado_Instalacion__c = (String)row.get('instala');
+            lev.Fotografia__c = (String)row.get('foto');
         }
-        // ... (resto de mapeos clásicos omitidos para brevedad pero mantenidos conceptualmente)
     }
 
     private static Decimal getDec(Object val) {

@@ -475,13 +475,17 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     handleCloseEditModal() { this.showEditModal = false; }
 
     calculateTotals() {
-        let total = 0;
-        this.quoteLineItems.forEach(item => {
-            if (item.isSelected) {
+        // El total debe reflejar el presupuesto completo para ser consistente con la solicitud del usuario
+        const quote = this.availableQuotes.find(q => q.Id === this.selectedQuoteId);
+        if (quote && quote.GrandTotal > 0) {
+            this.totals = { total: quote.GrandTotal };
+        } else {
+            let total = 0;
+            this.quoteLineItems.forEach(item => {
                 total += (item.TotalPrice || 0) * 1.16;
-            }
-        });
-        this.totals = { total };
+            });
+            this.totals = { total };
+        }
     }
 
     handleToggle(event) {
