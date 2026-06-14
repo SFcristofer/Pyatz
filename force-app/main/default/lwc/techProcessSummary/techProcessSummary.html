@@ -1,23 +1,11 @@
 <template>
-    <div class="slds-box slds-theme_default slds-m-bottom_medium summary-card">
-        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small slds-p-horizontal_small slds-grid_vertical-align-end">
-            <div class="slds-grid slds-grid_vertical-align-center">
-                <lightning-button-icon
-                    icon-name={toggleIcon}
-                    variant="border-filled"
-                    onclick={handleToggleVisibility}
-                    tooltip={toggleTooltip}
-                    class="slds-m-right_small">
-                </lightning-button-icon>
-                <lightning-icon icon-name="standard:answer_best" size="small" class="slds-m-right_small"></lightning-icon>
-                <div>
-                    <h3 class="slds-text-heading_small header-title">
-                        Resumen de Ejecución Comercial y Operativa
-                    </h3>
-                    <p if:true={isViewingOther} class="slds-text-color_error slds-text-title_bold">
-                        ⚠️ MODO CONSULTA: Viendo referencia externa
-                    </p>
-                </div>
+    <div class="slds-theme_default">
+        <template if:false={showEvidenceOnly}>
+            <div class="slds-grid slds-grid_align-spread slds-m-bottom_small slds-grid_vertical-align-end">
+            <div>
+                <p if:true={isViewingOther} class="slds-text-color_error slds-text-title_bold">
+                    ⚠️ MODO CONSULTA: Viendo referencia externa
+                </p>
             </div>
             
             <div class="slds-grid slds-grid_vertical-align-end">
@@ -44,8 +32,8 @@
             </div>
         </div>
         
-        <template if:true={isExpanded}>
-            <div class="table-container">
+        <!-- TABLA -->
+        <div class="table-container slds-m-bottom_medium">
                 <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-no-row-hover custom-table">
                     <thead>
                         <tr class="slds-line-height_reset">
@@ -82,9 +70,9 @@
                 </table>
             </div>
         </template>
-
-        <!-- SECCIÓN: GESTIÓN DE EVIDENCIAS (SIEMPRE VISIBLE) -->
-        <div class="evidence-section slds-m-top_medium slds-p-around_medium border-top bg-light">
+        <!-- SECCIÓN: GESTIÓN DE EVIDENCIAS -->
+        <template if:false={showTableOnly}>
+            <div class="evidence-section slds-m-top_medium slds-p-around_medium border-top bg-light">
             <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
                 <div class="slds-grid slds-grid_vertical-align-center">
                     <lightning-icon icon-name="utility:attach" size="x-small" class="slds-m-right_x-small"></lightning-icon>
@@ -154,5 +142,6 @@
                 </div>
             </template>
         </div>
+        </template>
     </div>
 </template>

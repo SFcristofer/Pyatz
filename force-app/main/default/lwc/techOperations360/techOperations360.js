@@ -25,6 +25,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     // --- ESTADO DEL MODAL ---
     @track isCreationModalOpen = false;
+    @track isSummaryModalOpen = false;
     @track activeOppId = null; 
     
     // LISTA DE CAMPOS SEGÚN x.txt
@@ -530,6 +531,9 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     handleNewOpportunity() { this.isCreationModalOpen = true; }
     closeCreationModal() { this.isCreationModalOpen = false; }
+
+    openSummaryModal() { this.isSummaryModalOpen = true; }
+    closeSummaryModal() { this.isSummaryModalOpen = false; }
 
     handleOpportunitySuccess(event) {
         const newOppId = event.detail.id;

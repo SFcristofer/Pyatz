@@ -8,7 +8,11 @@ import getEvidenceGallery from '@salesforce/apex/OperationsController.getEvidenc
 import renameUploadedFile from '@salesforce/apex/OperationsController.renameUploadedFile';
 
 export default class TechProcessSummary extends NavigationMixin(LightningElement) {
-    @api recordId; // Oportunidad base
+    @api recordId;
+    @api isModalMode = false;
+    @api showTableOnly = false;
+    @api showEvidenceOnly = false;
+
     @track displayRecordId; // ID que estamos visualizando actualmente
     @track openOppOptions = []; // Opciones para el dropdown de pipeline activo
     @track isExpanded = false; // Variable de control para visibilidad de la tabla, inicia contraído

@@ -68,9 +68,12 @@
 
             <!-- INFORMACIÓN DE LA OPORTUNIDAD -->
             <div class="slds-box slds-theme_shade slds-m-bottom_medium">
-                <h3 class="slds-text-heading_small slds-m-bottom_small slds-p-horizontal_small" style="color: #0070d2; font-weight: bold; border-left: 3px solid #0070d2;">
-                    Información de la Oportunidad
-                </h3>
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small slds-p-horizontal_small">
+                    <h3 class="slds-text-heading_small" style="color: #0070d2; font-weight: bold; border-left: 3px solid #0070d2; padding-left: 8px;">
+                        Información de la Oportunidad
+                    </h3>
+                    <lightning-button label="Historial y Evidencias" icon-name="utility:table" variant="brand-outline" onclick={openSummaryModal}></lightning-button>
+                </div>
                 <lightning-record-edit-form record-id={effectiveRecordId} object-api-name="Opportunity" onsuccess={handleHeaderSuccess} class="header-edit-form">
                     <div class="slds-grid slds-wrap slds-p-horizontal_small">
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
@@ -189,7 +192,7 @@
                     <c-tech-communication-hub record-id={effectiveRecordId} folder-name="Enhorabuena"></c-tech-communication-hub>
                 </template>
                 <template if:true={isAutorizacionPhase}>
-                    <c-tech-process-summary record-id={effectiveRecordId}></c-tech-process-summary>
+                    <c-tech-process-summary record-id={effectiveRecordId} show-evidence-only="true"></c-tech-process-summary>
                 </template>
                 <template if:true={isAltaCliente}>
                     <c-tech-file-checklist record-id={effectiveRecordId} category="Alta Cliente"></c-tech-file-checklist>
@@ -248,6 +251,24 @@
                             <lightning-button type="submit" label="Crear e Iniciar 360" variant="brand"></lightning-button>
                         </div>
                     </lightning-record-edit-form>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- MODAL RESUMEN OPERATIVO -->
+    <template if:true={isSummaryModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={closeSummaryModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium">Historial Operativo y Evidencias</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" style="background: #fdfdfd; min-height: 400px;">
+                    <c-tech-process-summary record-id={effectiveRecordId} show-table-only="true"></c-tech-process-summary>
                 </div>
             </div>
         </section>
