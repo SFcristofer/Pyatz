@@ -187,3 +187,23 @@
 .radius-8 {
     border-radius: 8px;
 }
+
+/* 📱 Responsive Adjustments for Tablets and Laptops */
+@media (max-width: 1024px) {
+    .action-card {
+        padding: 1rem 0.5rem;
+    }
+    .card-title {
+        font-size: 0.85rem;
+        margin-top: 8px;
+    }
+    .form-title {
+        font-size: 1.1rem;
+    }
+    .action-form-container {
+        padding: 1rem;
+    }
+    .history-panel {
+        min-height: 400px;
+    }
+}

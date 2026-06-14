@@ -2,35 +2,35 @@
     <div class="tactical-container slds-grid slds-wrap slds-gutters slds-p-around_medium">
         
         <!-- COLUMNA IZQUIERDA: ACCIONES -->
-        <div class="slds-col slds-size_1-of-1 slds-large-size_6-of-12 slds-p-right_medium slds-m-bottom_large">
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12 slds-p-right_medium slds-m-bottom_large">
             <h2 class="slds-text-heading_medium slds-font-weight_bold slds-m-bottom_large" style="color: #00396b;">¿Qué acción deseas realizar hoy?</h2>
             
             <div class="slds-grid slds-wrap slds-gutters_small action-cards-container">
-                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-3 slds-large-size_1-of-3 slds-m-bottom_medium">
                     <div class="action-card color-call" onclick={handleLogCall}>
                         <lightning-icon icon-name="standard:log_a_call" size="large"></lightning-icon>
                         <span class="card-title">Registrar Llamada</span>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-3 slds-large-size_1-of-3 slds-m-bottom_medium">
                     <div class="action-card color-task" onclick={handleNewTask}>
                         <lightning-icon icon-name="standard:task" size="large"></lightning-icon>
                         <span class="card-title">Crear Tarea</span>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-3 slds-large-size_1-of-3 slds-m-bottom_medium">
                     <div class={noteCardClass} data-action="note" onclick={handleActionClick}>
                         <lightning-icon icon-name="standard:note" size="large"></lightning-icon>
                         <span class="card-title">Añadir Nota</span>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-3 slds-large-size_1-of-3 slds-m-bottom_medium">
                     <div class={emailCardClass} data-action="email" onclick={handleActionClick}>
                         <lightning-icon icon-name="standard:email" size="large"></lightning-icon>
                         <span class="card-title">Enviar Correo</span>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-2 slds-small-size_1-of-3 slds-medium-size_1-of-3 slds-large-size_1-of-3 slds-m-bottom_medium">
                     <div class={fileCardClass} data-action="file" onclick={handleActionClick}>
                         <lightning-icon icon-name="standard:file" size="large"></lightning-icon>
                         <span class="card-title">Subir Archivo</span>
@@ -88,7 +88,7 @@
         </div>
 
         <!-- COLUMNA DERECHA: HISTORIAL (PERMANENTE) -->
-        <div class="slds-col slds-size_1-of-1 slds-large-size_6-of-12">
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12">
             <div class="history-panel slds-p-around_medium">
                 <div class="slds-grid slds-grid_align-spread slds-m-bottom_large">
                     <div class="slds-grid slds-grid_vertical-align-center">
