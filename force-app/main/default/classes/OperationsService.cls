@@ -13,7 +13,7 @@ public with sharing class OperationsService {
 
         // --- 1. TAREAS Y ACTIVIDADES (Log a Call, Tasks) ---
         for (Task t : [SELECT Id, Subject, Status, Description, TaskSubtype, CreatedDate, Owner.Name 
-                        FROM Task WHERE WhatId = :oppId ORDER BY CreatedDate DESC LIMIT 50]) {
+                        FROM Task WHERE WhatId = :oppId AND TaskSubtype != 'Email' ORDER BY CreatedDate DESC LIMIT 50]) {
             String subType = t.TaskSubtype != null ? t.TaskSubtype : 'Task';
             String icon = subType == 'Call' ? 'standard:log_a_call' : (subType == 'Email' ? 'standard:email' : 'standard:task');
             history.add(new Map<String, Object>{ 
@@ -33,11 +33,12 @@ public with sharing class OperationsService {
         }
 
         // --- 3. CORREOS ELECTRÓNICOS (EmailMessages) ---
-        for (EmailMessage em : [SELECT Id, Subject, TextBody, MessageDate, FromAddress, ToAddress 
+        for (EmailMessage em : [SELECT Id, Subject, TextBody, MessageDate, FromAddress, ToAddress, CreatedBy.Name 
                                  FROM EmailMessage WHERE RelatedToId = :oppId ORDER BY MessageDate DESC LIMIT 20]) {
             history.add(new Map<String, Object>{ 
                 'id' => em.Id, 'type' => 'Email', 'label' => 'Correo', 'subject' => em.Subject,
-                'date' => em.MessageDate.getTime(), 'icon' => 'standard:email', 'desc' => 'De: ' + em.FromAddress + '\nPara: ' + em.ToAddress, 'owner' => 'Email'
+                'date' => em.MessageDate.getTime(), 'icon' => 'standard:email', 'desc' => 'De: ' + em.FromAddress + '\nPara: ' + em.ToAddress, 'owner' => em.CreatedBy != null ? em.CreatedBy.Name : 'Email',
+                'isEmail' => true
             });
         }
 
@@ -93,5 +94,30 @@ public with sharing class OperationsService {
         ContentDocumentLink cdl = new ContentDocumentLink(ContentDocumentId = cn.Id, LinkedEntityId = parentId, ShareType = 'V', Visibility = 'AllUsers');
         insert cdl;
         return cn.Id;
+    }
+
+    public static Map<String, Object> getEmailDetails(Id emailId) {
+        EmailMessage em = [SELECT Id, Subject, HtmlBody, TextBody, FromAddress, ToAddress, MessageDate 
+                           FROM EmailMessage WHERE Id = :emailId LIMIT 1];
+                           
+        List<Map<String, Object>> attachments = new List<Map<String, Object>>();
+        for (ContentDocumentLink cdl : [SELECT ContentDocumentId, ContentDocument.Title, ContentDocument.FileType 
+                                        FROM ContentDocumentLink WHERE LinkedEntityId = :emailId]) {
+            String fType = cdl.ContentDocument.FileType;
+            String icon = (fType == 'PDF') ? 'doctype:pdf' : (new Set<String>{'PNG','JPG','JPEG'}.contains(fType) ? 'doctype:image' : 'doctype:attachment');
+            attachments.add(new Map<String, Object>{
+                'id' => cdl.ContentDocumentId,
+                'title' => cdl.ContentDocument.Title,
+                'icon' => icon
+            });
+        }
+        
+        return new Map<String, Object>{
+            'subject' => em.Subject,
+            'fromAddress' => em.FromAddress,
+            'toAddress' => em.ToAddress,
+            'htmlBody' => String.isNotBlank(em.HtmlBody) ? em.HtmlBody : em.TextBody,
+            'attachments' => attachments
+        };
     }
 }

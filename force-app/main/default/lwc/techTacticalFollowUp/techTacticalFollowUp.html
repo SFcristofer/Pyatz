@@ -168,6 +168,12 @@
                                                         </template>
                                                     </div>
                                                 </template>
+                                                <!-- ACCIÓN CORREO (VER COMPLETO) -->
+                                                <template if:true={item.isEmail}>
+                                                    <div class="slds-m-top_small slds-border_top slds-p-top_small slds-text-align_right">
+                                                        <lightning-button variant="base" label="Ver Correo Completo" icon-name="utility:preview" data-id={item.id} onclick={handleViewEmail}></lightning-button>
+                                                    </div>
+                                                </template>
                                                 
                                                 <!-- PREVISUALIZACIÓN DE IMAGEN -->
                                                 <template if:true={item.previewUrl}>
@@ -191,4 +197,57 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE CORREO COMPLETO -->
+    <template if:true={showEmailModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" onclick={closeEmailModal} alternative-text="Cerrar" class="slds-modal__close" variant="bare-inverse"></lightning-button-icon>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">
+                        <template if:true={isLoadingEmail}>Cargando...</template>
+                        <template if:false={isLoadingEmail}>{selectedEmail.subject}</template>
+                    </h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={isLoadingEmail}>
+                        <div class="slds-is-relative slds-p-around_large" style="height: 150px;">
+                            <lightning-spinner alternative-text="Cargando contenido..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+                    
+                    <template if:false={isLoadingEmail}>
+                        <div class="slds-grid slds-m-bottom_medium slds-text-body_small">
+                            <div class="slds-col slds-size_1-of-2"><strong>De:</strong> {selectedEmail.fromAddress}</div>
+                            <div class="slds-col slds-size_1-of-2"><strong>Para:</strong> {selectedEmail.toAddress}</div>
+                        </div>
+                        <div class="email-body-container slds-box slds-theme_shade slds-m-bottom_medium" style="background: white; min-height: 150px;">
+                            <lightning-formatted-rich-text value={selectedEmail.htmlBody}></lightning-formatted-rich-text>
+                        </div>
+                        
+                        <template if:true={selectedEmail.attachments.length}>
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">
+                                <lightning-icon icon-name="utility:attach" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                Archivos Adjuntos
+                            </h3>
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <template for:each={selectedEmail.attachments} for:item="att">
+                                    <div key={att.id} class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_small">
+                                        <div class="slds-box slds-box_link slds-text-align_center action-card" data-id={att.id} onclick={previewAttachment} style="padding: 1rem;">
+                                            <lightning-icon icon-name={att.icon} size="medium" class="slds-m-bottom_x-small"></lightning-icon>
+                                            <p class="slds-truncate slds-text-body_small" title={att.title}>{att.title}</p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cerrar" onclick={closeEmailModal}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
 </template>

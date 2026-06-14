@@ -110,4 +110,9 @@ public with sharing class OperationsController {
         }
         return options;
     }
+
+    @AuraEnabled
+    public static Map<String, Object> getEmailDetails(Id emailId) {
+        return OperationsService.getEmailDetails(emailId);
+    }
 }

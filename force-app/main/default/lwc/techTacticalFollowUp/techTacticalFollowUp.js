@@ -5,6 +5,7 @@ import { refreshApex } from '@salesforce/apex';
 import saveNote from '@salesforce/apex/OperationsController.saveNote';
 import getTacticalHistory from '@salesforce/apex/OperationsController.getTacticalHistory';
 import updateTaskActivity from '@salesforce/apex/OperationsController.updateTaskActivity';
+import getEmailDetails from '@salesforce/apex/OperationsController.getEmailDetails';
 
 export default class TechTacticalFollowUp extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
@@ -13,6 +14,11 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
     @track isLoadingHistory = false;
     @track historyItems = [];
     @track groupedHistory = [];
+
+    // --- ESTADO MODAL CORREO ---
+    @track showEmailModal = false;
+    @track selectedEmail = {};
+    @track isLoadingEmail = false;
 
     // --- MANEJO DE TARJETAS DE ACCIÓN ---
     get noteCardClass() { return this.activeAction === 'note' ? 'action-card active-card' : 'action-card'; }
@@ -237,5 +243,46 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
 
     refreshHistory() {
         this.loadHistory();
+    }
+
+    // --- MANEJO DE CORREOS COMPLETOS ---
+    handleViewEmail(event) {
+        const emailId = event.target.dataset.id;
+        this.showEmailModal = true;
+        this.isLoadingEmail = true;
+        this.selectedEmail = {};
+        
+        getEmailDetails({ emailId: emailId })
+            .then(result => {
+                this.selectedEmail = result;
+                this.isLoadingEmail = false;
+            })
+            .catch(error => {
+                console.error('Error loading email details:', error);
+                this.isLoadingEmail = false;
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error',
+                    message: 'No se pudo cargar el correo.',
+                    variant: 'error'
+                }));
+            });
+    }
+
+    closeEmailModal() {
+        this.showEmailModal = false;
+        this.selectedEmail = {};
+    }
+
+    previewAttachment(event) {
+        const docId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__namedPage',
+            attributes: {
+                pageName: 'filePreview'
+            },
+            state: {
+                selectedRecordId: docId
+            }
+        });
     }
 }
