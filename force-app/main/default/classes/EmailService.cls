@@ -80,35 +80,40 @@ public with sharing class EmailService {
             mail.setWhatId(oppId); 
             mail.setSaveAsActivity(true);
             
-            List<Messaging.EmailFileAttachment> attachments = new List<Messaging.EmailFileAttachment>();
+            List<Id> contentVersionIds = new List<Id>();
             for (Map<String, String> att : selectedAttachments) {
                 String type = att.get('type'); 
                 Id attId = (Id)att.get('id'); 
-                Messaging.EmailFileAttachment efa = new Messaging.EmailFileAttachment();
+                
                 if (type == 'Quote' || type == 'Survey') {
                     PageReference pr = Page.QuoteTechnicalPDF; 
                     pr.getParameters().put('id', type == 'Quote' ? attId : oppId);
                     if (type == 'Survey') pr.getParameters().put('surveyOnly', 'true');
-                    efa.setFileName(att.get('name') + '.pdf'); 
                     
                     Blob pdfBlob = !Test.isRunningTest() ? pr.getContentAsPDF() : Blob.valueOf('Test Content');
                     
                     // VALIDACIÓN CRÍTICA: ¿Es realmente un PDF binario o un HTML de error?
-                    // Los PDFs empiezan con %PDF (en Base64: JVBERi)
                     String base64Content = EncodingUtil.base64Encode(pdfBlob);
                     if (!base64Content.startsWith('JVBERi')) {
                         throw new AuraHandledException('Error al generar el PDF para "' + att.get('name') + '". El servidor devolvió un error. Verifique la configuración técnica.');
                     }
                     
-                    efa.setBody(pdfBlob);
+                    ContentVersion cv = new ContentVersion();
+                    cv.Title = att.get('name');
+                    cv.PathOnClient = att.get('name') + '.pdf';
+                    cv.VersionData = pdfBlob;
+                    cv.FirstPublishLocationId = oppId; // Lo guarda en la oportunidad
+                    insert cv;
+                    
+                    contentVersionIds.add(cv.Id);
                 } else if (type == 'File') {
-                    ContentVersion cv = [SELECT VersionData, Title, FileExtension FROM ContentVersion WHERE ContentDocumentId = :attId AND IsLatest = true LIMIT 1];
-                    efa.setFileName(cv.Title + '.' + cv.FileExtension); 
-                    efa.setBody(cv.VersionData);
+                    ContentVersion cv = [SELECT Id FROM ContentVersion WHERE ContentDocumentId = :attId AND IsLatest = true LIMIT 1];
+                    contentVersionIds.add(cv.Id);
                 }
-                attachments.add(efa);
             }
-            mail.setFileAttachments(attachments); 
+            if (!contentVersionIds.isEmpty()) {
+                mail.setEntityAttachments(contentVersionIds); 
+            }
             Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
         } catch (Exception e) { throw new AuraHandledException('Error en el motor de envío: ' + e.getMessage()); }
     }
