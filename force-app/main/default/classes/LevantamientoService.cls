@@ -96,11 +96,15 @@ public with sharing class LevantamientoService {
             lev.Vactor_Servicio_Requerido__c = (String)row.get('servicio'); lev.Vactor_Distancia_Camion__c = (String)row.get('distancia');
             lev.Vactor_Permiso_Delegacion__c = (String)row.get('permDelegacion'); lev.Vactor_Permiso_Plaza__c = (String)row.get('permPlaza');
             lev.Vactor_Alcance_Pyatz__c = (String)row.get('alcance');
+            lev.Metros_Lineales__c = getDec(row.get('mtLineal'));
         } else if (type == 'GRASAS') {
             lev.SP__c = getDec(row.get('sp')); lev.ENT__c = getDec(row.get('ent'));
             lev.Frecuencia_Limpieza__c = (String)row.get('frecuencia'); lev.Estado_Trampa__c = (String)row.get('estado');
             lev.Modelo_Grasas__c = (String)row.get('modelo'); lev.Estado_Instalacion__c = (String)row.get('instala');
             lev.Fotografia__c = (String)row.get('foto');
+            lev.Tornillo__c = getDec(row.get('tornillo')); lev.Sello__c = getDec(row.get('sello'));
+            lev.Mampara__c = getDec(row.get('mampara')); lev.Canastilla__c = getDec(row.get('canastilla'));
+            lev.Ret_Salida__c = getDec(row.get('retSalida'));
         } else if (type == 'INTIMA') {
             lev.Tornillo__c = getDec(row.get('tornillo')); lev.Sello__c = getDec(row.get('sello'));
             lev.Mampara__c = getDec(row.get('mampara')); lev.Canastilla__c = getDec(row.get('canastilla'));
@@ -117,7 +121,7 @@ public with sharing class LevantamientoService {
             lev.Fotografia__c = (String)row.get('foto');
         } else if (type == 'AROMATIZANTES') {
             lev.WC__c = getDec(row.get('wc')); lev.Estado_Instalacion__c = (String)row.get('instala');
-            lev.Fotografia__c = (String)row.get('foto');
+            lev.Fotografia__c = (String)row.get('foto'); lev.Equipos_ARM__c = getDec(row.get('arm'));
         }
     }
 

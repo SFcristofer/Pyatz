@@ -593,18 +593,18 @@
                                             <option value="">-</option><option value='1"'>1"</option><option value='4"'>4"</option>
                                         </select>
                                     </td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="material" onchange={handleSurveyChange}>{row.material}</textarea></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="servicio" onchange={handleSurveyChange}>{row.servicio}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="material" onchange={handleSurveyChange} value={row.material}></textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="servicio" onchange={handleSurveyChange} value={row.servicio}></textarea></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="largo" value={row.largo} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="ancho" value={row.ancho} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="prof" value={row.prof} onchange={handleSurveyChange}></td>
                                     <td><input type="number" class="cell-input" data-index={index} data-field="mtLineal" value={row.mtLineal} onchange={handleSurveyChange}></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="distancia" onchange={handleSurveyChange}>{row.distancia}</textarea></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="permDelegacion" onchange={handleSurveyChange}>{row.permDelegacion}</textarea></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="permPlaza" onchange={handleSurveyChange}>{row.permPlaza}</textarea></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="dificultad" onchange={handleSurveyChange}>{row.dificultad}</textarea></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="alcance" onchange={handleSurveyChange}>{row.alcance}</textarea></td>
-                                    <td><textarea class="cell-input" data-index={index} data-field="obs" onchange={handleSurveyChange}>{row.obs}</textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="distancia" onchange={handleSurveyChange} value={row.distancia}></textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="permDelegacion" onchange={handleSurveyChange} value={row.permDelegacion}></textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="permPlaza" onchange={handleSurveyChange} value={row.permPlaza}></textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="dificultad" onchange={handleSurveyChange} value={row.dificultad}></textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="alcance" onchange={handleSurveyChange} value={row.alcance}></textarea></td>
+                                    <td><textarea class="cell-input" data-index={index} data-field="obs" onchange={handleSurveyChange} value={row.obs}></textarea></td>
                                     <td class="action-cell"><lightning-button-icon icon-name="utility:delete" variant="error" size="xx-small" data-index={index} onclick={handleRemoveSurveyRow}></lightning-button-icon></td>
                                 </tr>
                             </template>

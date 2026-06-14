@@ -67,6 +67,20 @@ export default class TechLevantamientoManager extends LightningElement {
         return !classics.includes((this.surveyType || '').toUpperCase()) && this.dynamicColumns.length > 0;
     }
 
+    renderedCallback() {
+        // Forzar sincronización de elementos HTML estándar (select/textarea) que LWC a veces no enlaza bien en loops
+        if (this.surveyData && this.surveyData.length > 0) {
+            const elements = this.template.querySelectorAll('select[data-field], textarea[data-field]');
+            elements.forEach(el => {
+                const idx = el.dataset.index;
+                const field = el.dataset.field;
+                if (idx !== undefined && field && this.surveyData[idx]) {
+                    el.value = this.surveyData[idx][field] || '';
+                }
+            });
+        }
+    }
+
     connectedCallback() {
         this.loadExistingData();
     }
