@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MilestoneType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Mantenga al cliente informado del estado de la resolución.</description>
+    <recurrenceType>recursChained</recurrenceType>
+</MilestoneType>

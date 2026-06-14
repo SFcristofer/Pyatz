@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span style="font-size: 10pt;"><b>{!Product2.Name},&nbsp;{!Contact.Name},</b></span><p class="MsoNormal"><o:p></o:p></p><span style="font-size: 10pt;">Por medio del presente confirmamos la visita de levantamiento programada con los siguientes datos:<br></span><span style="font-size: 10pt; font-weight: bold;"><br>Fecha:<br>Hora:<br>Dirección:<br><br>Personal que se presentará:<br><br>Objetivo de la visita:</span><span style="font-size: 10pt;"><br><br>Adjunto a este correo encontrará la documentación del personal técnico que asistirá, así como el formato de solicitud de acceso, para su registro y autorización conforme a sus procedimientos internos.<br><br>Agradeceremos su amable confirmación de recepción. En caso de requerir reprogramar la visita, le solicitamos nos lo informe con al menos 24 horas de anticipación, con el fin de coordinar adecuadamente la agenda de nuestro personal.<br><br>Quedo a sus órdenes para cualquier duda o comentario.<br><br>Saludos cordiales.</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

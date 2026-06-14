@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LastSegmentMemberCountError</fullName>
+    <inlineHelpText>Recuento de errores de la entidad de segmento seleccionada. Los requisitos de RGPD podrían afectar su recuento.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

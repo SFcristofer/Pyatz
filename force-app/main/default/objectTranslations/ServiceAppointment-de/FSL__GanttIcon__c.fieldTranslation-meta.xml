@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>Geben Sie eine URL für ein Symbol ein. Die URL muss mit einem Bildsuffix wie .png enden.</help>
+    <label><!-- Gantt Icon --></label>
+    <name>FSL__GanttIcon__c</name>
+</CustomFieldTranslation>

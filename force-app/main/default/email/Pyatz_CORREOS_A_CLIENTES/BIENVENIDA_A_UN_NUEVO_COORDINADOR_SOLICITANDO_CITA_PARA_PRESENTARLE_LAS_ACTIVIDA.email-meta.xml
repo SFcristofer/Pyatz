@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <letterhead>Membrete_Pyatz</letterhead>
+    <name>BIENVENIDA A UN NUEVO COORDINADOR SOLICITANDO CITA PARA PRESENTARLE LAS ACTIVIDA</name>
+    <style>formalLetter</style>
+    <subject>Presentación y coordinación de servicios Pyatz – Zona #</subject>
+    <type>html</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

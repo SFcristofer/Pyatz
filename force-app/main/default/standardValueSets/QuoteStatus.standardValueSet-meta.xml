@@ -5,25 +5,30 @@
         <fullName>Borrador</fullName>
         <default>true</default>
         <label>Borrador</label>
+        <allowEmail>false</allowEmail>
     </standardValue>
     <standardValue>
         <fullName>Pendiente</fullName>
         <default>false</default>
         <label>Pendiente</label>
+        <allowEmail>false</allowEmail>
     </standardValue>
     <standardValue>
         <fullName>Aprobada</fullName>
         <default>false</default>
         <label>Aprobada</label>
+        <allowEmail>false</allowEmail>
     </standardValue>
     <standardValue>
         <fullName>Rechazada</fullName>
         <default>false</default>
         <label>Rechazada</label>
+        <allowEmail>false</allowEmail>
     </standardValue>
     <standardValue>
         <fullName>Actualizada</fullName>
         <default>false</default>
         <label>Actualizada</label>
+        <allowEmail>false</allowEmail>
     </standardValue>
 </StandardValueSet>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CalculationMode</fullName>
+    <inlineHelpText>Calcula el número total de citas de servicio o la suma de los campos numéricos incluidos en el periodo de pago.</inlineHelpText>
+</CustomField>

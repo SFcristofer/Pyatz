@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Aeropuerto</fullName>
+        <default>false</default>
+        <label>Aeropuerto</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Agencia publicidad</fullName>
+        <default>false</default>
+        <label>Agencia publicidad</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Almacén</fullName>
+        <default>false</default>
+        <label>Almacén</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Aseguradoras</fullName>
+        <default>false</default>
+        <label>Aseguradoras</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Bar</fullName>
+        <default>false</default>
+        <label>Bar</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Bodega</fullName>
+        <default>false</default>
+        <label>Bodega</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Boutique</fullName>
+        <default>false</default>
+        <label>Boutique</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cafetería</fullName>
+        <default>false</default>
+        <label>Cafetería</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cámaras</fullName>
+        <default>false</default>
+        <label>Cámaras</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Carnicería</fullName>
+        <default>false</default>
+        <label>Carnicería</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Catering</fullName>
+        <default>false</default>
+        <label>Catering</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Centro comercial</fullName>
+        <default>false</default>
+        <label>Centro comercial</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Centro producción/Comisariato</fullName>
+        <default>false</default>
+        <label>Centro producción/Comisariato</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Centro de Distribución</fullName>
+        <default>false</default>
+        <label>Centro de Distribución</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Colegio</fullName>
+        <default>false</default>
+        <label>Colegio</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Comedor industrial</fullName>
+        <default>false</default>
+        <label>Comedor industrial</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Conjunto habitacional</fullName>
+        <default>false</default>
+        <label>Conjunto habitacional</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Construcción</fullName>
+        <default>false</default>
+        <label>Construcción</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Corporativo</fullName>
+        <default>false</default>
+        <label>Corporativo</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Distribuidor</fullName>
+        <default>false</default>
+        <label>Distribuidor</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Empresa servicios</fullName>
+        <default>false</default>
+        <label>Empresa servicios</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Foro / Teatro</fullName>
+        <default>false</default>
+        <label>Foro / Teatro</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Fumigación</fullName>
+        <default>false</default>
+        <label>Fumigación</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Hospital</fullName>
+        <default>false</default>
+        <label>Hospital</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Hotelería</fullName>
+        <default>false</default>
+        <label>Hotelería</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Industria</fullName>
+        <default>false</default>
+        <label>Industria</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Laboratorio</fullName>
+        <default>false</default>
+        <label>Laboratorio</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Mantenimiento</fullName>
+        <default>false</default>
+        <label>Mantenimiento</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Oficina</fullName>
+        <default>false</default>
+        <label>Oficina</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Otro</fullName>
+        <default>false</default>
+        <label>Otro</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Panadería</fullName>
+        <default>false</default>
+        <label>Panadería</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Particular</fullName>
+        <default>false</default>
+        <label>Particular</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Pastelería</fullName>
+        <default>false</default>
+        <label>Pastelería</label>
+    </standardValue>
+    <standardValue>
+        <fullName>PTAR</fullName>
+        <default>false</default>
+        <label>PTAR</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Restaurante</fullName>
+        <default>false</default>
+        <label>Restaurante</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Revendedor retardantes</fullName>
+        <default>false</default>
+        <label>Revendedor retardantes</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Servicios contra incendios</fullName>
+        <default>false</default>
+        <label>Servicios contra incendios</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Telemarketing</fullName>
+        <default>false</default>
+        <label>Telemarketing</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Tienda comercio</fullName>
+        <default>false</default>
+        <label>Tienda comercio</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Tienda departamental</fullName>
+        <default>false</default>
+        <label>Tienda departamental</label>
+    </standardValue>
+</StandardValueSet>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__Absence_Color_HEX_Format</fullName>
+    <active>true</active>
+    <errorConditionFormula>(!ISBLANK(FSL__Gantt_Color__c)) &amp;&amp; (NOT(REGEX(FSL__Gantt_Color__c, &quot;#[a-fA-F0-9]{6}&quot;)))</errorConditionFormula>
+    <errorDisplayField>FSL__Gantt_Color__c</errorDisplayField>
+    <errorMessage>Gantt color must be in hexadecimal format: (for example: #ffffff)</errorMessage>
+</ValidationRule>

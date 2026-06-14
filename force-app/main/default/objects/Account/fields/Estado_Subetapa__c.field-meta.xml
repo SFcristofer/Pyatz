@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estado_Subetapa__c</fullName>
+    <label>Estado Subetapa</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Subetapa__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Pendiente de información a cliente</fullName>
+                <default>false</default>
+                <label>Pendiente de información a cliente</label>
+            </value>
+            <value>
+                <fullName>Pendiente de información de cliente</fullName>
+                <default>false</default>
+                <label>Pendiente de información de cliente</label>
+            </value>
+            <value>
+                <fullName>Información recibida</fullName>
+                <default>false</default>
+                <label>Información recibida</label>
+            </value>
+            <value>
+                <fullName>Información enviada</fullName>
+                <default>false</default>
+                <label>Información enviada</label>
+            </value>
+            <value>
+                <fullName>Alta pendiente</fullName>
+                <default>false</default>
+                <label>Alta pendiente</label>
+            </value>
+            <value>
+                <fullName>Alta confirmada</fullName>
+                <default>false</default>
+                <label>Alta confirmada</label>
+            </value>
+            <value>
+                <fullName>NA - Cliente activo</fullName>
+                <default>false</default>
+                <label>NA - Cliente activo</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Alta cliente (Clientes nuevos)</controllingFieldValue>
+            <valueName>Pendiente de información a cliente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Alta cliente (Clientes nuevos)</controllingFieldValue>
+            <valueName>Información enviada</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Alta cliente (Clientes nuevos)</controllingFieldValue>
+            <controllingFieldValue>Alta pyatz(Clientes nuevos)</controllingFieldValue>
+            <valueName>Alta pendiente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Alta cliente (Clientes nuevos)</controllingFieldValue>
+            <controllingFieldValue>Alta pyatz(Clientes nuevos)</controllingFieldValue>
+            <valueName>Alta confirmada</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Alta cliente (Clientes nuevos)</controllingFieldValue>
+            <controllingFieldValue>Alta pyatz(Clientes nuevos)</controllingFieldValue>
+            <valueName>NA - Cliente activo</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Alta pyatz(Clientes nuevos)</controllingFieldValue>
+            <valueName>Pendiente de información de cliente</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Alta pyatz(Clientes nuevos)</controllingFieldValue>
+            <valueName>Información recibida</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

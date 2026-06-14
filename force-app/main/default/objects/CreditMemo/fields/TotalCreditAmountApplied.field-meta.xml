@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TotalCreditAmountApplied</fullName>
+    <inlineHelpText>Importe aplicado desde el memorándum de crédito a facturas.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

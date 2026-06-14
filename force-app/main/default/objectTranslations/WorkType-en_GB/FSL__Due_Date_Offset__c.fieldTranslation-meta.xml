@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>Calculates the Due Date by adding Minutes to the Service creation time, reflecting the organisation’s internal SLA</help>
+    <label><!-- Due Date Offset --></label>
+    <name>FSL__Due_Date_Offset__c</name>
+</CustomFieldTranslation>

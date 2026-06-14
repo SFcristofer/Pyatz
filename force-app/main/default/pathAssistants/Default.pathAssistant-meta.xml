@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PathAssistant xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <entityName>Lead</entityName>
+    <fieldName>Status</fieldName>
+    <masterLabel>Default</masterLabel>
+    <pathAssistantSteps>
+        <fieldNames>Rating</fieldNames>
+        <info>&lt;p&gt;Nutre tus leads e identifica oportunidades.&lt;/p&gt;&lt;p&gt;Identifica los puntos de dolor que puedes resolver para este lead.&lt;/p&gt;&lt;p&gt; Determina la probabilidad de que este lead se convierta.&lt;/p&gt;&lt;p&gt; Si este lead está calificado, conviértelo en una oportunidad.&lt;/p&gt;&lt;ul&gt;&lt;li&gt; Asegúrate de que Marketing y Ventas trabajen juntos para desarrollar tu proceso de calificación de leads.&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>En_contacto</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Company</fieldNames>
+        <fieldNames>Website</fieldNames>
+        <fieldNames>Industry</fieldNames>
+        <fieldNames>NumberOfEmployees</fieldNames>
+        <info>&lt;p&gt;Determina qué leads están calificados o no calificados.&lt;/p&gt;&lt;p&gt;Asigna el lead a un representante.&lt;/p&gt;&lt;p&gt; Reúne los datos clave del lead desde el sitio web de su empresa.&lt;/p&gt;&lt;ul&gt;&lt;li&gt; Crea un plan para establecer una conexión con este lead&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>No_calificado</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <info>&lt;p&gt;¡Hurra! Tienes un nuevo trato para llevar hasta la meta.&lt;/p&gt;</info>
+        <picklistValueName>Qualified</picklistValueName>
+    </pathAssistantSteps>
+    <recordTypeName>__MASTER__</recordTypeName>
+</PathAssistant>

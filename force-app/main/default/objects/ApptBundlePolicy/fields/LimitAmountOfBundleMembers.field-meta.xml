@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LimitAmountOfBundleMembers</fullName>
+    <inlineHelpText>Ingrese el número máximo de miembros de empaquetado que puedan incluirse en un paquete, con un máximo de 200.</inlineHelpText>
+</CustomField>

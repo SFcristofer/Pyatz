@@ -3,7 +3,6 @@
     <fullName>Plantilla__c</fullName>
     <label>Plantilla de Formulario</label>
     <referenceTo>Form_Template__c</referenceTo>
-    <relationshipLabel>Zonas Asignadas</relationshipLabel>
     <relationshipName>Plantillas_de_Zona</relationshipName>
     <relationshipOrder>1</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>

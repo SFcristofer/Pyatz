@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Frequency</fullName>
+    <inlineHelpText>Establezca la frecuencia del mantenimiento. Por ejemplo, si este campo es “1000”, se programará en incrementos de 1000. Puede ser un valor positivo para un campo Uso de incremento, o un valor negativo para un campo Uso de decremento.</inlineHelpText>
+</CustomField>

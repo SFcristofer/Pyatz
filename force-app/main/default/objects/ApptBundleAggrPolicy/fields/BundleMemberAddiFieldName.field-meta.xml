@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BundleMemberAddiFieldName</fullName>
+    <inlineHelpText>El campo de origen adicional proviene de la cita de servicio del miembro de paquete. Si selecciona la acción de agregación Suma basada en campos de paquete o Resta basada en campos de paquete, el campo de origen adicional proviene de la cita de servicio del paquete.</inlineHelpText>
+</CustomField>

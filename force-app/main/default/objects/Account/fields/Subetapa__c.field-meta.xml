@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Subetapa__c</fullName>
+    <label>Subetapa</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Etapa__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Alta cliente (Clientes nuevos)</fullName>
+                <default>false</default>
+                <label>Alta cliente (Clientes nuevos)</label>
+            </value>
+            <value>
+                <fullName>Alta pyatz(Clientes nuevos)</fullName>
+                <default>false</default>
+                <label>Alta pyatz(Clientes nuevos)</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Altas</controllingFieldValue>
+            <valueName>Alta cliente (Clientes nuevos)</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Altas</controllingFieldValue>
+            <valueName>Alta pyatz(Clientes nuevos)</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

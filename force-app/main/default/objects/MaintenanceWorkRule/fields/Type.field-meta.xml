@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type</fullName>
+    <inlineHelpText>Basado en calendario define un patrón de recurrencia, como una programación el primer lunes de cada mes. Basado en criterios selecciona un criterios de filtro de conjunto de registros que define condiciones, como si la temperatura del motor supera los 100 ºC o el kilometraje supera los 10.000.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

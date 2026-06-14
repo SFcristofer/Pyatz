@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span style="font-size: 10pt;"><b>{!Product2.Name},&nbsp;{!Contact.Name},</b></span><p class="MsoNormal"><o:p></o:p></p><span style="font-size: 10pt; color: rgb(255, 0, 255);"><br></span><span style="font-size: 10pt;">Por medio del presente, solicito su amable apoyo con la autorización de ingreso a las instalaciones, a fin de llevar a cabo el servicio de </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">XXX</span><span style="font-size: 10pt;">, programado para el </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">##</span><span style="font-size: 10pt;"> de </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">MES</span><span style="font-size: 10pt;"> de 202</span><span style="font-size: 10pt; color: rgb(0, 0, 255);">#</span><span style="font-size: 10pt;">.<br><br>Adjunto a este correo encontrará la documentación correspondiente y el formato de solicitud de acceso, para su registro y autorización conforme a sus procedimientos internos.<br><br>Agradeceré nos puedan confirmar la recepción del presente correo y la autorización de ingreso.<br><br>Quedo atenta a cualquier duda o comentario.<br><br>Saludos cordiales.<br><br></span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

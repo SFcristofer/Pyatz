@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Línea de Levantamiento</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Líneas de Levantamiento</value>
+    </caseValues>
+    <gender>Neuter</gender>
+    <layouts>
+        <layout>Formato Línea de Levantamiento</layout>
+        <sections>
+            <label><!-- Vínculos personalizados --></label>
+            <section>Vínculos personalizados</section>
+        </sections>
+    </layouts>
+</CustomObjectTranslation>

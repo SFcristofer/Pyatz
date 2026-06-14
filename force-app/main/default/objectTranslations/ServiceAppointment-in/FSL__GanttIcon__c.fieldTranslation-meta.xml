@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>Masukkan URL untuk ikon. URL harus diakhiri dengan akhiran gambar seperti .png.</help>
+    <label><!-- Gantt Icon --></label>
+    <name>FSL__GanttIcon__c</name>
+</CustomFieldTranslation>

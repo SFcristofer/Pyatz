@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Vacaciones</fullName>
+        <default>true</default>
+        <label>Vacaciones</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Reunión</fullName>
+        <default>false</default>
+        <label>Reunión</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Capacitación</fullName>
+        <default>false</default>
+        <label>Capacitación</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Médica</fullName>
+        <default>false</default>
+        <label>Médica</label>
+    </standardValue>
+</StandardValueSet>

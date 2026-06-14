@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TimeZone</fullName>
+    <inlineHelpText>Especifica la zona horaria registrada cuando se reservó la cita o se modificó por última vez (normalmente es la zona horaria del paciente). Esto puede diferir de la zona horaria empleada en las horas de inicio y finalización programadas de la cita de servicio, que reflejan la zona horaria del usuario que inició sesión.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

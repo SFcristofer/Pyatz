@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Slot Color --></label>
+    <name>FSL__Slot_Color__c</name>
+    <picklistValues>
+        <masterLabel>Amber</masterLabel>
+        <translation>Màu Hổ Phách</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Asphalt</masterLabel>
+        <translation>Màu Nhựa Đường</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Black</masterLabel>
+        <translation>Màu Đen</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Blue</masterLabel>
+        <translation>Màu Xanh Lam</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Brown</masterLabel>
+        <translation>Màu Nâu</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Cyan</masterLabel>
+        <translation>Màu Lục Lam</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Green</masterLabel>
+        <translation>Màu Lục</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Grey</masterLabel>
+        <translation>Màu Xám</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Indigo</masterLabel>
+        <translation>Màu Chàm</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Lime</masterLabel>
+        <translation>Màu Vàng Chanh</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Orange</masterLabel>
+        <translation>Màu Cam</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Pink</masterLabel>
+        <translation>Màu Hồng</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Purple</masterLabel>
+        <translation>Màu Tím</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Red</masterLabel>
+        <translation>Màu Đỏ</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Teal</masterLabel>
+        <translation>Màu Xanh Mòng Két</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Yellow</masterLabel>
+        <translation>Màu Vàng</translation>
+    </picklistValues>
+</CustomFieldTranslation>

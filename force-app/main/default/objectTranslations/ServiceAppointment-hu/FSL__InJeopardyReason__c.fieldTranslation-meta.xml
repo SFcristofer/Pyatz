@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- In Jeopardy Reason --></label>
+    <name>FSL__InJeopardyReason__c</name>
+    <picklistValues>
+        <masterLabel>Delayed Finish</masterLabel>
+        <translation>Késleltetett befejezés</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Delayed Start</masterLabel>
+        <translation>Késleltetett kezdés</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Due Date Approaching</masterLabel>
+        <translation>Közeledik a határidő</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>No Response</masterLabel>
+        <translation>Nincs válasz</translation>
+    </picklistValues>
+</CustomFieldTranslation>

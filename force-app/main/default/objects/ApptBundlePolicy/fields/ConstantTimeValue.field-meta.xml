@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ConstantTimeValue</fullName>
+    <inlineHelpText>Utilice esta opción únicamente si Cálculo de tiempo por campo de duración de paquete está activado. Ingrese el tiempo total del paquete como un valor constante en minutos.</inlineHelpText>
+</CustomField>

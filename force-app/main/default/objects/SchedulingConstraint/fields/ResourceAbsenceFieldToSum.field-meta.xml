@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ResourceAbsenceFieldToSum</fullName>
+    <inlineHelpText>Determina qué campo en el absentismo de recurso incluir en el cálculo del periodo de pago. Solo es relevante si Modo de cálculo es Suma.</inlineHelpText>
+</CustomField>

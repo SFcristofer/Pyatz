@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>Calcula a Data de vencimento adicionando Minutos ao tempo de criação do Serviço, refletindo o SLA interno da organização</help>
+    <label><!-- Due Date Offset --></label>
+    <name>FSL__Due_Date_Offset__c</name>
+</CustomFieldTranslation>

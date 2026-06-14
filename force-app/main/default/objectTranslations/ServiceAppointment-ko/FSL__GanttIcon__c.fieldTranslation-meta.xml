@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>아이콘의 URL을 입력하십시오. URL은 .png와 같은 이미지 접미사로 끝나야 합니다.</help>
+    <label><!-- Gantt Icon --></label>
+    <name>FSL__GanttIcon__c</name>
+</CustomFieldTranslation>

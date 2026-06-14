@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>false</plural>
+        <value>Εξάρτηση ραντεβού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>true</plural>
+        <value>Εξαρτήσεις ραντεβού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>false</plural>
+        <value>Εξάρτηση ραντεβού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>true</plural>
+        <value>Εξαρτήσεις ραντεβού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>false</plural>
+        <value>Εξάρτησης ραντεβού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>true</plural>
+        <value>Εξαρτήσεων ραντεβού</value>
+    </caseValues>
+    <gender>Feminine</gender>
+    <nameFieldLabel>Όνομα εξάρτησης ραντεβού</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span style="font-size: 13.3333px;">{!Product2.Name},&nbsp;</span><font face="Arial" style="font-size: medium;"><span style="font-size: 13.3333px;">{!Account.Name},</span></font><span style="font-size: 10pt; color: rgb(255, 0, 255);"><br><br></span><span style="font-size: 10pt;">Por medio del presente, solicito su amable apoyo para actualizar el listado de personal autorizado para ingresar a sus instalaciones, derivado de un ajuste operativo en el equipo asignado al servicio de </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">XXX</span><span style="font-size: 10pt;">, programado para el </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">##</span><span style="font-size: 10pt;"> de </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">MES</span><span style="font-size: 10pt;"> de 202</span><span style="font-size: 10pt; color: rgb(0, 0, 255);">#</span><span style="font-size: 10pt;">.<br><br></span><span style="font-size: 10pt; font-weight: bold;">Personal que acudirá a realizar los trabajos:<br></span><span style="font-size: 10pt;"><br>Adjunto a este correo encontrará la documentación correspondiente del personal, para su debido registro y autorización conforme a sus procedimientos internos.<br><br>Agradeceré nos puedan confirmar la recepción del presente correo y la autorización del acceso actualizado.<br><br>Quedo atenta a cualquier duda o comentario.<br><br>Saludos cordiales.</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

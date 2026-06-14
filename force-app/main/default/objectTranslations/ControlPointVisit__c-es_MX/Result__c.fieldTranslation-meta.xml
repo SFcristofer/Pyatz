@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Resultado --></label>
+    <name>Result__c</name>
+    <picklistValues>
+        <masterLabel>Capture</masterLabel>
+        <translation><!-- Capture --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Consumption</masterLabel>
+        <translation><!-- Consumption --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Incident</masterLabel>
+        <translation><!-- Incident --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Maintenance</masterLabel>
+        <translation><!-- Maintenance --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>No Activity (default)</masterLabel>
+        <translation><!-- No Activity (default) --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

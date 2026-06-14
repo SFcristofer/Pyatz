@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__All_Work_Capacity_Availabilities</fullName>
+    <columns>Name</columns>
+    <columns>StartDate</columns>
+    <columns>EndDate</columns>
+    <columns>ServiceTerritory</columns>
+    <columns>AvailCapacityMinutes</columns>
+    <columns>AvailCapacityHours</columns>
+    <columns>TimePeriod</columns>
+    <filterScope>Everything</filterScope>
+    <label>All Work Capacity Availabilities</label>
+</ListView>

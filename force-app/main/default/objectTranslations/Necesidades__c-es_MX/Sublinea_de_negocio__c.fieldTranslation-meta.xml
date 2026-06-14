@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Sublínea de negocio --></label>
+    <name>Sublinea_de_negocio__c</name>
+    <picklistValues>
+        <masterLabel>APLIC.RETARDANTE</masterLabel>
+        <translation><!-- APLIC.RETARDANTE --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>AROMATIZANTES</masterLabel>
+        <translation><!-- AROMATIZANTES --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>BIOENZIMÁTICO</masterLabel>
+        <translation><!-- BIOENZIMÁTICO --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>ELCLA</masterLabel>
+        <translation><!-- ELCLA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>EVITER</masterLabel>
+        <translation><!-- EVITER --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>GRASAS</masterLabel>
+        <translation><!-- GRASAS --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>INTIMA</masterLabel>
+        <translation><!-- INTIMA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>LIMPIEZA</masterLabel>
+        <translation><!-- LIMPIEZA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>OBRA CIVIL</masterLabel>
+        <translation><!-- OBRA CIVIL --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>PLOMERIA</masterLabel>
+        <translation><!-- PLOMERIA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>RET MADERA</masterLabel>
+        <translation><!-- RET MADERA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>RET. PALAPA</masterLabel>
+        <translation><!-- RET. PALAPA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>RET. TEXTIL</masterLabel>
+        <translation><!-- RET. TEXTIL --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>RETENCIO SOLIDOS</masterLabel>
+        <translation><!-- RETENCIO SOLIDOS --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>SONDEO/DESAZOLVE MECANICO</masterLabel>
+        <translation><!-- SONDEO/DESAZOLVE MECANICO --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>SONDEO/DESAZOLVE VACTOR</masterLabel>
+        <translation><!-- SONDEO/DESAZOLVE VACTOR --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

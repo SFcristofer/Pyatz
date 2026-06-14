@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- In Jeopardy Reason --></label>
+    <name>FSL__InJeopardyReason__c</name>
+    <picklistValues>
+        <masterLabel>Delayed Finish</masterLabel>
+        <translation>Odložen zaključek</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Delayed Start</masterLabel>
+        <translation>Odložen začetek</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Due Date Approaching</masterLabel>
+        <translation>Datum zapadlosti se približuje</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>No Response</masterLabel>
+        <translation>Brez odziva</translation>
+    </picklistValues>
+</CustomFieldTranslation>

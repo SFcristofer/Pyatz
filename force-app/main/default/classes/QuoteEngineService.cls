@@ -81,7 +81,10 @@ public with sharing class QuoteEngineService {
             }
             if (oppId != null && rid != null) {
                 Opportunity opp = new Opportunity(Id = oppId, SyncedQuoteId = rid);
-                if (businessLines != null) opp.Linea_de_negocio__c = businessLines;
+                // SINCRONIZACIÓN ARQUITECTÓNICA: Solo actualiza si hay un valor, no borra el original.
+                if (String.isNotBlank(businessLines)) {
+                    opp.Linea_de_negocio__c = businessLines;
+                }
                 if (q.Estrategia_Venta__c != null) {
                     Map<String, String> strategyLabels = new Map<String, String>{
                         'E1' => 'E1 - Póliza Anual', 'E2' => 'E2 - Extraordinario',

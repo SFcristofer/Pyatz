@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FullRefreshIntervalDays</fullName>
+    <inlineHelpText>El intervalo de actualización completo se utiliza para determinar cuándo se desencadena una actualización completa periódica.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

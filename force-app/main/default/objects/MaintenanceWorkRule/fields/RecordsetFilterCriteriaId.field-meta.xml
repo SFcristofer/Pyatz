@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RecordsetFilterCriteriaId</fullName>
+    <inlineHelpText>Defina el criterios de filtro de conjunto de registros solo para pedidos de trabajo con una regla de trabajo basada en criterios o uso.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

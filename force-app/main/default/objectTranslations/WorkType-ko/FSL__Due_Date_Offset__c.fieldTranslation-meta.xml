@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>조직의 내부 SLA를 반영하고 분을 서비스 생성 시간에 추가하여 기한을 계산합니다.</help>
+    <label><!-- Due Date Offset --></label>
+    <name>FSL__Due_Date_Offset__c</name>
+</CustomFieldTranslation>

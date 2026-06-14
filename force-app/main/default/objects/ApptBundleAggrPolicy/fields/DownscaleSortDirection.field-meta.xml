@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DownscaleSortDirection</fullName>
+    <inlineHelpText>Se aplica solo si la acción Establecer duración con escala reducida está establecida. Seleccione la dirección de clasificación con la reducción de escala de las citas de servicio de miembros de paquete según su duración.</inlineHelpText>
+</CustomField>

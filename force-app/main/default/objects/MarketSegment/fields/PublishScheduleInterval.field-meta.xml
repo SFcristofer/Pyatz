@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PublishScheduleInterval</fullName>
+    <inlineHelpText>Determina cuándo y con qué frecuencia se publica su segmento en destinos de activación.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

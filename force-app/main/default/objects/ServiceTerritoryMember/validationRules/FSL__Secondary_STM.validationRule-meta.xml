@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__Secondary_STM</fullName>
+    <active>true</active>
+    <errorConditionFormula>(ISPICKVAL(TerritoryType, &quot;Secondary&quot;) &amp;&amp; 
+    ( ( ( ISCHANGED(Longitude) || ISCHANGED(Latitude) ) &amp;&amp; ( (NOT(ISBLANK(Longitude))) || (NOT(ISBLANK(Latitude))) )) || 
+      (NOT(ISBLANK(FSL__Internal_SLR_HomeAddress_Geolocation__Latitude__s))) || 
+      (NOT(ISBLANK(FSL__Internal_SLR_HomeAddress_Geolocation__Longitude__s))) || 
+      (NOT(ISBLANK( Street ))) || 
+      (NOT(ISBLANK( City ))) ||
+      (NOT(ISBLANK( Country ))) ||
+      (NOT(ISBLANK( State ))) || 
+      (NOT(ISBLANK(  PostalCode  )))
+    )
+ )</errorConditionFormula>
+    <errorMessage>Cannot save Service Territory Member of type secondary with Operating Hours or Address</errorMessage>
+</ValidationRule>

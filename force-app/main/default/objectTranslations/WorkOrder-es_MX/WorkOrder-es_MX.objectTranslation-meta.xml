@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Número de Visita</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Número de Visitas</value>
+    </caseValues>
+    <fieldSets>
+        <label><!-- Crew Managment Lightbox --></label>
+        <name>FSL__CrewManagment_Lightbox</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- Deprecated --></label>
+        <name>FSL__Emergency_Current_WorkORder_Fields</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- Gantt Lightbox --></label>
+        <name>FSL__Gantt_Lightbox</name>
+    </fieldSets>
+    <gender>Masculine</gender>
+    <layouts>
+        <layout>Field Service Dispatcher Work Order Layout</layout>
+        <sections>
+            <label>Dirección</label>
+            <section>Address</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Field Service Technician Work Order Layout</layout>
+        <sections>
+            <label>Dirección</label>
+            <section>Address</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>System Administrator Work Order Layout</layout>
+        <sections>
+            <label>Dirección</label>
+            <section>Dirección</section>
+        </sections>
+        <sections>
+            <label><!-- Información adicional --></label>
+            <section>Información adicional</section>
+        </sections>
+    </layouts>
+    <quickActions>
+        <label><!-- SendEmail --></label>
+        <name>SendEmail</name>
+    </quickActions>
+</CustomObjectTranslation>

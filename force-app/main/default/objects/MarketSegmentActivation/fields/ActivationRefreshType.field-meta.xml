@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ActivationRefreshType</fullName>
+    <inlineHelpText>Seleccione con qué frecuencia actualizar sus datos. La actualización incremental actualiza datos nuevos o cambiados desde la última publicación. La actualización completa actualiza todos sus datos y puede seleccionarse una vez cada 24 horas.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

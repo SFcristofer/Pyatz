@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><b><span data-teams="true">{!Product2.Name},&nbsp;{!Account.Name},</span><span style="font-size: 10pt; color: rgb(255, 0, 255);"><br></span></b><span style="font-size: 10pt;"><br>De acuerdo con su reporte, por medio del presente confirmamos la recepción de la notificación relacionada con una posible falla en el/los equipo(s) dosificador(es) y/o en el funcionamiento del producto.<br><br></span><span style="font-size: 10pt; font-weight: bold;">Número de equipos a revisar:<br>Ubicación de los equipos:<br>Fecha programada para revisión:<br>Falla reportada:</span><span style="font-size: 10pt;"><br><br>En seguimiento a lo anterior, nuestro personal técnico realizará la revisión correspondiente para identificar la causa de la incidencia y proceder con las acciones necesarias.<br><br>Le mantendremos informado sobre el estatus de la revisión y las conclusiones derivadas de la misma.<br><br>Agradeceré nos puedan confirmar la recepción del presente correo.<br><br>Quedo atenta a cualquier duda o comentario.<br><br>Saludos cordiales.</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

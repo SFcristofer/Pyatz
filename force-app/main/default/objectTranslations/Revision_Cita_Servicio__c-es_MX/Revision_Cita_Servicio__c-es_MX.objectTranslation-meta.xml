@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Revisión de Cita de Servicio</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Revisiones de Cita de Servicio</value>
+    </caseValues>
+    <gender>Neuter</gender>
+    <layouts>
+        <layout>Formato Revisión de Cita de Servicio</layout>
+        <sections>
+            <label><!-- Vínculos personalizados --></label>
+            <section>Vínculos personalizados</section>
+        </sections>
+    </layouts>
+    <validationRules>
+        <errorMessage><!-- No se puede cambiar la Plantilla de Formulario porque el formulario ya fue contestado. --></errorMessage>
+        <name>No_Cambiar_Plantilla_Si_Contestada</name>
+    </validationRules>
+</CustomObjectTranslation>

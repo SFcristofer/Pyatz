@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <layouts>
+        <layout>Field Service Dispatcher Work Type Layout</layout>
+        <sections>
+            <label><!-- Scheduling Related --></label>
+            <section>Scheduling Related</section>
+        </sections>
+        <sections>
+            <label><!-- Skills Editor --></label>
+            <section>Skills Editor</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Field Service Technician Work Type Layout</layout>
+        <sections>
+            <label><!-- Scheduling Related --></label>
+            <section>Scheduling Related</section>
+        </sections>
+        <sections>
+            <label><!-- Skills Editor --></label>
+            <section>Skills Editor</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>System Administrator Work Type Layout</layout>
+        <sections>
+            <label><!-- Scheduling Related --></label>
+            <section>Scheduling Related</section>
+        </sections>
+        <sections>
+            <label><!-- Skills Editor --></label>
+            <section>Skills Editor</section>
+        </sections>
+    </layouts>
+</CustomObjectTranslation>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Subetapa --></label>
+    <name>Subetapa__c</name>
+    <picklistValues>
+        <masterLabel>Alta cliente (Clientes nuevos)</masterLabel>
+        <translation><!-- Alta cliente (Clientes nuevos) --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Alta pyatz(Clientes nuevos)</masterLabel>
+        <translation><!-- Alta pyatz(Clientes nuevos) --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

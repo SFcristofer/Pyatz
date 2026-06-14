@@ -127,6 +127,7 @@
         <relatedList>RelatedEntityHistoryList</relatedList>
     </relatedLists>
     <relatedLists>
+        <fields>Name</fields>
         <fields>Start</fields>
         <fields>End</fields>
         <fields>Type</fields>

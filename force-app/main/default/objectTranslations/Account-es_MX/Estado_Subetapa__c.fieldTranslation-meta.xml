@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Estado Subetapa --></label>
+    <name>Estado_Subetapa__c</name>
+    <picklistValues>
+        <masterLabel>Alta confirmada</masterLabel>
+        <translation><!-- Alta confirmada --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Alta pendiente</masterLabel>
+        <translation><!-- Alta pendiente --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Información enviada</masterLabel>
+        <translation><!-- Información enviada --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Información recibida</masterLabel>
+        <translation><!-- Información recibida --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>NA - Cliente activo</masterLabel>
+        <translation><!-- NA - Cliente activo --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Pendiente de información a cliente</masterLabel>
+        <translation><!-- Pendiente de información a cliente --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Pendiente de información de cliente</masterLabel>
+        <translation><!-- Pendiente de información de cliente --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

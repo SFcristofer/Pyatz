@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Schedule Mode --></label>
+    <name>FSL__Schedule_Mode__c</name>
+    <picklistValues>
+        <masterLabel>Automatic</masterLabel>
+        <translation>Автоматично</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Drag and Drop</masterLabel>
+        <translation>Плъзгане и пускане</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Global Optimization</masterLabel>
+        <translation>Глобална оптимизация</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>In Day Optimization</masterLabel>
+        <translation>Дневна оптимизация</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Manual</masterLabel>
+        <translation>Ръчно</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>None</masterLabel>
+        <translation>Няма</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Optimization</masterLabel>
+        <translation>Оптимизация</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Resource Optimization</masterLabel>
+        <translation>Оптимизация на ресурсите</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Schedule</masterLabel>
+        <translation>Планиране</translation>
+    </picklistValues>
+</CustomFieldTranslation>

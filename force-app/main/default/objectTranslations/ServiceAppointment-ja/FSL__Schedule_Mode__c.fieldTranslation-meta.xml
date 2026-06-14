@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Schedule Mode --></label>
+    <name>FSL__Schedule_Mode__c</name>
+    <picklistValues>
+        <masterLabel>Automatic</masterLabel>
+        <translation>自動</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Drag and Drop</masterLabel>
+        <translation>ドラッグアンドドロップ</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Global Optimization</masterLabel>
+        <translation>グローバル最適化</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>In Day Optimization</masterLabel>
+        <translation>全日最適化</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Manual</masterLabel>
+        <translation>手動</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>None</masterLabel>
+        <translation>なし</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Optimization</masterLabel>
+        <translation>最適化</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Resource Optimization</masterLabel>
+        <translation>リソース最適化</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Schedule</masterLabel>
+        <translation>スケジュール</translation>
+    </picklistValues>
+</CustomFieldTranslation>

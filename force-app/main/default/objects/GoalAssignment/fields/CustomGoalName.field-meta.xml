@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CustomGoalName</fullName>
+    <inlineHelpText>Cuando cree objetivos personalizados, se utilizarán en vez del nombre de Definición de objetivo que será algo más genérico como Objetivo financiero personalizado.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

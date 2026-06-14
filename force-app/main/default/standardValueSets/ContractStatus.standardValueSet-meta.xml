@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <groupingStringEnum>ContractStatusCode</groupingStringEnum>
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Pendiente de realizacion</fullName>
+        <default>false</default>
+        <label>Pendiente de realización</label>
+        <groupingString>InApproval</groupingString>
+    </standardValue>
+    <standardValue>
+        <fullName>Enviado a cliente</fullName>
+        <default>false</default>
+        <label>Enviado a cliente</label>
+        <groupingString>Activated</groupingString>
+    </standardValue>
+    <standardValue>
+        <fullName>Pendiente firma de cliente</fullName>
+        <default>false</default>
+        <label>Pendiente firma de cliente</label>
+        <groupingString>Draft</groupingString>
+    </standardValue>
+    <standardValue>
+        <fullName>Firmado</fullName>
+        <default>false</default>
+        <label>Firmado</label>
+        <groupingString>Activated</groupingString>
+    </standardValue>
+</StandardValueSet>

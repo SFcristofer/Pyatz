@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Title</fullName>
+    <inlineHelpText>El encabezado de su medición de confianza que se muestra a los visores. ¡Manténgalo breve y amable! Puede utilizar un máximo de 40 caracteres, pero 20 son los óptimos para mantener su título en una línea.</inlineHelpText>
+</CustomField>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DoesFloatingAdjustment</fullName>
+    <inlineHelpText>Si no se selecciona, se arreglará la cadencia de repetición para número de visitas. Por ejemplo, realizar trabajo cada seis meses (6, 12, 18), independientemente de cuándo se completó el número de visita anterior. Si se selecciona, la cadencia de repetición para los número de visitas será flotante en base a cuándo se completó el último número de visita. Por ejemplo, si el último número de visita se completó a los 8 meses, el próximo número de visita tendrá como objetivo 6 meses desde la realización - 14 meses.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

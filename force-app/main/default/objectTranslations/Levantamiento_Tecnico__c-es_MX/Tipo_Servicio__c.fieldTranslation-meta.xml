@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Tipo de Servicio --></label>
+    <name>Tipo_Servicio__c</name>
+    <picklistValues>
+        <masterLabel>AROMATIZANTES</masterLabel>
+        <translation><!-- AROMATIZANTES --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>BIOENZIMÁTICO</masterLabel>
+        <translation><!-- BIOENZIMÁTICO --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>DESAZOLVE MECANICO</masterLabel>
+        <translation><!-- DESAZOLVE MECANICO --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>GRASAS</masterLabel>
+        <translation><!-- GRASAS --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>INTIMA</masterLabel>
+        <translation><!-- INTIMA --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>VACTOR</masterLabel>
+        <translation><!-- VACTOR --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estatus__c</fullName>
+    <label>Estatus</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Status</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Primer contacto</fullName>
+                <default>false</default>
+                <label>Primer contacto</label>
+            </value>
+            <value>
+                <fullName>No responde</fullName>
+                <default>false</default>
+                <label>No responde</label>
+            </value>
+            <value>
+                <fullName>Cita programada</fullName>
+                <default>false</default>
+                <label>Cita programada</label>
+            </value>
+            <value>
+                <fullName>Primer cita</fullName>
+                <default>false</default>
+                <label>Primer cita</label>
+            </value>
+            <value>
+                <fullName>Prospecto interesado a futuro</fullName>
+                <default>false</default>
+                <label>Prospecto interesado a futuro</label>
+            </value>
+            <value>
+                <fullName>Prospecto no interesado&quot;</fullName>
+                <default>false</default>
+                <label>Prospecto no interesado&quot;</label>
+            </value>
+            <value>
+                <fullName>Prospecto Convertido</fullName>
+                <default>false</default>
+                <label>Prospecto Convertido</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>No_calificado</controllingFieldValue>
+            <valueName>Primer contacto</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>No_calificado</controllingFieldValue>
+            <valueName>No responde</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>No_calificado</controllingFieldValue>
+            <valueName>Cita programada</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Qualified</controllingFieldValue>
+            <controllingFieldValue>En_contacto</controllingFieldValue>
+            <valueName>Prospecto no interesado&quot;</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Qualified</controllingFieldValue>
+            <valueName>Prospecto Convertido</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>En_contacto</controllingFieldValue>
+            <valueName>Primer cita</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>En_contacto</controllingFieldValue>
+            <valueName>Prospecto interesado a futuro</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

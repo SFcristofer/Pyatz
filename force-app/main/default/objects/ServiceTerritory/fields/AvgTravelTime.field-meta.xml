@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AvgTravelTime</fullName>
+    <inlineHelpText>Ingrese el tiempo de desplazamiento medio para este territorio de servicio. El valor se agrega al Uso de capacidad de trabajo para cada cita de servicio programada en el territorio de servicio.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

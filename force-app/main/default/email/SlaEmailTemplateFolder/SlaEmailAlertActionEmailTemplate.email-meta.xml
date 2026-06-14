@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Plantilla de ejemplo para el envío de alertas de distribución.</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Email de distribución de ejemplo</name>
+    <style>none</style>
+    <subject>Alerta de brecha de SLA de ejemplo</subject>
+    <type>custom</type>
+    <uiType>SFX</uiType>
+</EmailTemplate>

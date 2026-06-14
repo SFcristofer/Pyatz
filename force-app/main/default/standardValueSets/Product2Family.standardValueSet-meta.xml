@@ -7,29 +7,9 @@
         <label>AMBIENTAL</label>
     </standardValue>
     <standardValue>
-        <fullName>Batteries</fullName>
+        <fullName>HH</fullName>
         <default>false</default>
-        <label>Batteries</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Battery Tools</fullName>
-        <default>false</default>
-        <label>Battery Tools</label>
-    </standardValue>
-    <standardValue>
-        <fullName>GENERAL</fullName>
-        <default>false</default>
-        <label>GENERAL</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Kits</fullName>
-        <default>false</default>
-        <label>Kits</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Product</fullName>
-        <default>false</default>
-        <label>Product</label>
+        <label>HH</label>
     </standardValue>
     <standardValue>
         <fullName>RETARDANTE</fullName>
@@ -40,25 +20,5 @@
         <fullName>SELLADORES</fullName>
         <default>false</default>
         <label>SELLADORES</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Service</fullName>
-        <default>false</default>
-        <label>Service</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Software Licenses</fullName>
-        <default>false</default>
-        <label>Software Licenses</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Solar Panels</fullName>
-        <default>false</default>
-        <label>Solar Panels</label>
-    </standardValue>
-    <standardValue>
-        <fullName>Turbines</fullName>
-        <default>false</default>
-        <label>Turbines</label>
     </standardValue>
 </StandardValueSet>

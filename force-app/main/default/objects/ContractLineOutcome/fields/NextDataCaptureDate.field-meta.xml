@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>NextDataCaptureDate</fullName>
+    <inlineHelpText>La fecha de la próxima captura de datos y comprobación de cumplimiento basada en la frecuencia de las capturas.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

@@ -32,6 +32,10 @@
                 <field>Description</field>
             </layoutItems>
             <layoutItems>
+                <behavior>Edit</behavior>
+                <field>ApprovalStatus</field>
+            </layoutItems>
+            <layoutItems>
                 <behavior>Required</behavior>
                 <field>Type</field>
             </layoutItems>

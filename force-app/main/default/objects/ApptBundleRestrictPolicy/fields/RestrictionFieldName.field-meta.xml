@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RestrictionFieldName</fullName>
+    <inlineHelpText>Seleccione el campo de cita de servicio de miembro de paquete que se utilizará para aplicar la restricción. Solo las citas de servicio de miembros de paquete con el mismo valor pueden empaquetarse conjuntamente.</inlineHelpText>
+</CustomField>

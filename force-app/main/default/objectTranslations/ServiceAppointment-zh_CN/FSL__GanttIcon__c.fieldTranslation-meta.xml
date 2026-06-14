@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help>输入图标的 URL。URL 必须以图像后缀结尾，例如 .png。</help>
+    <label><!-- Gantt Icon --></label>
+    <name>FSL__GanttIcon__c</name>
+</CustomFieldTranslation>

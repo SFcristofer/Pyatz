@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FilterCriteriaId</fullName>
+    <inlineHelpText>Ingrese los criterios de filtro del conjunto de registros empleados para agregar los miembros de paquete. Solo puede agregar citas de servicio que cumplan estos criterios.</inlineHelpText>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Schedule Mode --></label>
+    <name>FSL__Schedule_Mode__c</name>
+    <picklistValues>
+        <masterLabel>Automatic</masterLabel>
+        <translation>Αυτόματα</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Drag and Drop</masterLabel>
+        <translation>Μεταφορά και απόθεση</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Global Optimization</masterLabel>
+        <translation>Καθολική βελτιστοποίηση</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>In Day Optimization</masterLabel>
+        <translation>Βελτιστοποίηση εντός ημέρας</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Manual</masterLabel>
+        <translation>Χειροκίνητο</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>None</masterLabel>
+        <translation>Καμία επιλογή</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Optimization</masterLabel>
+        <translation>Βελτιστοποίηση</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Resource Optimization</masterLabel>
+        <translation>Βελτιστοποίηση πόρων</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Schedule</masterLabel>
+        <translation>Πρόγραμμα</translation>
+    </picklistValues>
+</CustomFieldTranslation>

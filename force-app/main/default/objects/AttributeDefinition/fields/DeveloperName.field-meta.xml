@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DeveloperName</fullName>
+    <inlineHelpText>Ingrese un nombre exclusivo. Este nombre debe comenzar por una letra y usar únicamente caracteres alfanuméricos y guiones bajos. No puede terminar por un guion bajo ni tener dos guiones bajos consecutivos.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

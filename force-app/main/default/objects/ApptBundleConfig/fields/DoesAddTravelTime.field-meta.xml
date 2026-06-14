@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DoesAddTravelTime</fullName>
+    <inlineHelpText>Si las citas de servicio de miembro de paquete no están en la misma ubicación, agregue tiempo de desplazamiento entre ellas hasta la duración del paquete según su orden de clasificación.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

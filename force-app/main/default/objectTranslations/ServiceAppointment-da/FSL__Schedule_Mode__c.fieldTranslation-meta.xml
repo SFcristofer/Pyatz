@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Schedule Mode --></label>
+    <name>FSL__Schedule_Mode__c</name>
+    <picklistValues>
+        <masterLabel>Automatic</masterLabel>
+        <translation>Automatisk</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Drag and Drop</masterLabel>
+        <translation>Træk og slip</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Global Optimization</masterLabel>
+        <translation>Global optimering</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>In Day Optimization</masterLabel>
+        <translation>Dagsoptimering</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Manual</masterLabel>
+        <translation>Manuelt</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>None</masterLabel>
+        <translation>Ingen</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Optimization</masterLabel>
+        <translation>Optimering</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Resource Optimization</masterLabel>
+        <translation>Ressourceoptimering</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Schedule</masterLabel>
+        <translation>Planlæg</translation>
+    </picklistValues>
+</CustomFieldTranslation>

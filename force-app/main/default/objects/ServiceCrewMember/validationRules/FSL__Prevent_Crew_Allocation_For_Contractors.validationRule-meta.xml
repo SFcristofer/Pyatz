@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__Prevent_Crew_Allocation_For_Contractors</fullName>
+    <active>true</active>
+    <errorConditionFormula>ServiceResource.IsCapacityBased = true</errorConditionFormula>
+    <errorMessage>Capacity Based Service Resource Cannot Have Crew Member Allocations</errorMessage>
+</ValidationRule>

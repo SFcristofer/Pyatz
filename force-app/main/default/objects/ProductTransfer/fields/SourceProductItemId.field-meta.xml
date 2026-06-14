@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SourceProductItemId</fullName>
+    <inlineHelpText>Para obtener mejores resultados de la búsqueda, ingrese el máximo de detalles posible. Por ejemplo, en vez de buscar &quot;cable&quot;, busque &quot;cable coaxial&quot; o ingrese parte de un código de producto.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

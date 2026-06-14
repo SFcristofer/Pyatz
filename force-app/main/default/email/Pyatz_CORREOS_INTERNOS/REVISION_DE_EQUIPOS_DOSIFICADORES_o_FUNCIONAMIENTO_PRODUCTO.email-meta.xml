@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <letterhead>Membrete_Pyatz</letterhead>
+    <name>REVISIÓN DE EQUIPOS DOSIFICADORES o FUNCIONAMIENTO PRODUCTO</name>
+    <style>formalLetter</style>
+    <subject>&quot;Equipo, el cliente reporta problema con nuestro servicio, favor de programar la visita lo antes posible:  Cliente: (Razón social) Nombre de quien realiza reporte: (Nombre cliente)  Medio por el cuál llega el requerimiento: (Whats</subject>
+    <type>html</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

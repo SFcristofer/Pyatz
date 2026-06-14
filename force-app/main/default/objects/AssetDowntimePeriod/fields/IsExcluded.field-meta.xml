@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsExcluded</fullName>
+    <inlineHelpText>Cuando la casilla de verificación está marcada, este registro se excluye de los cálculos de disponibilidad y fiabilidad porque está fuera de la Fecha de inicio de registro con disponibilidad y Fecha de finalización de registro con disponibilidad para el activo. Solo lectura.</inlineHelpText>
+</CustomField>

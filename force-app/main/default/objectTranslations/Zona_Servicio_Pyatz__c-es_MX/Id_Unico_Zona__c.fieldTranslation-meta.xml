@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- ID Único Zona --></label>
+    <name>Id_Unico_Zona__c</name>
+</CustomFieldTranslation>

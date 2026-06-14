@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Designated Work Boolean Fields --></label>
+    <name>FSL__Designated_Work_Boolean_Fields__c</name>
+    <picklistValues>
+        <masterLabel>None</masterLabel>
+        <translation>Немає</translation>
+    </picklistValues>
+</CustomFieldTranslation>

@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span style="font-size: 13.3333px;">{!Product2.Name},&nbsp;</span><font face="Arial" style="font-size: medium;"><span style="font-size: 13.3333px;">{!Account.Name},</span></font><span style="font-size: 10pt; color: rgb(255, 0, 255);"><br><br></span><span style="font-size: 10pt;">De acuerdo con su solicitud, por este medio confirmamos el retiro temporal de los equipos dosificadores, derivado de los trabajos de remodelación que se llevarán a cabo en las áreas correspondientes.<br><br></span><span style="font-size: 10pt; font-weight: bold;">Número de equipos a retirar:<br>Ubicación de los equipos:<br>Motivo del retiro: Remodelación de áreas</span><span style="font-size: 10pt;"><br><br>Tal como acordamos, durante el mes de </span><span style="font-size: 10pt; color: rgb(0, 0, 255);">XXX</span><span style="font-size: 10pt;"> estaremos en contacto con usted para coordinar la reinstalación de los equipos, una vez que las áreas remodeladas se encuentren disponibles para su operación.<br><br>Mientras los equipos permanezcan retirados, los servicios asociados no serán facturados.<br><br>Agradeceré nos puedan confirmar la recepción del presente correo y su autorización para proceder con el retiro temporal de los equipos.<br><br>Quedo atenta a cualquier duda o comentario.<br><br>Saludos cordiales.<br></span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

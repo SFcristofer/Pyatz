@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsAbsenceTravelFromHomeBase</fullName>
+    <inlineHelpText>Determina si el desplazamiento del recurso a su absentismo comienza desde su base de operaciones. El valor predeterminado es falso.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

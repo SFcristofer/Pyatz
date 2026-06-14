@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Línea de negocio --></label>
+    <name>Linea_de_negocio__c</name>
+    <picklistValues>
+        <masterLabel>Ambiental</masterLabel>
+        <translation><!-- Ambiental --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Hidrosanitario</masterLabel>
+        <translation><!-- Hidrosanitario --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Higiene</masterLabel>
+        <translation><!-- Higiene --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Retardante</masterLabel>
+        <translation><!-- Retardante --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

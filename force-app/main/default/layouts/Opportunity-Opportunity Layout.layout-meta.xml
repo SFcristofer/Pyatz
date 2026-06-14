@@ -22,6 +22,14 @@
                 <behavior>Edit</behavior>
                 <field>Auxiliar_oportunidad__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Linea_de_negocio2__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Estado_Oportunidad__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

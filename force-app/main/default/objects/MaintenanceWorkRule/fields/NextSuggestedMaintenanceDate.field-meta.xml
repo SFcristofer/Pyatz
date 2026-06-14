@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>NextSuggestedMaintenanceDate</fullName>
+    <inlineHelpText>La fecha sugerida del servicio para el número de visita en el siguiente lote generado para esta regla de trabajo de mantenimiento. El valor se actualiza después de que se genere cada lote.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

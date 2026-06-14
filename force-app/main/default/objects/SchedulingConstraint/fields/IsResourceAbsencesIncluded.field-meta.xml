@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsResourceAbsencesIncluded</fullName>
+    <inlineHelpText>Determina si se incluyen los absentismos de recursos en la suma. Solo es relevante si Modo de cálculo es Suma.</inlineHelpText>
+</CustomField>

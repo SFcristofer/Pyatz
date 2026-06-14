@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MaxContractValueForPayPeriod</fullName>
+    <inlineHelpText>El importe máximo del trabajo contratado permitido para el recurso por periodo de pago antes de que se desencadene una infracción de regla.</inlineHelpText>
+</CustomField>

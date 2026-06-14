@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TravelTimeBuffer</fullName>
+    <inlineHelpText>Minutos que se agregan a la duración estimada del viaje para cubrir el tiempo adicional, por ejemplo para aparcar. Ingrese un valor entre 0 y 120.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

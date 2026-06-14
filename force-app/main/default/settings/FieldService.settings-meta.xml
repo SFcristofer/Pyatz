@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FieldServiceSettings xmlns="http://soap.sforce.com/2006/04/metadata">
+    <advancedDataSyncOrgPreference>false</advancedDataSyncOrgPreference>
+    <canPopulateGoogleAddress>true</canPopulateGoogleAddress>
+    <canSendAppCenterCrashReports>true</canSendAppCenterCrashReports>
+    <canStoreMobileAnalytics>true</canStoreMobileAnalytics>
+    <doesAllowEditSaForCrew>false</doesAllowEditSaForCrew>
+    <doesAvlCalcInclOvertime>false</doesAvlCalcInclOvertime>
+    <doesAvlCalcInclPrimOnly>false</doesAvlCalcInclPrimOnly>
+    <doesShareSaParentWoWithAr>true</doesShareSaParentWoWithAr>
+    <doesShareSaWithAr>true</doesShareSaWithAr>
+    <enableAdvancedDataSync>false</enableAdvancedDataSync>
+    <enableBatchWindow>true</enableBatchWindow>
+    <enableDocumentBuilder>true</enableDocumentBuilder>
+    <enableFloatingWorkOrder>true</enableFloatingWorkOrder>
+    <enableLsdkMode>false</enableLsdkMode>
+    <enablePopulateWorkOrderAddress>true</enablePopulateWorkOrderAddress>
+    <enableServiceAppointmentLifecycle>false</enableServiceAppointmentLifecycle>
+    <enableStandbyMode>false</enableStandbyMode>
+    <enableWorkOrders>false</enableWorkOrders>
+    <enableWorkPlansAutoGeneration>false</enableWorkPlansAutoGeneration>
+    <enableWorkStepManualStatusUpdate>false</enableWorkStepManualStatusUpdate>
+    <enrouteStatus>En curso</enrouteStatus>
+    <fieldServiceNotificationsOrgPref>true</fieldServiceNotificationsOrgPref>
+    <fieldServiceOrgPref>true</fieldServiceOrgPref>
+    <isGeoCodeSyncEnabled>false</isGeoCodeSyncEnabled>
+    <isLocationHistoryEnabled>false</isLocationHistoryEnabled>
+    <o2EngineEnabled>true</o2EngineEnabled>
+    <optimizationServiceAccess>true</optimizationServiceAccess>
+    <overrideDefaultLwcStyling>true</overrideDefaultLwcStyling>
+    <serviceAppointmentsDueDateOffsetOrgValue>7</serviceAppointmentsDueDateOffsetOrgValue>
+    <workOrderLineItemSearchFields>Subject</workOrderLineItemSearchFields>
+    <workOrderSearchFields>Subject</workOrderSearchFields>
+</FieldServiceSettings>

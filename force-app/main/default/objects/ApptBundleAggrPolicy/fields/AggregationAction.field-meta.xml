@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AggregationAction</fullName>
+    <inlineHelpText>Seleccione una acción que pueda utilizarse con el Nombre de campo de paquete. Para obtener ayuda, consulte la documentación.</inlineHelpText>
+</CustomField>

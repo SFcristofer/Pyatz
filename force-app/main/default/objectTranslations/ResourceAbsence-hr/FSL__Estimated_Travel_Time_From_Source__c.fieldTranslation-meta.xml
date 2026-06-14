@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Estimated Travel Time From Source --></label>
+    <name>FSL__Estimated_Travel_Time_From_Source__c</name>
+    <picklistValues>
+        <masterLabel>Aerial</masterLabel>
+        <translation>Antena</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>None</masterLabel>
+        <translation>Ništa</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Predictive</masterLabel>
+        <translation>Prediktivno</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>SLR</masterLabel>
+        <translation>Usmjeravanje na razini ulice (SLR)</translation>
+    </picklistValues>
+</CustomFieldTranslation>

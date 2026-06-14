@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Time Dependency --></label>
+    <name>FSL__Time_Dependency__c</name>
+    <picklistValues>
+        <masterLabel>Finish Before Start</masterLabel>
+        <translation>在开始前结束</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Same Start</masterLabel>
+        <translation>同时开始</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Start After Finish</masterLabel>
+        <translation>在结束后开始</translation>
+    </picklistValues>
+</CustomFieldTranslation>

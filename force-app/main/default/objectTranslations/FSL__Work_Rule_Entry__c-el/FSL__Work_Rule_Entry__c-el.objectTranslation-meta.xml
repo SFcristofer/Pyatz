@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>false</plural>
+        <value>Καταχώρηση κανόνα εργασίας</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>true</plural>
+        <value>Καταχωρήσεις κανόνα εργασίας</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>false</plural>
+        <value>Καταχώρηση κανόνα εργασίας</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>true</plural>
+        <value>Καταχωρήσεις κανόνα εργασίας</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>false</plural>
+        <value>Καταχώρησης κανόνα εργασίας</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>true</plural>
+        <value>Καταχωρήσεων κανόνα εργασίας</value>
+    </caseValues>
+    <gender>Feminine</gender>
+    <nameFieldLabel>Όνομα καταχώρησης κανόνα εργασίας</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

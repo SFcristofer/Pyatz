@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Estatus --></label>
+    <name>Estatus__c</name>
+    <picklistValues>
+        <masterLabel>Cita programada</masterLabel>
+        <translation><!-- Cita programada --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>No responde</masterLabel>
+        <translation><!-- No responde --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Primer cita</masterLabel>
+        <translation><!-- Primer cita --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Primer contacto</masterLabel>
+        <translation><!-- Primer contacto --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Prospecto Convertido</masterLabel>
+        <translation><!-- Prospecto Convertido --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Prospecto interesado a futuro</masterLabel>
+        <translation><!-- Prospecto interesado a futuro --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Prospecto no interesado&quot;</masterLabel>
+        <translation><!-- Prospecto no interesado&quot; --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

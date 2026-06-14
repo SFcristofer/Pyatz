@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ImageId</fullName>
+    <inlineHelpText>Para obtener los mejores resultados, utilice una imagen de 1000 px x 380 px a 72 dpi o una con una relación similar.</inlineHelpText>
+    <type>Lookup</type>
+</CustomField>

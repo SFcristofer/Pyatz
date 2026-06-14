@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Dépendance de rendez-vous</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Dépendances de rendez-vous</value>
+    </caseValues>
+    <gender>Feminine</gender>
+    <nameFieldLabel>Nom de la dépendance de rendez-vous</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

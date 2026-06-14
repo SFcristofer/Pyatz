@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span style="font-size: 10pt;"><b>{!Product2.Name},&nbsp;{!Contact.Name},</b></span><p class="MsoNormal"><b><o:p></o:p></b></p><span style="font-size: 10pt;"><br>De acuerdo con su solicitud, por medio del presente confirmamos la recepción de la petición para modificar las condiciones del servicio (XXX) dentro de la póliza vigente.<br><br></span><span style="font-size: 10pt; font-weight: bold;">Temporalidad solicitada:<br>Nueva cantidad solicitada:<br>Ubicación:<br>Motivo del cambio:<br></span><span style="font-size: 10pt;"><br>En seguimiento a lo anterior, procederemos con la validación administrativa y operativa correspondiente para realizar los ajustes solicitados.<br><br>Le mantendremos informado sobre el estatus del proceso y la implementación de las modificaciones.<br><br>Agradeceré nos puedan confirmar la recepción del presente correo.<br><br>Quedo atenta a cualquier duda o comentario.<br><br>Saludos cordiales.</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

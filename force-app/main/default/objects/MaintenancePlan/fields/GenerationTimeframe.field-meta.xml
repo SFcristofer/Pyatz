@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>GenerationTimeframe</fullName>
+    <inlineHelpText>El tiempo por anticipado con que se generan los número de visitas en cada lote. La unidad se especifica en Tipo de intervalo de tiempo de generación.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

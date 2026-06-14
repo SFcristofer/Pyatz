@@ -3,5 +3,6 @@
     <fullName>Show_Tax__c</fullName>
     <defaultValue>true</defaultValue>
     <label>Mostrar Impuestos en PDF</label>
+    <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>

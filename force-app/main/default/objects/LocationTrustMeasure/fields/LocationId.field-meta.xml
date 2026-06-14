@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LocationId</fullName>
+    <inlineHelpText>El establecimiento, hotel u otro espacio físico que ocupa su negocio. Cada medida de confianza reside en una única ubicación. Si no hay una referencia externa en la ubicación, la tarjeta de confianza no se mostrará. Si recibe un error, modifique la ubicación para agregar una referencia externa.</inlineHelpText>
+    <type>Lookup</type>
+</CustomField>

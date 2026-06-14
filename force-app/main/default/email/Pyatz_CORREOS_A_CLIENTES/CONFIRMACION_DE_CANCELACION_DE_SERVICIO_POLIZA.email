@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span style="font-size: 10pt;"><b>{!Product2.Name},&nbsp;{!Contact.Name},</b></span><p class="MsoNormal"><o:p></o:p></p><span style="font-size: 10pt;"><br>De acuerdo con su solicitud, por medio del presente confirmamos la recepción de la petición de cancelación del servicio (XXX).<br><br></span><span style="font-size: 10pt; font-weight: bold;">Ubicación de los equipos (si aplica):<br>Fecha programada para retiro:<br>Motivo de la cancelación:</span><span style="font-size: 10pt;"><br><br>En seguimiento a lo anterior, procederemos con el proceso administrativo correspondiente para la cancelación del servicio y, en caso de aplicar, coordinaremos el retiro de los equipos instalados.<br><br>Le mantendremos informado sobre el avance y cierre del proceso.<br><br>Agradeceré nos puedan confirmar la recepción del presente correo.<br><br>Quedo atenta a cualquier duda o comentario.<br><br>Saludos cordiales.</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

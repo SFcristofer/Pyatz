@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Radius</fullName>
+    <inlineHelpText>Ingrese una distancia entre 100 y 5.000 metros. La acción se desencadena cuando el trabajador móvil está dentro del radio del registro asociado.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RemoveFromBundleStatuses</fullName>
+    <inlineHelpText>Seleccione los estados de citas de servicio que se pueden eliminar de un paquete. Utilice un valor vacío para eliminar citas de servicio con cualquier estado.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+</CustomField>

@@ -3,7 +3,6 @@
     <fullName>Zona__c</fullName>
     <label>Zona</label>
     <referenceTo>Zona_Servicio_Pyatz__c</referenceTo>
-    <relationshipLabel>Plantillas de la Zona</relationshipLabel>
     <relationshipName>Plantillas_de_Zona</relationshipName>
     <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>

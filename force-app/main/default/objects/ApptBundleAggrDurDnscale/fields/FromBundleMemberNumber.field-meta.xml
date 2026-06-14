@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FromBundleMemberNumber</fullName>
+    <inlineHelpText>Ingrese el primer número del miembro de paquete al que se aplica la reducción de escala.</inlineHelpText>
+</CustomField>

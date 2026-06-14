@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__Due_Date_Offset__c</fullName>
+    <deprecated>false</deprecated>
+    <description>Minutes</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Calcula la fecha de vencimiento agregando minutos a la hora de creación del servicio, lo que refleja el SLA interno de la organización</inlineHelpText>
+    <label>Due Date Offset</label>
+    <precision>9</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackHistory>false</trackHistory>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

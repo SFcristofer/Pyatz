@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- In Jeopardy Reason --></label>
+    <name>FSL__InJeopardyReason__c</name>
+    <picklistValues>
+        <masterLabel>Delayed Finish</masterLabel>
+        <translation>완료 지연</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Delayed Start</masterLabel>
+        <translation>시작 지연</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Due Date Approaching</masterLabel>
+        <translation>기한 임박</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>No Response</masterLabel>
+        <translation>응답 없음</translation>
+    </picklistValues>
+</CustomFieldTranslation>

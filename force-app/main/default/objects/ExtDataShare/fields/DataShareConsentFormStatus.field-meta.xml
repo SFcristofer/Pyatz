@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DataShareConsentFormStatus</fullName>
+    <inlineHelpText>Los administradores o usuarios con privilegios de la organización receptora que no sea Salesforce Data Cloud pueden ver y consultar todos los registros de los objetos del lago de datos (DLO) asignados a los objetos del modelo de datos (DMO) en la colaboración de datos.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

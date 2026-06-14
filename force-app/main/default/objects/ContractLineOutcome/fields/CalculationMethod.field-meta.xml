@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CalculationMethod</fullName>
+    <inlineHelpText>Seleccione Media o Como se capturó para calcular el resultado de la partida de contrato. 
+
+            Media calcula el valor del resultado final en base a la media de todos los datos capturados hasta la fecha. 
+
+            Como se capturó tiene en cuenta los datos actuales del activo en el momento de la comprobación de cumplimiento.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

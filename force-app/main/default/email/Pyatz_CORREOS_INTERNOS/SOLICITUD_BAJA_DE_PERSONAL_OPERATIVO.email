@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Equipo, Requiero de su apoyo para el proceso de </span><span style="font-size: 10pt; font-weight: bold;">Baja</span><span style="font-size: 10pt;"> en el IMSS del siguiente personal::</span><span style="font-size: 10pt; font-style: italic;"><br><br></span><span style="font-size: 10pt;">1. Nombre y NSS:<br>2. Nombre y NSS:<br>3. Nombre y NSS:<br><br></span><span style="font-size: 10pt; font-weight: bold;">Fecha de baja requerida:</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

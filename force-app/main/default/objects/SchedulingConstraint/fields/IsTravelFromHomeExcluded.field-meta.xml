@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsTravelFromHomeExcluded</fullName>
+    <inlineHelpText>Determina si se incluye el primer desplazamiento del día desde la base de operaciones en la suma. Solo es relevante si Modo de cálculo es Suma.</inlineHelpText>
+</CustomField>

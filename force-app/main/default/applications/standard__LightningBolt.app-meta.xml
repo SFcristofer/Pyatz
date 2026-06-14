@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>LightningBolt</label>
+    <navType>Standard</navType>
+    <tabs>standard-LightningBoltHome</tabs>
+    <tabs>Necesidades__c</tabs>
+    <tabs>Levantamiento_Tecnico__c</tabs>
+    <tabs>Configuracion_Tabla_Pyatz__c</tabs>
+    <tabs>Revision_Cita_Servicio__c</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>LightningBolt_UtilityBar</utilityBar>
+</CustomApplication>

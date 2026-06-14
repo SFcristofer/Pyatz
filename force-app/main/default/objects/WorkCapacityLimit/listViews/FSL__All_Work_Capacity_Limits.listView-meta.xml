@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__All_Work_Capacity_Limits</fullName>
+    <columns>Name</columns>
+    <columns>ServiceTerritory</columns>
+    <columns>LimitationValue</columns>
+    <columns>StartDate</columns>
+    <columns>EndDate</columns>
+    <columns>TimePeriod</columns>
+    <columns>IsActive</columns>
+    <columns>SvcApptField</columns>
+    <columns>SvcApptFieldValue</columns>
+    <columns>LimitationUnits</columns>
+    <filterScope>Everything</filterScope>
+    <label>All Work Capacity Limits</label>
+</ListView>

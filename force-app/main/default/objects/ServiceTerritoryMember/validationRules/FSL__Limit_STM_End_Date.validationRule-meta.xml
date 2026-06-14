@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FSL__Limit_STM_End_Date</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND( NOT(ISBLANK(EffectiveEndDate)),
+                                EffectiveEndDate &gt; ADDMONTHS(NOW(),36) )</errorConditionFormula>
+    <errorMessage>End Date must be within 3 years from today</errorMessage>
+</ValidationRule>

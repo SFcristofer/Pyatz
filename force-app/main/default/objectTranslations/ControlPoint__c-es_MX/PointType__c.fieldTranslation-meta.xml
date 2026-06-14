@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Tipo de Punto --></label>
+    <name>PointType__c</name>
+    <picklistValues>
+        <masterLabel>Bait Station</masterLabel>
+        <translation><!-- Bait Station --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Inspection Area</masterLabel>
+        <translation><!-- Inspection Area --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Other</masterLabel>
+        <translation><!-- Other --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Sensor</masterLabel>
+        <translation><!-- Sensor --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Trap</masterLabel>
+        <translation><!-- Trap --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

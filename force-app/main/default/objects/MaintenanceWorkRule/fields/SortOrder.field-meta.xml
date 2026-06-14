@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SortOrder</fullName>
+    <inlineHelpText>Establezca la prioridad que determina el modo en que se generan los número de visitas cuando un plan de mantenimiento o activo de mantenimiento tiene dos o más reglas de trabajo de mantenimiento que generan un número de visita para la misma fecha. El valor de orden de clasificación más bajo tiene prioridad.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

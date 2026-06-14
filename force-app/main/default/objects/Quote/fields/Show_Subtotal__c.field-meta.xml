@@ -3,5 +3,6 @@
     <fullName>Show_Subtotal__c</fullName>
     <defaultValue>true</defaultValue>
     <label>Mostrar Subtotal en PDF</label>
+    <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>

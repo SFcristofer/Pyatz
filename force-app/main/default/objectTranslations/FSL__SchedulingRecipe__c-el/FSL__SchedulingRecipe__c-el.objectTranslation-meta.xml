@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>false</plural>
+        <value>Συνταγή προγραμματισμού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>true</plural>
+        <value>Συνταγές προγραμματισμού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>false</plural>
+        <value>Συνταγή προγραμματισμού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>true</plural>
+        <value>Συνταγές προγραμματισμού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>false</plural>
+        <value>Συνταγής προγραμματισμού</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>true</plural>
+        <value>Συνταγών προγραμματισμού</value>
+    </caseValues>
+    <gender>Feminine</gender>
+    <nameFieldLabel>Όνομα συνταγής προγραμματισμού</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

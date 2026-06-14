@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PreWorkBriefPromptTemplate</fullName>
+    <inlineHelpText>Ingrese el identificador de su plantilla de solicitud de Resumen previo al trabajo. Para encontrar su identificador, abra la plantilla en el Generador de solicitudes y copie los caracteres que hay tras &quot;EinsteinPromptStudio/&quot; desde la URL. Por ejemplo, en esta URL: https://testcom98.test1.my.pc-rnd.salesforce-setup.com/lightning/setup/EinsteinPromptStudio/0hfSG000001SUFVYA4/edit?c__versionId=3vNSG0000000g8v2AA, el identificador es 0hfSG000001SUFVYA4.</inlineHelpText>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+</CustomField>

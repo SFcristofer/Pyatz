@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Hecho</fullName>
+        <default>false</default>
+        <label>Hecho</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Posible</fullName>
+        <default>false</default>
+        <label>Posible</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Complejo</fullName>
+        <default>false</default>
+        <label>Complejo</label>
+    </standardValue>
+</StandardValueSet>

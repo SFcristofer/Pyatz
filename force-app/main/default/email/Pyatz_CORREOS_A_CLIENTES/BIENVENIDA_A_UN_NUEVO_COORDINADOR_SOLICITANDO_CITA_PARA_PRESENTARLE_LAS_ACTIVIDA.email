@@ -1,0 +1,14 @@
+<table border="0" cellpadding="5" width="600" cellspacing="5" height="400" >
+<tr valign="top" height="50" >
+<td tEditID="c1r1" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r1" locked="0" >
+<![CDATA[]]></td>
+</tr>
+<tr valign="top" height="300" >
+<td tEditID="c1r2" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r2" locked="0" >
+<![CDATA[<span data-sheets-root="1" style="font-size: 10pt; font-family: Arial;"><span style="font-size: 10pt;">Estimad@&nbsp;</span><span data-teams="true">{!Product2.Name},&nbsp;{!Account.Name},</span><span style="font-size: 10pt; font-weight: bold; color: rgb(255, 0, 255);"><br></span><span style="font-size: 10pt;"><br>Reciba un cordial saludo.<br><br>Aprovecho la ocasión para presentarme y felicitarlo por su reciente nombramiento como Coordinador de la Zona </span><span style="font-size: 10pt; font-weight: bold; color: rgb(0, 0, 255);">#</span><span style="font-size: 10pt;"> de Liverpool. Será un gusto poder colaborar con usted en esta nueva etapa.<br><br>En PYATZ Ingeniería Biotecnológica contamos con más de 20 años ofreciendo soluciones para el control de malos olores, sarro y acumulación de grasas en las instalaciones hidrosanitarias de Liverpool. Durante años previos hemos trabajado de forma cercana con el </span><span style="font-size: 10pt; font-weight: bold; color: rgb(0, 0, 255);">(Coordinador previo)</span><span style="font-size: 10pt;">, coordinando diversas acciones orientadas al cuidado y mantenimiento preventivo de sus instalaciones.<br><br>Particularmente en su zona atendemos actualmente las tiendas de Liverpool XXX, con servicio cada # semanas, y Liverpool XXX, con servicio cada # semanas. En ambos casos implementamos un programa de dosificación de líquido bioenzimático, el cual acelera la degradación de grasas y aceites desde las tarjas, reduciendo su capacidad de incrustación en las tuberías y facilitando el mantenimiento mecánico que deben recibir de manera periódica.<br><br>Nuestro objetivo es apoyar a las áreas de mantenimiento para reducir incidencias operativas, mejorar las condiciones hidrosanitarias y facilitar el cuidado preventivo de las instalaciones.<br><br>Me pongo a sus órdenes y agradeceré nos pueda conceder una breve reunión para platicar sobre el estado de sus tiendas y las acciones que actualmente estamos realizando.<br><br>Quedo atenta a sus comentarios.</span></span>]]></td>
+</tr>
+<tr valign="top" height="50" >
+<td tEditID="c1r3" style=" background-color:#FFFFFF; bEditID:r3st1; color:#000000; bLabel:main; font-size:12pt; font-family:arial;" aEditID="c1r3" locked="0" >
+<![CDATA[]]></td>
+</tr>
+</table>

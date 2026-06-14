@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Tipo de Reporte --></label>
+    <name>Tipo_Reporte__c</name>
+    <picklistValues>
+        <masterLabel>Aplicación de retardante</masterLabel>
+        <translation><!-- Aplicación de retardante --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Aromatizante</masterLabel>
+        <translation><!-- Aromatizante --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Bacter (Bactereo)</masterLabel>
+        <translation><!-- Bacter (Bactereo) --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Bioenzmático</masterLabel>
+        <translation><!-- Bioenzmático --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Control de Plaga</masterLabel>
+        <translation><!-- Control de Plaga --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Desazolve</masterLabel>
+        <translation><!-- Desazolve --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Ductos</masterLabel>
+        <translation><!-- Ductos --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Elcla</masterLabel>
+        <translation><!-- Elcla --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Entrega</masterLabel>
+        <translation><!-- Entrega --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Filtros</masterLabel>
+        <translation><!-- Filtros --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Instalación</masterLabel>
+        <translation><!-- Instalación --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Limpieza</masterLabel>
+        <translation><!-- Limpieza --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Limpieza de Trampa</masterLabel>
+        <translation><!-- Limpieza de Trampa --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>PLOM</masterLabel>
+        <translation><!-- PLOM --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Recolección de Grasa</masterLabel>
+        <translation><!-- Recolección de Grasa --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Íntima</masterLabel>
+        <translation><!-- Íntima --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

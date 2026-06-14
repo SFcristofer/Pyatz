@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TravelTimeScalingFactor</fullName>
+    <inlineHelpText>Ingrese un valor entre 0,1 y 10 que represente un porcentaje del tiempo de viaje habitual. Solo se aplica si utiliza los modos de transporte de camión ligero o camión pesado. Por ejemplo, un factor de 1,0 significa el 100 % del tiempo de viaje normal (valor predeterminado), un factor de 1,2 significa que el tiempo de viaje es un 20 % más lento y un factor de 0,9 significa que el tiempo de viaje es un 10 % más rápido.</inlineHelpText>
+</CustomField>

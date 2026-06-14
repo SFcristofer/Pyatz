@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MaintenanceWindowEndDays</fullName>
+    <inlineHelpText>El número de días después de la fecha de servicio del número de visita en la que se puede programar la odt.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

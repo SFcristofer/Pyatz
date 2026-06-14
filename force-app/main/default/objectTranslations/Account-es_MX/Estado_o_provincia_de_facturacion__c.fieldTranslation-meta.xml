@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label><!-- Estado o provincia de facturación --></label>
+    <name>Estado_o_provincia_de_facturacion__c</name>
+</CustomFieldTranslation>

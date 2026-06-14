@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsTimeCalcByBundleDurationFld</fullName>
+    <inlineHelpText>Reste la hora de inicio del paquete de la hora de finalización del paquete y compárela con la duración del paquete.</inlineHelpText>
+</CustomField>

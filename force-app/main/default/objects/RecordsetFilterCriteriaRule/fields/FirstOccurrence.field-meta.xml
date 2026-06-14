@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FirstOccurrence</fullName>
+    <inlineHelpText>Establece el valor inicial. Para determinar si la regla es verdadera, este valor se compara con el valor del campo Uso.</inlineHelpText>
+</CustomField>

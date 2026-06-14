@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TravelTimeBuffer</fullName>
+    <inlineHelpText>Agregue tiempo adicional al tiempo de conducción, como tiempo para encontrar estacionamiento o andar al emplazamiento. Este valor sustituye el valor Tiempo de reserva de desplazamiento definido en Configuración de Field Service | Programación | Enrutamiento.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

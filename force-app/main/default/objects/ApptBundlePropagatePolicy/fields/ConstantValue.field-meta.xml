@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ConstantValue</fullName>
+    <inlineHelpText>Ingresa el valor constante que se agrega a los miembros de paquete.</inlineHelpText>
+</CustomField>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RecurrencePattern</fullName>
+    <inlineHelpText>Defina un patrón de recurrencia solo para una regla de trabajo basada en un calendario. La frecuencia indica la repetición del evento durante el periodo de tiempo seleccionado. Por ejemplo, si selecciona un periodo de repetición semanal y una frecuencia de 2, el evento se produce cada 2 semanas.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

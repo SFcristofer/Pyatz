@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MemberStatusesNotToPropagate</fullName>
+    <inlineHelpText>Seleccione los estados de citas de servicio de miembro de paquete que se sustituyen cuando se actualiza el estado de la cita de servicio de paquete. Utilice un valor vacío para propagar todos los estados.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+</CustomField>
