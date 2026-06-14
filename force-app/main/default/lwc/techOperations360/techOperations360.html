@@ -104,21 +104,52 @@
                 </lightning-record-edit-form>
             </div>
 
-            <!-- NAVEGACIÓN -->
-            <div class="slds-m-vertical_medium">
-                <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
-                    <template for:each={stages} for:item="stage">
-                        <lightning-progress-step key={stage.value} label={stage.label} value={stage.value} onclick={handleStepClick}></lightning-progress-step>
-                    </template>
-                </lightning-progress-indicator>
+            <!-- NAVEGACIÓN ETAPAS -->
+            <div class="slds-m-vertical_medium slds-path">
+                <div class="slds-grid slds-path__track">
+                    <div class="slds-grid slds-path__scroller-container">
+                        <div class="slds-path__scroller">
+                            <div class="slds-path__scroller_inner">
+                                <ul class="slds-path__nav" role="listbox" aria-orientation="horizontal">
+                                    <template for:each={processedStages} for:item="stage">
+                                        <li key={stage.value} class={stage.cssClass} role="presentation">
+                                            <a aria-selected={stage.isCurrent} class="slds-path__link" href="javascript:void(0);" role="option" tabindex="-1" data-value={stage.value} onclick={handleStepClick}>
+                                                <span class="slds-path__stage">
+                                                    <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Completado" if:true={stage.isCompleted} variant="inverse"></lightning-icon>
+                                                </span>
+                                                <span class="slds-path__title">{stage.label}</span>
+                                            </a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="substage-toolbar slds-m-bottom_medium">
-                <lightning-progress-indicator current-step={currentSubStep} type="path" variant="base" class="substage-path">
-                    <template for:each={currentSubStages} for:item="sub">
-                        <lightning-progress-step key={sub.value} label={sub.label} value={sub.value} onclick={handleSubStepClick}></lightning-progress-step>
-                    </template>
-                </lightning-progress-indicator>
+            <!-- NAVEGACIÓN SUBETAPAS -->
+            <div class="substage-toolbar slds-m-bottom_medium slds-path">
+                <div class="slds-grid slds-path__track">
+                    <div class="slds-grid slds-path__scroller-container">
+                        <div class="slds-path__scroller">
+                            <div class="slds-path__scroller_inner">
+                                <ul class="slds-path__nav" role="listbox" aria-orientation="horizontal">
+                                    <template for:each={processedSubStages} for:item="sub">
+                                        <li key={sub.value} class={sub.cssClass} role="presentation">
+                                            <a aria-selected={sub.isCurrent} class="slds-path__link" href="javascript:void(0);" role="option" tabindex="-1" data-value={sub.value} onclick={handleSubStepClick}>
+                                                <span class="slds-path__stage">
+                                                    <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Completado" if:true={sub.isCompleted} variant="inverse"></lightning-icon>
+                                                </span>
+                                                <span class="slds-path__title">{sub.label}</span>
+                                            </a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="module-container slds-p-around_medium">

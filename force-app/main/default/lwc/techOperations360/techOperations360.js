@@ -429,6 +429,68 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         });
     }
 
+    get processedStages() {
+        if (!this.stages) return [];
+        let maxStageIndex = 0;
+        const currentStageIdx = this.stages.findIndex(s => s.value === this.currentStep);
+        
+        if (this.processHistory && this.processHistory.length > 0) {
+            this.processHistory.forEach(h => {
+                const idx = this.stages.findIndex(s => s.value === h.Etapa__c || s.label === h.Etapa__c);
+                if (idx > maxStageIndex) maxStageIndex = idx;
+            });
+        }
+        if (currentStageIdx > maxStageIndex) maxStageIndex = currentStageIdx;
+
+        return this.stages.map((stage, index) => {
+            let cssClass = 'slds-path__item ';
+            let isCompleted = false;
+            let isCurrent = false;
+            if (index === currentStageIdx) {
+                cssClass += 'slds-is-current slds-is-active';
+                isCurrent = true;
+            } else if (index <= maxStageIndex) {
+                cssClass += 'slds-is-complete';
+                isCompleted = true;
+            } else {
+                cssClass += 'slds-is-incomplete';
+            }
+            return { ...stage, cssClass, isCompleted, isCurrent };
+        });
+    }
+
+    get processedSubStages() {
+        const subStages = this.currentSubStages;
+        if (!subStages || subStages.length === 0) return [];
+        let maxSubIndex = 0;
+        const currentSubIdx = subStages.findIndex(s => s.value === this.currentSubStep);
+
+        if (this.processHistory && this.processHistory.length > 0) {
+            const stageHistory = this.processHistory.filter(h => h.Etapa__c === this.currentStep || h.Etapa__c === (this.currentStage ? this.currentStage.label : ''));
+            stageHistory.forEach(h => {
+                const idx = subStages.findIndex(s => s.value === h.Subetapa__c || s.label === h.Subetapa__c);
+                if (idx > maxSubIndex) maxSubIndex = idx;
+            });
+        }
+        if (currentSubIdx > maxSubIndex) maxSubIndex = currentSubIdx;
+
+        return subStages.map((sub, index) => {
+            let cssClass = 'slds-path__item ';
+            let isCompleted = false;
+            let isCurrent = false;
+            if (index === currentSubIdx) {
+                cssClass += 'slds-is-current slds-is-active';
+                isCurrent = true;
+            } else if (index <= maxSubIndex) {
+                cssClass += 'slds-is-complete';
+                isCompleted = true;
+            } else {
+                cssClass += 'slds-is-incomplete';
+            }
+            return { ...sub, cssClass, isCompleted, isCurrent };
+        });
+    }
+
     get subPhase() {
         const sub = (this.currentSubStages || []).find(ss => ss.value === this.currentSubStep);
         return sub ? sub.label : '';
@@ -539,7 +601,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     handleStepClick(event) {
-        this.currentStep = event.target.value;
+        this.currentStep = event.currentTarget.dataset.value || event.target.value;
         this.currentSubStep = '1';
         this.currentStatus = ''; 
         this.quoteViewMode = 'list';
@@ -548,7 +610,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     }
 
     handleSubStepClick(event) {
-        this.currentSubStep = event.target.value;
+        this.currentSubStep = event.currentTarget.dataset.value || event.target.value;
         this.currentStatus = ''; 
         this.quoteViewMode = 'list';
         this.syncOpportunityStatus();
