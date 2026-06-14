@@ -91,7 +91,7 @@ export default class TechMemoriaManager extends LightningElement {
                     const label = config.labels[index] || field;
                     const value = rec[field];
                     // Solo añadir si el campo tiene valor y no es uno de los campos base ya mostrados
-                    if (value && !['Nivel__c', 'Area_Cocina_Banos__c', 'Zona_Genero__c'].includes(field)) {
+                    if ((value !== undefined && value !== null && value !== '') && !['Nivel__c', 'Area_Cocina_Banos__c', 'Zona_Genero__c'].includes(field)) {
                         specs.push(`${label}: ${value}`);
                     }
                 });
@@ -105,24 +105,55 @@ export default class TechMemoriaManager extends LightningElement {
                     if (rec.Bidon_10L__c) specs.push(`10L: ${rec.Bidon_10L__c}`);
                     if (rec.Bidon_20L__c) specs.push(`20L: ${rec.Bidon_20L__c}`);
                     if (rec.Bidon_25L__c) specs.push(`25L: ${rec.Bidon_25L__c}`);
-                    if (rec.Piso__c || rec.Mueble__c || rec.Pared__c) specs.push(`Ubic: P:${rec.Piso__c}/M:${rec.Mueble__c}/W:${rec.Pared__c}`);
+                    if (rec.Piso__c || rec.Mueble__c || rec.Pared__c) specs.push(`Ubic: P:${rec.Piso__c||0}/M:${rec.Mueble__c||0}/W:${rec.Pared__c||0}`);
                     if (rec.Escamoche__c) specs.push(`Escamoche: ${rec.Escamoche__c}`);
+                    if (rec.Azolves__c) specs.push(`Azolves: ${rec.Azolves__c}`);
+                    if (rec.Residuos_Tarja__c) specs.push(`Residuos: ${rec.Residuos_Tarja__c}`);
+                    if (rec.Coladeras__c || rec.Coladeras__c === 0) specs.push(`Coladeras: ${rec.Coladeras__c}`);
+                    if (rec.Tapon_Registro__c || rec.Tapon_Registro__c === 0) specs.push(`Tapón Reg: ${rec.Tapon_Registro__c}`);
+                    if (rec.Tarja__c || rec.Tarja__c === 0) specs.push(`Tarjas: ${rec.Tarja__c}`);
+                    if (rec.Tinas_por_Tarja__c || rec.Tinas_por_Tarja__c === 0) specs.push(`Tinas x Tarja: ${rec.Tinas_por_Tarja__c}`);
+                    if (rec.Trampa_Grasa__c || rec.Trampa_Grasa__c === 0) specs.push(`Trampa Grasa: ${rec.Trampa_Grasa__c}`);
+                    if (rec.Modelo_TG_Bio__c) specs.push(`Mod TG: ${rec.Modelo_TG_Bio__c}`);
+                    if (rec.ST_1__c || rec.ST_1__c === 0) specs.push(`ST-1: ${rec.ST_1__c}`);
+                    if (rec.Ovalines_Lavabo__c || rec.Ovalines_Lavabo__c === 0) specs.push(`Ovalines: ${rec.Ovalines_Lavabo__c}`);
                 } else if (typeUpper === 'GRASAS') {
                     if (rec.Modelo_Grasas__c) specs.push(`Mod: ${rec.Modelo_Grasas__c}`);
+                    if (rec.Frecuencia_Limpieza__c) specs.push(`Frec: ${rec.Frecuencia_Limpieza__c}`);
                     if (rec.Estado_Trampa__c) specs.push(`Estado: ${rec.Estado_Trampa__c}`);
-                    if (rec.SP__c || rec.ENT__c) specs.push(`SP:${rec.SP__c} / ENT:${rec.ENT__c}`);
+                    if (rec.SP__c || rec.ENT__c) specs.push(`SP:${rec.SP__c||0} / ENT:${rec.ENT__c||0}`);
+                    if (rec.Tornillo__c || rec.Sello__c || rec.Mampara__c || rec.Canastilla__c || rec.Ret_Salida__c) {
+                        specs.push(`Tor:${rec.Tornillo__c||0}/Sel:${rec.Sello__c||0}/Mam:${rec.Mampara__c||0}/Can:${rec.Canastilla__c||0}/Ret:${rec.Ret_Salida__c||0}`);
+                    }
                 } else if (typeUpper === 'VACTOR') {
-                    if (rec.Vactor_Largo__c) specs.push(`L:${rec.Vactor_Largo__c}m`);
-                    if (rec.Vactor_Ancho__c) specs.push(`A:${rec.Vactor_Ancho__c}m`);
-                    if (rec.Vactor_Profundidad__c) specs.push(`P:${rec.Vactor_Profundidad__c}m`);
-                    if (rec.Metros_Lineales__c) specs.push(`Total: ${rec.Metros_Lineales__c}m lineales`);
+                    if (rec.Vactor_Descripcion__c) specs.push(`Desc: ${rec.Vactor_Descripcion__c}`);
+                    if (rec.Vactor_Medida__c) specs.push(`Medida: ${rec.Vactor_Medida__c}`);
+                    if (rec.Vactor_Material__c) specs.push(`Material: ${rec.Vactor_Material__c}`);
+                    if (rec.Vactor_Servicio_Requerido__c) specs.push(`Servicio: ${rec.Vactor_Servicio_Requerido__c}`);
+                    if (rec.Vactor_Largo__c || rec.Vactor_Largo__c === 0) specs.push(`L:${rec.Vactor_Largo__c}m`);
+                    if (rec.Vactor_Ancho__c || rec.Vactor_Ancho__c === 0) specs.push(`A:${rec.Vactor_Ancho__c}m`);
+                    if (rec.Vactor_Profundidad__c || rec.Vactor_Profundidad__c === 0) specs.push(`P:${rec.Vactor_Profundidad__c}m`);
+                    if (rec.Metros_Lineales__c || rec.Metros_Lineales__c === 0) specs.push(`Total: ${rec.Metros_Lineales__c}m lineales`);
+                    if (rec.Vactor_Distancia_Camion__c) specs.push(`Distancia: ${rec.Vactor_Distancia_Camion__c}`);
+                    if (rec.Vactor_Permiso_Delegacion__c) specs.push(`Permiso Del: ${rec.Vactor_Permiso_Delegacion__c}`);
+                    if (rec.Vactor_Permiso_Plaza__c) specs.push(`Permiso Plaza: ${rec.Vactor_Permiso_Plaza__c}`);
                     if (rec.Vactor_Dificultad__c) specs.push(`Dificultad: ${rec.Vactor_Dificultad__c}`);
+                    if (rec.Vactor_Alcance_Pyatz__c) specs.push(`Alcance: ${rec.Vactor_Alcance_Pyatz__c}`);
                 } else if (typeUpper === 'INTIMA') {
-                    if (rec.WC__c) specs.push(`WC: ${rec.WC__c}`);
+                    if (rec.WC__c || rec.WC__c === 0) specs.push(`WC: ${rec.WC__c}`);
                     if (rec.Frecuencia__c) specs.push(`Freq: ${rec.Frecuencia__c}`);
+                    if (rec.Dias_Servicio_Censo__c) specs.push(`Días: ${rec.Dias_Servicio_Censo__c}`);
                 } else if (typeUpper === 'DESAZOLVE MECANICO') {
-                    if (rec.Metros_Lineales__c) specs.push(`Mts: ${rec.Metros_Lineales__c}`);
-                    if (rec.WC__c || rec.Ovalines_Lavabo__c || rec.Mingitorios__c) specs.push(`Puntos: WC:${rec.WC__c}/Ov:${rec.Ovalines_Lavabo__c}/Min:${rec.Mingitorios__c}`);
+                    if (rec.Metros_Lineales__c || rec.Metros_Lineales__c === 0) specs.push(`Mts: ${rec.Metros_Lineales__c}`);
+                    if (rec.Tarjas_Servicios__c || rec.Tarjas_Servicios__c === 0) specs.push(`Tarjas: ${rec.Tarjas_Servicios__c}`);
+                    if (rec.Cuarto_Humado__c || rec.Cuarto_Humado__c === 0) specs.push(`Cuarto Húmedo: ${rec.Cuarto_Humado__c}`);
+                    if (rec.Equipos_ARM__c || rec.Equipos_ARM__c === 0) specs.push(`ARM: ${rec.Equipos_ARM__c}`);
+                    if (rec.Coladeras__c || rec.Coladeras__c === 0) specs.push(`Coladeras: ${rec.Coladeras__c}`);
+                    if (rec.Tapon_Registro__c || rec.Tapon_Registro__c === 0) specs.push(`Tapón Reg: ${rec.Tapon_Registro__c}`);
+                    if (rec.WC__c || rec.Ovalines_Lavabo__c || rec.Mingitorios__c) specs.push(`Puntos: WC:${rec.WC__c||0}/Ov:${rec.Ovalines_Lavabo__c||0}/Min:${rec.Mingitorios__c||0}`);
+                } else if (typeUpper === 'AROMATIZANTES') {
+                    if (rec.WC__c || rec.WC__c === 0) specs.push(`WC: ${rec.WC__c}`);
+                    if (rec.Equipos_ARM__c || rec.Equipos_ARM__c === 0) specs.push(`ARM: ${rec.Equipos_ARM__c}`);
                 }
             }
 
