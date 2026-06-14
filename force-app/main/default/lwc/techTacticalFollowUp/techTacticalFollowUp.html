@@ -1,180 +1,194 @@
 <template>
-    <div class="tactical-container">
-        <!-- INTERRUPTOR DE HISTORIAL (FUERA DEL CUADRO) -->
-        <div class="slds-m-bottom_medium slds-p-horizontal_small slds-grid slds-grid_vertical-align-center">
-            <div class="slds-grid slds-grid_vertical-align-center">
-                <lightning-icon icon-name="standard:follow" size="small" class="slds-m-right_small"></lightning-icon>
-                <h2 class="slds-text-heading_small slds-font-weight_bold">Gestión de Seguimiento</h2>
+    <div class="tactical-container slds-grid slds-wrap slds-gutters slds-p-around_medium">
+        
+        <!-- COLUMNA IZQUIERDA: ACCIONES -->
+        <div class="slds-col slds-size_1-of-1 slds-large-size_6-of-12 slds-p-right_medium slds-m-bottom_large">
+            <h2 class="slds-text-heading_medium slds-font-weight_bold slds-m-bottom_large" style="color: #00396b;">¿Qué acción deseas realizar hoy?</h2>
+            
+            <div class="slds-grid slds-wrap slds-gutters_small action-cards-container">
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                    <div class="action-card color-call" onclick={handleLogCall}>
+                        <lightning-icon icon-name="standard:log_a_call" size="large"></lightning-icon>
+                        <span class="card-title">Registrar Llamada</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                    <div class="action-card color-task" onclick={handleNewTask}>
+                        <lightning-icon icon-name="standard:task" size="large"></lightning-icon>
+                        <span class="card-title">Crear Tarea</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                    <div class={noteCardClass} data-action="note" onclick={handleActionClick}>
+                        <lightning-icon icon-name="standard:note" size="large"></lightning-icon>
+                        <span class="card-title">Añadir Nota</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                    <div class={emailCardClass} data-action="email" onclick={handleActionClick}>
+                        <lightning-icon icon-name="standard:email" size="large"></lightning-icon>
+                        <span class="card-title">Enviar Correo</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_medium">
+                    <div class={fileCardClass} data-action="file" onclick={handleActionClick}>
+                        <lightning-icon icon-name="standard:file" size="large"></lightning-icon>
+                        <span class="card-title">Subir Archivo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULARIOS DESPLEGABLES -->
+            <template if:true={isActionNote}>
+                <div class="action-form-container slide-down slds-m-top_small">
+                    <h3 class="form-title slds-m-bottom_medium">
+                        <lightning-icon icon-name="standard:note" size="small" class="slds-m-right_small"></lightning-icon>
+                        Redactar Nota Técnica
+                    </h3>
+                    <lightning-input label="Título de la Nota" value={noteTitle} onchange={handleNoteTitleChange} placeholder="Ej: Minuta de llamada técnica..." class="slds-m-bottom_small"></lightning-input>
+                    <lightning-input-rich-text value={noteContent} onchange={handleNoteContentChange} placeholder="Escriba los detalles aquí..."></lightning-input-rich-text>
+                    <div class="slds-m-top_medium slds-text-align_right">
+                        <lightning-button label="Cancelar" onclick={handleCancelAction} class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Guardar Nota" variant="brand" icon-name="utility:save" onclick={handleSaveNote} disabled={isNoteEmpty}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isActionEmail}>
+                <div class="action-form-container slide-down slds-m-top_small">
+                    <h3 class="form-title slds-m-bottom_medium">
+                        <lightning-icon icon-name="standard:email" size="small" class="slds-m-right_small"></lightning-icon>
+                        Centro de Correos
+                    </h3>
+                    <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
+                </div>
+            </template>
+
+            <template if:true={isActionFile}>
+                <div class="action-form-container slide-down slds-m-top_small">
+                    <h3 class="form-title slds-m-bottom_medium">
+                        <lightning-icon icon-name="standard:file" size="small" class="slds-m-right_small"></lightning-icon>
+                        Repositorio de Expediente
+                    </h3>
+                    <div class="slds-box slds-theme_shade slds-text-align_center">
+                        <lightning-file-upload label="Arrastre sus documentos aquí" name="fileUploader" accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished} multiple></lightning-file-upload>
+                        <p class="slds-m-top_small slds-text-body_small slds-text-color_weak">Formatos aceptados: PDF, Imágenes, Office.</p>
+                    </div>
+                </div>
+            </template>
+
+            <!-- GUÍA DE CIERRE (PIE DE PÁGINA) -->
+            <div class="slds-m-top_xx-large slds-p-around_small bg-info radius-8">
+                <div class="slds-grid">
+                    <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span class="slds-text-title_bold" style="color: #00396b;">Consejo de Negociación:</span>
+                </div>
+                <p class="slds-text-body_small slds-p-left_large slds-m-top_xx-small">Utilice las Notas para registrar acuerdos verbales y el Correo para formalizarlos. El historial a la derecha le permite auditar cada paso.</p>
             </div>
         </div>
 
-        <!-- EL CUADRO PROFESIONAL (TABSET SCOPED) -->
-        <div class="slds-box bg-white shadow-card slds-p-around_none custom-tabset">
-            <lightning-tabset variant="scoped" active-tab-value={activeTab}>
-                
-                <!-- PESTAÑA: ACTIVIDAD -->
-                <lightning-tab label="Actividad" value="activity">
-                    <div class="slds-p-around_large slds-text-align_center">
-                        <p class="slds-m-bottom_medium slds-text-color_weak">Utilice las acciones estándar para registrar avances inmediatos.</p>
-                        <lightning-button-group>
-                            <lightning-button label="Registrar Llamada" icon-name="standard:log_a_call" onclick={handleLogCall}></lightning-button>
-                            <lightning-button label="Nueva Tarea" icon-name="standard:task" onclick={handleNewTask}></lightning-button>
-                        </lightning-button-group>
+        <!-- COLUMNA DERECHA: HISTORIAL (PERMANENTE) -->
+        <div class="slds-col slds-size_1-of-1 slds-large-size_6-of-12">
+            <div class="history-panel slds-p-around_medium">
+                <div class="slds-grid slds-grid_align-spread slds-m-bottom_large">
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <lightning-icon icon-name="standard:recent" size="small" class="slds-m-right_small"></lightning-icon>
+                        <h3 class="slds-text-title_bold" style="font-size: 1.1rem; color: #0070d2;">Historial de Actividad</h3>
                     </div>
-                </lightning-tab>
-
-                <!-- PESTAÑA: NOTAS (NATIVAS) -->
-                <lightning-tab label="Notas" value="notes">
-                    <div class="slds-p-around_medium">
-                        <div class="slds-grid slds-gutters slds-m-bottom_small">
-                            <div class="slds-col slds-size_1-of-1">
-                                <lightning-input label="Título de la Nota" value={noteTitle} onchange={handleNoteTitleChange} placeholder="Ej: Minuta de llamada técnica..."></lightning-input>
-                            </div>
-                        </div>
-                        <lightning-input-rich-text 
-                            value={noteContent} 
-                            onchange={handleNoteContentChange} 
-                            placeholder="Escriba los detalles técnicos aquí...">
-                        </lightning-input-rich-text>
-                        <div class="slds-m-top_small slds-text-align_right">
-                            <lightning-button label="Guardar Nota en Salesforce" variant="brand" icon-name="utility:save" onclick={handleSaveNote} disabled={isNoteEmpty}></lightning-button>
-                        </div>
-                    </div>
-                </lightning-tab>
-
-                <!-- PESTAÑA: CORREO ELECTRÓNICO -->
-                <lightning-tab label="Correo electrónico" value="email">
-                    <div class="slds-p-around_small">
-                        <c-tech-communication-hub record-id={recordId}></c-tech-communication-hub>
-                    </div>
-                </lightning-tab>
-
-                <!-- PESTAÑA: ARCHIVOS -->
-                <lightning-tab label="Archivos" value="files">
-                    <div class="slds-p-around_large">
-                        <div class="slds-box slds-theme_shade slds-text-align_center">
-                            <lightning-file-upload
-                                label="Subir documentos al expediente"
-                                name="fileUploader"
-                                accept={acceptedFormats}
-                                record-id={recordId}
-                                onuploadfinished={handleUploadFinished}
-                                multiple>
-                            </lightning-file-upload>
-                            <p class="slds-m-top_small slds-text-body_small slds-text-color_weak">Formatos aceptados: PDF, Imágenes, Office.</p>
-                        </div>
-                    </div>
-                </lightning-tab>
-
-            </lightning-tabset>
-        </div>
-
-        <!-- SECCIÓN HISTORIAL (PERMANENTE) -->
-        <div class="timeline-container slds-m-top_medium slds-p-around_medium bg-timeline border-top">
-                <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                    <h3 class="slds-text-title_bold" style="color: #0070d2;">Línea de Tiempo Consolidada (360°)</h3>
-                    <lightning-button-icon icon-name="utility:refresh" variant="bare" onclick={refreshHistory}></lightning-button-icon>
+                    <lightning-button-icon icon-name="utility:refresh" variant="bare" onclick={refreshHistory} title="Actualizar Historial"></lightning-button-icon>
                 </div>
 
                 <template if:true={isLoadingHistory}>
-                    <lightning-spinner alternative-text="Cargando historial..." size="small"></lightning-spinner>
+                    <div class="slds-is-relative slds-p-around_large" style="height: 100px;">
+                        <lightning-spinner alternative-text="Cargando historial..." size="small"></lightning-spinner>
+                    </div>
                 </template>
 
                 <template if:false={isLoadingHistory}>
-                    <template for:each={historyItems} for:item="item">
-                        <div key={item.id} class="timeline-item slds-m-bottom_small slds-p-around_small border-all radius-8" style={item.color}>
-                            <div class="slds-grid slds-grid_align-spread">
-                                <div class="slds-grid slds-grid_vertical-align-center">
-                                    <lightning-icon icon-name={item.icon} size="small" class="slds-m-right_small"></lightning-icon>
-                                    <div>
-                                        <div class="slds-text-title_bold">{item.subject}</div>
-                                        <div class="slds-text-body_small">
-                                            <span class="slds-text-color_weak">{item.label} • </span>
-                                            <lightning-formatted-date-time value={item.date} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
-                                            
-                                            <!-- VISIBILIDAD DE PROPIETARIO (NUEVO) -->
-                                            <template if:true={item.owner}>
-                                                <span class="slds-m-left_small slds-badge slds-theme_lightest" style="font-weight: normal; text-transform: none;">
-                                                    <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                                    {item.owner}
-                                                </span>
-                                            </template>
-                                        </div>
-                                    </div>
+                    <div class="timeline-feed-container">
+                        <template for:each={groupedHistory} for:item="group">
+                            <div key={group.id} class="timeline-date-group slds-m-bottom_large">
+                                
+                                <!-- CHEVRON HEADER -->
+                                <div class="date-header-chevron slds-m-bottom_small">
+                                    <span class="chevron-text">{group.dateLabel}</span>
                                 </div>
-                            </div>
-                            <div class="slds-m-top_x-small slds-text-body_small slds-text-color_weak italic">
-                                {item.desc}
-                            </div>
-
-                            <!-- GESTIÓN DE TAREA (Solo para Actividades) -->
-                            <template if:true={item.isTask}>
-                                <div class="slds-m-top_small slds-border_top slds-p-top_small">
-                                    <template if:false={item.isEditing}>
-                                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                                            <span class="slds-badge slds-theme_inverse">{item.status}</span>
-                                            <lightning-button-icon 
-                                                icon-name="utility:edit" 
-                                                variant="bare" 
-                                                alternative-text="Gestionar Tarea" 
-                                                title="Gestionar Tarea"
-                                                data-id={item.id}
-                                                onclick={handleEditTask}>
-                                            </lightning-button-icon>
-                                        </div>
-                                    </template>
-                                    
-                                    <template if:true={item.isEditing}>
-                                        <div class="slds-box slds-theme_shade slds-m-top_x-small">
-                                            <div class="slds-grid slds-gutters slds-m-bottom_x-small">
-                                                <div class="slds-col slds-size_1-of-1">
-                                                    <lightning-combobox
-                                                        label="Nuevo Estado"
-                                                        value={item.status}
-                                                        options={statusOptions}
-                                                        data-id={item.id}
-                                                        onchange={handleStatusChange}>
-                                                    </lightning-combobox>
+                                
+                                <div class="timeline-vertical-line">
+                                    <template for:each={group.items} for:item="item">
+                                        <div key={item.id} class="timeline-bubble-wrapper slds-m-bottom_medium">
+                                            <div class="timeline-dot" style={item.color}>
+                                                <!-- We use a neutral icon inside the dot if we want, or inherit color. The style is applied to the border -->
+                                            </div>
+                                            <div class="timeline-content-card">
+                                                <div class="slds-grid slds-grid_align-spread">
+                                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                                        <lightning-icon icon-name={item.icon} size="small" class="slds-m-right_small"></lightning-icon>
+                                                        <div>
+                                                            <div class="slds-text-title_bold">{item.subject}</div>
+                                                            <div class="slds-text-body_small">
+                                                                <span class="slds-text-color_weak">{item.label} • </span>
+                                                                <lightning-formatted-date-time value={item.date} hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                                
+                                                                <!-- VISIBILIDAD DE PROPIETARIO -->
+                                                                <template if:true={item.owner}>
+                                                                    <span class="slds-m-left_small slds-badge slds-theme_shade slds-badge_lightest" style="font-weight: normal; text-transform: none;">
+                                                                        <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                                        {item.owner}
+                                                                    </span>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <lightning-textarea 
-                                                label="Añadir Observación de Seguimiento" 
-                                                placeholder="Ej: El cliente solicitó reagendar..."
-                                                data-id={item.id}
-                                                onchange={handleObsTaskChange}>
-                                            </lightning-textarea>
-                                            <div class="slds-m-top_small slds-grid slds-grid_align-end">
-                                                <lightning-button label="Cancelar" variant="neutral" onclick={handleCancelEdit} class="slds-m-right_x-small"></lightning-button>
-                                                <lightning-button label="Guardar Avance" variant="brand" data-id={item.id} onclick={handleSaveTaskUpdate}></lightning-button>
+                                                
+                                                <div class="slds-m-top_x-small slds-text-body_small slds-text-color_weak italic timeline-desc">
+                                                    {item.desc}
+                                                </div>
+
+                                                <!-- GESTIÓN DE TAREA -->
+                                                <template if:true={item.isTask}>
+                                                    <div class="slds-m-top_small slds-border_top slds-p-top_small">
+                                                        <template if:false={item.isEditing}>
+                                                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                                                <span class="slds-badge slds-theme_inverse">{item.status}</span>
+                                                                <lightning-button-icon icon-name="utility:edit" variant="bare" alternative-text="Gestionar Tarea" title="Gestionar Tarea" data-id={item.id} onclick={handleEditTask}></lightning-button-icon>
+                                                            </div>
+                                                        </template>
+                                                        
+                                                        <template if:true={item.isEditing}>
+                                                            <div class="slds-box slds-theme_shade slds-m-top_x-small" style="background: white;">
+                                                                <lightning-combobox label="Nuevo Estado" value={item.status} options={statusOptions} data-id={item.id} onchange={handleStatusChange} class="slds-m-bottom_x-small"></lightning-combobox>
+                                                                <lightning-textarea label="Añadir Observación de Seguimiento" placeholder="Ej: El cliente solicitó reagendar..." data-id={item.id} onchange={handleObsTaskChange}></lightning-textarea>
+                                                                <div class="slds-m-top_small slds-text-align_right">
+                                                                    <lightning-button label="Cancelar" variant="neutral" onclick={handleCancelEdit} class="slds-m-right_x-small"></lightning-button>
+                                                                    <lightning-button label="Guardar Avance" variant="brand" data-id={item.id} onclick={handleSaveTaskUpdate}></lightning-button>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                                
+                                                <!-- PREVISUALIZACIÓN DE IMAGEN -->
+                                                <template if:true={item.previewUrl}>
+                                                    <div class="slds-m-top_small preview-box">
+                                                        <img src={item.previewUrl} alt={item.subject}/>
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </template>
                                 </div>
-                            </template>
-                            
-                            <!-- NUEVO: Previsualización de Imagen si aplica -->
-                            <template if:true={item.previewUrl}>
-                                <div class="slds-m-top_small" style="max-width: 250px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <img src={item.previewUrl} alt={item.subject} style="width: 100%; height: auto; display: block;"/>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-                    <template if:false={historyItems.length}>
-                        <div class="slds-text-align_center slds-p-around_large slds-text-color_weak">
-                            No hay actividad registrada aún.
-                        </div>
-                    </template>
+                            </div>
+                        </template>
+                        <template if:false={historyItems.length}>
+                            <div class="slds-text-align_center slds-p-around_large slds-text-color_weak">
+                                No hay actividad registrada en este expediente.
+                            </div>
+                        </template>
+                    </div>
                 </template>
             </div>
-
-        <!-- GUÍA DE CIERRE (PIE DE PÁGINA) -->
-        <div class="slds-m-top_medium slds-p-around_small bg-info border-all radius-8">
-            <div class="slds-grid">
-                <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_x-small"></lightning-icon>
-                <span class="slds-text-title_bold" style="color: #00396b;">Consejo de Negociación:</span>
-            </div>
-            <p class="slds-text-body_small slds-p-left_large">Utilice las Notas para registrar acuerdos verbales y el Correo para formalizarlos. El historial le permite auditar cada paso antes de pasar a la fase de Cierre.</p>
         </div>
     </div>
 </template>

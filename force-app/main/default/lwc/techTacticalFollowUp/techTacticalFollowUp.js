@@ -9,10 +9,32 @@ import updateTaskActivity from '@salesforce/apex/OperationsController.updateTask
 export default class TechTacticalFollowUp extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
     
-    @track activeTab = 'activity';
-    @track showFullHistory = false;
+    @track activeAction = null; // 'note', 'email', 'file'
     @track isLoadingHistory = false;
     @track historyItems = [];
+    @track groupedHistory = [];
+
+    // --- MANEJO DE TARJETAS DE ACCIÓN ---
+    get noteCardClass() { return this.activeAction === 'note' ? 'action-card active-card' : 'action-card'; }
+    get emailCardClass() { return this.activeAction === 'email' ? 'action-card active-card' : 'action-card'; }
+    get fileCardClass() { return this.activeAction === 'file' ? 'action-card active-card' : 'action-card'; }
+
+    get isActionNote() { return this.activeAction === 'note'; }
+    get isActionEmail() { return this.activeAction === 'email'; }
+    get isActionFile() { return this.activeAction === 'file'; }
+
+    handleActionClick(event) {
+        const action = event.currentTarget.dataset.action;
+        if (this.activeAction === action) {
+            this.activeAction = null; // Cierra si se hace clic otra vez
+        } else {
+            this.activeAction = action;
+        }
+    }
+
+    handleCancelAction() {
+        this.activeAction = null;
+    }
     
     // --- ESTADO NOTAS ---
     @track noteTitle = '';
@@ -62,6 +84,7 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
             }));
             this.noteTitle = '';
             this.noteContent = '';
+            this.activeAction = null;
             this.loadHistory();
         })
         .catch(error => {
@@ -75,12 +98,12 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
         });
     }
 
-    // --- MANEJADORES GESTIÓN TAREAS ---
     handleEditTask(event) {
         const taskId = event.target.dataset.id;
         this.historyItems = this.historyItems.map(item => {
             return { ...item, isEditing: item.id === taskId };
         });
+        this.refreshGrouping();
     }
 
     handleCancelEdit() {
@@ -89,6 +112,7 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
         });
         this.newTaskStatus = '';
         this.newTaskObs = '';
+        this.refreshGrouping();
     }
 
     handleStatusChange(event) {
@@ -162,6 +186,7 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
             message: uploadedFiles.length + ' archivos subidos al expediente.',
             variant: 'success'
         }));
+        this.activeAction = null;
         // REFRESCO REACTIVO: Actualizar historial inmediatamente
         this.loadHistory();
     }
@@ -171,25 +196,43 @@ export default class TechTacticalFollowUp extends NavigationMixin(LightningEleme
         this.isLoadingHistory = true;
         getTacticalHistory({ oppId: this.recordId })
             .then(result => {
-                // PROCESAMIENTO SEGURO: Mapeamos los campos para asegurar que siempre haya valores para renderizar
                 this.historyItems = result.map(item => {
                     return {
                         ...item,
-                        // Si es una tarea no completada, permitimos edición rápida
                         isPendingTask: item.isTask && item.status !== 'Completed',
-                        // Aseguramos que la descripción no sea nula para evitar fallos de renderizado
                         desc: item.desc || 'Sin descripción adicional.'
                     };
                 }).sort((a, b) => {
-                    // Ordenamiento descendente (más reciente primero) basado en milisegundos
                     return (b.date || 0) - (a.date || 0);
                 });
+                this.refreshGrouping();
                 this.isLoadingHistory = false;
             })
             .catch(error => {
                 console.error('Error loading 360 history:', error);
                 this.isLoadingHistory = false;
             });
+    }
+
+    refreshGrouping() {
+        let groups = [];
+        let currentGroup = null;
+        this.historyItems.forEach(item => {
+            const d = new Date(item.date);
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const dateStr = d.toLocaleDateString('es-MX', options).toUpperCase();
+            
+            if (!currentGroup || currentGroup.dateLabel !== dateStr) {
+                currentGroup = {
+                    id: 'group-' + item.id,
+                    dateLabel: dateStr,
+                    items: []
+                };
+                groups.push(currentGroup);
+            }
+            currentGroup.items.push(item);
+        });
+        this.groupedHistory = groups;
     }
 
     refreshHistory() {
