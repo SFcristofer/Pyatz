@@ -177,9 +177,25 @@ export default class TechResourceCalendar extends LightningElement {
 
     handleShowPopover(event) {
         const appId = event.currentTarget.dataset.id;
+        
+        // Calcular la posición relativa al contenedor con scroll
+        const rect = event.currentTarget.getBoundingClientRect();
+        const container = this.template.querySelector('.calendar-scroll-container');
+        
+        let showBelow = false;
+        if (container) {
+            const containerRect = container.getBoundingClientRect();
+            // Distancia de la tarjeta al borde superior visible del calendario
+            const relativeTop = rect.top - containerRect.top;
+            showBelow = relativeTop < 200; // Si está a menos de 200px del borde, mostrar abajo
+        } else {
+            showBelow = rect.top < 350; // Fallback
+        }
+        
         this.appointments = this.appointments.map(app => ({
             ...app,
-            showPopover: app.Id === appId
+            showPopover: app.Id === appId,
+            popoverClass: showBelow ? 'modern-popover popover-bottom' : 'modern-popover popover-top'
         }));
         this.buildResourceRows();
     }
