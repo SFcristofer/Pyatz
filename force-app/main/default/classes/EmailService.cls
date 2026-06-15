@@ -17,7 +17,7 @@ public with sharing class EmailService {
             for (EmailMessageRelation rel : em.EmailMessageRelations) recipients.add(new Map<String, String>{ 'name' => rel.RelationAddress, 'email' => rel.RelationAddress, 'type' => rel.RelationType == 'ToAddress' ? 'Principal' : 'En Copia' });
             row.put('recipients', recipients);
             row.put('statusLabel', em.IsOpened ? 'Leído' : 'Enviado');
-            row.put('statusClass', em.IsOpened ? 'slds-theme_success' : 'slds-theme_shade');
+            row.put('statusClass', em.IsOpened ? 'slds-badge slds-theme_success' : 'slds-badge slds-theme_shade');
             results.add(row);
         }
         return results;

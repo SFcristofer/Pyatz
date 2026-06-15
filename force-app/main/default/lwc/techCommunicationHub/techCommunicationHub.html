@@ -232,55 +232,82 @@
                     </button>
                     <h2 class="slds-text-heading_medium">Historial de Engagement de Propuestas</h2>
                 </header>
-                <div class="slds-modal__content slds-p-around_medium bg-light">
-                    <template if:true={isLoadingEngagement}>
-                        <lightning-spinner alternative-text="Cargando historial..." size="medium"></lightning-spinner>
-                    </template>
-                    
-                    <template if:false={isLoadingEngagement}>
-                        <div class="slds-grid slds-wrap slds-gutters">
-                            <template for:each={engagementDetails} for:item="email">
-                                <div key={email.id} class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
-                                    <div class="slds-box bg-white shadow-sm">
-                                        <div class="slds-grid slds-grid_align-spread">
-                                            <div class="slds-grid">
-                                                <lightning-icon icon-name="standard:email" size="small" class="slds-m-right_small"></lightning-icon>
-                                                <div>
-                                                    <div class="slds-text-title_bold">{email.subject}</div>
-                                                    <div class="slds-m-top_xx-small">
-                                                        <template for:each={email.recipients} for:item="rec">
-                                                            <lightning-badge key={rec.email} label={rec.name} title={rec.email} icon-name={rec.icon} class="slds-m-right_xx-small"></lightning-badge>
-                                                        </template>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <span class={email.statusClass}>{email.statusLabel}</span>
-                                        </div>
-                                        
-                                        <div class="slds-m-top_small border-top slds-p-top_small">
-                                            <div class="slds-grid slds-wrap">
-                                                <div class="slds-col slds-size_1-of-2">
-                                                    <div class="slds-text-title">Fecha de Envío:</div>
-                                                    <div><lightning-formatted-date-time value={email.sentDate} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
-                                                </div>
-                                                <template if:true={email.isOpened}>
-                                                    <div class="slds-col slds-size_1-of-2">
-                                                        <div class="slds-text-title">Primera Apertura:</div>
-                                                        <div class="slds-text-color_success"><lightning-formatted-date-time value={email.firstOpen} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
-                                                    </div>
-                                                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
-                                                        <div class="slds-text-title">Última Apertura:</div>
-                                                        <div class="slds-text-color_error"><lightning-formatted-date-time value={email.lastOpen} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-                </div>
+                <div class="slds-modal__content slds-p-around_medium bg-light modal-scroll">
+                      <template if:true={isLoadingEngagement}>
+                          <lightning-spinner alternative-text="Cargando historial..." size="medium"></lightning-spinner>
+                      </template>
+                      
+                      <template if:false={isLoadingEngagement}>
+                          <div class="engagement-timeline slds-p-around_x-small">
+                              <template for:each={engagementDetails} for:item="email">
+                                  <div key={email.id} class="engagement-card slds-m-bottom_medium">
+                                      <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                                          <div class="slds-grid slds-has-flexi-truncate">
+                                              <div class="icon-container slds-m-right_small">
+                                                  <lightning-icon icon-name={email.iconName} size="small" variant={email.iconVariant}></lightning-icon>
+                                              </div>
+                                              <div class="slds-truncate">
+                                                  <div class="slds-text-heading_small slds-truncate slds-m-bottom_xxx-small" title={email.subject}>
+                                                      <strong>{email.subject}</strong>
+                                                  </div>
+                                                  <div class="recipients-list slds-truncate">
+                                                      <template for:each={email.recipients} for:item="rec">
+                                                          <lightning-badge key={rec.email} label={rec.name} title={rec.email} icon-name={rec.icon} class="slds-m-right_xx-small custom-badge"></lightning-badge>
+                                                      </template>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="status-container slds-m-left_small">
+                                              <span class={email.statusClass}>{email.statusLabel}</span>
+                                          </div>
+                                      </div>
+                                      
+                                      <div class="engagement-stats">
+                                          <div class="slds-grid slds-wrap">
+                                              <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 stat-box">
+                                                  <div class="stat-label">
+                                                      <lightning-icon icon-name="utility:send" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                      Enviado
+                                                  </div>
+                                                  <div class="stat-value">
+                                                      <lightning-formatted-date-time value={email.sentDate} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                  </div>
+                                              </div>
+                                              <template if:true={email.isOpened}>
+                                                  <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 stat-box success-box">
+                                                      <div class="stat-label">
+                                                          <lightning-icon icon-name="utility:preview" size="xx-small" class="slds-m-right_xx-small slds-icon-text-success"></lightning-icon>
+                                                          Primera Apertura
+                                                      </div>
+                                                      <div class="stat-value text-success">
+                                                          <lightning-formatted-date-time value={email.firstOpen} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                      </div>
+                                                  </div>
+                                                  <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 stat-box warning-box">
+                                                      <div class="stat-label">
+                                                          <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small slds-icon-text-error"></lightning-icon>
+                                                          Última Apertura
+                                                      </div>
+                                                      <div class="stat-value text-error">
+                                                          <lightning-formatted-date-time value={email.lastOpen} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                      </div>
+                                                  </div>
+                                              </template>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </template>
+                              <template if:false={engagementDetails.length}>
+                                  <div class="slds-illustration slds-illustration_small slds-m-top_large">
+                                      <div class="slds-text-longform">
+                                          <h3 class="slds-text-heading_medium">Aún no hay correos enviados</h3>
+                                          <p class="slds-text-body_regular">El historial de aperturas aparecerá aquí una vez que envíes propuestas.</p>
+                                      </div>
+                                  </div>
+                              </template>
+                          </div>
+                      </template>
+                  </div>
                 <footer class="slds-modal__footer">
                     <lightning-button label="Cerrar" variant="neutral" onclick={handleCloseEngagement}></lightning-button>
                 </footer>

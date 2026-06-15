@@ -80,6 +80,8 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
                 // Procesamos para añadir iconos dinámicos
                 this.engagementDetails = result.map(email => ({
                     ...email,
+                    iconName: email.isOpened ? 'standard:task2' : 'standard:email',
+                    iconVariant: email.isOpened ? 'success' : '',
                     recipients: email.recipients.map(r => ({
                         ...r,
                         icon: r.type === 'Principal' ? 'standard:contact' : 'standard:groups'
