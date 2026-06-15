@@ -141,7 +141,7 @@
                                     <tr><th width="25%">Método de Pago</th><th width="50%" style="text-align:center;">Descripción</th><th width="25%">Tipo de Trabajo</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td style="text-align:left;">{!metodoPago}</td><td style="text-align:center; font-size:8.5pt;"><apex:outputText value="{!descripcionPago}" escape="false"/></td><td style="text-align:left;">{!tipoTrabajo}</td></tr>
+                                    <tr><td style="text-align:left;">{!metodoPago}</td><td style="text-align:center; font-size:8.5pt; line-height:1.2;"><apex:outputText value="{!descripcionPago}" escape="false"/></td><td style="text-align:left;">{!tipoTrabajo}</td></tr>
                                 </tbody>
                             </table>
                         </td></tr>

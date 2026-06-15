@@ -496,6 +496,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleObservacionesPagoChange(event) { this.observacionesPago = event.target.value; }
     handlePagoTransferenciaChange(event) { this.pagoTransferencia = event.target.checked; }
     handlePagoTarjetaChange(event) { this.pagoTarjeta = event.target.checked; }
+    handleTrabajoPuntualChange(event) { this.trabajoPuntual = event.target.checked; }
     handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
     handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
     handleShowSubtotalChange(event) { this.showSubtotal = event.target.checked; }
