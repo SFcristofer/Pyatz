@@ -16,7 +16,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     @track selectedFolder = '';
     @track selectedTemplateId = '';
     @track templates = [];
-    @track availableAttachments = { quotes: [], surveys: [], files: [] };
+    @track availableAttachments = { quotes: [], surveys: [], files: [], fichas: [] };
     @track selectedAttachments = [];
     @track sedeContacts = [];
     @track internalContacts = [];

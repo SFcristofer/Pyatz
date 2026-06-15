@@ -34,100 +34,119 @@
                         </lightning-combobox>
                     </div>
 
-                    <!-- 2. CUERPO DEL PANEL (SCROLL INDEPENDIENTE) -->
-                    <div class="panel-body flex-grow scrollable-attachments">
-                        
-                        <!-- SECCIÓN: EQUIPO INTERNO (Ventas, Operaciones) -->
-                        <template if:true={internalContacts.length}>
-                            <div class="slds-p-vertical_small border-bottom">
-                                <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
-                                    <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    EQUIPO INTERNO:
-                                </div>
-                                <div class="slds-p-horizontal_x-small">
-                                    <template for:each={internalContacts} for:item="int">
-                                        <div key={int.id} class="att-item slds-m-bottom_xx-small">
-                                            <lightning-input 
-                                                type="checkbox" 
-                                                label={int.name} 
-                                                title={int.email}
-                                                data-email={int.email} 
-                                                onchange={handleQuickAddContact}>
-                                            </lightning-input>
-                                            <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{int.role}</div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- SECCIÓN: CONTACTOS DE LA SEDE -->
-                        <template if:true={sedeContacts.length}>
-                            <div class="slds-p-vertical_small border-bottom">
-                                <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
-                                    <lightning-icon icon-name="standard:contact" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    CONTACTOS DE LA SEDE:
-                                </div>
-                                <div class="slds-p-horizontal_x-small">
-                                    <template for:each={sedeContacts} for:item="con">
-                                        <div key={con.id} class="att-item slds-m-bottom_xx-small">
-                                            <lightning-input 
-                                                type="checkbox" 
-                                                label={con.name} 
-                                                title={con.email}
-                                                data-email={con.email} 
-                                                onchange={handleQuickAddContact}>
-                                            </lightning-input>
-                                            <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{con.sede}</div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <div class="slds-p-vertical_small">
-                            <p class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">DOCUMENTOS PDF:</p>
+                    <!-- 2. CUERPO DEL PANEL (TABS PARA AHORRAR ESPACIO VERTICAL) -->
+                    <div class="panel-body flex-grow scrollable-attachments" style="padding: 0;">
+                        <lightning-tabset variant="scoped">
                             
-                            <template if:true={isLoadingAttachments}>
-                                <div class="slds-align_absolute-center slds-p-around_large">
-                                    <lightning-spinner alternative-text="Cargando..." size="small" variant="brand" style="position: relative;"></lightning-spinner>
-                                </div>
-                            </template>
-                            
-                            <template if:false={isLoadingAttachments}>
-                                <div class="slds-p-horizontal_x-small">
-                                    <div class="att-group-title first-group">
-                                        <lightning-icon icon-name="utility:quote" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                        Presupuestos
-                                    </div>
-                                    <template for:each={availableAttachments.quotes} for:item="quote">
-                                        <div key={quote.id} class="att-item">
-                                            <lightning-input type="checkbox" label={quote.name} data-id={quote.id} data-type="Quote" onchange={handleAttachmentToggle}></lightning-input>
+                            <!-- PESTAÑA 1: DESTINATARIOS -->
+                            <lightning-tab label="Contactos" icon-name="standard:people">
+                                <!-- SECCIÓN: EQUIPO INTERNO (Ventas, Operaciones) -->
+                                <template if:true={internalContacts.length}>
+                                    <div class="slds-p-vertical_small border-bottom">
+                                        <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
+                                            <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            EQUIPO INTERNO:
                                         </div>
-                                    </template>
+                                        <div class="slds-p-horizontal_x-small">
+                                            <template for:each={internalContacts} for:item="int">
+                                                <div key={int.id} class="att-item slds-m-bottom_xx-small">
+                                                    <lightning-input 
+                                                        type="checkbox" 
+                                                        label={int.name} 
+                                                        title={int.email}
+                                                        data-email={int.email} 
+                                                        onchange={handleQuickAddContact}>
+                                                    </lightning-input>
+                                                    <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{int.role}</div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
 
-                                    <div class="att-group-title">
-                                        <lightning-icon icon-name="utility:survey" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                        Levantamientos
+                                <!-- SECCIÓN: CONTACTOS DE LA SEDE -->
+                                <template if:true={sedeContacts.length}>
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
+                                            <lightning-icon icon-name="standard:contact" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            CONTACTOS DE LA SEDE:
+                                        </div>
+                                        <div class="slds-p-horizontal_x-small">
+                                            <template for:each={sedeContacts} for:item="con">
+                                                <div key={con.id} class="att-item slds-m-bottom_xx-small">
+                                                    <lightning-input 
+                                                        type="checkbox" 
+                                                        label={con.name} 
+                                                        title={con.email}
+                                                        data-email={con.email} 
+                                                        onchange={handleQuickAddContact}>
+                                                    </lightning-input>
+                                                    <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{con.sede}</div>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                    <template for:each={availableAttachments.surveys} for:item="survey">
-                                        <div key={survey.name} class="att-item">
-                                            <lightning-input type="checkbox" label={survey.name} data-id={survey.id} data-type="Survey" onchange={handleAttachmentToggle}></lightning-input>
+                                </template>
+                            </lightning-tab>
+
+                            <!-- PESTAÑA 2: ARCHIVOS Y ADJUNTOS -->
+                            <lightning-tab label="Adjuntos" icon-name="standard:file">
+                                <div class="slds-p-vertical_small">
+                                    <template if:true={isLoadingAttachments}>
+                                        <div class="slds-align_absolute-center slds-p-around_large">
+                                            <lightning-spinner alternative-text="Cargando..." size="small" variant="brand" style="position: relative;"></lightning-spinner>
                                         </div>
                                     </template>
+                                    
+                                    <template if:false={isLoadingAttachments}>
+                                        <div class="slds-p-horizontal_x-small">
+                                            <div class="att-group-title first-group">
+                                                <lightning-icon icon-name="utility:quote" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                Presupuestos
+                                            </div>
+                                            <template for:each={availableAttachments.quotes} for:item="quote">
+                                                <div key={quote.id} class="att-item">
+                                                    <lightning-input type="checkbox" label={quote.name} data-id={quote.id} data-type="Quote" onchange={handleAttachmentToggle}></lightning-input>
+                                                </div>
+                                            </template>
 
-                                    <div class="att-group-title">
-                                        <lightning-icon icon-name="utility:pdf_ext" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                        Archivos PDF
-                                    </div>
-                                    <template for:each={availableAttachments.files} for:item="file">
-                                        <div key={file.id} class="att-item">
-                                            <lightning-input type="checkbox" label={file.name} data-id={file.id} data-type="File" onchange={handleAttachmentToggle}></lightning-input>
+                                            <div class="att-group-title">
+                                                <lightning-icon icon-name="utility:survey" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                Levantamientos
+                                            </div>
+                                            <template for:each={availableAttachments.surveys} for:item="survey">
+                                                <div key={survey.name} class="att-item">
+                                                    <lightning-input type="checkbox" label={survey.name} data-id={survey.id} data-type="Survey" onchange={handleAttachmentToggle}></lightning-input>
+                                                </div>
+                                            </template>
+
+                                            <div class="att-group-title">
+                                                <lightning-icon icon-name="utility:pdf_ext" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                Archivos PDF
+                                            </div>
+                                            <template for:each={availableAttachments.files} for:item="file">
+                                                <div key={file.id} class="att-item">
+                                                    <lightning-input type="checkbox" label={file.name} data-id={file.id} data-type="File" onchange={handleAttachmentToggle}></lightning-input>
+                                                </div>
+                                            </template>
+
+                                            <!-- FICHAS TÉCNICAS -->
+                                            <template if:true={availableAttachments.fichas.length}>
+                                                <div class="att-group-title">
+                                                    <lightning-icon icon-name="utility:catalog" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                    Fichas Técnicas
+                                                </div>
+                                                <template for:each={availableAttachments.fichas} for:item="ficha">
+                                                    <div key={ficha.id} class="att-item">
+                                                        <lightning-input type="checkbox" label={ficha.name} data-id={ficha.id} data-type="File" onchange={handleAttachmentToggle}></lightning-input>
+                                                    </div>
+                                                </template>
+                                            </template>
                                         </div>
                                     </template>
                                 </div>
-                            </template>
-                        </div>
+                            </lightning-tab>
+                        </lightning-tabset>
                     </div>
 
                     <!-- 3. FOOTER DEL PANEL (FIJO AL FONDO) -->

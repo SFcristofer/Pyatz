@@ -32,6 +32,13 @@ public with sharing class FileService {
         List<Map<String, String>> files = new List<Map<String, String>>();
         for (ContentDocumentLink cdl : [SELECT ContentDocumentId, ContentDocument.Title, ContentDocument.FileExtension FROM ContentDocumentLink WHERE LinkedEntityId = :oppId AND ContentDocument.FileExtension = 'pdf']) files.add(new Map<String, String>{'id' => cdl.ContentDocumentId, 'name' => 'Archivo: ' + cdl.ContentDocument.Title, 'type' => 'File'});
         result.put('files', files);
+        
+        List<Map<String, String>> fichas = new List<Map<String, String>>();
+        for (ContentWorkspaceDoc cwd : [SELECT ContentDocumentId, ContentDocument.Title FROM ContentWorkspaceDoc WHERE ContentWorkspace.Name = 'Fichas Técnicas' OR ContentWorkspace.Name = 'Fichas Tecnicas']) {
+            fichas.add(new Map<String, String>{'id' => cwd.ContentDocumentId, 'name' => cwd.ContentDocument.Title, 'type' => 'File'});
+        }
+        result.put('fichas', fichas);
+        
         return result;
     }
 
