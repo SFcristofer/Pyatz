@@ -181,13 +181,6 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
 
     OPERATIONAL_STAGES = [
         {
-            value: 'Altas', label: 'Altas',
-            subStages: [
-                { value: '1', label: 'Alta cliente (Clientes nuevos)' },
-                { value: '2', label: 'Alta pyatz (Clientes nuevos)' }
-            ]
-        },
-        {
             value: 'Organización', label: 'Organización',
             subStages: [
                 { value: '1', label: 'Calendario' },
