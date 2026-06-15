@@ -73,7 +73,7 @@ public with sharing class QuoteEngineService {
                             UnitPrice = (can > 0 ? (tot/can) : tot), 
                             Descripcion_Detallada__c = (String)it.get('detalleTecnico'),
                             Zonas_a_Tratar__c = (String)it.get('areas'),
-                            Levantamiento_Tecnico__c = (it.get('levantamientoId') != null && String.valueOf(it.get('levantamientoId')) != '') ? (Id)it.get('levantamientoId') : null
+                            Solucion_Tecnica__c = (it.get('solucionId') != null && String.valueOf(it.get('solucionId')) != '') ? (Id)it.get('solucionId') : null
                         ));
                     } catch (Exception e) {}
                 }

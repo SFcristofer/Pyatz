@@ -22,6 +22,20 @@ public with sharing class QuoteController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getOpportunitySoluciones(Id oppId) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        for (Solucion_Tecnica__c s : [SELECT Id, Name, Levantamiento_Tecnico__r.Name 
+                                      FROM Solucion_Tecnica__c 
+                                      WHERE Oportunidad__c = :oppId 
+                                      ORDER BY Name ASC]) {
+            String label = s.Name + (s.Levantamiento_Tecnico__r != null ? ' (' + s.Levantamiento_Tecnico__r.Name + ')' : '');
+            results.add(new Map<String, String>{ 'label' => label, 'value' => s.Id });
+        }
+        return results;
+    }
+
+
+    @AuraEnabled(cacheable=true)
     public static Map<String, Object> getInitialData(Id recordId) {
         Map<String, Object> result = new Map<String, Object>();
         Id accountId;

@@ -2,7 +2,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import searchProducts from '@salesforce/apex/QuoteController.searchProducts';
 import getProductPrices from '@salesforce/apex/QuoteController.getProductPrices';
 import getProductInfoByPBE from '@salesforce/apex/QuoteController.getProductInfoByPBE';
-import getOpportunityLevantamientos from '@salesforce/apex/QuoteController.getOpportunityLevantamientos';
+import getOpportunitySoluciones from '@salesforce/apex/QuoteController.getOpportunitySoluciones';
 import getHistoricalZones from '@salesforce/apex/QuoteController.getHistoricalZones';
 
 export default class TechQuoteItemConfigurator extends LightningElement {
@@ -23,8 +23,8 @@ export default class TechQuoteItemConfigurator extends LightningElement {
     }
     _editItem;
 
-    @track levantamientoOptions = [];
-    @track selectedLevantamientoId = '';
+    @track solucionOptions = [];
+    @track selectedSolucionId = '';
     @track searchResults = [];
     @track allHistoricalZones = [];
     @track zonasAfectadas = [];
@@ -73,16 +73,16 @@ export default class TechQuoteItemConfigurator extends LightningElement {
         this.zonasAfectadas = [...new Set(normalized)];
     }
 
-    @wire(getOpportunityLevantamientos, { oppId: '$opportunityId' })
-    wiredLevantamientos({ error, data }) {
+    @wire(getOpportunitySoluciones, { oppId: '$opportunityId' })
+    wiredSoluciones({ error, data }) {
         if (data) {
-            this.levantamientoOptions = data;
+            this.solucionOptions = data;
         } else if (error) {
-            console.error('Error cargando levantamientos:', error);
+            console.error('Error cargando soluciones:', error);
         }
     }
 
-    handleLevantamientoChange(event) { this.selectedLevantamientoId = event.detail.value; }
+    handleSolucionChange(event) { this.selectedSolucionId = event.detail.value; }
 
     get priceTypeOptions() { return [ { label: 'Unitario', value: 'UNITARIO' }, { label: 'Total', value: 'TOTAL' } ]; }
     get selectedPriceType() { return this.isUnitario ? 'UNITARIO' : 'TOTAL'; }
@@ -122,7 +122,7 @@ export default class TechQuoteItemConfigurator extends LightningElement {
             return { id: s.Id, sede: s.Name, isSelected: isMatch, cantidad: item.cantidad, importeTotal: item.totalSinImpuestos / (item.cantidad || 1), descuento: 0, tipoDescuento: 'monto', totalSinImpuestos: item.totalSinImpuestos, impuestos: 16 };
         });
         this.selectedProductPrice = item.totalSinImpuestos / (item.cantidad || 1);
-        this.selectedLevantamientoId = item.levantamientoId || '';
+        this.selectedSolucionId = item.solucionId || '';
     }
 
     handleToggleGlobalSearch(event) {
@@ -228,7 +228,7 @@ export default class TechQuoteItemConfigurator extends LightningElement {
             sedes: row.sede,
             areas: this.zonasAfectadas.join(', '),
             detalleTecnico: this.modalDescription,
-            levantamientoId: this.selectedLevantamientoId,
+            solucionId: this.selectedSolucionId,
             rowClass: 'row-service'
         }));
         this.dispatchEvent(new CustomEvent('add', { detail: newItems }));
