@@ -8,7 +8,7 @@
                 }
                 @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
                 @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
-                body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:10pt; color:#333; line-height:1.4; margin:0; padding:0; }
+                body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:10pt; color:#333; line-height:1.6; margin:0; padding:0; }
                 
                 .header-img   { width:100%; display:block; position:fixed; top:0; left:0; z-index:1000; }
                 .footer-img   { width:100%; display:block; position:fixed; bottom:0; left:0; height:1.5cm; z-index:1000; }
@@ -32,7 +32,7 @@
                 .tbl-svc th           { background-color:#0a315e; color:#ffffff; text-align:center; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; }
                 .row-sep td           { background-color:#eef2f9; color:#0070d2; font-weight:bold; font-size:9.5pt; padding:8pt; border-top:2pt solid #0070d2; }
                 .row-item td          { padding:7pt 6pt; font-size:10pt; border-bottom:0.5pt solid #f0f0f0; background-color:#fff; vertical-align:middle; }
-                .row-detail td        { padding:3pt 32pt 10pt 16pt; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.5; }
+                .row-detail td        { padding:3pt 32pt 10pt 16pt; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.6; }
                 .detail-inner         { border-left:2pt solid #dde; padding-left:10pt; }
                 .detail-inner img     { max-width:100% !important; height:auto !important; }
 

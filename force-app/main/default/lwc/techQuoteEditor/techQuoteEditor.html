@@ -217,51 +217,59 @@
                         <h2>Resumen de Totales</h2>
                     </div>
                     <div class="slds-p-around_medium">
+                        
+                        <!-- Opciones de Visibilidad (Horizontal / Columnas) -->
+                        <div class="slds-box slds-m-bottom_medium" style="background-color: #f3f3f3; border: none;">
+                            <div class="slds-text-title_bold slds-m-bottom_small" style="color: #0a315e;">Opciones de Visibilidad en PDF</div>
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-5">
+                                    <lightning-input type="checkbox" label="Ver Subtotal 1" checked={showSubtotal} onchange={handleShowSubtotalChange}></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-5">
+                                    <lightning-input type="checkbox" label="Ver Descuento" checked={showDiscount} onchange={handleShowDiscountChange}></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-5">
+                                    <lightning-input type="checkbox" label="Ver Subtotal 2" checked={showSubtotal2} onchange={handleShowSubtotal2Change}></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-5">
+                                    <lightning-input type="checkbox" label="Ver I.V.A." checked={showTax} onchange={handleShowTaxChange}></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-5">
+                                    <lightning-input type="checkbox" label="Ver Total" checked={showTotal} onchange={handleShowTotalChange}></lightning-input>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Totales (Sin checkboxes) -->
                         <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                             <thead>
                                 <tr>
                                     <th>Concepto</th>
                                     <th>Monto</th>
-                                    <th style="width: 150px; text-align: center;">Opciones de PDF</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td><strong>SUBTOTAL 1</strong></td>
                                     <td><lightning-formatted-number value={calcSubtotal1} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
-                                    <td style="text-align: center;">
-                                        <lightning-input type="checkbox" checked={showSubtotal} onchange={handleShowSubtotalChange}></lightning-input>
-                                    </td>
                                 </tr>
                                 <template if:true={hasDescuento}>
                                     <tr>
                                         <td style="color:#d8000c;"><strong>DESCUENTO</strong></td>
                                         <td style="color:#d8000c;">- <lightning-formatted-number value={calcDescuento} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
-                                        <td style="text-align: center;">
-                                            <lightning-input type="checkbox" checked={showDiscount} onchange={handleShowDiscountChange}></lightning-input>
-                                        </td>
                                     </tr>
                                 </template>
                                 <tr>
                                     <td><strong>SUBTOTAL 2</strong></td>
                                     <td><lightning-formatted-number value={calcSubtotal2} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
-                                    <td style="text-align: center;">
-                                        <lightning-input type="checkbox" checked={showSubtotal2} onchange={handleShowSubtotal2Change}></lightning-input>
-                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>I.V.A. (16%)</strong></td>
                                     <td><lightning-formatted-number value={calcIva} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
-                                    <td style="text-align: center;">
-                                        <lightning-input type="checkbox" checked={showTax} onchange={handleShowTaxChange}></lightning-input>
-                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>TOTAL</strong></td>
                                     <td><strong><lightning-formatted-number value={calcTotal} format-style="currency" currency-code="MXN"></lightning-formatted-number></strong></td>
-                                    <td style="text-align: center;">
-                                        <lightning-input type="checkbox" checked={showTotal} onchange={handleShowTotalChange}></lightning-input>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>
