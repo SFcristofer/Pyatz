@@ -18,6 +18,9 @@ public with sharing class QuoteEngineService {
             
             Boolean showSubtotal = p.containsKey('showSubtotal') ? (Boolean)p.get('showSubtotal') : true;
             Boolean showTax = p.containsKey('showTax') ? (Boolean)p.get('showTax') : true;
+            Boolean showDiscount = p.containsKey('showDiscount') ? (Boolean)p.get('showDiscount') : true;
+            Boolean showSubtotal2 = p.containsKey('showSubtotal2') ? (Boolean)p.get('showSubtotal2') : true;
+            Boolean showTotal = p.containsKey('showTotal') ? (Boolean)p.get('showTotal') : true;
 
             Quote q;
             String businessLines = (String)p.get('businessLines');
@@ -31,6 +34,9 @@ public with sharing class QuoteEngineService {
                 q.Business_Lines_Selected__c = businessLines;
                 q.Show_Subtotal__c = showSubtotal;
                 q.Show_Tax__c = showTax;
+                q.Show_Discount__c = showDiscount;
+                q.Show_Subtotal_2__c = showSubtotal2;
+                q.Show_Total__c = showTotal;
                 update q;
             } else {
                 if (oppId == null && rid != null && rid.getSObjectType().getDescribe().getName() == 'Opportunity') oppId = rid;
@@ -45,7 +51,10 @@ public with sharing class QuoteEngineService {
                     Estrategia_Venta__c = (String)p.get('estrategiaVenta'), Business_Lines_Selected__c = businessLines, 
                     ExpirationDate = Date.today().addDays(30),
                     Show_Subtotal__c = showSubtotal,
-                    Show_Tax__c = showTax
+                    Show_Tax__c = showTax,
+                    Show_Discount__c = showDiscount,
+                    Show_Subtotal_2__c = showSubtotal2,
+                    Show_Total__c = showTotal
                 );
                 insert q; rid = q.Id;
             }
@@ -66,11 +75,19 @@ public with sharing class QuoteEngineService {
                     try {
                         Decimal can = Decimal.valueOf(String.valueOf(it.get('cantidad') != null ? it.get('cantidad') : 1));
                         Decimal tot = Decimal.valueOf(String.valueOf(it.get('totalSinImpuestos') != null ? it.get('totalSinImpuestos') : 0));
+                        Decimal precioVenta = it.containsKey('precioVenta') && it.get('precioVenta') != null ? Decimal.valueOf(String.valueOf(it.get('precioVenta'))) : (can > 0 ? (tot/can) : tot);
+                        
+                        Decimal discountPct = 0;
+                        if (precioVenta > 0 && (precioVenta * can) > tot) {
+                            discountPct = (((precioVenta * can) - tot) / (precioVenta * can)) * 100.0;
+                        }
+
                         qlis.add(new QuoteLineItem(
                             QuoteId = rid, 
                             PricebookEntryId = (Id)pbeIdStr, 
                             Quantity = (can > 0 ? can : 1), 
-                            UnitPrice = (can > 0 ? (tot/can) : tot), 
+                            UnitPrice = precioVenta,
+                            Discount = discountPct,
                             Descripcion_Detallada__c = (String)it.get('detalleTecnico'),
                             Zonas_a_Tratar__c = (String)it.get('areas'),
                             Solucion_Tecnica__c = (it.get('solucionId') != null && String.valueOf(it.get('solucionId')) != '') ? (Id)it.get('solucionId') : null

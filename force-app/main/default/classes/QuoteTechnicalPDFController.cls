@@ -23,6 +23,7 @@ public with sharing class QuoteTechnicalPDFController {
         this.technicalQuote = [SELECT Id, Name, QuoteNumber, AccountId, Account.Name, ContactId, Contact.Name, Opportunity.Name, 
                                      Show_Introduction__c, Introduction_Text__c, Phone, Email, Discount,
                                      Show_Warranty__c, Warranty_Text__c, Markers_Data__c, Show_Subtotal__c, Show_Tax__c,
+                                     Show_Discount__c, Show_Subtotal_2__c, Show_Total__c,
                                      Business_Lines_Selected__c, Technical_Sedes__c, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                      Subtotal, Tax, TotalPrice, Description,
                                      (SELECT Id, Product2.Name, Product2.ProductCode, Description, Pyatz_Technical_Description__c, Descripcion_Detallada__c, Quantity, ListPrice, UnitPrice, Discount, TotalPrice
@@ -138,7 +139,7 @@ public with sharing class QuoteTechnicalPDFController {
         this.calcDescuento = 0;
         
         for (QuoteLineItem qli : this.technicalQuote.QuoteLineItems) {
-            Decimal listP = qli.ListPrice != null ? qli.ListPrice : (qli.UnitPrice != null ? qli.UnitPrice : 0);
+            Decimal listP = qli.UnitPrice != null ? qli.UnitPrice : (qli.ListPrice != null ? qli.ListPrice : 0);
             Decimal qty = qli.Quantity != null ? qli.Quantity : 1;
             Decimal subP = listP * qty;
             Decimal totP = qli.TotalPrice != null ? qli.TotalPrice : subP;

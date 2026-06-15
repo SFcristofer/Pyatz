@@ -45,10 +45,11 @@ public with sharing class QuoteContractPDFController {
                                    Account.CP_Notificacion__c, Account.CD_Notificacion__c,
                                    Account.Pais_Notificacion__c, Account.Correo_Notificacion__c, Account.Tel_Notificacion__c,
                                    Account.Proceso_liberacion_pedidos__c, Account.Proceso_ingreso_de_facturas__c,
+                                   Show_Warranty__c, Warranty_Text__c, Markers_Data__c, Show_Subtotal__c, Show_Tax__c,
+                                   Show_Discount__c, Show_Subtotal_2__c, Show_Total__c,
                                    Contact.Name, CreatedBy.Name, CreatedBy.Email, CreatedDate,
                                    TotalPrice, Business_Lines_Selected__c, Technical_Sedes__c,
-                                   Introduction_Text__c, Warranty_Text__c, Description, Subtotal, Tax, Discount,
-                                   Show_Subtotal__c, Show_Tax__c
+                                   Introduction_Text__c, Description, Subtotal, Tax, Discount
                             FROM Quote WHERE Id = :quoteId];
 
         // Folio sin ceros iniciales
@@ -82,7 +83,7 @@ public with sharing class QuoteContractPDFController {
         this.calcDescuento = 0;
         
         for (QuoteLineItem qli : this.selectedLineItems) {
-            Decimal listP = qli.ListPrice != null ? qli.ListPrice : (qli.UnitPrice != null ? qli.UnitPrice : 0);
+            Decimal listP = qli.UnitPrice != null ? qli.UnitPrice : (qli.ListPrice != null ? qli.ListPrice : 0);
             Decimal qty = qli.Quantity != null ? qli.Quantity : 1;
             Decimal subP = listP * qty;
             Decimal totP = qli.TotalPrice != null ? qli.TotalPrice : subP;

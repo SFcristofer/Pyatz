@@ -237,13 +237,17 @@
                                     <tr>
                                         <td style="color:#d8000c;"><strong>DESCUENTO</strong></td>
                                         <td style="color:#d8000c;">- <lightning-formatted-number value={calcDescuento} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
-                                        <td></td>
+                                        <td style="text-align: center;">
+                                            <lightning-input type="checkbox" checked={showDiscount} onchange={handleShowDiscountChange}></lightning-input>
+                                        </td>
                                     </tr>
                                 </template>
                                 <tr>
                                     <td><strong>SUBTOTAL 2</strong></td>
                                     <td><lightning-formatted-number value={calcSubtotal2} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
-                                    <td></td>
+                                    <td style="text-align: center;">
+                                        <lightning-input type="checkbox" checked={showSubtotal2} onchange={handleShowSubtotal2Change}></lightning-input>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>I.V.A. (16%)</strong></td>
@@ -255,7 +259,9 @@
                                 <tr>
                                     <td><strong>TOTAL</strong></td>
                                     <td><strong><lightning-formatted-number value={calcTotal} format-style="currency" currency-code="MXN"></lightning-formatted-number></strong></td>
-                                    <td></td>
+                                    <td style="text-align: center;">
+                                        <lightning-input type="checkbox" checked={showTotal} onchange={handleShowTotalChange}></lightning-input>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

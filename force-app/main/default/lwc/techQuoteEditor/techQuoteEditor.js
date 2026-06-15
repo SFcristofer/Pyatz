@@ -83,7 +83,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track lineaNegocioOptions = [];
     @track allowOtherLines = false;
     @track showSubtotal = true;
+    @track showDiscount = true;
+    @track showSubtotal2 = true;
     @track showTax = true;
+    @track showTotal = true;
 
     // --- NUEVOS TOTALES PARA LA TABLA ---
     @track calcSubtotal1 = 0;
@@ -155,7 +158,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                     this.accountId = q.AccountId;
                     this.parentOpportunityId = q.OpportunityId;
                     this.showSubtotal = q.Show_Subtotal__c !== undefined ? q.Show_Subtotal__c : true;
+                    this.showDiscount = q.Show_Discount__c !== undefined ? q.Show_Discount__c : true;
+                    this.showSubtotal2 = q.Show_Subtotal_2__c !== undefined ? q.Show_Subtotal_2__c : true;
                     this.showTax = q.Show_Tax__c !== undefined ? q.Show_Tax__c : true;
+                    this.showTotal = q.Show_Total__c !== undefined ? q.Show_Total__c : true;
                     if (q.Account) this.clienteNombre = q.Account.Name;
                     if (q.Markers_Data__c) {
                         try {
@@ -365,7 +371,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             estrategiaVenta: this.estrategiaVenta,
             businessLines: this.selectedLines.join(', '),
             showSubtotal: this.showSubtotal,
-            showTax: this.showTax
+            showDiscount: this.showDiscount,
+            showSubtotal2: this.showSubtotal2,
+            showTax: this.showTax,
+            showTotal: this.showTotal
         };
 
         try {
@@ -490,7 +499,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     handleVentaProductoChange(event) { this.ventaProducto = event.target.checked; }
     handleTrabajoMantenimientoChange(event) { this.trabajoMantenimiento = event.target.checked; }
     handleShowSubtotalChange(event) { this.showSubtotal = event.target.checked; }
+    handleShowDiscountChange(event) { this.showDiscount = event.target.checked; }
+    handleShowSubtotal2Change(event) { this.showSubtotal2 = event.target.checked; }
     handleShowTaxChange(event) { this.showTax = event.target.checked; }
+    handleShowTotalChange(event) { this.showTotal = event.target.checked; }
 
     handleOpenSeparatorModal() { this.showSeparatorModal = true; }
     handleCloseSeparatorModal() { this.showSeparatorModal = false; }

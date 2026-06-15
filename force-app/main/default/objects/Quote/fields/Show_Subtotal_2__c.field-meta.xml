@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Show_Subtotal_2__c</fullName>
+    <defaultValue>true</defaultValue>
+    <label>Mostrar Subtotal 2 en PDF</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>
