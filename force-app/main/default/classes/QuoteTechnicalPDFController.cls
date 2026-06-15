@@ -15,6 +15,12 @@ public with sharing class QuoteTechnicalPDFController {
     public Decimal calcIva {get; set;}
     public Decimal calcTotal {get; set;}
 
+    public Boolean showSubtotal {get; set;}
+    public Boolean showDiscount {get; set;}
+    public Boolean showSubtotal2 {get; set;}
+    public Boolean showTax {get; set;}
+    public Boolean showTotal {get; set;}
+
     public QuoteTechnicalPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
         this.htmlDescriptions = new Map<Id, String>();
@@ -125,11 +131,18 @@ public with sharing class QuoteTechnicalPDFController {
                 }
             }
         }
-        if (String.isNotBlank(this.technicalQuote.Introduction_Text__c)) {
+        if(String.isNotBlank(this.technicalQuote.Introduction_Text__c)){
             this.technicalQuote.Introduction_Text__c = fixListStyles(this.technicalQuote.Introduction_Text__c);
-            this.technicalQuote.Introduction_Text__c = fixParagraphStyles(this.technicalQuote.Introduction_Text__c); // REVERT: borrar esta línea
+            this.technicalQuote.Introduction_Text__c = fixParagraphStyles(this.technicalQuote.Introduction_Text__c);
         }
-        if (String.isNotBlank(this.technicalQuote.Warranty_Text__c)) {
+        
+        this.showSubtotal = this.technicalQuote.Show_Subtotal__c != null ? this.technicalQuote.Show_Subtotal__c : true;
+        this.showDiscount = this.technicalQuote.Show_Discount__c != null ? this.technicalQuote.Show_Discount__c : true;
+        this.showSubtotal2 = this.technicalQuote.Show_Subtotal_2__c != null ? this.technicalQuote.Show_Subtotal_2__c : true;
+        this.showTax = this.technicalQuote.Show_Tax__c != null ? this.technicalQuote.Show_Tax__c : true;
+        this.showTotal = this.technicalQuote.Show_Total__c != null ? this.technicalQuote.Show_Total__c : true;
+        
+        if(this.technicalQuote.Show_Warranty__c == true && String.isNotBlank(this.technicalQuote.Warranty_Text__c)){
             this.technicalQuote.Warranty_Text__c = fixListStyles(this.technicalQuote.Warranty_Text__c);
             this.technicalQuote.Warranty_Text__c = fixParagraphStyles(this.technicalQuote.Warranty_Text__c);
         }

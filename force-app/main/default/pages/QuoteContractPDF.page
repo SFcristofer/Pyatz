@@ -372,7 +372,7 @@
 
                                 <apex:outputPanel rendered="{!config['show_total']}">
                                     <table class="tbl-totals">
-                                        <apex:outputPanel rendered="{!quoteRecord.Show_Subtotal__c}" layout="none">
+                                        <apex:outputPanel rendered="{!showSubtotal}" layout="none">
                                             <tr>
                                                 <td class="tot-lbl">SUBTOTAL 1</td>
                                                 <td class="tot-val">
@@ -380,7 +380,7 @@
                                                 </td>
                                             </tr>
                                         </apex:outputPanel>
-                                        <apex:outputPanel rendered="{!AND(quoteRecord.Show_Discount__c, calcDescuento > 0)}" layout="none">
+                                        <apex:outputPanel rendered="{!AND(showDiscount, calcDescuento > 0)}" layout="none">
                                             <tr>
                                                 <td class="tot-lbl" style="color:#d8000c;">DESCUENTO</td>
                                                 <td class="tot-val" style="color:#d8000c;">
@@ -388,7 +388,7 @@
                                                 </td>
                                             </tr>
                                         </apex:outputPanel>
-                                        <apex:outputPanel rendered="{!quoteRecord.Show_Subtotal_2__c}" layout="none">
+                                        <apex:outputPanel rendered="{!showSubtotal2}" layout="none">
                                             <tr>
                                                 <td class="tot-lbl">SUBTOTAL 2</td>
                                                 <td class="tot-val">
@@ -396,7 +396,7 @@
                                                 </td>
                                             </tr>
                                         </apex:outputPanel>
-                                        <apex:outputPanel rendered="{!quoteRecord.Show_Tax__c}" layout="none">
+                                        <apex:outputPanel rendered="{!showTax}" layout="none">
                                             <tr>
                                                 <td class="tot-lbl">I.V.A. (16%)</td>
                                                 <td class="tot-val">
@@ -404,7 +404,7 @@
                                                 </td>
                                             </tr>
                                         </apex:outputPanel>
-                                        <apex:outputPanel rendered="{!quoteRecord.Show_Total__c}" layout="none">
+                                        <apex:outputPanel rendered="{!showTotal}" layout="none">
                                             <tr class="row-grand">
                                                 <td class="tot-lbl">TOTAL</td>
                                                 <td class="tot-val">

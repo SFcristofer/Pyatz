@@ -19,6 +19,12 @@ public with sharing class QuoteContractPDFController {
     public String signatureUrl {get; set;}
     public String fechaContrato {get; set;}
 
+    public Boolean showSubtotal {get; set;}
+    public Boolean showDiscount {get; set;}
+    public Boolean showSubtotal2 {get; set;}
+    public Boolean showTax {get; set;}
+    public Boolean showTotal {get; set;}
+
     public QuoteContractPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
         this.fechaHoy = Date.today().format();
@@ -135,11 +141,17 @@ public with sharing class QuoteContractPDFController {
         this.signatureUrl = findSignatureUrl(this.firmanteNombre);
 
         // 3. Formatear campos long text para el PDF
-        if (String.isNotBlank(this.quoteRecord.Introduction_Text__c)) {
+        if(String.isNotBlank(this.quoteRecord.Introduction_Text__c)){
             this.quoteRecord.Introduction_Text__c = fixListStyles(this.quoteRecord.Introduction_Text__c);
-            this.quoteRecord.Introduction_Text__c = fixParagraphStyles(this.quoteRecord.Introduction_Text__c);
         }
-        if (String.isNotBlank(this.quoteRecord.Warranty_Text__c)) {
+        
+        this.showSubtotal = this.quoteRecord.Show_Subtotal__c != null ? this.quoteRecord.Show_Subtotal__c : true;
+        this.showDiscount = this.quoteRecord.Show_Discount__c != null ? this.quoteRecord.Show_Discount__c : true;
+        this.showSubtotal2 = this.quoteRecord.Show_Subtotal_2__c != null ? this.quoteRecord.Show_Subtotal_2__c : true;
+        this.showTax = this.quoteRecord.Show_Tax__c != null ? this.quoteRecord.Show_Tax__c : true;
+        this.showTotal = this.quoteRecord.Show_Total__c != null ? this.quoteRecord.Show_Total__c : true;
+        
+        if(this.quoteRecord.Show_Warranty__c == true && String.isNotBlank(this.quoteRecord.Warranty_Text__c)){
             this.quoteRecord.Warranty_Text__c = fixListStyles(this.quoteRecord.Warranty_Text__c);
             this.quoteRecord.Warranty_Text__c = fixParagraphStyles(this.quoteRecord.Warranty_Text__c);
         }

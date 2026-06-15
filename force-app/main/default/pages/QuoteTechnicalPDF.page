@@ -119,19 +119,19 @@
                         <!-- BLOQUE: TOTALES (Inyectados como fila de la misma tabla) -->
                         <tr><td colspan="4" style="padding-top:20pt;">
                             <table class="tbl-totals">
-                                <apex:outputPanel rendered="{!technicalQuote.Show_Subtotal__c}" layout="none">
+                                <apex:outputPanel rendered="{!showSubtotal}" layout="none">
                                     <tr><td class="tot-lbl">SUBTOTAL 1</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcSubtotal1}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
-                                <apex:outputPanel rendered="{!AND(technicalQuote.Show_Discount__c, calcDescuento > 0)}" layout="none">
+                                <apex:outputPanel rendered="{!AND(showDiscount, calcDescuento > 0)}" layout="none">
                                     <tr><td class="tot-lbl" style="color:#d8000c;">DESCUENTO</td><td class="tot-val" style="color:#d8000c;">- <apex:outputText value="{0, number, currency}"><apex:param value="{!calcDescuento}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
-                                <apex:outputPanel rendered="{!technicalQuote.Show_Subtotal_2__c}" layout="none">
+                                <apex:outputPanel rendered="{!showSubtotal2}" layout="none">
                                     <tr><td class="tot-lbl">SUBTOTAL 2</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcSubtotal2}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
-                                <apex:outputPanel rendered="{!technicalQuote.Show_Tax__c}" layout="none">
+                                <apex:outputPanel rendered="{!showTax}" layout="none">
                                     <tr><td class="tot-lbl">I.V.A. (16%)</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcIva}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
-                                <apex:outputPanel rendered="{!technicalQuote.Show_Total__c}" layout="none">
+                                <apex:outputPanel rendered="{!showTotal}" layout="none">
                                     <tr class="row-grand"><td class="tot-lbl">TOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcTotal}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
                             </table>
