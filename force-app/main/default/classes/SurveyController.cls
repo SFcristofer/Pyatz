@@ -38,10 +38,12 @@ public with sharing class SurveyController {
         Id oppId = resolveOppId(recordId);
         Solucion_Tecnica__c sol = new Solucion_Tecnica__c(
             Id = solucionId, 
-            Oportunidad__c = (solucionId == null ? oppId : null), 
             Name = nombre, 
             Descripcion_Detallada__c = descripcion
         );
+        if (solucionId == null) {
+            sol.Oportunidad__c = oppId;
+        }
         upsert sol; 
         return sol.Id;
     }
