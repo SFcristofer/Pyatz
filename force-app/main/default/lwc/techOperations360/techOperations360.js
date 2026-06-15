@@ -183,9 +183,9 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         {
             value: 'Organización', label: 'Organización',
             subStages: [
-                { value: '1', label: 'Calendario' },
-                { value: '2', label: 'Contrato' },
-                { value: '3', label: "Creación ODT's" },
+                { value: '1', label: 'Contrato' },
+                { value: '2', label: "Creación ODT's" },
+                { value: '3', label: 'Calendario' },
                 { value: '4', label: 'Enhorabuena' }
             ]
         }
@@ -514,9 +514,9 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     get isAltaCliente() { return this.currentStep === 'Altas' && this.currentSubStep === '1'; }
     get isAltaPyatz() { return this.currentStep === 'Altas' && this.currentSubStep === '2'; }
     get isAutorizacionPhase() { return this.currentStep === 'Cierre' && this.currentSubStep === '1'; }
-    get isCalendarioPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '1'; }
-    get isContratoPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '2'; }
-    get isWorkOrderPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '3'; }
+    get isContratoPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '1'; }
+    get isWorkOrderPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '2'; }
+    get isCalendarioPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '3'; }
     get isEnhorabuenaPhase() { return this.currentStep === 'Organización' && this.currentSubStep === '4'; }
 
     handleLogCall() { this.navigateToGlobalAction('LogACall'); }
