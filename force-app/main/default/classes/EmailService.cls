@@ -61,8 +61,47 @@ public with sharing class EmailService {
                 Integer endIdx = lowerBody.lastIndexOf('</body>');
                 body = body.substring(0, endIdx);
             }
-            // NOTA: No eliminamos <style> de forma agresiva para permitir plantillas con diseño, 
-            // a menos que sean estilos inyectados por Salesforce que rompan el LWC.
+            
+            // 0.5. Extraer SOLO el contenido real de las plantillas clásicas (Letterhead)
+            // Estas plantillas envuelven todo en una <table> gigante que Quill JS no puede editar bien y causa que se borre todo con Backspace
+            if (body.contains('bLabel:main')) {
+                String extracted = '';
+                Matcher m = Pattern.compile('(?si)<td[^>]*bLabel:main[^>]*>(.*?)</td>').matcher(body);
+                while (m.find()) {
+                    String innerHtml = m.group(1);
+                    if (String.isNotBlank(innerHtml) && innerHtml.trim() != '&nbsp;') {
+                        extracted += innerHtml + '<br/>';
+                    }
+                }
+                if (String.isNotBlank(extracted)) {
+                    body = extracted;
+                }
+            }
+
+            // 0.8. Remover marcadores CDATA que rompen la interpretación del HTML en LWC
+            body = body.replaceAll('<!\\[CDATA\\[', '');
+            body = body.replaceAll('\\]\\]>', '');
+
+            // 0.9. Remover envoltorios de Google Sheets que vuelven el bloque atómico
+            body = body.replaceAll('(?i)<span data-sheets-root="1"[^>]*>', '');
+            if (body.trim().endsWith('</span>')) {
+                body = body.substring(0, body.lastIndexOf('</span>'));
+            }
+
+            // 1. Limpiar párrafos vacíos y saltos de línea basura inyectados al inicio y al final
+            body = body.replaceAll('(?i)^(?:\\s|<br\\s*/?>|<p>(?:&nbsp;|\\s|<br\\s*/?>)*</p>)+', '');
+            body = body.replaceAll('(?i)(?:\\s|<br\\s*/?>|<p>(?:&nbsp;|\\s|<br\\s*/?>)*</p>)+$', '');
+            
+            // Forzar envoltura en un div bloque para evitar que Quill borre todo como un solo nodo inline
+            if (String.isNotBlank(body) && !body.toLowerCase().startsWith('<div')) {
+                body = '<div>' + body + '</div>';
+            }
+
+            // 2. Aislar el pixel de rastreo de Salesforce para que no cause espacios extra
+            body = body.replaceAll('(?i)(<img[^>]*?width="1"[^>]*?height="1"[^>]*?>)', '<div style="display:none;">$1</div>');
+            
+            // 3. Suprimir márgenes gigantes de los contenedores por defecto de Lightning
+            body = body.replaceAll('(?i)padding:\\s*(?:[3-5][0-9]px|\\d{2,3}px)(?:\\s+(?:[3-5][0-9]px|\\d{2,3}px)){0,3};?', '');
         }
         return body != null ? body.trim() : '';
     }

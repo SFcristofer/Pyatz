@@ -208,6 +208,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
                 quoteId: contextId 
             });
             this.emailBody = content;
+            this._currentDraftBody = ''; // Resetear el borrador para que tome la nueva plantilla
             
             // Actualizar asunto automáticamente si la plantilla lo tiene o usar el nombre de la plantilla
             const tpl = this.templates.find(t => t.id === this.selectedTemplateId);
@@ -239,17 +240,25 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     handleEmailChange(event) { this.toEmail = event.detail.value; }
     handleCcChange(event) { this.ccEmail = event.detail.value; }
     handleSubjectChange(event) { this.subject = event.detail.value; }
-    handleBodyChange(event) { this.emailBody = event.detail.value; }
+    // Almacena el cuerpo sin causar un re-render continuo
+    _currentDraftBody = '';
+
+    handleBodyChange(event) { 
+        this._currentDraftBody = event.detail.value; 
+    }
 
     handleSendEmail() {
         this.isSending = true;
         
+        // Usar el borrador actual si existe, si no usar el original cargado
+        const finalBody = this._currentDraftBody || this.emailBody;
+
         sendEmailWithAttachments({
             oppId: this.recordId,
             toEmail: this.toEmail,
             ccEmail: this.ccEmail,
             subject: this.subject,
-            body: this.emailBody,
+            body: finalBody,
             selectedAttachments: this.selectedAttachments
         })
         .then(() => {
