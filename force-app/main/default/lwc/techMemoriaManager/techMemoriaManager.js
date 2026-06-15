@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import LightningConfirm from 'lightning/confirm';
 import getLevantamientoDetails from '@salesforce/apex/SurveyController.getLevantamientoDetails';
 import getSolucionesOpp from '@salesforce/apex/SurveyController.getSolucionesOpp';
 import saveSolucionOpp from '@salesforce/apex/SurveyController.saveSolucionOpp';
@@ -17,12 +18,14 @@ export default class TechMemoriaManager extends LightningElement {
     
     @track selectedSolucionId = null;
     @track selectedSolucionName = '';
-    @track activeEnlaces = []; // Array of Levantamiento Ids
+    @track activeEnlaces = []; 
+    @track activeSections = [];
     
     @track isSaving = false;
     @track showSolModal = false;
     @track newSolName = '';
     @track isFullScreen = false;
+    @track isMemoriaDirty = false;
 
     connectedCallback() {
         this.loadInitialData();
@@ -58,6 +61,10 @@ export default class TechMemoriaManager extends LightningElement {
         return this.isFullScreen ? '12' : '6';
     }
 
+    get columnOpacityStyle() {
+        return this.selectedSolucionId ? 'opacity: 1; transition: opacity 0.3s ease;' : 'opacity: 0.5; transition: opacity 0.3s ease;';
+    }
+
     get hallazgosPointerEvents() {
         return this.selectedSolucionId ? 'auto' : 'none';
     }
@@ -66,13 +73,33 @@ export default class TechMemoriaManager extends LightningElement {
         return !this.selectedSolucionId || this.isSaving;
     }
 
+    get saveButtonVariant() {
+        return this.isMemoriaDirty ? 'brand' : 'neutral';
+    }
+    
+    get isSaveButtonDisabled() {
+        return !this.selectedSolucionId || (!this.isMemoriaDirty && !this.isSaving);
+    }
+
+    get saveButtonLabel() {
+        return this.isMemoriaDirty ? '* Guardar Cambios' : 'Guardar Memoria';
+    }
+
+    get noSolucionSelected() {
+        return !this.selectedSolucionId;
+    }
+
     loadSoluciones() {
         return getSolucionesOpp({ recordId: this.recordId })
             .then(result => {
-                this.solutions = result.map(s => ({
-                    ...s,
-                    className: s.Id === this.selectedSolucionId ? 'sol-item active-sol' : 'sol-item'
-                }));
+                this.solutions = result.map(s => {
+                    const count = s.Enlaces_Hallazgos__r ? s.Enlaces_Hallazgos__r.length : 0;
+                    return {
+                        ...s,
+                        badgeCount: `[ ${count} ]`,
+                        className: s.Id === this.selectedSolucionId ? 'sol-item active-sol' : 'sol-item'
+                    };
+                });
             });
     }
 
@@ -84,10 +111,14 @@ export default class TechMemoriaManager extends LightningElement {
 
     formatGroupedDetails(records) {
         const groups = {};
+        const tempActiveSections = [];
         records.forEach(rec => {
             const type = rec.Tipo_Servicio__c || 'GENERAL';
             const typeUpper = type.toUpperCase();
-            if (!groups[type]) groups[type] = { label: type, records: [] };
+            if (!groups[type]) {
+                groups[type] = { label: type, records: [] };
+                tempActiveSections.push(type);
+            }
             
             const identifier = [rec.Nivel__c, rec.Area_Cocina_Banos__c, rec.Zona_Genero__c]
                 .filter(item => item)
@@ -191,11 +222,22 @@ export default class TechMemoriaManager extends LightningElement {
             });
         });
         this.groupedDetails = Object.values(groups);
+        this.activeSections = tempActiveSections;
     }
 
     async handleSolSelect(event) {
+        if (this.isMemoriaDirty) {
+            const confirmed = await LightningConfirm.open({
+                message: 'Tienes cambios sin guardar en la memoria descriptiva. ¿Estás seguro que deseas cambiar de solución y perder los cambios?',
+                theme: 'warning',
+                label: 'Cambios sin guardar'
+            });
+            if (!confirmed) return;
+        }
+
         const solId = event.currentTarget.dataset.id;
         this.selectedSolucionId = solId;
+        this.isMemoriaDirty = false;
         const sol = this.solutions.find(s => s.Id === solId);
         
         if (sol) {
@@ -208,7 +250,6 @@ export default class TechMemoriaManager extends LightningElement {
             className: s.Id === solId ? 'sol-item active-sol' : 'sol-item'
         }));
 
-        // Fetch enlaces
         try {
             this.activeEnlaces = await getEnlacesForSolucion({ solucionId: solId });
             this.updateCheckboxes();
@@ -238,7 +279,6 @@ export default class TechMemoriaManager extends LightningElement {
             this.activeEnlaces = this.activeEnlaces.filter(id => id !== recId);
         }
         
-        // Auto-save enlaces
         this.isSaving = true;
         try {
             await saveEnlaces({ solucionId: this.selectedSolucionId, hallazgosIds: this.activeEnlaces });
@@ -247,11 +287,42 @@ export default class TechMemoriaManager extends LightningElement {
         } finally {
             this.isSaving = false;
             this.updateCheckboxes();
+            this.loadSoluciones(); // Update badge counts
+        }
+    }
+
+    async handleSelectAll(event) {
+        if (!this.selectedSolucionId) return;
+        const groupLabel = event.target.dataset.group;
+        const group = this.groupedDetails.find(g => g.label === groupLabel);
+        if (!group) return;
+
+        let anyUnselected = group.records.some(r => !this.activeEnlaces.includes(r.id));
+        
+        if (anyUnselected) {
+            group.records.forEach(r => {
+                if (!this.activeEnlaces.includes(r.id)) this.activeEnlaces.push(r.id);
+            });
+        } else {
+            const groupIds = group.records.map(r => r.id);
+            this.activeEnlaces = this.activeEnlaces.filter(id => !groupIds.includes(id));
+        }
+
+        this.isSaving = true;
+        try {
+            await saveEnlaces({ solucionId: this.selectedSolucionId, hallazgosIds: this.activeEnlaces });
+        } catch(e) {
+            console.error('Error saving enlaces', e);
+        } finally {
+            this.isSaving = false;
+            this.updateCheckboxes();
+            this.loadSoluciones(); // Update badge counts
         }
     }
 
     handleTextChange(event) {
         this.memoriaText = event.target.value;
+        this.isMemoriaDirty = true;
     }
 
     handleAddSol() {
@@ -280,6 +351,7 @@ export default class TechMemoriaManager extends LightningElement {
             this.selectedSolucionId = newId;
             this.selectedSolucionName = this.newSolName;
             this.memoriaText = '';
+            this.isMemoriaDirty = false;
             this.activeEnlaces = [];
             this.showSolModal = false;
             return this.loadSoluciones();
@@ -312,18 +384,31 @@ export default class TechMemoriaManager extends LightningElement {
             descripcion: this.memoriaText
         })
         .then(() => {
+            this.isMemoriaDirty = false;
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Memoria guardada', variant: 'success' }));
             return this.loadSoluciones();
         })
         .finally(() => this.isSaving = false);
     }
 
-    handleDeleteSol(event) {
+    async handleDeleteSol(event) {
+        event.stopPropagation();
         const id = event.target.dataset.id;
+        const sol = this.solutions.find(s => s.Id === id);
+        
+        const confirmed = await LightningConfirm.open({
+            message: `¿Estás seguro de que deseas eliminar la solución "${sol ? sol.Name : ''}" y desenlazar todos sus hallazgos?`,
+            theme: 'error',
+            label: 'Eliminar Solución'
+        });
+        
+        if (!confirmed) return;
+
         deleteSolucion({ solucionId: id }).then(() => {
             if(this.selectedSolucionId === id) {
                 this.selectedSolucionId = null;
                 this.memoriaText = '';
+                this.isMemoriaDirty = false;
                 this.activeEnlaces = [];
                 this.updateCheckboxes();
             }

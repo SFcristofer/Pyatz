@@ -15,9 +15,12 @@
                     <div class="sol-list">
                         <template for:each={solutions} for:item="sol">
                             <div key={sol.Id} class={sol.className} data-id={sol.Id} onclick={handleSolSelect}>
-                                <div class="slds-grid slds-grid_align-spread">
-                                    <span>{sol.Name}</span>
-                                    <lightning-button-icon icon-name="utility:delete" size="xx-small" variant="bare" data-id={sol.Id} onclick={handleDeleteSol}></lightning-button-icon>
+                                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                    <span class="slds-truncate" title={sol.Name}>{sol.Name}</span>
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-shrink-none">
+                                        <span class="slds-badge slds-m-right_xx-small">{sol.badgeCount}</span>
+                                        <lightning-button-icon icon-name="utility:delete" size="xx-small" variant="bare" data-id={sol.Id} onclick={handleDeleteSol}></lightning-button-icon>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -30,24 +33,37 @@
 
             <!-- COLUMNA 2: HALLAZGOS APLICABLES (3/12) -->
             <lightning-layout-item size="12" large-device-size="3" padding="around-small" class={hideSidebarsClass}>
-                <div class="summary-card slds-p-around_small">
+                <div class="summary-card slds-p-around_small" style={columnOpacityStyle}>
                     <div class="column-header">
                         <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
                             <h2 class="title">2. Aplica a (Hallazgos)</h2>
-                            <!-- Save Enlaces icon if needed, or auto-save -->
                         </div>
-                        <div if:true={selectedSolucionId} class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
-                            Selecciona las áreas donde aplica esta solución. Se guardará automáticamente al cambiar.
-                        </div>
-                        <div if:false={selectedSolucionId} class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
-                            Selecciona una solución primero.
+                        <div if:true={selectedSolucionId} class="slds-text-body_small slds-text-color_success slds-m-bottom_small">
+                            <lightning-icon icon-name="utility:success" size="xx-small" class="slds-m-right_xx-small" variant="success"></lightning-icon>
+                            Auto-guardado activo. Selecciona las áreas.
                         </div>
                     </div>
                     
-                    <div class="details-scroll" style="pointer-events: {hallazgosPointerEvents}">
-                        <lightning-accordion allow-multiple-sections-open>
+                    <div class="details-scroll" style="position: relative; pointer-events: {hallazgosPointerEvents}">
+                        <div if:true={noSolucionSelected} class="empty-state-overlay">
+                            <lightning-icon icon-name="utility:back" size="large" class="slds-m-bottom_small"></lightning-icon>
+                            <h3 class="slds-text-heading_small slds-text-align_center">Paso 1</h3>
+                            <p class="slds-text-align_center slds-text-color_weak">Selecciona o crea una solución en el panel izquierdo para empezar a enlazar hallazgos.</p>
+                        </div>
+
+                        <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
                             <template for:each={groupedDetails} for:item="group">
                                 <lightning-accordion-section key={group.label} name={group.label} label={group.label}>
+                                    <div class="slds-m-bottom_small slds-text-align_right">
+                                        <lightning-button 
+                                            label="Seleccionar Todos" 
+                                            icon-name="utility:check" 
+                                            variant="base" 
+                                            data-group={group.label} 
+                                            onclick={handleSelectAll}
+                                            disabled={isHallazgosDisabled}>
+                                        </lightning-button>
+                                    </div>
                                     <template for:each={group.records} for:item="rec">
                                         <div key={rec.id} class="record-detail-card">
                                             <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
@@ -103,40 +119,40 @@
 
             <!-- COLUMNA 3: EDITOR (6/12) -->
             <lightning-layout-item size="12" large-device-size={editorColumnSize} padding="around-small">
-                <div class={editorContainerClass}>
+                <div class={editorContainerClass} style={columnOpacityStyle}>
                     <div class="editor-header slds-p-around_medium slds-grid slds-grid_align-spread">
                         <h2 class="title">{editorTitle}</h2>
                         <lightning-button-icon 
                             icon-name={fullScreenIcon} 
                             variant="border-filled" 
                             onclick={toggleFullScreen}
-                            tooltip="Modo Pantalla Completa">
+                            tooltip="Modo Pantalla Completa"
+                            disabled={noSolucionSelected}>
                         </lightning-button-icon>
                     </div>
                     
-                    <div class="editor-content-area">
-                        <template if:true={selectedSolucionId}>
-                            <lightning-input-rich-text
-                                value={memoriaText}
-                                onchange={handleTextChange}
-                                class="rich-editor">
-                            </lightning-input-rich-text>
-                        </template>
-                        <template if:false={selectedSolucionId}>
-                            <div class="empty-editor-state">
-                                <lightning-icon icon-name="utility:edit" size="large"></lightning-icon>
-                                <p>Seleccione o cree una solución para redactar.</p>
-                            </div>
-                        </template>
+                    <div class="editor-content-area" style="position: relative;">
+                        <div if:true={noSolucionSelected} class="empty-state-overlay">
+                            <lightning-icon icon-name="utility:edit_form" size="large" class="slds-m-bottom_small"></lightning-icon>
+                            <h3 class="slds-text-heading_small slds-text-align_center">Paso 2</h3>
+                            <p class="slds-text-align_center slds-text-color_weak">Redacta aquí la memoria técnica para la solución seleccionada.</p>
+                        </div>
+
+                        <lightning-input-rich-text
+                            value={memoriaText}
+                            onchange={handleTextChange}
+                            class="rich-editor"
+                            disabled={noSolucionSelected}>
+                        </lightning-input-rich-text>
                     </div>
 
                     <div class="editor-footer slds-p-around_medium slds-text-align_right">
                         <lightning-button 
-                            variant="brand" 
-                            label="Guardar Memoria" 
+                            variant={saveButtonVariant}
+                            label={saveButtonLabel}
                             icon-name="utility:save"
                             onclick={handleSaveDescription}
-                            disabled={isSaving}>
+                            disabled={isSaveButtonDisabled}>
                         </lightning-button>
                     </div>
                 </div>
