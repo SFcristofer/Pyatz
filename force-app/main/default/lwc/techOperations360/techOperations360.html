@@ -232,19 +232,56 @@
                     <lightning-record-edit-form object-api-name="Opportunity" onsuccess={handleOpportunitySuccess}>
                         <lightning-messages></lightning-messages>
                         
-                        <!-- RENDERIZADO DINÁMICO DE CAMPOS EN 2 COLUMNAS -->
-                        <div class="slds-grid slds-wrap">
-                            <template for:each={opportunityFields} for:item="f">
-                                <div key={f} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_x-small">
-                                    <lightning-input-field field-name={f}></lightning-input-field>
+                        <!-- RENDERIZADO POR SECCIONES PARA MAYOR PROFESIONALISMO -->
+                        <div class="slds-section slds-is-open slds-m-top_none">
+                            <h3 class="slds-section__title slds-theme_shade" style="padding: 0.5rem; border-radius: 4px; font-weight: bold; color: #0070d2;">
+                                <lightning-icon icon-name="utility:info" size="x-small" class="slds-m-right_small"></lightning-icon>
+                                Información Principal
+                            </h3>
+                            <div class="slds-grid slds-wrap slds-p-vertical_small">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Name" required></lightning-input-field>
                                 </div>
-                            </template>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="CloseDate" required></lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Amount"></lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Tipo_de_venta__c"></lightning-input-field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slds-section slds-is-open">
+                            <h3 class="slds-section__title slds-theme_shade" style="padding: 0.5rem; border-radius: 4px; font-weight: bold; color: #0070d2;">
+                                <lightning-icon icon-name="utility:strategy" size="x-small" class="slds-m-right_small"></lightning-icon>
+                                Clasificación y Seguimiento
+                            </h3>
+                            <div class="slds-grid slds-wrap slds-p-vertical_small">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Linea_de_negocio__c"></lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="StageName"></lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Subetapa__c"></lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Estado_Oportunidad__c"></lightning-input-field>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
+                                    <lightning-input-field field-name="Auxiliar_oportunidad__c"></lightning-input-field>
+                                </div>
+                            </div>
+                        </div>
                             
                             <!-- Campo oculto para vinculación automática al cliente actual -->
                             <div class="slds-hide">
                                 <lightning-input-field field-name="AccountId" value={recordId}></lightning-input-field>
                             </div>
-                        </div>
 
                         <div class="slds-m-top_medium slds-text-align_right">
                             <lightning-button label="Cancelar" onclick={closeCreationModal} class="slds-m-right_small"></lightning-button>
