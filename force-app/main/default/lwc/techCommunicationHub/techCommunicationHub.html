@@ -41,27 +41,29 @@
                             <!-- PESTAÑA 1: DESTINATARIOS -->
                             <lightning-tab label="Contactos" icon-name="standard:people">
                                 <!-- SECCIÓN: EQUIPO INTERNO (Ventas, Operaciones) -->
-                                <template if:true={internalContacts.length}>
-                                    <div class="slds-p-vertical_small border-bottom">
-                                        <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
-                                            <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                            EQUIPO INTERNO:
+                                <template if:true={showInternalTeam}>
+                                    <template if:true={internalContacts.length}>
+                                        <div class="slds-p-vertical_small border-bottom">
+                                            <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
+                                                <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                EQUIPO INTERNO:
+                                            </div>
+                                            <div class="slds-p-horizontal_x-small">
+                                                <template for:each={internalContacts} for:item="int">
+                                                    <div key={int.id} class="att-item slds-m-bottom_xx-small">
+                                                        <lightning-input 
+                                                            type="checkbox" 
+                                                            label={int.name} 
+                                                            title={int.email}
+                                                            data-email={int.email} 
+                                                            onchange={handleQuickAddContact}>
+                                                        </lightning-input>
+                                                        <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{int.role}</div>
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
-                                        <div class="slds-p-horizontal_x-small">
-                                            <template for:each={internalContacts} for:item="int">
-                                                <div key={int.id} class="att-item slds-m-bottom_xx-small">
-                                                    <lightning-input 
-                                                        type="checkbox" 
-                                                        label={int.name} 
-                                                        title={int.email}
-                                                        data-email={int.email} 
-                                                        onchange={handleQuickAddContact}>
-                                                    </lightning-input>
-                                                    <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{int.role}</div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
+                                    </template>
                                 </template>
 
                                 <!-- SECCIÓN: CONTACTOS DE LA SEDE -->

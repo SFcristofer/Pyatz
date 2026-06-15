@@ -1,6 +1,9 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
+import SUBETAPA_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import getEmailTemplatesByFolders from '@salesforce/apex/CommunicationController.getEmailTemplatesByFolders';
 import getAvailableAttachments from '@salesforce/apex/CommunicationController.getAvailableAttachments';
 import sendEmailWithAttachments from '@salesforce/apex/CommunicationController.sendEmailWithAttachments';
@@ -25,9 +28,29 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     @track ccEmail = '';
     @track subject = '';
     @track emailBody = '';
-    
+    @track isLoadingTemplates = false;
     @track isLoadingAttachments = false;
     @track isSending = false;
+    
+    @track currentSubetapa = '';
+    @track currentStage = '';
+
+    @wire(getRecord, { recordId: '$recordId', fields: [STAGE_FIELD, SUBETAPA_FIELD] })
+    wiredOpp({ error, data }) {
+        if (data) {
+            this.currentStage = getFieldValue(data, STAGE_FIELD) || '';
+            this.currentSubetapa = getFieldValue(data, SUBETAPA_FIELD) || '';
+        } else if (error) {
+            console.error('Error fetching opp stage:', error);
+        }
+    }
+
+    get showInternalTeam() {
+        const stageStr = this.currentStage ? this.currentStage.toLowerCase() : '';
+        const subStr = this.currentSubetapa ? this.currentSubetapa.toLowerCase() : '';
+        // Mostramos el equipo interno solo si la etapa/subetapa incluye enhorabuena o ganada
+        return stageStr.includes('enhorabuena') || subStr.includes('enhorabuena') || stageStr.includes('cerrada ganada') || stageStr.includes('closed won');
+    }
 
     // --- ESTADO DE ENGAGEMENT ---
     @track showEngagementModal = false;
