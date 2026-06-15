@@ -132,7 +132,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         
         const savedStep = sessionStorage.getItem(this.storageKey);
         if (savedStep) {
-            this.currentStep = savedStep;
+            this.currentStep = savedStep === '4' ? '3' : savedStep;
         }
 
         this.loadInitialData();
@@ -240,7 +240,9 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                         this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
                     }
                     this.currentStep = nextStepInt.toString();
-                    sessionStorage.setItem(this.storageKey, this.currentStep);
+                    if (this.currentStep !== '4') {
+                        sessionStorage.setItem(this.storageKey, this.currentStep);
+                    }
                 }
             } catch (error) {
                 console.error('Error al avanzar de paso:', error);
