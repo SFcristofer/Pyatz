@@ -37,7 +37,7 @@
     border: 1px solid var(--slate-200); 
     border-radius: 8px; 
     overflow: auto; 
-    max-height: 650px; 
+    max-height: 65vh; 
     background: white; 
     position: relative;
     padding-bottom: 150px;

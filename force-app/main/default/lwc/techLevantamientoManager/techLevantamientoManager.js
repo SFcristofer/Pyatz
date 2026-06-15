@@ -159,15 +159,29 @@ export default class TechLevantamientoManager extends LightningElement {
                         this.gmPermiteLev = r.GM_Permite_Levantamiento_Foto__c || '';
                     }
                 }
-                return row;
+                return this.updateRowClasses(row);
             });
         } else {
             this.handleAddSurveyRow();
         }
     }
 
+    updateRowClasses(row) {
+        row.escamocheClass = 'cell-select';
+        if (row.escamoche === 'Correcto, separan orgánico e inorgánico' || row.escamoche === 'Correcto') row.escamocheClass += ' bg-green-soft';
+        else if (row.escamoche === 'Lo hacen a medias, basura en suelo, botes con basura revuelta' || row.escamoche === 'A medias') row.escamocheClass += ' bg-orange-soft';
+        else if (row.escamoche === 'Pésimo, tarjas, pisos y coladeras con basura; no hay cuidado' || row.escamoche === 'Pésimo') row.escamocheClass += ' bg-red-soft';
+
+        row.estadoClass = 'cell-select';
+        if (row.estado === 'EN BUEN ESTADO') row.estadoClass += ' bg-green-soft';
+        else if (row.estado === 'EN MAL ESTADO') row.estadoClass += ' bg-orange-soft';
+        else if (row.estado === 'EN PESIMO ESTADO') row.estadoClass += ' bg-red-soft';
+        
+        return row;
+    }
+
     createBaseRow(num) {
-        return { 
+        return this.updateRowClasses({ 
             id: Date.now() + Math.random(), 
             rowNumber: num, nivel: '', area: '', zona: '', obs: '', cells: [],
             ve: 0, vp: 0, c10l: 0, c20l: 0, c25l: 0, piso: 0, mueble: 0, pared: 0, foto: '',
@@ -178,7 +192,7 @@ export default class TechLevantamientoManager extends LightningElement {
             wc: 0, dias: '', mingitorios: 0, mtLineal: 0, tarjas: 0, cuartoHumado: 0, arm: 0, 
             descripcion: '', medida: '', material: '', servicio: '', largo: 0, ancho: 0, prof: 0,
             distancia: '', permDelegacion: '', permPlaza: '', dificultad: '', alcance: ''
-        };
+        });
     }
 
     handleAddSurveyRow() {
@@ -202,6 +216,9 @@ export default class TechLevantamientoManager extends LightningElement {
         const field = event.target.dataset.field;
         const value = event.target.value;
         this.surveyData[index][field] = value;
+        if (field === 'escamoche' || field === 'estado') {
+            this.updateRowClasses(this.surveyData[index]);
+        }
         this.surveyData = [...this.surveyData];
     }
 

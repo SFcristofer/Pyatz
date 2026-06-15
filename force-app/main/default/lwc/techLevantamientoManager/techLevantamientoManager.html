@@ -19,7 +19,8 @@
                         icon-name="utility:save" 
                         onclick={handleSave}
                         class="slds-m-right_small"
-                        disabled={isSaving}>
+                        disabled={isSaving}
+                        loading={isSaving}>
                     </lightning-button>
                 </div>
             </div>
@@ -198,7 +199,7 @@
             <!-- 1. TABLA BIOENZIMÁTICO -->
             <template if:true={isBio}>
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 3200px;">
+                    <table class="survey-table" style="width: max-content; min-width: 100%;">
                         <thead>
                             <tr class="survey-header-group">
                                 <th colspan="4">DATOS BASE</th>
@@ -317,7 +318,7 @@
             <!-- 2. TABLA GRASAS -->
             <template if:true={isGrasas}>
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 2100px;">
+                    <table class="survey-table" style="width: max-content; min-width: 100%;">
                         <thead>
                             <tr class="survey-header-group">
                                 <th colspan="4">IDENTIFICACIÓN</th>
@@ -458,7 +459,7 @@
 
                 <!-- CENSO -->
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 1400px;">
+                    <table class="survey-table" style="width: max-content; min-width: 100%;">
                         <thead>
                             <tr class="slds-line-height_reset">
                                 <th style="width: 40px;">#</th>
@@ -497,7 +498,7 @@
             <!-- 4. DESAZOLVE MECÁNICO -->
             <template if:true={isDesazolveMec}>
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 1600px;">
+                    <table class="survey-table" style="width: max-content; min-width: 100%;">
                         <thead>
                             <tr class="survey-header-group">
                                 <th colspan="4">UBICACIÓN</th>
@@ -571,7 +572,7 @@
             <!-- 6. VACTOR -->
             <template if:true={isVactor}>
                 <div class="table-scroll-container">
-                    <table class="survey-table" style="width: 2400px;">
+                    <table class="survey-table" style="width: max-content; min-width: 100%;">
                         <thead>
                             <tr class="slds-line-height_reset">
                                 <th style="width: 150px;">DESCRIPCIÓN</th><th style="width: 80px;">MEDIDA</th><th style="width: 120px;">MATERIAL</th><th style="width: 120px;">SERVICIO REQUERIDO</th>

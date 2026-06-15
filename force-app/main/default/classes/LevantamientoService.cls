@@ -15,6 +15,8 @@ public with sharing class LevantamientoService {
                 [SELECT Id FROM Levantamiento_Tecnico__c WHERE Oportunidad__c = :oppId AND Tipo_Servicio__c = :typeUpper]
             );
             
+            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Levantamiento_Tecnico__c.fields.getMap();
+            
             List<Levantamiento_Tecnico__c> toUpsert = new List<Levantamiento_Tecnico__c>();
             Set<Id> idsToKeep = new Set<Id>();
 
@@ -39,16 +41,27 @@ public with sharing class LevantamientoService {
                 // --- LÓGICA AGNOSTICA DE CAMPOS (MOTOR DINÁMICO) ---
                 // Iteramos sobre todas las llaves del JSON y si coinciden con un campo de Salesforce, lo llenamos.
                 for (String key : row.keySet()) {
-                    if (key.endsWith('__c')) { // Es un campo de Salesforce
+                    if (key.endsWith('__c') && fieldMap.containsKey(key)) {
                         try {
                             Object val = row.get(key);
-                            // Manejo básico de tipos (String vs Decimal)
-                            if (val instanceof String) {
-                                lev.put(key, (String)val);
-                            } else {
-                                lev.put(key, Decimal.valueOf(String.valueOf(val)));
+                            if (val == null || String.valueOf(val).trim() == '') {
+                                continue;
                             }
-                        } catch (Exception e) { /* Ignorar errores de mapeo individual */ }
+                            Schema.DisplayType fType = fieldMap.get(key).getDescribe().getType();
+                            String strVal = String.valueOf(val);
+                            
+                            if (fType == Schema.DisplayType.DOUBLE || fType == Schema.DisplayType.CURRENCY || fType == Schema.DisplayType.PERCENT) {
+                                lev.put(key, Decimal.valueOf(strVal));
+                            } else if (fType == Schema.DisplayType.INTEGER) {
+                                lev.put(key, Integer.valueOf(strVal));
+                            } else if (fType == Schema.DisplayType.BOOLEAN) {
+                                lev.put(key, Boolean.valueOf(strVal));
+                            } else {
+                                lev.put(key, strVal);
+                            }
+                        } catch (Exception e) { 
+                            System.debug('Error mapping field ' + key + ': ' + e.getMessage());
+                        }
                     }
                 }
 
@@ -73,6 +86,9 @@ public with sharing class LevantamientoService {
      * Mapeo de campos para las 7 tablas clásicas que usan nombres descriptivos en el LWC.
      */
     private static void mapClassicFields(Levantamiento_Tecnico__c lev, Map<String, Object> row, String type) {
+        Set<String> classicTypes = new Set<String>{'BIOENZIMÁTICO', 'VACTOR', 'GRASAS', 'INTIMA', 'DESAZOLVE MECANICO', 'AROMATIZANTES'};
+        if (!classicTypes.contains(type)) return;
+
         lev.Nivel__c = (String)row.get('nivel');
         lev.Area_Cocina_Banos__c = (String)row.get('area');
         lev.Zona_Genero__c = (String)row.get('zona');
