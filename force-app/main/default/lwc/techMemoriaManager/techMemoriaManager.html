@@ -2,23 +2,68 @@
     <div class="memoria-container">
         <lightning-layout multiple-rows="true" vertical-align="stretch">
             
-            <!-- COLUMNA 1: HALLAZGOS (3/12) -->
+            <!-- COLUMNA 1: SOLUCIONES (3/12) -->
             <lightning-layout-item size="12" large-device-size="3" padding="around-small" class={hideSidebarsClass}>
                 <div class="summary-card slds-p-around_small">
                     <div class="column-header">
-                        <h2 class="title slds-m-bottom_small">1. Hallazgos</h2>
+                        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                            <h2 class="title">1. Soluciones Generales</h2>
+                            <lightning-button-icon icon-name="utility:add" variant="border-filled" onclick={handleAddSol}></lightning-button-icon>
+                        </div>
                     </div>
-                    <div class="details-scroll">
+                    
+                    <div class="sol-list">
+                        <template for:each={solutions} for:item="sol">
+                            <div key={sol.Id} class={sol.className} data-id={sol.Id} onclick={handleSolSelect}>
+                                <div class="slds-grid slds-grid_align-spread">
+                                    <span>{sol.Name}</span>
+                                    <lightning-button-icon icon-name="utility:delete" size="xx-small" variant="bare" data-id={sol.Id} onclick={handleDeleteSol}></lightning-button-icon>
+                                </div>
+                            </div>
+                        </template>
+                        <div if:false={solutions.length} class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                            No hay soluciones creadas.
+                        </div>
+                    </div>
+                </div>
+            </lightning-layout-item>
+
+            <!-- COLUMNA 2: HALLAZGOS APLICABLES (3/12) -->
+            <lightning-layout-item size="12" large-device-size="3" padding="around-small" class={hideSidebarsClass}>
+                <div class="summary-card slds-p-around_small">
+                    <div class="column-header">
+                        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                            <h2 class="title">2. Aplica a (Hallazgos)</h2>
+                            <!-- Save Enlaces icon if needed, or auto-save -->
+                        </div>
+                        <div if:true={selectedSolucionId} class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                            Selecciona las áreas donde aplica esta solución. Se guardará automáticamente al cambiar.
+                        </div>
+                        <div if:false={selectedSolucionId} class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                            Selecciona una solución primero.
+                        </div>
+                    </div>
+                    
+                    <div class="details-scroll" style="pointer-events: {hallazgosPointerEvents}">
                         <lightning-accordion allow-multiple-sections-open>
                             <template for:each={groupedDetails} for:item="group">
                                 <lightning-accordion-section key={group.label} name={group.label} label={group.label}>
                                     <template for:each={group.records} for:item="rec">
-                                        <div key={rec.id} class={rec.className} data-id={rec.id} onclick={handleRecordSelect}>
+                                        <div key={rec.id} class="record-detail-card">
                                             <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
-                                                <span class="record-name">{rec.name}</span>
+                                                <div class="slds-grid slds-grid_vertical-align-center">
+                                                    <lightning-input 
+                                                        type="checkbox" 
+                                                        checked={rec.selected} 
+                                                        data-id={rec.id} 
+                                                        onchange={handleCheckboxChange}
+                                                        class="slds-m-right_x-small"
+                                                        disabled={isHallazgosDisabled}>
+                                                    </lightning-input>
+                                                    <span class="record-name">{rec.name}</span>
+                                                </div>
                                                 <div class="slds-grid slds-grid_vertical-align-center">
                                                     <span if:true={rec.estado} class={rec.estadoClass}>{rec.estado}</span>
-                                                    <lightning-icon if:true={rec.hasSolutions} icon-name="utility:check" size="xx-small" variant="success" class="slds-m-left_x-small"></lightning-icon>
                                                 </div>
                                             </div>
                                             
@@ -43,7 +88,7 @@
                                             <div if:true={rec.observaciones} class="obs-box">
                                                 <div class="obs-header">
                                                     <lightning-icon icon-name="utility:note" size="xx-small" class="slds-m-right_xxx-small"></lightning-icon>
-                                                    <span>Observaciones Técnicas:</span>
+                                                    <span>Obs. Técnicas:</span>
                                                 </div>
                                                 <p class="obs-text">{rec.observaciones}</p>
                                             </div>
@@ -52,37 +97,6 @@
                                 </lightning-accordion-section>
                             </template>
                         </lightning-accordion>
-                    </div>
-                </div>
-            </lightning-layout-item>
-
-            <!-- COLUMNA 2: SOLUCIONES (3/12) -->
-            <lightning-layout-item size="12" large-device-size="3" padding="around-small" class={hideSidebarsClass}>
-                <div class="summary-card slds-p-around_small">
-                    <div class="column-header">
-                        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
-                            <h2 class="title">2. Soluciones</h2>
-                            <lightning-button-icon icon-name="utility:add" variant="border-filled" onclick={handleAddSol} disabled={isAddButtonDisabled}></lightning-button-icon>
-                        </div>
-                    </div>
-                    
-                    <template if:true={selectedRecordId}>
-                        <div class="sol-list">
-                            <template for:each={solutions} for:item="sol">
-                                <div key={sol.Id} class={sol.className} data-id={sol.Id} onclick={handleSolSelect}>
-                                    <div class="slds-grid slds-grid_align-spread">
-                                        <span>{sol.Name}</span>
-                                        <lightning-button-icon icon-name="utility:delete" size="xx-small" variant="bare" data-id={sol.Id} onclick={handleDeleteSol}></lightning-button-icon>
-                                    </div>
-                                </div>
-                            </template>
-                            <div if:false={solutions.length} class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
-                                No hay soluciones.
-                            </div>
-                        </div>
-                    </template>
-                    <div if:false={selectedRecordId} class="slds-text-align_center slds-p-around_medium">
-                        Seleccione un hallazgo.
                     </div>
                 </div>
             </lightning-layout-item>
@@ -119,7 +133,7 @@
                     <div class="editor-footer slds-p-around_medium slds-text-align_right">
                         <lightning-button 
                             variant="brand" 
-                            label="Guardar Solución" 
+                            label="Guardar Memoria" 
                             icon-name="utility:save"
                             onclick={handleSaveDescription}
                             disabled={isSaving}>
@@ -134,7 +148,7 @@
             <section role="dialog" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
                     <header class="slds-modal__header">
-                        <h2 class="slds-text-heading_medium">Nueva Solución para {selectedRecordName}</h2>
+                        <h2 class="slds-text-heading_medium">Nueva Solución General</h2>
                     </header>
                     <div class="slds-modal__content slds-p-around_medium">
                         <lightning-input label="Nombre de la Solución" value={newSolName} onchange={handleNewSolNameChange} placeholder="ej. Limpieza Profunda, Cambio de Sello..."></lightning-input>

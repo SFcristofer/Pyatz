@@ -1,9 +1,11 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getLevantamientoDetails from '@salesforce/apex/SurveyController.getLevantamientoDetails';
-import getSoluciones from '@salesforce/apex/SurveyController.getSoluciones';
-import saveSolucion from '@salesforce/apex/SurveyController.saveSolucion';
+import getSolucionesOpp from '@salesforce/apex/SurveyController.getSolucionesOpp';
+import saveSolucionOpp from '@salesforce/apex/SurveyController.saveSolucionOpp';
 import deleteSolucion from '@salesforce/apex/SurveyController.deleteSolucion';
+import getEnlacesForSolucion from '@salesforce/apex/SurveyController.getEnlacesForSolucion';
+import saveEnlaces from '@salesforce/apex/SurveyController.saveEnlaces';
 import getTableConfigs from '@salesforce/apex/AdminController.getTableConfigs';
 
 export default class TechMemoriaManager extends LightningElement {
@@ -13,10 +15,9 @@ export default class TechMemoriaManager extends LightningElement {
     @track solutions = [];
     @track tableConfigs = [];
     
-    @track selectedRecordId = null;
-    @track selectedRecordName = '';
     @track selectedSolucionId = null;
     @track selectedSolucionName = '';
+    @track activeEnlaces = []; // Array of Levantamiento Ids
     
     @track isSaving = false;
     @track showSolModal = false;
@@ -30,6 +31,7 @@ export default class TechMemoriaManager extends LightningElement {
     async loadInitialData() {
         try {
             this.tableConfigs = await getTableConfigs();
+            await this.loadSoluciones();
             await this.loadDetails();
         } catch (error) {
             console.error('Error loading initial data:', error);
@@ -56,6 +58,24 @@ export default class TechMemoriaManager extends LightningElement {
         return this.isFullScreen ? '12' : '6';
     }
 
+    get hallazgosPointerEvents() {
+        return this.selectedSolucionId ? 'auto' : 'none';
+    }
+
+    get isHallazgosDisabled() {
+        return !this.selectedSolucionId || this.isSaving;
+    }
+
+    loadSoluciones() {
+        return getSolucionesOpp({ recordId: this.recordId })
+            .then(result => {
+                this.solutions = result.map(s => ({
+                    ...s,
+                    className: s.Id === this.selectedSolucionId ? 'sol-item active-sol' : 'sol-item'
+                }));
+            });
+    }
+
     loadDetails() {
         return getLevantamientoDetails({ recordId: this.recordId })
             .then(result => this.formatGroupedDetails(result))
@@ -69,7 +89,6 @@ export default class TechMemoriaManager extends LightningElement {
             const typeUpper = type.toUpperCase();
             if (!groups[type]) groups[type] = { label: type, records: [] };
             
-            // Construir Nombre Descriptivo Único
             const identifier = [rec.Nivel__c, rec.Area_Cocina_Banos__c, rec.Zona_Genero__c]
                 .filter(item => item)
                 .join(' - ');
@@ -81,23 +100,19 @@ export default class TechMemoriaManager extends LightningElement {
             if (rec.Area_Cocina_Banos__c) detailItems.push({ label: 'Área', value: rec.Area_Cocina_Banos__c });
             if (rec.Zona_Genero__c) detailItems.push({ label: 'Zona', value: rec.Zona_Genero__c });
             
-            // --- DETALLE TÉCNICO HÍBRIDO (DINÁMICO + CLÁSICO) ---
             let specs = [];
             
-            // 1. Intentar Lógica Dinámica Primero (Configuraciones de Usuario)
             const config = this.tableConfigs.find(c => c.value === typeUpper);
             if (config && config.fields && config.fields.length > 0) {
                 config.fields.forEach((field, index) => {
                     const label = config.labels[index] || field;
                     const value = rec[field];
-                    // Solo añadir si el campo tiene valor y no es uno de los campos base ya mostrados
                     if ((value !== undefined && value !== null && value !== '') && !['Nivel__c', 'Area_Cocina_Banos__c', 'Zona_Genero__c'].includes(field)) {
                         specs.push(`${label}: ${value}`);
                     }
                 });
             } 
             
-            // 2. Si no hay specs dinámicos (o para complementar), usar Lógica Clásica Hardcoded
             if (specs.length === 0) {
                 if (typeUpper === 'BIOENZIMÁTICO') {
                     if (rec.VE__c) specs.push(`VE: ${rec.VE__c}`);
@@ -157,7 +172,6 @@ export default class TechMemoriaManager extends LightningElement {
                 }
             }
 
-            // Estado Class
             let estadoClass = 'status-badge';
             if (rec.Estado_Instalacion__c) {
                 const est = rec.Estado_Instalacion__c.toUpperCase();
@@ -169,54 +183,71 @@ export default class TechMemoriaManager extends LightningElement {
                 id: rec.Id,
                 name: displayName,
                 fields: detailItems,
-                metrics: specs, // Cambiado de join a array
+                metrics: specs,
                 estado: rec.Estado_Instalacion__c,
                 estadoClass: estadoClass,
                 observaciones: rec.Observaciones_Tecnicas__c,
-                hasSolutions: rec.Soluciones_Tecnicas__r && rec.Soluciones_Tecnicas__r.length > 0,
-                className: this.selectedRecordId === rec.Id ? 'record-detail-card active-card' : 'record-detail-card'
+                selected: this.activeEnlaces.includes(rec.Id)
             });
         });
         this.groupedDetails = Object.values(groups);
     }
 
-    handleRecordSelect(event) {
-        const recordId = event.currentTarget.dataset.id;
-        this.selectedRecordId = recordId;
-        this.selectedSolucionId = null;
-        this.memoriaText = '';
-        
-        // UI Feedback
-        this.groupedDetails.forEach(g => g.records.forEach(r => {
-            r.className = (r.id === recordId) ? 'record-detail-card active-card' : 'record-detail-card';
-            if(r.id === recordId) this.selectedRecordName = r.name;
-        }));
-        this.groupedDetails = [...this.groupedDetails];
-        this.loadSoluciones();
-    }
-
-    loadSoluciones() {
-        getSoluciones({ levantamientoId: this.selectedRecordId })
-            .then(result => {
-                this.solutions = result.map(s => ({
-                    ...s,
-                    className: s.Id === this.selectedSolucionId ? 'sol-item active-sol' : 'sol-item'
-                }));
-            });
-    }
-
-    handleSolSelect(event) {
+    async handleSolSelect(event) {
         const solId = event.currentTarget.dataset.id;
         this.selectedSolucionId = solId;
         const sol = this.solutions.find(s => s.Id === solId);
+        
         if (sol) {
             this.memoriaText = sol.Descripcion_Detallada__c || '';
             this.selectedSolucionName = sol.Name;
         }
+        
         this.solutions = this.solutions.map(s => ({
             ...s,
             className: s.Id === solId ? 'sol-item active-sol' : 'sol-item'
         }));
+
+        // Fetch enlaces
+        try {
+            this.activeEnlaces = await getEnlacesForSolucion({ solucionId: solId });
+            this.updateCheckboxes();
+        } catch(e) {
+            console.error('Error fetching enlaces', e);
+        }
+    }
+
+    updateCheckboxes() {
+        let updatedGroups = [];
+        this.groupedDetails.forEach(g => {
+            let updatedRecords = g.records.map(r => {
+                return { ...r, selected: this.activeEnlaces.includes(r.id) };
+            });
+            updatedGroups.push({ ...g, records: updatedRecords });
+        });
+        this.groupedDetails = updatedGroups;
+    }
+
+    async handleCheckboxChange(event) {
+        const recId = event.target.dataset.id;
+        const isChecked = event.target.checked;
+        
+        if (isChecked && !this.activeEnlaces.includes(recId)) {
+            this.activeEnlaces.push(recId);
+        } else if (!isChecked && this.activeEnlaces.includes(recId)) {
+            this.activeEnlaces = this.activeEnlaces.filter(id => id !== recId);
+        }
+        
+        // Auto-save enlaces
+        this.isSaving = true;
+        try {
+            await saveEnlaces({ solucionId: this.selectedSolucionId, hallazgosIds: this.activeEnlaces });
+        } catch(e) {
+            console.error('Error saving enlaces', e);
+        } finally {
+            this.isSaving = false;
+            this.updateCheckboxes();
+        }
     }
 
     handleTextChange(event) {
@@ -239,8 +270,8 @@ export default class TechMemoriaManager extends LightningElement {
     handleConfirmAddSol() {
         if (!this.newSolName) return;
         this.isSaving = true;
-        saveSolucion({ 
-            levantamientoId: this.selectedRecordId, 
+        saveSolucionOpp({ 
+            recordId: this.recordId, 
             solucionId: null, 
             nombre: this.newSolName, 
             descripcion: '' 
@@ -249,19 +280,22 @@ export default class TechMemoriaManager extends LightningElement {
             this.selectedSolucionId = newId;
             this.selectedSolucionName = this.newSolName;
             this.memoriaText = '';
+            this.activeEnlaces = [];
             this.showSolModal = false;
-            this.loadSoluciones();
-            
+            return this.loadSoluciones();
+        })
+        .then(() => {
+            this.updateCheckboxes();
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Éxito',
-                message: 'Nueva solución creada y seleccionada.',
+                message: 'Nueva solución creada.',
                 variant: 'success'
             }));
         })
         .catch(error => {
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Error',
-                message: error.body.message,
+                message: error.body ? error.body.message : error,
                 variant: 'error'
             }));
         })
@@ -271,33 +305,33 @@ export default class TechMemoriaManager extends LightningElement {
     handleSaveDescription() {
         if (!this.selectedSolucionId) return;
         this.isSaving = true;
-        saveSolucion({
-            levantamientoId: this.selectedRecordId,
+        saveSolucionOpp({
+            recordId: this.recordId,
             solucionId: this.selectedSolucionId,
             nombre: this.selectedSolucionName,
             descripcion: this.memoriaText
         })
         .then(() => {
-            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Descripción guardada', variant: 'success' }));
-            this.loadSoluciones();
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Memoria guardada', variant: 'success' }));
+            return this.loadSoluciones();
         })
         .finally(() => this.isSaving = false);
     }
 
     handleDeleteSol(event) {
         const id = event.target.dataset.id;
-        deleteSolucion({ solucionId: id }).then(() => this.loadSoluciones());
-    }
-
-    get isAddButtonDisabled() { 
-        return !this.selectedRecordId; 
-    }
-
-    get isEditorDisabled() { 
-        return !this.selectedSolucionId; 
+        deleteSolucion({ solucionId: id }).then(() => {
+            if(this.selectedSolucionId === id) {
+                this.selectedSolucionId = null;
+                this.memoriaText = '';
+                this.activeEnlaces = [];
+                this.updateCheckboxes();
+            }
+            this.loadSoluciones();
+        });
     }
 
     get editorTitle() { 
-        return this.selectedSolucionId ? `Redacción: ${this.selectedSolucionName}` : 'Seleccione una solución para redactar'; 
+        return this.selectedSolucionId ? `Redacción: ${this.selectedSolucionName}` : 'Editor de Memoria Técnica'; 
     }
 }
