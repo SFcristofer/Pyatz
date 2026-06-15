@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Solucion_Tecnica__c</fullName>
+    <label>Solución Técnica</label>
+    <referenceTo>Solucion_Tecnica__c</referenceTo>
+    <relationshipLabel>Enlaces a Hallazgos</relationshipLabel>
+    <relationshipName>Enlaces_Hallazgos</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>
