@@ -109,8 +109,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         { label: 'Total', fieldName: 'total', type: 'currency', cellAttributes: { class: 'slds-text-title_bold' } }
     ];
 
+    get storageKey() {
+        return `quote_editor_step_${this.recordId || this.opportunityId || 'new'}`;
+    }
+
     connectedCallback() {
         if (this.opportunityId) this.parentOpportunityId = this.opportunityId;
+        
+        const savedStep = sessionStorage.getItem(this.storageKey);
+        if (savedStep) {
+            this.currentStep = savedStep;
+        }
+
         this.loadInitialData();
         this.loadBusinessLines();
         this.loadTemplates();
@@ -213,6 +223,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                         this.pdfUrl = `/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`;
                     }
                     this.currentStep = nextStepInt.toString();
+                    sessionStorage.setItem(this.storageKey, this.currentStep);
                 }
             } catch (error) {
                 console.error('Error al avanzar de paso:', error);
@@ -227,7 +238,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         }
     }
 
-    handleBack() { this.currentStep = (parseInt(this.currentStep) - 1).toString(); }
+    handleBack() { 
+        this.currentStep = (parseInt(this.currentStep) - 1).toString(); 
+        sessionStorage.setItem(this.storageKey, this.currentStep);
+    }
 
     get estrategiaOptions() {
         return [
