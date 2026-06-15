@@ -86,6 +86,10 @@
                 <field>Subtotal</field>
             </layoutItems>
             <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Show_Subtotal__c</field>
+            </layoutItems>
+            <layoutItems>
                 <behavior>Readonly</behavior>
                 <field>Discount</field>
             </layoutItems>
@@ -98,6 +102,10 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Tax</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Show_Tax__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

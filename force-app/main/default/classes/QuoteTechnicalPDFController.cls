@@ -9,6 +9,12 @@ public with sharing class QuoteTechnicalPDFController {
     public String descripcionPago {get; set;}
     public Map<Id, String> htmlDescriptions {get; set;}
 
+    public Decimal calcSubtotal1 {get; set;}
+    public Decimal calcDescuento {get; set;}
+    public Decimal calcSubtotal2 {get; set;}
+    public Decimal calcIva {get; set;}
+    public Decimal calcTotal {get; set;}
+
     public QuoteTechnicalPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
         this.htmlDescriptions = new Map<Id, String>();
@@ -126,6 +132,36 @@ public with sharing class QuoteTechnicalPDFController {
             this.technicalQuote.Warranty_Text__c = fixListStyles(this.technicalQuote.Warranty_Text__c);
             this.technicalQuote.Warranty_Text__c = fixParagraphStyles(this.technicalQuote.Warranty_Text__c);
         }
+
+        // --- CALCULO A PRUEBA DE TONTOS PARA SUBTOTALES Y DESCUENTOS ---
+        this.calcSubtotal1 = 0;
+        this.calcDescuento = 0;
+        
+        for (QuoteLineItem qli : this.technicalQuote.QuoteLineItems) {
+            Decimal listP = qli.ListPrice != null ? qli.ListPrice : (qli.UnitPrice != null ? qli.UnitPrice : 0);
+            Decimal qty = qli.Quantity != null ? qli.Quantity : 1;
+            Decimal subP = listP * qty;
+            Decimal totP = qli.TotalPrice != null ? qli.TotalPrice : subP;
+            
+            this.calcSubtotal1 += subP;
+            this.calcDescuento += (subP - totP);
+        }
+        
+        Decimal headerDiscountPercent = this.technicalQuote.Discount != null ? this.technicalQuote.Discount : 0;
+        Decimal intermediateSubtotal = this.calcSubtotal1 - this.calcDescuento;
+        Decimal headerDiscountAmount = intermediateSubtotal * (headerDiscountPercent / 100.0);
+        
+        this.calcDescuento += headerDiscountAmount;
+        this.calcSubtotal2 = this.calcSubtotal1 - this.calcDescuento;
+        
+        if (this.technicalQuote.Tax != null && this.technicalQuote.Tax > 0) {
+            this.calcIva = this.technicalQuote.Tax;
+            this.calcTotal = this.technicalQuote.TotalPrice != null ? this.technicalQuote.TotalPrice : (this.calcSubtotal2 + this.calcIva);
+        } else {
+            this.calcIva = this.calcSubtotal2 * 0.16;
+            this.calcTotal = this.calcSubtotal2 + this.calcIva;
+        }
+        // -------------------------------------------------------------
 
         // 4. Buscar firma del creador en static resources
         this.signatureUrl = findSignatureUrl(this.technicalQuote.CreatedBy.Name);

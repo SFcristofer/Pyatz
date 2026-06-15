@@ -13,7 +13,7 @@ private class QuoteTechnicalPDFControllerTest {
         insert opp;
         Quote q = new Quote(
             Name = 'QTPDF Quote', OpportunityId = opp.Id,
-            Pricebook2Id = pb.Id, Status = 'Draft', AccountId = acc.Id,
+            Pricebook2Id = pb.Id, Status = 'Draft',
             Introduction_Text__c = 'Hello [[SEDES]] [[CLIENTE]] [[ATENCION]]',
             Warranty_Text__c = 'Warranty [[FOLIO]]'
         );

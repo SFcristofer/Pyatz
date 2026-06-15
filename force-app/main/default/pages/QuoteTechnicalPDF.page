@@ -23,7 +23,7 @@
                 .sede-title     { font-size:13pt; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; font-weight:bold; margin-top:8pt; border-bottom:1pt solid #ddd; padding-bottom:4pt; }
 
                 .tbl-svc              { width:100%; border-collapse:collapse; margin-top:4pt; -fs-table-paginate: paginate; }
-                .tbl-svc th           { background-color:#D4EDDA; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; }
+                .tbl-svc th           { background-color:#0a315e; color:#ffffff; text-align:center; border-bottom:1.5pt solid #0070d2; padding:7pt 6pt; font-size:8pt; text-transform:uppercase; font-weight:bold; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; }
                 .row-sep td           { background-color:#eef2f9; color:#0070d2; font-weight:bold; font-size:9.5pt; padding:8pt; border-top:2pt solid #0070d2; }
                 .row-item td          { padding:7pt 6pt; font-size:10pt; border-bottom:0.5pt solid #f0f0f0; background-color:#fff; vertical-align:middle; }
                 .row-detail td        { padding:3pt 0 10pt 0; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.5; }
@@ -38,7 +38,7 @@
                 .row-grand .tot-val   { font-size:13pt; color:#0070d2; font-weight:bold; border-bottom:none; }
 
                 .tbl-payment          { width:100%; border-collapse:collapse; border:1pt solid #ccc; margin-top:20pt; page-break-inside:avoid; }
-                .tbl-payment th       { background-color:#D4EDDA; border:1pt solid #ccc; padding:6pt; font-size:8.5pt; text-align:left; color:#333; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; }
+                .tbl-payment th       { background-color:#0a315e; border:1pt solid #ccc; padding:6pt; font-size:8.5pt; text-align:center; color:#ffffff; font-family:'Poppins-Bold','Helvetica','Arial',sans-serif; }
                 .tbl-payment td       { border:1pt solid #ccc; padding:8pt 6pt; font-size:9pt; vertical-align:top; }
 
                 .warranty-block   { margin-top:24pt; border-top:1.5pt solid #0070d2; padding-top:10pt; }
@@ -99,16 +99,16 @@
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
                                 <tr style="page-break-inside:avoid;">
-                                    <th width="50%" style="text-align:left;">Concepto / Servicio</th>
-                                    <th width="10%">Cant</th>
-                                    <th width="20%" style="text-align:right;">P. Unitario</th>
-                                    <th width="20%" style="text-align:right;">Importe</th>
+                                    <th width="50%" style="text-align:center;">Concepto / Servicio</th>
+                                    <th width="10%" style="text-align:center;">Cant</th>
+                                    <th width="20%" style="text-align:center;">P. Unitario</th>
+                                    <th width="20%" style="text-align:center;">Importe</th>
                                 </tr>
                                 <tr class="row-item">
-                                    <td style="text-align:left;"><strong>{!item.Product2.Name}</strong></td>
+                                    <td style="text-align:center;"><strong>{!item.Product2.Name}</strong></td>
                                     <td style="text-align:center;">{!item.Quantity}</td>
-                                    <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
-                                    <td style="text-align:right;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
+                                    <td style="text-align:center;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
+                                    <td style="text-align:center;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.TotalPrice, 0)}"/></apex:outputText></td>
                                 </tr>
                                 <apex:outputPanel rendered="{!NOT(ISBLANK(item.Descripcion_Detallada__c))}" layout="none">
                                     <tr class="row-detail"><td colspan="4"><div class="detail-inner"><apex:outputText value="{!item.Descripcion_Detallada__c}" escape="false"/></div></td></tr>
@@ -120,12 +120,16 @@
                         <tr><td colspan="4" style="padding-top:20pt;">
                             <table class="tbl-totals">
                                 <apex:outputPanel rendered="{!technicalQuote.Show_Subtotal__c}" layout="none">
-                                    <tr><td class="tot-lbl">SUBTOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Subtotal, 0)}"/></apex:outputText></td></tr>
+                                    <tr><td class="tot-lbl">SUBTOTAL 1</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcSubtotal1}"/></apex:outputText></td></tr>
+                                    <apex:outputPanel rendered="{!calcDescuento > 0}" layout="none">
+                                        <tr><td class="tot-lbl" style="color:#d8000c;">DESCUENTO</td><td class="tot-val" style="color:#d8000c;">- <apex:outputText value="{0, number, currency}"><apex:param value="{!calcDescuento}"/></apex:outputText></td></tr>
+                                    </apex:outputPanel>
+                                    <tr><td class="tot-lbl">SUBTOTAL 2</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcSubtotal2}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
                                 <apex:outputPanel rendered="{!technicalQuote.Show_Tax__c}" layout="none">
-                                    <tr><td class="tot-lbl">I.V.A. (16%)</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.Tax, 0)}"/></apex:outputText></td></tr>
+                                    <tr><td class="tot-lbl">I.V.A. (16%)</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcIva}"/></apex:outputText></td></tr>
                                 </apex:outputPanel>
-                                <tr class="row-grand"><td class="tot-lbl">TOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(technicalQuote.TotalPrice, 0)}"/></apex:outputText></td></tr>
+                                <tr class="row-grand"><td class="tot-lbl">TOTAL</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcTotal}"/></apex:outputText></td></tr>
                             </table>
                             <table class="tbl-payment" style="width:100%; margin-top:10pt;">
                                 <thead>

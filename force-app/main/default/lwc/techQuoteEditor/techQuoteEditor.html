@@ -216,16 +216,49 @@
                     <div class="section-header">
                         <h2>Resumen de Totales</h2>
                     </div>
-                    <!-- Toolbar de opciones de PDF sobre fondo blanco -->
-                    <div class="slds-p-around_small slds-border_bottom slds-theme_shade slds-grid slds-grid_align-end">
-                        <div class="slds-grid slds-grid_vertical-align-center">
-                            <span class="slds-m-right_small slds-text-title_bold" style="color: #475569;">Opciones de PDF:</span>
-                            <lightning-input type="checkbox" label="Mostrar Subtotal" checked={showSubtotal} onchange={handleShowSubtotalChange} class="slds-m-right_medium"></lightning-input>
-                            <lightning-input type="checkbox" label="Mostrar Impuestos" checked={showTax} onchange={handleShowTaxChange}></lightning-input>
-                        </div>
-                    </div>
-                    <div class="datatable-container">
-                        <lightning-datatable key-field="id" data={totalesData} columns={totalesColumns} hide-checkbox-column></lightning-datatable>
+                    <div class="slds-p-around_medium">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Monto</th>
+                                    <th style="width: 150px; text-align: center;">Opciones de PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>SUBTOTAL 1</strong></td>
+                                    <td><lightning-formatted-number value={calcSubtotal1} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
+                                    <td style="text-align: center;">
+                                        <lightning-input type="checkbox" checked={showSubtotal} onchange={handleShowSubtotalChange}></lightning-input>
+                                    </td>
+                                </tr>
+                                <template if:true={hasDescuento}>
+                                    <tr>
+                                        <td style="color:#d8000c;"><strong>DESCUENTO</strong></td>
+                                        <td style="color:#d8000c;">- <lightning-formatted-number value={calcDescuento} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
+                                        <td></td>
+                                    </tr>
+                                </template>
+                                <tr>
+                                    <td><strong>SUBTOTAL 2</strong></td>
+                                    <td><lightning-formatted-number value={calcSubtotal2} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>I.V.A. (16%)</strong></td>
+                                    <td><lightning-formatted-number value={calcIva} format-style="currency" currency-code="MXN"></lightning-formatted-number></td>
+                                    <td style="text-align: center;">
+                                        <lightning-input type="checkbox" checked={showTax} onchange={handleShowTaxChange}></lightning-input>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TOTAL</strong></td>
+                                    <td><strong><lightning-formatted-number value={calcTotal} format-style="currency" currency-code="MXN"></lightning-formatted-number></strong></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

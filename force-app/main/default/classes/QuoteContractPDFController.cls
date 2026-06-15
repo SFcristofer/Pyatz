@@ -6,6 +6,12 @@ public with sharing class QuoteContractPDFController {
     public Decimal totalContrato {get; set;}
     public Decimal totalTax {get; set;}
     
+    public Decimal calcSubtotal1 {get; set;}
+    public Decimal calcDescuento {get; set;}
+    public Decimal calcSubtotal2 {get; set;}
+    public Decimal calcIva {get; set;}
+    public Decimal calcTotal {get; set;}
+    
     public String quoteNumberShort {get; set;}
     public String firmanteNombre {get; set;}
     public String firmanteCargo {get; set;}
@@ -63,22 +69,47 @@ public with sharing class QuoteContractPDFController {
         String selectedIdsParam = params.get('selectedItems');
         if (String.isNotBlank(selectedIdsParam)) {
             this.selectedLineItems = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
-                                             Discount, Description, Descripcion_Detallada__c, Zonas_a_Tratar__c FROM QuoteLineItem 
+                                             Discount, Description, Descripcion_Detallada__c, Zonas_a_Tratar__c, ListPrice FROM QuoteLineItem 
                                       WHERE QuoteId = :quoteId AND Id IN :selectedIdsParam.split(',')];
         } else {
             this.selectedLineItems = [SELECT Id, Product2.Name, Product2.ProductCode, Quantity, UnitPrice, TotalPrice, 
-                                             Discount, Description, Descripcion_Detallada__c, Zonas_a_Tratar__c FROM QuoteLineItem 
+                                             Discount, Description, Descripcion_Detallada__c, Zonas_a_Tratar__c, ListPrice FROM QuoteLineItem 
                                       WHERE QuoteId = :quoteId];
         }
 
-        // El Total del Contrato debe ser consistente con el Total del Presupuesto
-        if (this.quoteRecord.Tax != null && this.quoteRecord.Tax > 0) {
-            this.totalTax = this.quoteRecord.Tax;
-            this.totalContrato = (this.quoteRecord.GrandTotal != null ? this.quoteRecord.GrandTotal : 0);
-        } else {
-            this.totalTax = (this.quoteRecord.Subtotal != null ? this.quoteRecord.Subtotal : 0) * 0.16;
-            this.totalContrato = (this.quoteRecord.Subtotal != null ? this.quoteRecord.Subtotal : 0) * 1.16;
+        // --- CALCULO A PRUEBA DE TONTOS PARA SUBTOTALES Y DESCUENTOS ---
+        this.calcSubtotal1 = 0;
+        this.calcDescuento = 0;
+        
+        for (QuoteLineItem qli : this.selectedLineItems) {
+            Decimal listP = qli.ListPrice != null ? qli.ListPrice : (qli.UnitPrice != null ? qli.UnitPrice : 0);
+            Decimal qty = qli.Quantity != null ? qli.Quantity : 1;
+            Decimal subP = listP * qty;
+            Decimal totP = qli.TotalPrice != null ? qli.TotalPrice : subP;
+            
+            this.calcSubtotal1 += subP;
+            this.calcDescuento += (subP - totP);
         }
+        
+        Decimal headerDiscountPercent = this.quoteRecord.Discount != null ? this.quoteRecord.Discount : 0;
+        Decimal intermediateSubtotal = this.calcSubtotal1 - this.calcDescuento;
+        Decimal headerDiscountAmount = intermediateSubtotal * (headerDiscountPercent / 100.0);
+        
+        this.calcDescuento += headerDiscountAmount;
+        this.calcSubtotal2 = this.calcSubtotal1 - this.calcDescuento;
+
+        if (this.quoteRecord.Tax != null && this.quoteRecord.Tax > 0) {
+            this.calcIva = this.quoteRecord.Tax;
+            this.calcTotal = this.quoteRecord.GrandTotal != null ? this.quoteRecord.GrandTotal : (this.calcSubtotal2 + this.calcIva);
+        } else {
+            this.calcIva = this.calcSubtotal2 * 0.16;
+            this.calcTotal = this.calcSubtotal2 + this.calcIva;
+        }
+
+        // For backward compatibility
+        this.totalTax = this.calcIva;
+        this.totalContrato = this.calcTotal;
+        // -------------------------------------------------------------
 
         // 2. Lógica de Firmas Dinámica
         String creatorId = params.get('createdBy');

@@ -117,11 +117,28 @@ export default class TechQuoteItemConfigurator extends LightningElement {
         }
 
         const sedesVinculadas = item.sedes ? item.sedes.split(',').map(s => s.trim()) : [];
+        this.isUnitario = item.isUnitario !== undefined ? item.isUnitario : true;
+        this.isTotal = !this.isUnitario;
+
+        // Recuperar el importe original capturado por el usuario (Unitario o Total)
+        const storedImporte = this.isUnitario 
+            ? (item.precioVenta !== undefined ? item.precioVenta : (item.totalSinImpuestos / (item.cantidad || 1)))
+            : (item.subtotalBruto !== undefined ? item.subtotalBruto : item.totalSinImpuestos);
+
         this.modalTableData = this.selectedSedesObjects.map(s => {
             const isMatch = sedesVinculadas.includes(s.Name);
-            return { id: s.Id, sede: s.Name, isSelected: isMatch, cantidad: item.cantidad, importeTotal: item.totalSinImpuestos / (item.cantidad || 1), descuento: 0, tipoDescuento: 'monto', totalSinImpuestos: item.totalSinImpuestos, impuestos: 16 };
+            return { 
+                id: s.Id, sede: s.Name, isSelected: isMatch, cantidad: item.cantidad, 
+                importeTotal: storedImporte, 
+                descuento: item.descuento || 0, 
+                tipoDescuento: item.tipoDescuento || 'monto', 
+                totalSinImpuestos: item.totalSinImpuestos, 
+                subtotalBruto: item.subtotalBruto || item.totalSinImpuestos,
+                precioVenta: item.precioVenta || (item.totalSinImpuestos / (item.cantidad || 1)),
+                impuestos: 16 
+            };
         });
-        this.selectedProductPrice = item.totalSinImpuestos / (item.cantidad || 1);
+        this.selectedProductPrice = storedImporte;
         this.selectedSolucionId = item.solucionId || '';
     }
 
@@ -206,11 +223,16 @@ export default class TechQuoteItemConfigurator extends LightningElement {
 
     recalculateModalData() {
         this.modalTableData = this.modalTableData.map(row => {
-            let base = this.isUnitario ? (row.importeTotal * row.cantidad) : (row.cantidad !== 0 ? (row.importeTotal / row.cantidad) : 0);
+            let base = this.isUnitario ? (row.importeTotal * row.cantidad) : (row.importeTotal || 0);
             let finalTotal = base;
-            if (row.tipoDescuento === 'monto') finalTotal = base - (row.descuento || 0);
-            else if (row.tipoDescuento === 'porcentaje') finalTotal = base * (1 - ((row.descuento || 0) / 100));
-            return { ...row, totalSinImpuestos: finalTotal };
+            if (row.tipoDescuento === 'monto') {
+                let totalDescAmount = this.isUnitario ? ((row.descuento || 0) * row.cantidad) : (row.descuento || 0);
+                finalTotal = base - totalDescAmount;
+            } else if (row.tipoDescuento === 'porcentaje') {
+                finalTotal = base * (1 - ((row.descuento || 0) / 100));
+            }
+            let unitarioBase = row.cantidad !== 0 ? (base / row.cantidad) : 0;
+            return { ...row, totalSinImpuestos: finalTotal, subtotalBruto: base, precioVenta: unitarioBase };
         });
     }
 
@@ -225,6 +247,11 @@ export default class TechQuoteItemConfigurator extends LightningElement {
             descripcion: this.selectedProductName,
             cantidad: row.cantidad,
             totalSinImpuestos: row.totalSinImpuestos,
+            subtotalBruto: row.subtotalBruto,
+            precioVenta: row.precioVenta,
+            descuento: row.descuento,
+            tipoDescuento: row.tipoDescuento,
+            isUnitario: this.isUnitario,
             sedes: row.sede,
             areas: this.zonasAfectadas.join(', '),
             detalleTecnico: this.modalDescription,

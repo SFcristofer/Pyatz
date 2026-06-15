@@ -13,7 +13,7 @@ private class QuoteContractPDFControllerTest {
         insert opp;
         Quote q = new Quote(
             Name = 'Contract PDF Quote', OpportunityId = opp.Id,
-            Pricebook2Id = pb.Id, Status = 'Draft', AccountId = acc.Id
+            Pricebook2Id = pb.Id, Status = 'Draft'
         );
         insert q;
     }

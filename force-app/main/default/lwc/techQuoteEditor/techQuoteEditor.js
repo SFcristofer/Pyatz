@@ -84,7 +84,18 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     @track allowOtherLines = false;
     @track showSubtotal = true;
     @track showTax = true;
-    
+
+    // --- NUEVOS TOTALES PARA LA TABLA ---
+    @track calcSubtotal1 = 0;
+    @track calcDescuento = 0;
+    @track calcSubtotal2 = 0;
+    @track calcIva = 0;
+    @track calcTotal = 0;
+
+    get hasDescuento() {
+        return this.calcDescuento > 0;
+    }
+
     // --- MODALES ---
     @track showModal = false;
     @track itemToEdit = null;
@@ -399,10 +410,31 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
 
     calculateTotals() {
-        let subtotal = 0;
-        this.serviciosData.forEach(item => { if (!item.isSeparator) subtotal += (item.totalSinImpuestos || 0); });
-        const iva = subtotal * 0.16;
-        this.totalesData = [{ id: 'total-1', impuestosNom: 'IVA (16%)', base: subtotal, valorImpuesto: iva, total: subtotal + iva }];
+        this.calcSubtotal1 = 0;
+        this.calcDescuento = 0;
+
+        this.serviciosData.forEach(item => { 
+            if (!item.isSeparator) {
+                // lista = Precio de Lista (Unitario sin descuento) * Cantidad
+                // Usamos subtotalBruto si viene, si no, calculamos con precioVenta, si no, asumimos que no hay descuento y usamos totalSinImpuestos
+                let lista = item.subtotalBruto !== undefined ? item.subtotalBruto : (item.precioVenta !== undefined ? (item.precioVenta * (item.cantidad || 0)) : (item.totalSinImpuestos || 0));
+                this.calcSubtotal1 += lista;
+                
+                // totalSinImpuestos es el valor ya con descuento aplicado, la diferencia es el descuento en dinero
+                let totalConDesc = item.totalSinImpuestos || 0;
+                let descLinea = lista - totalConDesc;
+                if (descLinea > 0) {
+                    this.calcDescuento += descLinea;
+                }
+            } 
+        });
+
+        this.calcSubtotal2 = this.calcSubtotal1 - this.calcDescuento;
+        this.calcIva = this.calcSubtotal2 * 0.16;
+        this.calcTotal = this.calcSubtotal2 + this.calcIva;
+
+        // Mantenemos la variable vieja por si acaso
+        this.totalesData = [{ id: 'total-1', impuestosNom: 'IVA (16%)', base: this.calcSubtotal2, valorImpuesto: this.calcIva, total: this.calcTotal }];
     }
 
     handleRowAction(event) {
