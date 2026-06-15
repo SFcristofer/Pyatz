@@ -18,7 +18,8 @@
 }
 
 .agent-cell {
-    height: 90px;
+    min-height: 90px;
+    height: auto;
     padding: 0.75rem;
     border-bottom: 1px solid #e5e7eb;
     transition: background 0.2s;
@@ -55,21 +56,42 @@
 .status-red { background: #ef4444; }
 .status-gray { background: #9ca3af; }
 
-/* GRILLA */
-.days-grid-scroll {
+/* --------------------------------- */
+/* PREMIUM TIMELINE DESIGN           */
+/* --------------------------------- */
+
+.calendar-scroll-container {
     overflow-x: auto;
-    display: flex;
-    flex-direction: column;
+    overflow-y: hidden;
+    position: relative;
+    max-height: 600px;
+    background: #ffffff;
+}
+
+.calendar-header-row {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.agents-header {
+    position: sticky;
+    left: 0;
+    z-index: 25;
+    background: #f3f4f6;
+    border-right: 2px solid #e5e7eb;
+    border-bottom: none !important;
 }
 
 .grid-header-cell {
     min-width: 140px;
+    flex: 1 1 140px;
     height: 60px;
     padding: 0.5rem;
     text-align: center;
-    border-bottom: 2px solid #e5e7eb;
     border-right: 1px solid #f3f4f6;
-    background: #f9fafb;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -81,7 +103,7 @@
 }
 
 .day-name {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     color: #6b7280;
     font-weight: 700;
@@ -90,73 +112,184 @@
 .day-number {
     font-size: 1.25rem;
     font-weight: 800;
+    color: #111827;
+}
+
+/* FILAS DE RECURSOS (PERFECT ALIGNMENT) */
+.calendar-body-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.resource-full-row {
+    min-height: 90px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.resource-full-row:hover .agent-cell,
+.resource-full-row:hover .grid-data-cell {
+    background: #f8fafc;
+}
+
+.agent-cell {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    min-width: 220px;
+    width: 220px;
+    background: #f9fafb;
+    border-right: 2px solid #e5e7eb;
+    padding: 0.75rem;
+    transition: background 0.2s;
 }
 
 .grid-data-cell {
     min-width: 140px;
-    height: 90px;
-    border-bottom: 1px solid #f3f4f6;
+    flex: 1 1 140px;
     border-right: 1px solid #f3f4f6;
     padding: 6px;
     background: white;
+    transition: background 0.2s;
 }
 
-/* TARJETAS DE CITA */
+/* TARJETAS DE CITA PREMIUM */
 .app-card {
     padding: 6px;
-    border-radius: 6px;
-    margin-bottom: 4px;
-    color: white;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    color: #1f2937;
     font-family: inherit;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-left: 4px solid rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-left: 4px solid;
     position: relative;
     cursor: help;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    background: white;
+}
+
+.app-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15);
+    z-index: 30;
 }
 
 .app-time {
     font-size: 0.65rem;
     font-weight: 800;
-    opacity: 0.9;
+    color: #111827;
 }
 
 .app-duration {
     font-size: 0.6rem;
-    background: rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.05);
     padding: 1px 4px;
     border-radius: 3px;
+    color: #4b5563;
+    font-weight: 600;
 }
 
 .app-client {
     display: block;
     font-size: 0.75rem;
     font-weight: 800;
-    margin-top: 2px;
-    text-transform: uppercase;
+    margin-top: 4px;
+    color: #374151;
 }
 
-.status-done { background: #059669; }
-.status-pending { background: #2563eb; }
-.status-alert { background: #dc2626; }
+.status-done { 
+    border-left-color: #059669; 
+    background: rgba(5, 150, 105, 0.08); 
+}
+.status-pending { 
+    border-left-color: #2563eb; 
+    background: rgba(37, 99, 235, 0.08); 
+}
+.status-alert { 
+    border-left-color: #dc2626; 
+    background: rgba(220, 38, 38, 0.08); 
+}
 
-/* POPOVER */
-.custom-popover {
+/* MODERN POPOVER */
+.modern-popover {
     position: absolute;
-    left: 105%;
-    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(100% + 10px);
     width: 280px;
-    z-index: 9999;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    border: 1px solid #dddbda;
-    border-radius: 8px;
+    z-index: 99999;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
     background: white;
-    color: #3e3e3c;
-    animation: fadeIn 0.2s ease-out;
+    border: 1px solid #e2e8f0;
+    animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow: hidden;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
+.modern-popover::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modern-popover-header {
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.popover-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.popover-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 12px;
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.modern-popover-body {
+    padding: 12px 16px;
+}
+
+.popover-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.popover-row:last-child {
+    margin-bottom: 0;
+}
+
+.popover-icon {
+    margin-right: 8px;
+    margin-top: 2px;
+    --sds-c-icon-color-foreground-default: #64748b;
+}
+
+.popover-text {
+    font-size: 0.8rem;
+    color: #334155;
+    line-height: 1.4;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: translate(-50%, 10px) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
 /* LEYENDAS */
@@ -183,4 +316,34 @@
     min-width: 180px;
     font-weight: 800;
     color: #1e40af;
+}
+
+.date-jumper {
+    max-width: 140px;
+}
+
+.view-selector {
+    max-width: 130px;
+    margin-left: 8px;
+}
+
+/* --------------------------------- */
+/* RESPONSIVE DESIGN & UX ADJUSTMENTS */
+/* --------------------------------- */
+@media (max-width: 1024px) {
+    .agent-cell, .agents-header {
+        min-width: 160px;
+        width: 160px;
+    }
+    .agent-name {
+        font-size: 0.75rem;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    .agent-info {
+        font-size: 0.65rem;
+    }
+    .grid-header-cell, .grid-data-cell {
+        min-width: 120px;
+    }
 }

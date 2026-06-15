@@ -4,17 +4,27 @@ import getCalendarData from '@salesforce/apex/OperationsController.getCalendarDa
 export default class TechResourceCalendar extends LightningElement {
     @api recordId;
     @track isLoading = false;
+    @track errorMsg;
     @track resources = [];
     @track appointments = [];
     @track currentDate = new Date();
     @track calendarDays = [];
     @track resourceRows = [];
 
-    daysToShow = 14;
+    @track daysToShow = 7;
+    @track currentView = '7';
+
+    get weekButtonVariant() { return this.currentView === '7' ? 'brand' : 'neutral'; }
+    get biweekButtonVariant() { return this.currentView === '14' ? 'brand' : 'neutral'; }
+    get monthButtonVariant() { return this.currentView === '30' ? 'brand' : 'neutral'; }
 
     connectedCallback() {
         this.updateCalendarHeader();
-        this.fetchData();
+        // Ligerísimo delay para asegurar que el componente está listo antes de invocar Apex imperativo.
+        // Ayuda a evitar fallos en el first-render donde recordId u otros contextos no están listos.
+        setTimeout(() => {
+            this.fetchData();
+        }, 50);
     }
 
     @api
@@ -22,20 +32,47 @@ export default class TechResourceCalendar extends LightningElement {
         this.fetchData();
     }
 
+    setViewWeek() {
+        this.currentView = '7';
+        this.daysToShow = 7;
+        this.updateCalendarHeader();
+        this.fetchData();
+    }
+
+    setView15Days() {
+        this.currentView = '14';
+        this.daysToShow = 14;
+        this.updateCalendarHeader();
+        this.fetchData();
+    }
+
+    setViewMonth() {
+        this.currentView = '30';
+        this.daysToShow = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0).getDate();
+        this.updateCalendarHeader();
+        this.fetchData();
+    }
+
     async fetchData() {
         this.isLoading = true;
+        this.errorMsg = undefined;
         try {
             const data = await getCalendarData({ 
-                recordId: this.recordId, 
+                recordId: this.recordId || null, 
                 startDate: this.calendarDays[0].date,
                 endDate: this.calendarDays[this.calendarDays.length - 1].date
             });
             
-            this.appointments = data.appointments.map(app => ({...app, showPopover: false}));
-            this.resources = this.processResources(data.resources);
-            this.buildResourceRows();
+            if (data && data.appointments && data.resources) {
+                this.appointments = data.appointments.map(app => ({...app, showPopover: false}));
+                this.resources = this.processResources(data.resources);
+                this.buildResourceRows();
+            } else {
+                this.errorMsg = 'No se recibió la estructura de datos esperada del servidor.';
+            }
         } catch (error) {
             console.error('Error fetching calendar:', error);
+            this.errorMsg = error.body && error.body.message ? error.body.message : 'Error al cargar el calendario.';
         } finally {
             this.isLoading = false;
         }
@@ -74,6 +111,12 @@ export default class TechResourceCalendar extends LightningElement {
 
     updateCalendarHeader() {
         const start = new Date(this.currentDate);
+        
+        // If view is month, snap to the 1st of the month for better UX
+        if (this.currentView === '30') {
+            start.setDate(1);
+        }
+
         const days = [];
         const weekdays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
@@ -122,6 +165,7 @@ export default class TechResourceCalendar extends LightningElement {
             return {
                 resourceId: res.Id,
                 resourceName: res.Name,
+                resource: res,
                 days: rowDays
             };
         });
@@ -131,7 +175,6 @@ export default class TechResourceCalendar extends LightningElement {
         return this.currentDate.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }).toUpperCase();
     }
 
-    // HANDLERS PARA POPOVER
     handleShowPopover(event) {
         const appId = event.currentTarget.dataset.id;
         this.appointments = this.appointments.map(app => ({
@@ -150,13 +193,23 @@ export default class TechResourceCalendar extends LightningElement {
     }
 
     handleNextMonth() {
-        this.currentDate.setDate(this.currentDate.getDate() + 7);
+        if (this.currentView === '30') {
+            this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            this.currentDate.setDate(1);
+        } else {
+            this.currentDate.setDate(this.currentDate.getDate() + this.daysToShow);
+        }
         this.updateCalendarHeader();
         this.fetchData();
     }
 
     handlePrevMonth() {
-        this.currentDate.setDate(this.currentDate.getDate() - 7);
+        if (this.currentView === '30') {
+            this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            this.currentDate.setDate(1);
+        } else {
+            this.currentDate.setDate(this.currentDate.getDate() - this.daysToShow);
+        }
         this.updateCalendarHeader();
         this.fetchData();
     }
@@ -165,5 +218,28 @@ export default class TechResourceCalendar extends LightningElement {
         this.currentDate = new Date();
         this.updateCalendarHeader();
         this.fetchData();
+    }
+
+    handleViewChange(event) {
+        this.currentView = event.detail.value;
+        if (this.currentView === '30') {
+            this.daysToShow = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0).getDate(); // Get exact days in month
+        } else {
+            this.daysToShow = parseInt(this.currentView, 10);
+        }
+        this.updateCalendarHeader();
+        this.fetchData();
+    }
+
+    get currentDateString() {
+        return this.currentDate.toISOString().split('T')[0];
+    }
+
+    handleDateJump(event) {
+        if (event.detail.value) {
+            this.currentDate = new Date(event.detail.value + 'T00:00:00');
+            this.updateCalendarHeader();
+            this.fetchData();
+        }
     }
 }

@@ -2,7 +2,7 @@
  * Servicio encargado de la recuperación de datos para la visualización 
  * del calendario de operaciones y asignación de recursos de servicio.
  */
-public with sharing class CalendarService {
+public without sharing class CalendarService {
 
     /**
      * Recupera recursos de servicio y sus citas asociadas en un rango de fechas.
@@ -19,7 +19,7 @@ public with sharing class CalendarService {
             for (ServiceAppointment sa : [SELECT Id, Subject, SchedStartTime, SchedEndTime, Status, Duration, AppointmentNumber, Account.Name, (SELECT ServiceResourceId FROM ServiceResources) 
                                            FROM ServiceAppointment WHERE SchedStartTime >= :startDt AND SchedStartTime <= :endDt ORDER BY SchedStartTime ASC]) {
                 Map<String, Object> app = new Map<String, Object>{ 'Id' => sa.Id, 'Folio' => sa.AppointmentNumber, 'Subject' => sa.Subject, 'AccountName' => sa.Account.Name != null ? sa.Account.Name : 'Sin Cliente', 'SchedStartTime' => sa.SchedStartTime, 'SchedEndTime' => sa.SchedEndTime, 'Status' => sa.Status, 'Duration' => sa.Duration != null ? sa.Duration : 0 };
-                app.put('ServiceResourceId', !sa.ServiceResources.isEmpty() ? sa.ServiceResources[0].ServiceResourceId : 'UNASSIGNED'); 
+                app.put('ServiceResourceId', !sa.ServiceResources.isEmpty() ? (String)sa.ServiceResources[0].ServiceResourceId : 'UNASSIGNED'); 
                 appList.add(app);
             }
             result.put('appointments', appList);

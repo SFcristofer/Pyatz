@@ -67,7 +67,7 @@ public with sharing class OperationsController {
         FileService.renameAndLinkFile(documentId, docType);
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static Map<String, Object> getCalendarData(Id recordId, String startDate, String endDate) {
         return CalendarService.getCalendarData(startDate, endDate);
     }
