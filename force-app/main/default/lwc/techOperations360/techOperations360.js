@@ -8,8 +8,10 @@ import ID_FIELD from '@salesforce/schema/Opportunity.Id';
 import STAGE_FIELD from '@salesforce/schema/Opportunity.StageName';
 import SUBSTAGE_FIELD from '@salesforce/schema/Opportunity.Subetapa__c';
 import STATUS_FIELD from '@salesforce/schema/Opportunity.Estado_Subetapa__c';
+import OWNER_FIELD from '@salesforce/schema/Opportunity.OwnerId';
 
-const OPPORTUNITY_FIELDS = [STAGE_FIELD, SUBSTAGE_FIELD, STATUS_FIELD];
+const OPPORTUNITY_FIELDS = [STAGE_FIELD, SUBSTAGE_FIELD, STATUS_FIELD, OWNER_FIELD];
+import getActiveUsers from '@salesforce/apex/OperationsController.getActiveUsers';
 import getOpportunitiesList from '@salesforce/apex/OperationsController.getOpportunitiesList';
 import getOpportunitiesByAccount from '@salesforce/apex/OperationsController.getOpportunitiesByAccount';
 import saveStageTracking from '@salesforce/apex/OperationsController.saveStageTracking';
@@ -27,6 +29,8 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     @track isCreationModalOpen = false;
     @track isSummaryModalOpen = false;
     @track activeOppId = null; 
+    @track currentOwnerId = null;
+    @track usersList = [];
     
     // LISTA DE CAMPOS SEGÚN x.txt
     @track opportunityFields = [
@@ -142,6 +146,45 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
         this.template.querySelector('.header-edit-form').submit();
     }
 
+    handleHeaderFieldChange() {
+        const form = this.template.querySelector('.header-edit-form');
+        if (form) {
+            form.submit();
+        }
+    }
+
+    handleOwnerChange(event) {
+        const newOwnerId = event.detail.value;
+        if (newOwnerId && newOwnerId !== this.currentOwnerId) {
+            this.currentOwnerId = newOwnerId;
+            const fields = {};
+            fields[ID_FIELD.fieldApiName] = this.effectiveRecordId;
+            fields[OWNER_FIELD.fieldApiName] = newOwnerId;
+            const recordInput = { fields };
+            
+            updateRecord(recordInput)
+                .then(() => {
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Éxito',
+                            message: 'Propietario actualizado correctamente',
+                            variant: 'success'
+                        })
+                    );
+                })
+                .catch(error => {
+                    console.error('Error updating owner', error);
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error',
+                            message: error.body ? error.body.message : 'Error al actualizar propietario',
+                            variant: 'error'
+                        })
+                    );
+                });
+        }
+    }
+
     handleHeaderSuccess() {
         this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Estado actualizado correctamente', variant: 'success' }));
         if (this.isAccountContext) this.loadOpportunities();
@@ -207,6 +250,22 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
             this.applyPersistence();
             if (this.effectiveRecordId) this.loadProcessHistory();
         } else if (error) console.error('Error metadatos:', error);
+    }
+
+    @wire(getActiveUsers)
+    wiredUsers({ error, data }) {
+        if (data) {
+            this.usersList = data;
+        } else if (error) {
+            console.error('Error fetching users:', error);
+        }
+    }
+
+    @wire(getRecord, { recordId: '$effectiveRecordId', fields: OPPORTUNITY_FIELDS })
+    wiredOppRecordEffective({ error, data }) {
+        if (data) {
+            this.currentOwnerId = data.fields.OwnerId ? data.fields.OwnerId.value : null;
+        }
     }
 
     // --- PERSISTENCIA DE NAVEGACIÓN ---

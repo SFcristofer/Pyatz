@@ -4,6 +4,18 @@
 public with sharing class OperationsController {
 
     @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getActiveUsers() {
+        List<Map<String, String>> result = new List<Map<String, String>>();
+        for (User u : [SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name ASC]) {
+            result.add(new Map<String, String>{
+                'label' => u.Name,
+                'value' => u.Id
+            });
+        }
+        return result;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<Map<String, Object>> getOpportunitiesList(String searchTerm) {
         List<Map<String, Object>> result = new List<Map<String, Object>>();
         String query = 'SELECT Id, Name, Account.Name, StageName, Amount, CloseDate, Owner.Name, Estado_Oportunidad__c FROM Opportunity ';

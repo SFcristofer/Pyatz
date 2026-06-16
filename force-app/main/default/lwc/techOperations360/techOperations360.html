@@ -80,21 +80,21 @@
                             <lightning-output-field field-name="AccountId"></lightning-output-field>
                             <lightning-output-field field-name="Name"></lightning-output-field>
                             <lightning-output-field field-name="Amount"></lightning-output-field>
-                            
-                            <!-- Custom formatted input field to match standard output field styling -->
-                            <div class="slds-form-element slds-form-element_readonly slds-grid slds-m-bottom_xx-small" style="padding-top: 4px; padding-bottom: 4px;">
-                                <span class="slds-form-element__label slds-col slds-size_1-of-3" style="color: var(--slds-c-input-text-color, #444444); padding-left: 2px;">Estado Oportunidad</span>
-                                <div class="slds-form-element__control slds-col slds-size_2-of-3">
-                                    <lightning-input-field field-name="Estado_Oportunidad__c" variant="label-hidden" onchange={handleHeaderStatusChange} style="margin-top: -6px; margin-left: -12px;"></lightning-input-field>
-                                </div>
-                            </div>
-                            
+                            <lightning-combobox 
+                                label="Propietario"
+                                name="owner"
+                                placeholder="Seleccionar..."
+                                value={currentOwnerId}
+                                options={usersList}
+                                onchange={handleOwnerChange}>
+                            </lightning-combobox>
                             <lightning-output-field field-name="Linea_de_negocio__c"></lightning-output-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                             <lightning-output-field field-name="CloseDate"></lightning-output-field>
                             <lightning-output-field field-name="StageName"></lightning-output-field>
                             <lightning-output-field field-name="Tipo_de_venta__c"></lightning-output-field>
+                            <lightning-input-field field-name="Estado_Oportunidad__c" onchange={handleHeaderStatusChange}></lightning-input-field>
                             <div class="slds-p-around_x-small slds-m-top_x-small" style="background: white; border-radius: 4px; border: 1px solid #e0e5ee;">
                                 <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
                                     <span class="slds-text-title_bold" style="color: #0070d2;">Avance del Expediente</span>
