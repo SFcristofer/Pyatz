@@ -40,25 +40,51 @@
                             
                             <!-- PESTAÑA 1: DESTINATARIOS -->
                             <lightning-tab label="Contactos" icon-name="standard:people">
-                                <!-- SECCIÓN: EQUIPO INTERNO (Ventas, Operaciones) -->
-                                <template if:true={showInternalTeam}>
-                                    <template if:true={internalContacts.length}>
-                                        <div class="slds-p-vertical_small border-bottom">
+                                <template if:false={isInternalMode}>
+                                    <!-- SECCIÓN: EQUIPO INTERNO (Ventas, Operaciones) -->
+                                    <template if:true={showInternalTeam}>
+                                        <template if:true={internalContacts.length}>
+                                            <div class="slds-p-vertical_small border-bottom">
+                                                <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
+                                                    <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                    EQUIPO INTERNO:
+                                                </div>
+                                                <div class="slds-p-horizontal_x-small">
+                                                    <template for:each={internalContacts} for:item="int">
+                                                        <div key={int.id} class="att-item slds-m-bottom_xx-small">
+                                                            <lightning-input 
+                                                                type="checkbox" 
+                                                                label={int.name} 
+                                                                title={int.email}
+                                                                data-email={int.email} 
+                                                                onchange={handleQuickAddContact}>
+                                                            </lightning-input>
+                                                            <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{int.role}</div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </template>
+
+                                    <!-- SECCIÓN: CONTACTOS DE LA SEDE -->
+                                    <template if:true={sedeContacts.length}>
+                                        <div class="slds-p-vertical_small">
                                             <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
-                                                <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                                EQUIPO INTERNO:
+                                                <lightning-icon icon-name="standard:contact" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                CONTACTOS DE LA SEDE:
                                             </div>
                                             <div class="slds-p-horizontal_x-small">
-                                                <template for:each={internalContacts} for:item="int">
-                                                    <div key={int.id} class="att-item slds-m-bottom_xx-small">
+                                                <template for:each={sedeContacts} for:item="con">
+                                                    <div key={con.id} class="att-item slds-m-bottom_xx-small">
                                                         <lightning-input 
                                                             type="checkbox" 
-                                                            label={int.name} 
-                                                            title={int.email}
-                                                            data-email={int.email} 
+                                                            label={con.name} 
+                                                            title={con.email}
+                                                            data-email={con.email} 
                                                             onchange={handleQuickAddContact}>
                                                         </lightning-input>
-                                                        <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{int.role}</div>
+                                                        <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{con.sede}</div>
                                                     </div>
                                                 </template>
                                             </div>
@@ -66,25 +92,26 @@
                                     </template>
                                 </template>
 
-                                <!-- SECCIÓN: CONTACTOS DE LA SEDE -->
-                                <template if:true={sedeContacts.length}>
+                                <!-- SECCIÓN: COLAS INTERNAS PYATZ (Modo Enhorabuena) -->
+                                <template if:true={isInternalMode}>
                                     <div class="slds-p-vertical_small">
                                         <div class="slds-text-title_bold slds-m-bottom_small slds-p-horizontal_x-small">
-                                            <lightning-icon icon-name="standard:contact" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                            CONTACTOS DE LA SEDE:
+                                            <lightning-icon icon-name="standard:groups" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            COLAS PYATZ:
                                         </div>
                                         <div class="slds-p-horizontal_x-small">
-                                            <template for:each={sedeContacts} for:item="con">
-                                                <div key={con.id} class="att-item slds-m-bottom_xx-small">
+                                            <template for:each={pyatzQueues} for:item="q">
+                                                <div key={q.id} class="att-item slds-m-bottom_xx-small">
                                                     <lightning-input 
                                                         type="checkbox" 
-                                                        label={con.name} 
-                                                        title={con.email}
-                                                        data-email={con.email} 
-                                                        onchange={handleQuickAddContact}>
+                                                        label={q.name} 
+                                                        data-id={q.id} 
+                                                        onchange={handleQueueToggle}>
                                                     </lightning-input>
-                                                    <div class="slds-text-color_weak slds-text-body_small slds-m-left_large" style="margin-top: -4px;">{con.sede}</div>
                                                 </div>
+                                            </template>
+                                            <template if:false={pyatzQueues.length}>
+                                                <div class="slds-text-color_weak slds-text-body_small slds-m-left_large">No se encontraron colas con 'PYATZ'</div>
                                             </template>
                                         </div>
                                     </div>
@@ -186,16 +213,65 @@
                     </div>
 
                     <div class="slds-grid slds-wrap slds-gutters_small">
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                            <lightning-input type="email" label="Para" value={toEmail} onchange={handleEmailChange} required></lightning-input>
+                            <template if:false={isInternalMode}>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                    <lightning-input type="email" label="Para" value={toEmail} onchange={handleEmailChange} required></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                    <lightning-input label="CC (Opcional)" placeholder="separar por comas..." value={ccEmail} onchange={handleCcChange}></lightning-input>
+                                </div>
+                            </template>
+
+                            <template if:true={isInternalMode}>
+                                <div class="slds-col slds-size_1-of-1">
+                                    <div class="slds-form-element slds-m-bottom_small">
+                                        <label class="slds-form-element__label">Buscar Usuarios Internos adicionales (opcional)</label>
+                                        <div class="slds-form-element__control">
+                                            <div class="slds-combobox_container">
+                                                <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
+                                                    <lightning-input type="search" variant="label-hidden" value={userSearchTerm} onchange={handleUserSearchChange} placeholder="Buscar por nombre..."></lightning-input>
+                                                    
+                                                    <template if:true={userSearchResults.length}>
+                                                        <div class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" role="listbox">
+                                                            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                                                <template for:each={userSearchResults} for:item="u">
+                                                                    <li key={u.id} role="presentation" class="slds-listbox__item">
+                                                                        <div class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option" data-id={u.id} data-name={u.name} onclick={handleSelectUser}>
+                                                                            <span class="slds-media__figure slds-listbox__option-icon">
+                                                                                <lightning-icon icon-name="standard:user" size="small"></lightning-icon>
+                                                                            </span>
+                                                                            <span class="slds-media__body">
+                                                                                <span class="slds-listbox__option-text slds-listbox__option-text_entity">{u.name}</span>
+                                                                                <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{u.title}</span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </li>
+                                                                </template>
+                                                            </ul>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <template if:true={selectedUserPills.length}>
+                                        <lightning-pill-container items={selectedUserPills} onitemremove={handleRemoveUserPill} class="slds-m-bottom_small"></lightning-pill-container>
+                                    </template>
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                            <lightning-input label="CC (Opcional)" placeholder="separar por comas..." value={ccEmail} onchange={handleCcChange}></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                            <lightning-input label="CCO (Opcional)" placeholder="separar por comas..." value={bccEmail} onchange={handleBccChange}></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                                <lightning-input label="Asunto" value={subject} onchange={handleSubjectChange} required></lightning-input>
+                            </div>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                            <lightning-input label="CC (Opcional)" placeholder="separar por comas..." value={ccEmail} onchange={handleCcChange}></lightning-input>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-m-top_small">
-                            <lightning-input label="Asunto" value={subject} onchange={handleSubjectChange} required></lightning-input>
-                        </div>
-                    </div>
 
                     <div class="slds-m-top_medium rich-text-container">
                         <lightning-input-rich-text
@@ -207,14 +283,26 @@
                     </div>
 
                     <div class="slds-m-top_large slds-grid slds-grid_align-end">
-                        <lightning-button 
-                            label="Enviar Correo al Cliente" 
-                            variant="brand" 
-                            icon-name="utility:send" 
-                            onclick={handleSendEmail} 
-                            loading={isSending}
-                            disabled={isSendDisabled}>
-                        </lightning-button>
+                        <template if:false={isInternalMode}>
+                            <lightning-button 
+                                label="Enviar Correo al Cliente" 
+                                variant="brand" 
+                                icon-name="utility:send" 
+                                onclick={handleSendEmail} 
+                                loading={isSending}
+                                disabled={isSendDisabled}>
+                            </lightning-button>
+                        </template>
+                        <template if:true={isInternalMode}>
+                            <lightning-button 
+                                label="Enviar correo" 
+                                variant="brand" 
+                                icon-name="utility:send" 
+                                onclick={handleSendEmail} 
+                                loading={isSending}
+                                disabled={isSendDisabled}>
+                            </lightning-button>
+                        </template>
                     </div>
                 </div>
             </div>

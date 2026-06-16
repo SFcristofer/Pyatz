@@ -126,4 +126,43 @@ public with sharing class CommunicationController {
         } catch (Exception e) { System.debug('Error en getInternalTeam: ' + e.getMessage()); }
         return team;
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getPyatzQueues() {
+        List<Map<String, String>> queues = new List<Map<String, String>>();
+        try {
+            for (Group g : [SELECT Id, Name, Email FROM Group WHERE Type = 'Queue' AND Name LIKE '%PYATZ%' ORDER BY Name ASC LIMIT 50]) {
+                queues.add(new Map<String, String>{
+                    'id' => g.Id,
+                    'name' => g.Name,
+                    'group' => 'COLA'
+                });
+            }
+        } catch (Exception e) { System.debug('Error en getPyatzQueues: ' + e.getMessage()); }
+        return queues;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> searchInternalUsers(String searchTerm) {
+        List<Map<String, String>> users = new List<Map<String, String>>();
+        if (String.isBlank(searchTerm) || searchTerm.length() < 2) return users;
+        String searchKey = '%' + searchTerm + '%';
+        try {
+            for (User u : [SELECT Id, Name, Email, Title FROM User WHERE Name LIKE :searchKey AND IsActive = true AND UserType = 'Standard' ORDER BY Name ASC LIMIT 15]) {
+                users.add(new Map<String, String>{
+                    'id' => u.Id,
+                    'name' => u.Name,
+                    'email' => u.Email,
+                    'title' => u.Title != null ? u.Title : 'Usuario',
+                    'group' => 'USUARIO'
+                });
+            }
+        } catch (Exception e) { System.debug('Error en searchInternalUsers: ' + e.getMessage()); }
+        return users;
+    }
+
+    @AuraEnabled
+    public static void sendInternalEmail(Id oppId, String toEmail, String ccEmail, String bccEmail, String subject, String body, List<Id> queueIds, List<Id> userIds, List<Map<String, String>> selectedAttachments) {
+        EmailService.sendInternalEmail(oppId, toEmail, ccEmail, bccEmail, subject, body, queueIds, userIds, selectedAttachments);
+    }
 }

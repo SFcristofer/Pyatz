@@ -154,6 +154,118 @@ public with sharing class EmailService {
                 mail.setEntityAttachments(contentVersionIds); 
             }
             Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
-        } catch (Exception e) { throw new AuraHandledException('Error en el motor de envío: ' + e.getMessage()); }
+        } catch (Exception e) {
+            throw new AuraHandledException('Error enviando el correo: ' + e.getMessage());
+        }
+    }
+
+    /**
+     * Envía un correo interno resolviendo Colas y Usuarios individuales, enviándolo por Copia Oculta (BCC)
+     * para que cada miembro lo reciba de forma individual.
+     */
+    public static void sendInternalEmail(Id oppId, String toEmail, String ccEmail, String bccEmail, String subject, String body, List<Id> queueIds, List<Id> userIds, List<Map<String, String>> selectedAttachments) {
+        try {
+            Set<String> bccEmailsSet = new Set<String>();
+
+            // 1. Obtener correos de los usuarios directos seleccionados
+            if (userIds != null && !userIds.isEmpty()) {
+                for (User u : [SELECT Email FROM User WHERE Id IN :userIds AND IsActive = true AND Email != null]) {
+                    bccEmailsSet.add(u.Email);
+                }
+            }
+
+            // 2. Obtener correos de los miembros de las colas seleccionadas
+            if (queueIds != null && !queueIds.isEmpty()) {
+                List<GroupMember> members = [SELECT UserOrGroupId FROM GroupMember WHERE GroupId IN :queueIds];
+                Set<Id> memberUserIds = new Set<Id>();
+                for (GroupMember gm : members) {
+                    if (String.valueOf(gm.UserOrGroupId).startsWith('005')) {
+                        memberUserIds.add(gm.UserOrGroupId);
+                    }
+                }
+                if (!memberUserIds.isEmpty()) {
+                    for (User u : [SELECT Email FROM User WHERE Id IN :memberUserIds AND IsActive = true AND Email != null]) {
+                        bccEmailsSet.add(u.Email);
+                    }
+                }
+            }
+
+            // Agregar BCC manuales a la lista
+            if (String.isNotBlank(bccEmail)) {
+                for (String emailAddr : bccEmail.split(',')) {
+                    if (String.isNotBlank(emailAddr)) bccEmailsSet.add(emailAddr.trim());
+                }
+            }
+
+            // 3. Preparar el correo
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            
+            // Si el usuario especificó "Para" explícitamente, lo usamos, si no, nos enviamos a nosotros mismos como pivote
+            if (String.isNotBlank(toEmail)) {
+                List<String> toEmailsList = new List<String>();
+                for (String emailAddr : toEmail.split(',')) {
+                    if (String.isNotBlank(emailAddr)) toEmailsList.add(emailAddr.trim());
+                }
+                if (!toEmailsList.isEmpty()) mail.setToAddresses(toEmailsList);
+                else mail.setToAddresses(new String[]{ UserInfo.getUserEmail() }); 
+            } else {
+                mail.setToAddresses(new String[]{ UserInfo.getUserEmail() }); 
+            }
+
+            if (String.isNotBlank(ccEmail)) {
+                List<String> ccEmailsList = new List<String>();
+                for (String emailAddr : ccEmail.split(',')) {
+                    if (String.isNotBlank(emailAddr)) ccEmailsList.add(emailAddr.trim());
+                }
+                if (!ccEmailsList.isEmpty()) mail.setCcAddresses(ccEmailsList);
+            }
+
+            if (!bccEmailsSet.isEmpty()) {
+                mail.setBccAddresses(new List<String>(bccEmailsSet));
+            }
+            mail.setSubject(subject); 
+            mail.setHtmlBody(body); 
+            mail.setWhatId(oppId); 
+            mail.setSaveAsActivity(true);
+            
+            // 4. Manejo de Adjuntos (Reutilizando la lógica que ya tenías)
+            List<Id> contentVersionIds = new List<Id>();
+            for (Map<String, String> att : selectedAttachments) {
+                String type = att.get('type'); 
+                Id attId = (Id)att.get('id'); 
+                
+                if (type == 'Quote' || type == 'Survey') {
+                    PageReference pr = Page.QuoteTechnicalPDF; 
+                    pr.getParameters().put('id', type == 'Quote' ? attId : oppId);
+                    if (type == 'Survey') pr.getParameters().put('surveyOnly', 'true');
+                    
+                    Blob pdfBlob = !Test.isRunningTest() ? pr.getContentAsPDF() : Blob.valueOf('Test Content');
+                    
+                    String base64Content = EncodingUtil.base64Encode(pdfBlob);
+                    if (!base64Content.startsWith('JVBERi')) {
+                        throw new AuraHandledException('Error al generar el PDF para "' + att.get('name') + '". El servidor devolvió un error. Verifique la configuración técnica.');
+                    }
+                    
+                    ContentVersion cv = new ContentVersion();
+                    cv.Title = att.get('name');
+                    cv.PathOnClient = att.get('name') + '.pdf';
+                    cv.VersionData = pdfBlob;
+                    cv.FirstPublishLocationId = oppId;
+                    insert cv;
+                    
+                    contentVersionIds.add(cv.Id);
+                } else if (type == 'File') {
+                    ContentVersion cv = [SELECT Id FROM ContentVersion WHERE ContentDocumentId = :attId AND IsLatest = true LIMIT 1];
+                    contentVersionIds.add(cv.Id);
+                }
+            }
+            if (!contentVersionIds.isEmpty()) mail.setEntityAttachments(contentVersionIds);
+            
+            // 5. Enviar el correo final
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+            
+        } catch (Exception e) {
+            throw new AuraHandledException('Error enviando el correo interno: ' + e.getMessage());
+        }
     }
 }

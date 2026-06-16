@@ -11,6 +11,9 @@ import renderTemplate from '@salesforce/apex/CommunicationController.renderTempl
 import getEmailEngagementDetails from '@salesforce/apex/CommunicationController.getEmailEngagementDetails';
 import getContactsFromLatestQuoteSedes from '@salesforce/apex/CommunicationController.getContactsFromLatestQuoteSedes';
 import getInternalTeam from '@salesforce/apex/CommunicationController.getInternalTeam';
+import searchInternalUsers from '@salesforce/apex/CommunicationController.searchInternalUsers';
+import getPyatzQueues from '@salesforce/apex/CommunicationController.getPyatzQueues';
+import sendInternalEmail from '@salesforce/apex/CommunicationController.sendInternalEmail';
 
 export default class TechCommunicationHub extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
@@ -26,6 +29,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     
     @track toEmail = '';
     @track ccEmail = '';
+    @track bccEmail = '';
     @track subject = '';
     @track emailBody = '';
     @track isLoadingTemplates = false;
@@ -34,6 +38,17 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     
     @track currentSubetapa = '';
     @track currentStage = '';
+
+    // Internal Mode Properties
+    @track pyatzQueues = [];
+    @track selectedQueueIds = [];
+    @track selectedUserPills = [];
+    @track userSearchTerm = '';
+    @track userSearchResults = [];
+
+    get isInternalMode() {
+        return this.folderName === 'Enhorabuena';
+    }
 
     @wire(getRecord, { recordId: '$recordId', fields: [STAGE_FIELD, SUBETAPA_FIELD] })
     wiredOpp({ error, data }) {
@@ -176,6 +191,57 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
         }
     }
 
+    @wire(getPyatzQueues)
+    wiredQueues({ error, data }) {
+        if (data) {
+            this.pyatzQueues = data;
+        } else if (error) {
+            console.error('Error loading queues:', error);
+        }
+    }
+
+    handleUserSearchChange(event) {
+        this.userSearchTerm = event.target.value;
+        if (this.userSearchTerm.length >= 2) {
+            searchInternalUsers({ searchTerm: this.userSearchTerm })
+                .then(result => {
+                    this.userSearchResults = result;
+                })
+                .catch(error => {
+                    console.error('Error searching users', error);
+                });
+        } else {
+            this.userSearchResults = [];
+        }
+    }
+
+    handleSelectUser(event) {
+        const userId = event.currentTarget.dataset.id;
+        const userName = event.currentTarget.dataset.name;
+        
+        if (!this.selectedUserPills.some(p => p.id === userId)) {
+            this.selectedUserPills = [...this.selectedUserPills, { id: userId, label: userName, name: userId }];
+        }
+        
+        this.userSearchTerm = '';
+        this.userSearchResults = [];
+    }
+
+    handleRemoveUserPill(event) {
+        const userId = event.detail.item.name;
+        this.selectedUserPills = this.selectedUserPills.filter(p => p.id !== userId);
+    }
+
+    handleQueueToggle(event) {
+        const queueId = event.target.dataset.id;
+        const checked = event.target.checked;
+        if (checked) {
+            if (!this.selectedQueueIds.includes(queueId)) this.selectedQueueIds.push(queueId);
+        } else {
+            this.selectedQueueIds = this.selectedQueueIds.filter(id => id !== queueId);
+        }
+    }
+
     handleQuickAddContact(event) {
         const email = event.target.dataset.email;
         const checked = event.target.checked;
@@ -200,6 +266,9 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
     }
 
     get isSendDisabled() {
+        if (this.isInternalMode) {
+            return (!this.selectedUserPills.length && !this.selectedQueueIds.length) || !this.subject || this.isSending;
+        }
         return !this.toEmail || !this.subject || this.isSending;
     }
 
@@ -264,6 +333,7 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
 
     handleEmailChange(event) { this.toEmail = event.detail.value; }
     handleCcChange(event) { this.ccEmail = event.detail.value; }
+    handleBccChange(event) { this.bccEmail = event.detail.value; }
     handleSubjectChange(event) { this.subject = event.detail.value; }
     // Almacena el cuerpo sin causar un re-render continuo
     _currentDraftBody = '';
@@ -274,53 +344,75 @@ export default class TechCommunicationHub extends NavigationMixin(LightningEleme
 
     handleSendEmail() {
         this.isSending = true;
-        
-        // Usar el borrador actual si existe, si no usar el original cargado
         const finalBody = this._currentDraftBody || this.emailBody;
 
-        sendEmailWithAttachments({
-            oppId: this.recordId,
-            toEmail: this.toEmail,
-            ccEmail: this.ccEmail,
-            subject: this.subject,
-            body: finalBody,
-            selectedAttachments: this.selectedAttachments
-        })
-        .then(() => {
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Éxito',
-                message: 'Correo enviado correctamente y registrado en la actividad.',
-                variant: 'success'
-            }));
-            this.isSending = false;
-            
-            // LIMPIEZA DE FORMULARIO
-            this.clearForm();
+        if (this.isInternalMode) {
+            const userIds = this.selectedUserPills.map(p => p.id);
+            sendInternalEmail({
+                oppId: this.recordId,
+                toEmail: this.toEmail,
+                ccEmail: this.ccEmail,
+                bccEmail: this.bccEmail,
+                subject: this.subject,
+                body: finalBody,
+                queueIds: this.selectedQueueIds,
+                userIds: userIds,
+                selectedAttachments: this.selectedAttachments
+            })
+            .then(() => { this.handleSendSuccess(); })
+            .catch(error => { this.handleSendError(error); });
+        } else {
+            sendEmailWithAttachments({
+                oppId: this.recordId,
+                toEmail: this.toEmail,
+                ccEmail: this.ccEmail,
+                subject: this.subject,
+                body: finalBody,
+                selectedAttachments: this.selectedAttachments
+            })
+            .then(() => { this.handleSendSuccess(); })
+            .catch(error => { this.handleSendError(error); });
+        }
+    }
 
-            // NOTIFICAR AVANCE DE FASE
-            this.dispatchEvent(new CustomEvent('fasesuccess', {
-                detail: { phase: 'Negociación' }
-            }));
-        })
-        .catch(error => {
-            this.isSending = false;
-            console.error('Error enviando:', error);
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Error',
-                message: error.body ? error.body.message : error.message,
-                variant: 'error'
-            }));
-        });
+    handleSendSuccess() {
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Éxito',
+            message: 'Correo enviado correctamente y registrado en la actividad.',
+            variant: 'success'
+        }));
+        this.isSending = false;
+        
+        this.clearForm();
+
+        this.dispatchEvent(new CustomEvent('fasesuccess', {
+            detail: { phase: 'Negociación' }
+        }));
+    }
+
+    handleSendError(error) {
+        this.isSending = false;
+        console.error('Error enviando:', error);
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Error',
+            message: error.body ? error.body.message : error.message,
+            variant: 'error'
+        }));
     }
 
     clearForm() {
         this.toEmail = '';
         this.ccEmail = '';
+        this.bccEmail = '';
         this.subject = '';
         this.emailBody = '';
         this.selectedAttachments = [];
         this.selectedTemplateId = '';
         this.selectedFolder = '';
+        this.selectedUserPills = [];
+        this.selectedQueueIds = [];
+        this.userSearchTerm = '';
+        this.userSearchResults = [];
         
         // Desmarcar checkboxes de adjuntos en el DOM
         const checkboxes = this.template.querySelectorAll('lightning-input[data-type]');
