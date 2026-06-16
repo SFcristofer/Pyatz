@@ -35,8 +35,10 @@ public without sharing class CalendarService {
         List<Map<String, Object>> timeline = new List<Map<String, Object>>();
         if (opportunityId == null) return timeline;
 
+        Date todayDate = Date.today();
+
         // 1. Recuperar Tareas y Llamadas
-        for (Task t : [SELECT Id, Subject, ActivityDate, Status, TaskSubtype, Description 
+        for (Task t : [SELECT Id, Subject, ActivityDate, Status, TaskSubtype, Description, Who.Name, Who.Phone, Who.Id 
                        FROM Task WHERE WhatId = :opportunityId 
                        ORDER BY ActivityDate DESC LIMIT 100]) {
             Map<String, Object> item = new Map<String, Object>();
@@ -50,11 +52,22 @@ public without sharing class CalendarService {
             item.put('description', t.Description);
             item.put('icon', subType == 'Call' ? 'standard:log_a_call' : 'standard:task');
             item.put('colorClass', subType == 'Call' ? 'event-call' : 'event-task');
+            
+            // Mejoras de contacto y estado
+            if (t.Who != null) {
+                item.put('whoName', t.Who.Name);
+                item.put('whoPhone', t.Who.Phone);
+                item.put('whoId', t.Who.Id);
+            }
+            item.put('isCompleted', t.Status == 'Completed');
+            item.put('isOverdue', (t.ActivityDate != null && t.ActivityDate < todayDate && t.Status != 'Completed'));
+            item.put('isTaskRecord', true); // Bandera para UI
+            
             timeline.add(item);
         }
 
         // 2. Recuperar Eventos (Citas/Reuniones)
-        for (Event e : [SELECT Id, Subject, StartDateTime, EndDateTime, Location, Description 
+        for (Event e : [SELECT Id, Subject, StartDateTime, EndDateTime, Location, Description, Who.Name, Who.Phone, Who.Id 
                         FROM Event WHERE WhatId = :opportunityId 
                         ORDER BY StartDateTime DESC LIMIT 100]) {
             Map<String, Object> item = new Map<String, Object>();
@@ -67,6 +80,32 @@ public without sharing class CalendarService {
             item.put('description', e.Description);
             item.put('icon', 'standard:event');
             item.put('colorClass', 'event-meeting');
+            
+            if (e.Who != null) {
+                item.put('whoName', e.Who.Name);
+                item.put('whoPhone', e.Who.Phone);
+                item.put('whoId', e.Who.Id);
+            }
+            item.put('isCompleted', e.EndDateTime < Datetime.now());
+            
+            timeline.add(item);
+        }
+
+        // 3. Recuperar Correos Electrónicos Enviados (Historial de Email)
+        for (EmailMessage em : [SELECT Id, Subject, MessageDate, IsOpened, FirstOpenedDate, ToAddress 
+                               FROM EmailMessage WHERE RelatedToId = :opportunityId 
+                               ORDER BY MessageDate DESC LIMIT 50]) {
+            Map<String, Object> item = new Map<String, Object>();
+            item.put('id', em.Id);
+            item.put('title', 'Correo: ' + em.Subject);
+            item.put('start', em.MessageDate);
+            item.put('type', 'Email');
+            item.put('description', 'Enviado a: ' + em.ToAddress + (em.IsOpened ? '\nAbierto por primera vez el: ' + em.FirstOpenedDate : '\nAún no ha sido abierto.'));
+            item.put('icon', em.IsOpened ? 'standard:task2' : 'standard:email');
+            item.put('colorClass', em.IsOpened ? 'event-email-opened' : 'event-email');
+            item.put('isCompleted', true);
+            item.put('isEmail', true);
+            
             timeline.add(item);
         }
 

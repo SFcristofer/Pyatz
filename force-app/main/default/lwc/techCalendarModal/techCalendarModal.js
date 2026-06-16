@@ -1,6 +1,9 @@
 import { api, track } from 'lwc';
 import LightningModal from 'lightning/modal';
 import getActionTimeline from '@salesforce/apex/OperationsController.getActionTimeline';
+import completeTask from '@salesforce/apex/OperationsController.completeTask';
+import rescheduleTaskTomorrow from '@salesforce/apex/OperationsController.rescheduleTaskTomorrow';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class TechCalendarModal extends LightningModal {
     @api recordId;
@@ -24,6 +27,13 @@ export default class TechCalendarModal extends LightningModal {
         this.loadData();
     }
 
+    getLocalDateString(dateObj) {
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     buildWeek() {
         const days = [];
         const start = new Date(this.startDate);
@@ -37,7 +47,7 @@ export default class TechCalendarModal extends LightningModal {
         for (let i = 0; i < 7; i++) {
             const d = new Date(start);
             d.setDate(start.getDate() + i);
-            const dateStr = d.toISOString().split('T')[0];
+            const dateStr = this.getLocalDateString(d);
             days.push({
                 date: dateStr,
                 label: d.toLocaleDateString('es-MX', options),
@@ -66,9 +76,25 @@ export default class TechCalendarModal extends LightningModal {
         // Limpiar eventos previos en los días
         this.weekDays = this.weekDays.map(day => ({ ...day, events: [] }));
 
+        const todayStr = this.getLocalDateString(new Date());
+
         this.events.forEach(event => {
-            const eventDate = new Date(event.start).toISOString().split('T')[0];
-            const dayIndex = this.weekDays.findIndex(d => d.date === eventDate);
+            let eventDateStr = '';
+            
+            if (event.start && event.start.includes('T')) {
+                // Es datetime (Evento o Email) - calcular en hora local
+                eventDateStr = this.getLocalDateString(new Date(event.start));
+            } else if (event.start) {
+                // Es solo fecha (Tarea YYYY-MM-DD)
+                eventDateStr = event.start;
+            }
+
+            // Mover tareas atrasadas a HOY para que el vendedor las vea
+            if (event.isOverdue && !event.isCompleted) {
+                eventDateStr = todayStr;
+            }
+
+            const dayIndex = this.weekDays.findIndex(d => d.date === eventDateStr);
             
             if (dayIndex !== -1) {
                 // Aplicar filtro
@@ -78,15 +104,58 @@ export default class TechCalendarModal extends LightningModal {
                                    (this.currentView === 'event' && event.type === 'Event');
 
                 if (matchFilter) {
-                    const formattedTime = new Date(event.start).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                    let formattedTime = '';
+                    if (event.isEmail || (!event.isTaskRecord && !event.isEmail && event.start && event.start.includes('T'))) {
+                        formattedTime = new Date(event.start).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                    }
+
+                    // Definir clases CSS visuales
+                    let cardClass = event.colorClass;
+                    if (event.isCompleted) cardClass += ' is-completed';
+                    if (event.isOverdue) cardClass += ' is-overdue';
+
+                    // Formatear contacto
+                    const contactDisplay = event.whoName ? `${event.whoName} ${event.whoPhone ? '📞 ' + event.whoPhone : ''}` : '';
+
                     this.weekDays[dayIndex].events.push({
                         ...event,
-                        time: formattedTime
+                        time: formattedTime,
+                        cardClass: cardClass,
+                        contactDisplay: contactDisplay,
+                        showActions: event.isTaskRecord && !event.isCompleted
                     });
                 }
             }
         });
         this.weekDays = [...this.weekDays];
+    }
+
+    async handleCompleteTask(event) {
+        const taskId = event.currentTarget.dataset.id;
+        try {
+            this.isLoading = true;
+            await completeTask({ taskId: taskId });
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Tarea completada', variant: 'success' }));
+            this.loadData(); // Recargar agenda
+        } catch (error) {
+            console.error('Error al completar:', error);
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo completar la tarea.', variant: 'error' }));
+            this.isLoading = false;
+        }
+    }
+
+    async handleRescheduleTask(event) {
+        const taskId = event.currentTarget.dataset.id;
+        try {
+            this.isLoading = true;
+            await rescheduleTaskTomorrow({ taskId: taskId });
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: 'Tarea reagendada para mañana', variant: 'success' }));
+            this.loadData();
+        } catch (error) {
+            console.error('Error al reagendar:', error);
+            this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'No se pudo reagendar la tarea.', variant: 'error' }));
+            this.isLoading = false;
+        }
     }
 
     handleFilterChange(event) {

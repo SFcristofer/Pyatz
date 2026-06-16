@@ -115,4 +115,21 @@ public with sharing class OperationsController {
     public static Map<String, Object> getEmailDetails(Id emailId) {
         return OperationsService.getEmailDetails(emailId);
     }
+
+    @AuraEnabled
+    public static void completeTask(Id taskId) {
+        Task t = new Task(Id = taskId, Status = 'Completed');
+        update t;
+    }
+
+    @AuraEnabled
+    public static void rescheduleTaskTomorrow(Id taskId) {
+        Task t = [SELECT Id, ActivityDate FROM Task WHERE Id = :taskId LIMIT 1];
+        if (t.ActivityDate == null || t.ActivityDate < Date.today()) {
+            t.ActivityDate = Date.today().addDays(1);
+        } else {
+            t.ActivityDate = t.ActivityDate.addDays(1);
+        }
+        update t;
+    }
 }

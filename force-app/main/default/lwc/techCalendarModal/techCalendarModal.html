@@ -42,13 +42,39 @@
                             </div>
                             <div class="day-content">
                                 <template for:each={day.events} for:item="event">
-                                    <div key={event.id} class={event.colorClass} title={event.description}>
+                                    <div key={event.id} class={event.cardClass}>
                                         <div class="event-time">{event.time}</div>
-                                        <div class="event-subject">{event.title}</div>
+                                        <div class="event-subject slds-truncate" title={event.title}>{event.title}</div>
                                         <div class="event-footer slds-grid slds-grid_align-spread">
                                             <lightning-icon icon-name={event.icon} size="xx-small" variant="inverse"></lightning-icon>
                                             <span class="event-type-label">{event.type}</span>
                                         </div>
+
+                                        <!-- Tooltip Rico -->
+                                        <div class="rich-popover">
+                                            <div class="slds-p-around_x-small">
+                                                <strong>{event.title}</strong>
+                                                <p class="slds-m-top_xx-small text-muted">{event.description}</p>
+                                                <template if:true={event.contactDisplay}>
+                                                    <div class="slds-m-top_x-small contact-info">
+                                                        <lightning-icon icon-name="standard:contact" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                        {event.contactDisplay}
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <!-- Acciones Rápidas -->
+                                        <template if:true={event.showActions}>
+                                            <div class="quick-actions slds-grid slds-grid_align-spread slds-m-top_x-small">
+                                                <button class="action-btn complete-btn" data-id={event.id} onclick={handleCompleteTask} title="Completar">
+                                                    <lightning-icon icon-name="utility:check" size="xx-small"></lightning-icon>
+                                                </button>
+                                                <button class="action-btn reschedule-btn" data-id={event.id} onclick={handleRescheduleTask} title="Patear para mañana">
+                                                    <lightning-icon icon-name="utility:forward" size="xx-small"></lightning-icon>
+                                                </button>
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
                                 <template if:false={day.events.length}>
