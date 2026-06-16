@@ -79,9 +79,11 @@
                                         <div key={app.Id} class={app.cssClass} 
                                              draggable="true"
                                              ondragstart={handleDragStart}
+                                             ondblclick={navigateToRecord}
                                              onmouseenter={handleShowPopover} 
                                              onmouseleave={handleHidePopover}
-                                             data-id={app.Id}>
+                                             data-id={app.Id}
+                                             title="Doble clic para editar fecha y horario">
                                             <div class="app-header slds-grid slds-grid_align-spread">
                                                 <span class="app-time">{app.formattedTime}</span>
                                                 <span class="app-duration">{app.Duration}h</span>

@@ -3,8 +3,9 @@ import getCalendarData from '@salesforce/apex/OperationsController.getCalendarDa
 import reassignAppointment from '@salesforce/apex/OperationsController.reassignAppointment';
 import LightningConfirm from 'lightning/confirm';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TechResourceCalendar extends LightningElement {
+export default class TechResourceCalendar extends NavigationMixin(LightningElement) {
     @api recordId;
     @track isLoading = false;
     @track errorMsg;
@@ -243,6 +244,17 @@ export default class TechResourceCalendar extends LightningElement {
         this.currentDate = new Date();
         this.updateCalendarHeader();
         this.fetchData();
+    }
+
+    navigateToRecord(event) {
+        const appointmentId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: appointmentId,
+                actionName: 'view'
+            }
+        });
     }
 
     // --- DRAG AND DROP LOGIC --- //
