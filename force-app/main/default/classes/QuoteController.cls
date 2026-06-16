@@ -268,6 +268,32 @@ public with sharing class QuoteController {
             if (contractData.containsKey('fechaInicioContrato')) sc.StartDate = Date.valueOf((String)contractData.get('fechaInicioContrato'));
             if (contractData.containsKey('fechaVencimiento')) sc.EndDate = Date.valueOf((String)contractData.get('fechaVencimiento'));
             if (contractData.containsKey('contenidoLegal')) sc.Legal_Content__c = (String)contractData.get('contenidoLegal');
+            
+            if (contractData.containsKey('fechaPrimerServicio') && String.isNotBlank((String)contractData.get('fechaPrimerServicio'))) {
+                sc.First_Service_Date__c = Date.valueOf((String)contractData.get('fechaPrimerServicio'));
+            }
+            if (contractData.containsKey('fechaLimiteServicio') && String.isNotBlank((String)contractData.get('fechaLimiteServicio'))) {
+                sc.Service_Limit_Date__c = Date.valueOf((String)contractData.get('fechaLimiteServicio'));
+            }
+            if (contractData.containsKey('observacionesPrivadas')) {
+                sc.Private_Observations__c = (String)contractData.get('observacionesPrivadas');
+            }
+            if (contractData.containsKey('observaciones')) {
+                sc.Renewal_Observations__c = (String)contractData.get('observaciones');
+            }
+            if (contractData.containsKey('introduccion')) {
+                sc.Description = (String)contractData.get('introduccion');
+            }
+            if (contractData.containsKey('creatorId') && String.isNotBlank((String)contractData.get('creatorId'))) {
+                sc.Contract_Creator__c = (Id)contractData.get('creatorId');
+            }
+            if (contractData.containsKey('managerId') && String.isNotBlank((String)contractData.get('managerId'))) {
+                sc.Contract_Manager__c = (Id)contractData.get('managerId');
+            }
+            if (contractData.containsKey('clientSignerId') && String.isNotBlank((String)contractData.get('clientSignerId'))) {
+                sc.Client_Signer__c = (Id)contractData.get('clientSignerId');
+            }
+            
             insert sc;
 
             // 2. SINCRONIZACIÓN DE MATERIALIDAD: Crear partidas de contrato con vínculos técnicos
