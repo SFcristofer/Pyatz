@@ -48,7 +48,7 @@
                 .sig-space        { height:65pt; display:block; }
                 .sig-line         { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; margin:0 8pt; }
                 
-                .hdr-spacer { height:3.3cm; padding:0; line-height:0; font-size:0; border:none; }
+                .hdr-spacer { height:3.8cm; padding:0; line-height:0; font-size:0; border:none; }
                 .ftr-spacer { height:2.3cm; padding:0; line-height:0; font-size:0; border:none; }
             </style>
         </head>
@@ -90,7 +90,15 @@
             <!-- SECCIÓN 2 y 3 UNIFICADAS: SERVICIOS, TOTALES Y FIRMAS -->
             <div class="content-body" style="page-break-before:always;">
                 <table class="tbl-svc" style="width:100%; border-collapse:collapse;">
-                    <thead><tr><td colspan="4" class="hdr-spacer"></td></tr></thead>
+                    <thead>
+                        <tr><td colspan="4" class="hdr-spacer"></td></tr>
+                        <tr>
+                            <th width="50%" style="text-align:center;">Concepto / Servicio</th>
+                            <th width="10%" style="text-align:center;">Cant</th>
+                            <th width="20%" style="text-align:center;">P. Unitario</th>
+                            <th width="20%" style="text-align:center;">Importe</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <!-- BLOQUE: SERVICIOS -->
                         <apex:repeat value="{!technicalQuote.QuoteLineItems}" var="item">
@@ -98,13 +106,7 @@
                                 <tr class="row-sep"><td colspan="4" style="padding:8pt;">{!item.Product2.Name}</td></tr>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{!BLANKVALUE(item.Quantity, 0) > 0}" layout="none">
-                                <tr style="page-break-inside:avoid;">
-                                    <th width="50%" style="text-align:center;">Concepto / Servicio</th>
-                                    <th width="10%" style="text-align:center;">Cant</th>
-                                    <th width="20%" style="text-align:center;">P. Unitario</th>
-                                    <th width="20%" style="text-align:center;">Importe</th>
-                                </tr>
-                                <tr class="row-item">
+                                <tr class="row-item" style="page-break-inside:avoid;">
                                     <td style="text-align:center;"><strong>{!item.Product2.Name}</strong></td>
                                     <td style="text-align:center;">{!item.Quantity}</td>
                                     <td style="text-align:center;"><apex:outputText value="{0, number, currency}"><apex:param value="{!BLANKVALUE(item.UnitPrice, 0)}"/></apex:outputText></td>
@@ -117,7 +119,7 @@
                         </apex:repeat>
 
                         <!-- BLOQUE: TOTALES (Inyectados como fila de la misma tabla) -->
-                        <tr><td colspan="4" style="padding-top:20pt;">
+                        <tr style="page-break-inside:avoid;"><td colspan="4" style="padding-top:20pt;">
                             <table class="tbl-totals">
                                 <apex:outputPanel rendered="{!showSubtotal}" layout="none">
                                     <tr><td class="tot-lbl">SUBTOTAL 1</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcSubtotal1}"/></apex:outputText></td></tr>

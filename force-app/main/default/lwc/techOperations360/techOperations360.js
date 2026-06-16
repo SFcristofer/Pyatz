@@ -645,7 +645,7 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     async handleContractFinalized(event) {
         this.selectedContractId = event.detail;
         this.currentStatus = 'Realizado';
-        this.currentSubStep = '3'; 
+        this.currentSubStep = '2'; 
         await this.syncOpportunityStatus();
     }
 
