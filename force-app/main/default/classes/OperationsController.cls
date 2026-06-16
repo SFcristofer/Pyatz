@@ -144,4 +144,20 @@ public with sharing class OperationsController {
         }
         update t;
     }
+
+    @AuraEnabled
+    public static void reassignAppointment(Id appointmentId, String newResourceId) {
+        try {
+            delete [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId = :appointmentId];
+            
+            if (String.isNotBlank(newResourceId) && newResourceId != 'UNASSIGNED') {
+                AssignedResource ar = new AssignedResource();
+                ar.ServiceAppointmentId = appointmentId;
+                ar.ServiceResourceId = (Id)newResourceId;
+                insert ar;
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException('Error reasignando la cita: ' + e.getMessage());
+        }
+    }
 }

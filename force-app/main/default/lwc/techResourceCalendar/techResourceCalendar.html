@@ -73,10 +73,12 @@
 
                             <!-- DAY CELLS -->
                             <template for:each={row.days} for:item="cell">
-                                <div key={cell.date} class="grid-data-cell" data-res={row.resourceId} data-date={cell.date}>
+                                <div key={cell.date} class="grid-data-cell" data-res={row.resourceId} data-date={cell.date} ondragover={allowDrop} ondrop={handleDrop}>
                                     <template for:each={cell.appointments} for:item="app">
                                         <!-- TARJETA DE CITA PREMIUM -->
                                         <div key={app.Id} class={app.cssClass} 
+                                             draggable="true"
+                                             ondragstart={handleDragStart}
                                              onmouseenter={handleShowPopover} 
                                              onmouseleave={handleHidePopover}
                                              data-id={app.Id}>

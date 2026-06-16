@@ -1,5 +1,8 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import getCalendarData from '@salesforce/apex/OperationsController.getCalendarData';
+import reassignAppointment from '@salesforce/apex/OperationsController.reassignAppointment';
+import LightningConfirm from 'lightning/confirm';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class TechResourceCalendar extends LightningElement {
     @api recordId;
@@ -234,6 +237,79 @@ export default class TechResourceCalendar extends LightningElement {
         this.currentDate = new Date();
         this.updateCalendarHeader();
         this.fetchData();
+    }
+
+    handleToday() {
+        this.currentDate = new Date();
+        this.updateCalendarHeader();
+        this.fetchData();
+    }
+
+    // --- DRAG AND DROP LOGIC --- //
+    handleDragStart(event) {
+        event.dataTransfer.setData('appointmentId', event.currentTarget.dataset.id);
+        event.dataTransfer.dropEffect = 'move';
+    }
+
+    allowDrop(event) {
+        event.preventDefault(); // Necessary to allow dropping
+    }
+
+    async handleDrop(event) {
+        event.preventDefault();
+        const appointmentId = event.dataTransfer.getData('appointmentId');
+        
+        // Find the closest parent with the drop target attributes
+        const targetCell = event.currentTarget;
+        const newResourceId = targetCell.dataset.res;
+        const targetDate = targetCell.dataset.date; // we can use this later to move dates
+
+        // Get the appointment details for confirmation msg
+        const app = this.appointments.find(a => a.Id === appointmentId);
+        const resource = this.resources.find(r => r.Id === newResourceId) || { Name: 'POR ASIGNAR' };
+
+        if (!app || app.ServiceResourceId === newResourceId) {
+            return; // Dropped on the same resource or error
+        }
+
+        // VALIDATION: Ensure the user is not trying to change the date
+        const appDate = app.SchedStartTime ? app.SchedStartTime.split('T')[0] : null;
+        if (appDate && targetDate && !app.SchedStartTime.startsWith(targetDate)) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Acción no permitida',
+                message: 'Por el momento solo puedes cambiar de técnico, no de día.',
+                variant: 'warning'
+            }));
+            return;
+        }
+
+        const result = await LightningConfirm.open({
+            message: `¿Estás seguro de reasignar la cita "${app.Subject}" al técnico ${resource.Name}?`,
+            variant: 'header',
+            label: 'Confirmar Reasignación',
+            theme: 'info'
+        });
+
+        if (result) {
+            this.isLoading = true;
+            try {
+                await reassignAppointment({ appointmentId: appointmentId, newResourceId: newResourceId });
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Éxito',
+                    message: 'Cita reasignada correctamente.',
+                    variant: 'success'
+                }));
+                this.fetchData(); // Reload calendar data to reflect changes
+            } catch (error) {
+                console.error('Error reasignando:', error);
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error',
+                    message: error.body && error.body.message ? error.body.message : 'Error al reasignar la cita.',
+                    variant: 'error'
+                }));
+                this.isLoading = false;
+            }
+        }
     }
 
     handleViewChange(event) {
