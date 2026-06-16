@@ -11,6 +11,7 @@ import WORK_ORDER_OBJECT from '@salesforce/schema/WorkOrder';
 import PRIORITY_FIELD from '@salesforce/schema/WorkOrder.Priority';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
+import LightningConfirm from 'lightning/confirm';
 
 export default class TechWorkOrderConsole extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity ID
@@ -190,12 +191,34 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }
     }
 
-    generateSchedulingRows(quantity) {
+    getNextValidDate(dateObj) {
+        const allowedDays = [];
+        const dayMap = { 'Domingo': 0, 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 'Jueves': 4, 'Viernes': 5, 'Sábado': 6 };
+        this.daysOfWeek.forEach(d => {
+            if (d.checked) allowedDays.push(dayMap[d.label]);
+        });
+        
+        if (allowedDays.length === 0) allowedDays.push(1, 2, 3, 4, 5);
+
+        let testDate = new Date(dateObj);
+        let safetyCounter = 0;
+        while (!allowedDays.includes(testDate.getDay()) && safetyCounter < 10) {
+            testDate.setDate(testDate.getDate() + 1);
+            safetyCounter++;
+        }
+        return testDate;
+    }
+
+    generateSchedulingRows(quantity, baseDateParam = null) {
         const rows = [];
-        const baseDate = new Date();
+        let baseDate = baseDateParam ? new Date(baseDateParam + 'T00:00:00') : new Date();
+        baseDate = this.getNextValidDate(baseDate);
+
         for (let i = 1; i <= quantity; i++) {
-            const nextDate = new Date(baseDate);
+            let nextDate = new Date(baseDate);
             nextDate.setMonth(baseDate.getMonth() + (i - 1));
+            nextDate = this.getNextValidDate(nextDate);
+
             rows.push({
                 label: `${i}º Fecha`,
                 saId: '',
@@ -258,10 +281,13 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
             tratamientos: sede.tratamientos.map(tra => {
                 if (tra.id === traId && tra.schedulingRows.length > 1) {
                     const firstRow = tra.schedulingRows[0];
+                    const newDates = this.generateSchedulingRows(tra.schedulingRows.length, firstRow.date);
+
                     const updatedRows = tra.schedulingRows.map((row, idx) => {
                         if (idx === 0 || row.locked) return row;
                         return { 
                             ...row, 
+                            date: newDates[idx].date,
                             startTime: firstRow.startTime, 
                             duration: firstRow.duration,
                             arrivalMargin: firstRow.arrivalMargin,
@@ -276,14 +302,20 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         }));
         this.dispatchEvent(new ShowToastEvent({
             title: 'Sincronizado',
-            message: 'Se han replicado los valores de la primera fecha a las demás.',
+            message: 'Se han replicado los valores y ajustado las fechas a días hábiles.',
             variant: 'info'
         }));
     }
 
     handleTecnicoChange(event) {
-        const traId = event.target.dataset.traId;
-        const selectedOptions = Array.from(event.target.selectedOptions).map(option => option.value);
+        const traId = event.target.dataset.traId || event.currentTarget.dataset.traId;
+        let selectedOptions = [];
+        
+        if (event.detail && Array.isArray(event.detail.value)) {
+            selectedOptions = event.detail.value;
+        } else if (event.target.selectedOptions) {
+            selectedOptions = Array.from(event.target.selectedOptions).map(option => option.value);
+        }
 
         this.sedesList = this.sedesList.map(sede => ({
             ...sede,
@@ -368,8 +400,51 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         accordionBody.style.display = accordionBody.style.display === 'none' ? 'block' : 'none';
     }
 
-    handleGenerateODTs() {
+    async handleGenerateODTs() {
         if (this.isSaving) return;
+
+        // Validaciones preventivas
+        if (!this.contractData.direccionSede || this.contractData.direccionSede.trim() === '') {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Falta la dirección de ejecución.', variant: 'warning' }));
+            return;
+        }
+
+        let hasError = false;
+        let errorMsg = '';
+        let missingTechs = false;
+
+        this.sedesList.forEach(sede => {
+            sede.tratamientos.forEach(tra => {
+                if (!tra.tecnicosIds || tra.tecnicosIds.length === 0) {
+                    missingTechs = true;
+                }
+                tra.schedulingRows.forEach(row => {
+                    if (!row.date || !row.startTime) {
+                        hasError = true;
+                        errorMsg = `El tratamiento ${tra.name} tiene citas sin fecha u hora asignada.`;
+                    }
+                });
+            });
+        });
+
+        if (hasError) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Datos Incompletos', message: errorMsg, variant: 'warning' }));
+            return;
+        }
+
+        if (missingTechs) {
+            const confirmed = await LightningConfirm.open({
+                message: 'Estás dejando tratamientos sin un Equipo Base asignado.\n\nEstos servicios se crearán en estado "Por Asignar" y tendrás que programar a los técnicos después desde el Calendario General.\n\n¿Deseas continuar y generar las citas así?',
+                variant: 'header',
+                label: 'Servicios Sin Asignar',
+                theme: 'warning'
+            });
+
+            if (!confirmed) {
+                return; // Se cancela la acción
+            }
+        }
+
         this.isSaving = true;
 
         const payload = {
@@ -506,9 +581,47 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         return `left: ${leftPercent}%; border-left: 2px dashed #f56565; height: 100%; position: absolute; z-index: 10; top: 0;`;
     }
 
+    get ganttBodyStyle() {
+        let maxLanesUsed = 0;
+        const { start, end, total } = this.getGanttRange();
+        const rawItems = [];
+
+        this.sedesList.forEach(sede => {
+            sede.tratamientos.forEach(tra => {
+                tra.schedulingRows.forEach((row) => {
+                    const rowDate = new Date(row.date + 'T00:00:00');
+                    if (rowDate >= start && rowDate <= end) {
+                        rawItems.push({ rowDateMs: rowDate.getTime() });
+                    }
+                });
+            });
+        });
+
+        rawItems.sort((a, b) => a.rowDateMs - b.rowDateMs);
+        const msPerPixel = total / 2500;
+        const visualCardDurationMs = 160 * msPerPixel;
+        const lanes = [];
+
+        rawItems.forEach(item => {
+            let assignedLane = -1;
+            for (let i = 0; i < lanes.length; i++) {
+                if (item.rowDateMs >= lanes[i]) {
+                    assignedLane = i; break;
+                }
+            }
+            if (assignedLane === -1) { assignedLane = lanes.length; lanes.push(0); }
+            lanes[assignedLane] = item.rowDateMs + visualCardDurationMs;
+            if (assignedLane > maxLanesUsed) maxLanesUsed = assignedLane;
+        });
+
+        const h = Math.max(300, (maxLanesUsed + 2) * 75);
+        return `height: ${h}px; position: relative;`;
+    }
+
     get ganttItems() {
         const items = [];
-        const { start, total } = this.getGanttRange();
+        const { start, end, total } = this.getGanttRange();
+        const rawItems = [];
 
         this.sedesList.forEach(sede => {
             sede.tratamientos.forEach(tra => {
@@ -519,28 +632,62 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
                 tra.schedulingRows.forEach((row, idx) => {
                     const rowDate = new Date(row.date + 'T00:00:00');
-                    const { end } = this.getGanttRange();
                     if (rowDate >= start && rowDate <= end) {
-                        const offsetMs = rowDate.getTime() - start.getTime();
-                        const leftPercent = (offsetMs / total) * 100;
-
-                        const colors = ['#4299e1', '#48bb78', '#ed8936', '#9f7aea', '#f56565'];
-                        const color = colors[Math.abs(tra.name.length) % colors.length];
-
-                        items.push({
+                        rawItems.push({
                             id: `${tra.id}-${idx}`,
                             name: tra.name,
                             techs: techNames || 'Sin asignar',
                             area: tra.zonas || 'Sede Principal',
                             dateStr: row.date,
                             timeStr: row.startTime ? row.startTime.substring(0, 5) : '--:--',
-                            style: `left: ${leftPercent}%; top: ${(idx % 5) * 70}px; border-left: 4px solid ${color};`,
-                            fullLabel: `${tra.name} - ${row.date} ${row.startTime}`
+                            rowDateMs: rowDate.getTime(),
+                            color: Math.abs(tra.name.length)
                         });
                     }
                 });
             });
         });
+
+        // Sort items by time to assign lanes properly
+        rawItems.sort((a, b) => a.rowDateMs - b.rowDateMs);
+
+        // Approximate container width = 2500px, card width = 160px with margin
+        const msPerPixel = total / 2500;
+        const visualCardDurationMs = 160 * msPerPixel;
+        const lanes = [];
+
+        rawItems.forEach(item => {
+            const offsetMs = item.rowDateMs - start.getTime();
+            const leftPercent = (offsetMs / total) * 100;
+
+            // Find first available lane
+            let assignedLane = -1;
+            for (let i = 0; i < lanes.length; i++) {
+                if (item.rowDateMs >= lanes[i]) {
+                    assignedLane = i;
+                    break;
+                }
+            }
+
+            if (assignedLane === -1) {
+                // Create a new lane
+                assignedLane = lanes.length;
+                lanes.push(0);
+            }
+
+            // Update lane occupied until this card visually ends
+            lanes[assignedLane] = item.rowDateMs + visualCardDurationMs;
+
+            const colors = ['#4299e1', '#48bb78', '#ed8936', '#9f7aea', '#f56565'];
+            const colorStr = colors[item.color % colors.length];
+
+            items.push({
+                ...item,
+                style: `left: ${leftPercent}%; top: ${assignedLane * 75}px; border-left: 4px solid ${colorStr};`,
+                fullLabel: `Tratamiento: ${item.name}\nFecha: ${item.dateStr}\nHora: ${item.timeStr}\nTécnicos: ${item.techs}\nZonas: ${item.area}`
+            });
+        });
+
         return items;
     }
 }

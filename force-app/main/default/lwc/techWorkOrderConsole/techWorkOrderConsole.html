@@ -4,11 +4,12 @@
         <!-- 1. BARRA DE NAVEGACIÓN SUPERIOR (Restaurada y Limpia) -->
         <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
             <div class="slds-col">
-                <lightning-button label="VOLVER AL CONTRATO" 
+                <!-- Botón oculto por solicitud -->
+                <!-- <lightning-button label="VOLVER AL CONTRATO" 
                     icon-name="utility:back" 
                     variant="brand-outline"
                     onclick={handleBackToContract}>
-                </lightning-button>
+                </lightning-button> -->
             </div>
             <div class="slds-col">
                 <h1 class="slds-text-heading_medium slds-text-title_bold">Generar ODTs - Contrato Nº: {contractFolio}</h1>
@@ -124,13 +125,18 @@
                             <lightning-input type="number" label="Duración Técnica (Minutos)" value={tra.duration} data-field="duration" data-tra-id={tra.id} onchange={handleTraConfigChange} class="slds-m-top_small" field-level-help="Tiempo total estimado para la ejecución del servicio en minutos."></lightning-input>
                             
                             <div class="slds-m-top_medium">
-                                <label class="slds-form-element__label">Asignar Equipo Base ({tra.numTecnicosSeleccionados} técnicos)</label>
-                                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_xx-small">El personal seleccionado aparecerá por defecto en el calendario.</p>
-                                <select multiple class="slds-select" style="height: 100px;" data-tra-id={tra.id} onchange={handleTecnicoChange}>
-                                    <template for:each={tra.options} for:item="opt">
-                                        <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
-                                    </template>
-                                </select>
+                                <lightning-dual-listbox
+                                    name="tecnicos"
+                                    label="Asignar Equipo Base"
+                                    source-label="Disponibles"
+                                    selected-label="Seleccionados"
+                                    field-level-help="El personal seleccionado aparecerá por defecto en el calendario."
+                                    options={tecnicosOptions}
+                                    value={tra.tecnicosIds}
+                                    data-tra-id={tra.id}
+                                    onchange={handleTecnicoChange}
+                                    size="4">
+                                </lightning-dual-listbox>
                             </div>
                         </div>
 
@@ -221,7 +227,7 @@
                             </div>
                         </template>
                     </div>
-                    <div class="gantt-body">
+                    <div class="gantt-body" style={ganttBodyStyle}>
                         <div class="gantt-grid">
                             <template for:each={ganttAxisLabels} for:item="axis">
                                 <div key={axis.id} class="grid-line" style={axis.style}></div>
