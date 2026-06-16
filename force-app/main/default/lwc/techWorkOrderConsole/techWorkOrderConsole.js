@@ -103,7 +103,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         this.ganttView = event.target.value;
     }
 
-    // Transformamos las opciones de técnicos para que cada tratamiento sepa cuáles están seleccionados
     get treatmentsWithTechOptions() {
         return this.sedesList.flatMap(sede => 
             sede.tratamientos.map(tra => {
@@ -111,7 +110,22 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                     ...opt,
                     selected: tra.tecnicosIds ? tra.tecnicosIds.includes(opt.value) : false
                 }));
-                return { ...tra, options };
+                
+                const updatedRows = (tra.schedulingRows || []).map(row => {
+                    const techPills = (row.tecnicosIds || []).map(tId => {
+                        const opt = this.tecnicosOptions.find(o => o.value === tId);
+                        return { id: tId, label: opt ? opt.label : '...' };
+                    });
+                    return {
+                        ...row,
+                        hasTechs: techPills.length > 0,
+                        techPills: techPills,
+                        executedVariant: row.executed ? 'brand' : 'border-filled',
+                        notesVariant: row.showNotes ? 'brand' : 'border-filled'
+                    };
+                });
+                
+                return { ...tra, options, schedulingRows: updatedRows };
             })
         );
     }
@@ -176,7 +190,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             locked: row.locked || false,
                             duration: row.duration || 60,
                             arrivalMargin: row.arrivalMargin || 0,
-                            tecnicoId: row.tecnicoId || '',
+                            tecnicosIds: row.tecnicosIds || (row.tecnicoId ? [row.tecnicoId] : []),
                             executed: false,
                             showNotes: false,
                             notes: row.notes || ''
@@ -227,7 +241,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 locked: false,
                 duration: 60,
                 arrivalMargin: 0,
-                tecnicoId: '',
+                tecnicosIds: [],
                 executed: false,
                 showNotes: false,
                 notes: ''
@@ -291,7 +305,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             startTime: firstRow.startTime, 
                             duration: firstRow.duration,
                             arrivalMargin: firstRow.arrivalMargin,
-                            tecnicoId: firstRow.tecnicoId,
+                            tecnicosIds: firstRow.tecnicosIds,
                             notes: firstRow.notes 
                         };
                     });
@@ -333,17 +347,106 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     }
 
     handleRowChange(event) {
-        const field = event.target.dataset.field;
-        const rowIndex = event.target.dataset.rowIndex;
-        const traId = event.target.dataset.traId;
-        const val = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+        const field = event.target.dataset.field || event.currentTarget.dataset.field;
+        const rowIndex = event.target.dataset.rowIndex || event.currentTarget.dataset.rowIndex;
+        const traId = event.target.dataset.traId || event.currentTarget.dataset.traId;
+        
+        let val;
+        let isToggle = false;
+        if (event.target.type === 'checkbox') {
+            val = event.target.checked;
+        } else if (event.currentTarget.tagName === 'LIGHTNING-BUTTON-ICON') {
+            isToggle = true;
+        } else {
+            val = event.target.value;
+        }
 
         this.sedesList = this.sedesList.map(sede => ({
             ...sede,
             tratamientos: sede.tratamientos.map(tra => {
                 if (tra.id === traId) {
                     const newRows = [...tra.schedulingRows];
-                    newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+                    if (isToggle) {
+                        newRows[rowIndex] = { ...newRows[rowIndex], [field]: !newRows[rowIndex][field] };
+                    } else {
+                        newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+                    }
+                    return { ...tra, schedulingRows: newRows };
+                }
+                return tra;
+            })
+        }));
+    }
+
+    // Modal Methods for Technicians Picker
+    @track isTechModalOpen = false;
+    currentModalTraId = null;
+    currentModalRowIndex = null;
+    @track currentModalTechs = [];
+
+    openTechModal(event) {
+        this.currentModalRowIndex = parseInt(event.currentTarget.dataset.rowIndex, 10);
+        this.currentModalTraId = event.currentTarget.dataset.traId;
+        
+        let existingTechs = [];
+        this.sedesList.forEach(sede => {
+            sede.tratamientos.forEach(tra => {
+                if (tra.id === this.currentModalTraId) {
+                    existingTechs = tra.schedulingRows[this.currentModalRowIndex].tecnicosIds || [];
+                }
+            });
+        });
+        
+        this.currentModalTechs = existingTechs;
+        this.isTechModalOpen = true;
+    }
+
+    closeTechModal() {
+        this.isTechModalOpen = false;
+        this.currentModalTraId = null;
+        this.currentModalRowIndex = null;
+        this.currentModalTechs = [];
+    }
+
+    handleModalTechChange(event) {
+        this.currentModalTechs = event.detail.value;
+    }
+
+    saveTechModal() {
+        const val = this.currentModalTechs;
+        this.sedesList = this.sedesList.map(sede => ({
+            ...sede,
+            tratamientos: sede.tratamientos.map(tra => {
+                if (tra.id === this.currentModalTraId) {
+                    const newRows = [...tra.schedulingRows];
+                    newRows[this.currentModalRowIndex] = { 
+                        ...newRows[this.currentModalRowIndex], 
+                        tecnicosIds: val
+                    };
+                    return { ...tra, schedulingRows: newRows };
+                }
+                return tra;
+            })
+        }));
+        
+        this.closeTechModal();
+    }
+
+    handleRemovePill(event) {
+        const traId = event.currentTarget.dataset.traId;
+        const rowIndex = parseInt(event.currentTarget.dataset.rowIndex, 10);
+        const techToRemove = event.detail.item.name;
+
+        this.sedesList = this.sedesList.map(sede => ({
+            ...sede,
+            tratamientos: sede.tratamientos.map(tra => {
+                if (tra.id === traId) {
+                    const newRows = [...tra.schedulingRows];
+                    let currentTechs = newRows[rowIndex].tecnicosIds || [];
+                    newRows[rowIndex] = { 
+                        ...newRows[rowIndex], 
+                        tecnicosIds: currentTechs.filter(id => id !== techToRemove)
+                    };
                     return { ...tra, schedulingRows: newRows };
                 }
                 return tra;
@@ -415,10 +518,10 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
         this.sedesList.forEach(sede => {
             sede.tratamientos.forEach(tra => {
-                if (!tra.tecnicosIds || tra.tecnicosIds.length === 0) {
-                    missingTechs = true;
-                }
                 tra.schedulingRows.forEach(row => {
+                    if (!row.tecnicosIds || row.tecnicosIds.length === 0) {
+                        missingTechs = true;
+                    }
                     if (!row.date || !row.startTime) {
                         hasError = true;
                         errorMsg = `El tratamiento ${tra.name} tiene citas sin fecha u hora asignada.`;
@@ -625,18 +728,18 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
         this.sedesList.forEach(sede => {
             sede.tratamientos.forEach(tra => {
-                const techNames = (tra.tecnicosIds || []).map(id => {
-                    const opt = this.tecnicosOptions.find(o => o.value === id);
-                    return opt ? opt.label : '...';
-                }).join(', ');
-
                 tra.schedulingRows.forEach((row, idx) => {
+                    const rowTechNames = (row.tecnicosIds || []).map(id => {
+                        const opt = this.tecnicosOptions.find(o => o.value === id);
+                        return opt ? opt.label : '...';
+                    }).join(', ');
+
                     const rowDate = new Date(row.date + 'T00:00:00');
                     if (rowDate >= start && rowDate <= end) {
                         rawItems.push({
                             id: `${tra.id}-${idx}`,
                             name: tra.name,
-                            techs: techNames || 'Sin asignar',
+                            techs: rowTechNames || 'Sin asignar',
                             area: tra.zonas || 'Sede Principal',
                             dateStr: row.date,
                             timeStr: row.startTime ? row.startTime.substring(0, 5) : '--:--',

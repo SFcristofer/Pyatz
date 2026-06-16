@@ -130,7 +130,8 @@ public with sharing class TechWorkOrderController {
                                 'notes' => String.isNotBlank(sa.ServiceNote) ? sa.ServiceNote : '',
                                 'arrivalMargin' => margin,
                                 'locked' => sa.FSL__Pinned__c,
-                                'tecnicoId' => firstTechId
+                                'tecnicoId' => firstTechId,
+                                'tecnicosIds' => new List<String>(techIds)
                             });
                             // Solo sobreescribimos zonas si la cita trae algo útil (no vacío o default)
                             if (String.isNotBlank(sa.Zonas_a_Tratar__c) && sa.Zonas_a_Tratar__c != 'Sin descripción técnica') {
@@ -378,8 +379,15 @@ public with sharing class TechWorkOrderController {
                         if (String.isNotBlank((String)row.get('notes'))) sa.ServiceNote = (String)row.get('notes');
                         
                         List<String> techs = new List<String>();
-                        if (String.isNotBlank((String)row.get('tecnicoId'))) techs.add((String)row.get('tecnicoId'));
-                        else if (tra.containsKey('tecnicosIds')) for (Object tId : (List<Object>)tra.get('tecnicosIds')) techs.add((String)tId);
+                        if (row.containsKey('tecnicosIds') && row.get('tecnicosIds') != null) {
+                            for (Object tId : (List<Object>)row.get('tecnicosIds')) {
+                                techs.add((String)tId);
+                            }
+                        } else if (String.isNotBlank((String)row.get('tecnicoId'))) {
+                            techs.add((String)row.get('tecnicoId')); // Retrocompatibilidad
+                        } else if (tra.containsKey('tecnicosIds')) {
+                            for (Object tId : (List<Object>)tra.get('tecnicosIds')) techs.add((String)tId);
+                        }
                         
                         // PROTECCIÓN DE ESTADO
                         String currentStatus = saId != null ? saCurrentStatusMap.get(saId) : 'Ninguno';

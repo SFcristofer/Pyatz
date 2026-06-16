@@ -102,8 +102,8 @@
             <!-- 4. LISTA DE TRATAMIENTOS Y PROGRAMACIÓN DETALLADA -->
             <template for:each={treatmentsWithTechOptions} for:item="tra">
                 <div key={tra.id} class="slds-box slds-theme_default slds-m-bottom_medium">
-                    <!-- CABECERA DE TRATAMIENTO -->
-                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-grid_vertical-align-center">
+                    <!-- CABECERA DE TRATAMIENTO REDISEÑADA -->
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small slds-grid_vertical-align-center">
                         <div class="slds-grid slds-grid_vertical-align-center">
                             <lightning-icon icon-name="standard:service_report" size="small" class="slds-m-right_small"></lightning-icon>
                             <div>
@@ -114,34 +114,24 @@
                                 </div>
                             </div>
                         </div>
-                        <lightning-button label="BUSCAR PUNTOS DE CONTROL" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser} title="Configura las ubicaciones exactas del cliente"></lightning-button>
+                        <lightning-button label="ZONAS" icon-name="utility:location" variant="brand-outline" data-tra-id={tra.id} onclick={handleOpenZoneBrowser}></lightning-button>
+                    </div>
+
+                    <!-- CONFIGURACION GENERAL DEL TRATAMIENTO -->
+                    <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium" style="border-radius: 8px;">
+                        <div class="slds-grid slds-gutters slds-grid_vertical-align-center">
+                            <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                                <lightning-input type="number" label="Personal Requerido" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                                <lightning-input type="number" label="Duración (Minutos)" value={tra.duration} data-field="duration" data-tra-id={tra.id} onchange={handleTraConfigChange}></lightning-input>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="slds-grid slds-wrap slds-gutters">
-                        <!-- CONFIGURACIÓN TÉCNICA -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
-                            <lightning-input type="number" label="Personal Requerido" value={tra.numTecnicos} data-field="numTecnicos" data-tra-id={tra.id} onchange={handleTraConfigChange} field-level-help="Cantidad de técnicos recomendada para esta labor."></lightning-input>
-                            
-                            <lightning-input type="number" label="Duración Técnica (Minutos)" value={tra.duration} data-field="duration" data-tra-id={tra.id} onchange={handleTraConfigChange} class="slds-m-top_small" field-level-help="Tiempo total estimado para la ejecución del servicio en minutos."></lightning-input>
-                            
-                            <div class="slds-m-top_medium">
-                                <lightning-dual-listbox
-                                    name="tecnicos"
-                                    label="Asignar Equipo Base"
-                                    source-label="Disponibles"
-                                    selected-label="Seleccionados"
-                                    field-level-help="El personal seleccionado aparecerá por defecto en el calendario."
-                                    options={tecnicosOptions}
-                                    value={tra.tecnicosIds}
-                                    data-tra-id={tra.id}
-                                    onchange={handleTecnicoChange}
-                                    size="4">
-                                </lightning-dual-listbox>
-                            </div>
-                        </div>
-
-                        <!-- TABLA DE PROGRAMACIÓN (GRID) -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                        <!-- TABLA DE PROGRAMACIÓN (GRID EXPANDIDO A 100%) -->
+                        <div class="slds-col slds-size_1-of-1">
                             <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small slds-grid_vertical-align-center">
                                 <div>
                                     <h4 class="slds-text-title_bold">Programa tus Citas</h4>
@@ -158,9 +148,9 @@
                                             <th class="" scope="col" style="width: 8rem;">Fecha</th>
                                             <th class="" scope="col" style="width: 7rem;">Hora Inicio</th>
                                             <th class="" scope="col" style="width: 5rem;">Tolerancia</th>
-                                            <th class="" scope="col">Técnico Asignado</th>
+                                            <th class="" scope="col">Técnicos Asignados</th>
                                             <th class="" scope="col" style="width: 4rem;">Lock</th>
-                                            <th class="" scope="col" style="width: 6rem;">Acciones</th>
+                                            <th class="" scope="col" style="width: 17rem;">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -177,14 +167,21 @@
                                                     <lightning-input type="number" variant="label-hidden" value={row.arrivalMargin} placeholder="+/- Min" data-field="arrivalMargin" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} title="Margen de llegada permitido"></lightning-input>
                                                 </td>
                                                 <td>
-                                                    <lightning-combobox variant="label-hidden" value={row.tecnicoId} options={tecnicosOptions} data-field="tecnicoId" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} placeholder="Sobrescribir equipo"></lightning-combobox>
+                                                    <div class="slds-cell-wrap slds-grid slds-wrap slds-grid_vertical-align-center" style="min-width: 150px; gap: 4px;">
+                                                        <template if:true={row.hasTechs}>
+                                                            <template for:each={row.techPills} for:item="pill">
+                                                                <lightning-pill key={pill.id} name={pill.id} label={pill.label} onremove={handleRemovePill} data-row-index={idx} data-tra-id={tra.id}></lightning-pill>
+                                                            </template>
+                                                        </template>
+                                                        <lightning-button-icon icon-name="utility:add" variant="border-filled" onclick={openTechModal} data-row-index={idx} data-tra-id={tra.id} title="Asignar Técnicos"></lightning-button-icon>
+                                                    </div>
                                                 </td>
                                                 <td class="slds-text-align_center">
                                                     <lightning-input type="checkbox" checked={row.locked} data-field="locked" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} title="Bloquear contra cambios masivos"></lightning-input>
                                                 </td>
                                                 <td class="slds-text-align_right">
-                                                    <lightning-button-icon icon-name="utility:clock" variant="border-filled" size="small" alternative-text="Marcar ejecutado" title="Marcar como ejecutado fuera de sistema" data-field="executed" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange}></lightning-button-icon>
-                                                    <lightning-button-icon icon-name="utility:note" variant="border-filled" size="small" alternative-text="Notas" title="Agregar Instrucciones Específicas" data-field="showNotes" data-row-index={idx} data-tra-id={tra.id} onclick={handleRowChange} class="slds-m-left_xx-small"></lightning-button-icon>
+                                                    <lightning-button label="Ya Ejecutado" icon-name="utility:check" variant={row.executedVariant} onclick={handleRowChange} data-field="executed" data-row-index={idx} data-tra-id={tra.id} class="slds-m-right_xx-small"></lightning-button>
+                                                    <lightning-button label="Añadir Nota" icon-name="utility:note" variant={row.notesVariant} onclick={handleRowChange} data-field="showNotes" data-row-index={idx} data-tra-id={tra.id}></lightning-button>
                                                 </td>
                                             </tr>
                                             <!-- Fila Expandible para Notas -->
@@ -259,5 +256,39 @@
             planned-treatments={firstSedeTreatments}
             onzoneselected={handleZoneSelection}>
         </c-tech-zone-browser-drawer>
+        
+        <!-- MODAL DE SELECCIÓN DE TÉCNICOS -->
+        <template if:true={isTechModalOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={closeTechModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                            <span class="slds-assistive-text">Cerrar</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Asignar Técnicos a Cita</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <lightning-dual-listbox 
+                            name="tecnicos"
+                            label="Selecciona los Técnicos"
+                            source-label="Disponibles"
+                            selected-label="Asignados"
+                            options={tecnicosOptions}
+                            value={currentModalTechs}
+                            onchange={handleModalTechChange}
+                            size="6"
+                            disable-reordering>
+                        </lightning-dual-listbox>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeTechModal}>Cancelar</button>
+                        <button class="slds-button slds-button_brand" onclick={saveTechModal}>Guardar Asignación</button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
     </div>
 </template>
