@@ -1,6 +1,7 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import LightningAlert from 'lightning/alert';
 import { getRecord } from 'lightning/uiRecordApi';
 import USER_ID from '@salesforce/user/Id';
 import NAME_FIELD from '@salesforce/schema/User.Name';
@@ -55,7 +56,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     @track signatureSource = 'creator';
 
     // Datos del Contrato
-    @track isManualContract = false;
     @track fechaPrimerServicio = '';
     @track fechaLimiteServicio = '';
     @track fechaInicioContrato = '';
@@ -365,10 +365,6 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         this.signatureSource = event.target.dataset.id;
     }
 
-    handleManualContractToggle(event) {
-        this.isManualContract = event.target.checked;
-    }
-
     handleDateChange(event) {
         const id = event.target.dataset.id;
         const val = event.target.value;
@@ -492,8 +488,36 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
         this.selections[event.target.dataset.id] = event.target.checked;
     }
 
-    handleSaveDraft() {
+    async handleSaveDraft() {
         if (!this.selectedQuoteId) return Promise.reject('No quote selected');
+
+        if (!this.fechaInicioContrato || !this.fechaFinContrato) {
+            await LightningAlert.open({
+                message: 'Para poder guardar y generar el contrato, es estrictamente necesario definir la "Fecha de inicio" y la "Fecha fin" de su vigencia.',
+                theme: 'warning',
+                label: 'Faltan Fechas de Vigencia'
+            });
+            return Promise.reject('Validación: Faltan fechas');
+        }
+
+        if (!this.selectedClientSigner) {
+            await LightningAlert.open({
+                message: 'Por favor, selecciona en el formulario qué contacto (por parte del cliente) va a firmar este contrato.',
+                theme: 'warning',
+                label: 'Falta Firmante del Cliente'
+            });
+            return Promise.reject('Validación: Falta firmante');
+        }
+
+        const selectedIds = this.quoteLineItems.filter(item => item.isSelected).map(item => item.Id);
+        if (selectedIds.length === 0) {
+            await LightningAlert.open({
+                message: 'No puedes generar un contrato vacío. Debes marcar al menos un servicio (inciso) en la tabla.',
+                theme: 'error',
+                label: 'Contrato Vacío'
+            });
+            return Promise.reject('Validación: Sin partidas');
+        }
 
         const data = {
             fechaInicioContrato: this.fechaInicioContrato,

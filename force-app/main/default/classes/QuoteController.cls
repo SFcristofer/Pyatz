@@ -238,6 +238,10 @@ public with sharing class QuoteController {
         result.put('quotes', [SELECT Id, QuoteNumber, Name, GrandTotal, Status, CreatedDate, Introduction_Text__c FROM Quote WHERE OpportunityId = :oppId ORDER BY CreatedDate DESC]);
         result.put('syncedQuoteId', opp.SyncedQuoteId);
         
+        if (opp.AccountId != null) {
+            result.put('contacts', [SELECT Id, Name, Title FROM Contact WHERE AccountId = :opp.AccountId ORDER BY Name ASC]);
+        }
+        
         if (opp.SyncedQuoteId != null) {
             result.put('selectedQuote', QuoteSelector.getQuoteById(opp.SyncedQuoteId));
             // RECUPERACIÓN INTELIGENTE: Traer las zonas materializadas (iGeo Style)
