@@ -239,6 +239,7 @@ export default class TechServiceReview extends LightningElement {
     get canSkipSignature(){ return false; }
     get cantSaveRevision(){ return !this.signatureSaved || this.savingRevision; }
     get sigGpsDotClass()  { return this.sigGpsReady ? 'gps-dot gps-dot--ok' : 'gps-dot gps-dot--loading'; }
+    get isSignatureLocked() { return !this.hasPlantilla || !this.hasFormQuestions || !this.hasRevPhotos; }
 
     // ─── Getters – form ───────────────────────────────────────────────────────
 

@@ -153,12 +153,18 @@
                     <div class="resume-card">
                         <div class="resume-card__header">
                             <span class="resume-card__title">Firma del Cliente</span>
-                            <button class="resume-nav-btn" onclick={handleResumeGoSignature}>
+                            <button class="resume-nav-btn" onclick={handleResumeGoSignature} disabled={isSignatureLocked}>
                                 <template if:true={signatureSaved}>Cambiar</template>
                                 <template if:false={signatureSaved}>Firmar</template>
                                 <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
                             </button>
                         </div>
+                        <template if:true={isSignatureLocked}>
+                            <div class="sig-required-hint" style="margin-top: 8px;">
+                                <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
+                                Requiere agregar fotografías y contestar el formulario antes de firmar.
+                            </div>
+                        </template>
                         <template if:true={signatureSaved}>
                             <div class="resume-sig-row">
                                 <template if:true={savedSigThumb}>
