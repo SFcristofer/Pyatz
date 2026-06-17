@@ -87,12 +87,13 @@
                 <div class="dash-divider"></div>
 
                 <!-- ÓRDENES DE TRABAJO -->
-                <div class="dash-card" data-type="wo" onclick={handleCardClick} title="Ver órdenes de trabajo">
+                <div class="dash-card" data-type="wo" onclick={handleCardClick} title="Ver Número de visitas">
                     <div class="dash-icon">
                         <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
                     </div>
                     <div class="dash-content">
-                        <span class="dash-label">Órdenes de Trabajo</span>
+                        <!-- En realidad son Órdenes de Trabajo, pero se nombra Número de visitas porque el cliente se confunde al estar acostumbrado a otra integración -->
+                        <span class="dash-label">Número de visitas</span>
                         <div class="dash-badges">
                             <span class="badge badge-green tooltip-wrap">
                                 {woOpen}

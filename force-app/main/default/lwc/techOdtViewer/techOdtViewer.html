@@ -5,7 +5,10 @@
         <div class="odt-toolbar">
             <div class="toolbar-left">
                 <lightning-icon icon-name="standard:work_order" size="small" class="slds-m-right_small"></lightning-icon>
-                <h1 class="odt-title">Órdenes de Trabajo</h1>
+                <h1 class="odt-title">
+                    <!-- En realidad son Órdenes de Trabajo, pero se nombra Número de visitas porque el cliente se confunde al estar acostumbrado a otra integración -->
+                    Número de visitas
+                </h1>
                 <span class="total-badge slds-m-left_small">{totalWorkOrders} ODT</span>
                 <template if:true={hasSelected}>
                     <span class="selected-badge slds-m-left_small">{selectedCount} seleccionadas</span>
@@ -191,8 +194,8 @@
                                                                 icon-name={wo.saChevronIcon}
                                                                 variant="bare"
                                                                 size="x-small"
-                                                                alternative-text="Citas de servicio"
-                                                                title="Ver citas de servicio"
+                                                                alternative-text="Ver ODT"
+                                                                title="Ver ODT"
                                                                 data-id={wo.id}
                                                                 onclick={handleToggleRowExpand}>
                                                             </lightning-button-icon>
@@ -343,7 +346,8 @@
                                                             <div class="sa-accordion-content">
                                                                 <div class="sa-accordion-header">
                                                                     <lightning-icon icon-name="standard:service_appointment" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                                                                    Citas de servicio
+                                                                    <!-- En realidad son Citas de Servicio (Service Appointments), pero se muestra como ODT a peticin del cliente -->
+                                                                    ODT
                                                                 </div>
                                                                 <table class="sa-table">
                                                                     <thead>
@@ -572,12 +576,13 @@
                                                                                 <tr class="rev-accordion-row">
                                                                                     <td colspan="9">
                                                                                         <div class="rev-accordion-content">
-                                                                                            <div class="rev-accordion-header">
-                                                                                                <lightning-icon icon-name="standard:entity" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                                                                                                Revisiones de Cita de Servicio
-                                                                                                <button class="add-rev-btn" data-sa-id={sa.id} onclick={handleCreateRevision} disabled={isCreatingRev} title="Agregar revisión">+ Nueva Revisión</button>
-                                                                                                <button class="hist-btn" data-sa-id={sa.id} onclick={handleToggleSaHistory} title="Ver historial de estado">Historial SA</button>
-                                                                                            </div>
+                                                                        <div class="rev-accordion-header">
+                                                                        <lightning-icon icon-name="standard:entity" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                                                        <!-- En realidad son Revisiones de Cita de Servicio (Service Appointments), pero se muestra como Revisiones de ODT a peticin del cliente -->
+                                                                        Revisiones de ODT
+                                                                        <button class="add-rev-btn" data-sa-id={sa.id} onclick={handleCreateRevision} disabled={isCreatingRev} title="Agregar revisión">+ Nueva Revisión</button>
+                                                                        <button class="hist-btn" data-sa-id={sa.id} onclick={handleToggleSaHistory} title="Ver historial de estado">Historial SA</button>
+                                                                    </div>
                                                                                             <!-- SA history timeline -->
                                                                                             <template if:true={sa.saHistExpanded}>
                                                                                                 <div class="hist-timeline">

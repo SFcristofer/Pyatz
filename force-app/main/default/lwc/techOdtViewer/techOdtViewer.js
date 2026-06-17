@@ -239,11 +239,12 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
         if (data) {
             this.groups = data.map(g => {
                 const wos = (g.workOrders || []).map(wo => this._mapWo(wo));
+                let cleanName = g.name.replace(/^Contrato:\s*(?:\d+\s*(?:-\s*)?)?/i, '');
                 return {
                     ...g,
                     workOrders: wos,
                     woCount: wos.length,
-                    displayName: g.number !== '—' ? `Contrato ${g.number} — ${g.name}` : g.name,
+                    displayName: g.number !== '-' ? `${cleanName} — Contrato: ${g.number}` : cleanName,
                     statusClass: SC_STATUS_CSS[g.status] || 'sc-badge badge-sc-gray'
                 };
             });
