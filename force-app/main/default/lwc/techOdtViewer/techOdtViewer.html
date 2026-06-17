@@ -322,6 +322,15 @@
                                                                     data-id={wo.id}
                                                                     onclick={handleViewWorkOrder}>
                                                                 </lightning-button-icon>
+                                                                <lightning-button-icon
+                                                                    icon-name="utility:pdf_ext"
+                                                                    variant="border-filled"
+                                                                    size="x-small"
+                                                                    alternative-text="PDF Global"
+                                                                    title="PDF Consolidado de esta ODT"
+                                                                    data-id={wo.id}
+                                                                    onclick={handleGlobalPDF}>
+                                                                </lightning-button-icon>
                                                             </div>
                                                         </template>
                                                     </td>
@@ -1047,6 +1056,25 @@
                     <footer class="slds-modal__footer">
                         <lightning-button label="Cerrar" onclick={handleCloseUploadModal}></lightning-button>
                     </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Modal PDF Global -->
+        <template if:true={showPdfModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            onclick={handleClosePdfModal}>
+                            <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">{pdfModalTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content modal-body">
+                        <iframe src={pdfModalUrl} class="pdf-iframe" title="PDF Global"></iframe>
+                    </div>
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>

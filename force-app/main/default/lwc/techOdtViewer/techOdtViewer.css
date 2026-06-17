@@ -788,3 +788,15 @@
 .upload-foto-btn:hover {
     opacity: 1;
 }
+
+/* ── MODAL PDF ── */
+.modal-body {
+    padding: 0;
+    height: 80vh;
+}
+.pdf-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}

@@ -104,6 +104,11 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
     @track uploadRevId          = null;
     acceptedPhotoFormats        = ['.jpg', '.jpeg', '.png', '.heic', '.gif'];
 
+    // Modal PDF Global (Consolidado)
+    @track showPdfModal         = false;
+    @track pdfModalUrl          = '';
+    @track pdfModalTitle        = '';
+
     // Historial
     @track revHistoryMap        = {};
     @track saHistoryMap         = {};
@@ -1140,5 +1145,18 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
             this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: `${uploadedFiles.length} foto(s) subida(s) correctamente.`, variant: 'success' }));
             refreshApex(this._wiredResult);
         }
+    }
+
+    // ── PDF Global (Consolidado) ─────────────────────────────────────────────
+    handleGlobalPDF(e) {
+        const woId = e.currentTarget.dataset.id;
+        this.pdfModalTitle = 'PDF Consolidado de la ODT';
+        this.pdfModalUrl   = `/apex/ServiceReviewPDF?workOrderId=${woId}`;
+        this.showPdfModal  = true;
+    }
+
+    handleClosePdfModal() {
+        this.showPdfModal = false;
+        this.pdfModalUrl  = '';
     }
 }
