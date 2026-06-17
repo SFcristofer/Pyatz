@@ -99,6 +99,11 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
     @track isSavingRev          = false;
     @track formularios          = [];
 
+    // Subida y previsualización de fotos manuales
+    @track isUploadModalOpen    = false;
+    @track uploadRevId          = null;
+    acceptedPhotoFormats        = ['.jpg', '.jpeg', '.png', '.heic', '.gif'];
+
     // Historial
     @track revHistoryMap        = {};
     @track saHistoryMap         = {};
@@ -1082,5 +1087,58 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
         this.fusionContractId   = null;
         this.fusionContractName = '';
         refreshApex(this._wiredResult);
+    }
+
+    // ── Fotos (Subida y Previsualización) ────────────────────────────────────
+    handlePreviewFotos(e) {
+        const revId = e.currentTarget.dataset.revId;
+        let targetRev = null;
+        for (let sc of this.groups) {
+            for (let wo of sc.workOrders) {
+                for (let appt of wo.appointments) {
+                    if (appt.revisiones) {
+                        for (let rev of appt.revisiones) {
+                            if (rev.id === revId) {
+                                targetRev = rev;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (targetRev && targetRev.fotoIds && targetRev.fotoIds.length > 0) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__namedPage',
+                attributes: {
+                    pageName: 'filePreview'
+                },
+                state: {
+                    selectedRecordId: targetRev.fotoIds[0],
+                    recordIds: targetRev.fotoIds.join(',')
+                }
+            });
+        } else {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Aviso', message: 'No hay fotos para previsualizar.', variant: 'info' }));
+        }
+    }
+
+    handleOpenUploadModal(e) {
+        this.uploadRevId = e.currentTarget.dataset.revId;
+        this.isUploadModalOpen = true;
+    }
+
+    handleCloseUploadModal() {
+        this.isUploadModalOpen = false;
+        this.uploadRevId = null;
+    }
+
+    handleUploadFinished(e) {
+        const uploadedFiles = e.detail.files;
+        if (uploadedFiles && uploadedFiles.length > 0) {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Éxito', message: `${uploadedFiles.length} foto(s) subida(s) correctamente.`, variant: 'success' }));
+            refreshApex(this._wiredResult);
+        }
     }
 }

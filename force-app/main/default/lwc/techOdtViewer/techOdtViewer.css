@@ -765,3 +765,26 @@
 .rev-cancel-edit-btn { color: #c23934; }
 .rev-cancel-edit-btn:hover:not(:disabled) { background: #fce4ec; }
 .rev-save-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ── FOTOS (PREVIEW Y SUBIDA) ─────────────────────── */
+.fotos-cell-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.clickable-fotos {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #0176d3;
+    transition: color 0.2s;
+}
+.clickable-fotos:hover {
+    color: #005fb2;
+}
+.upload-foto-btn {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+.upload-foto-btn:hover {
+    opacity: 1;
+}

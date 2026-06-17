@@ -670,12 +670,24 @@
 
                                                                                                             <!-- Fotos -->
                                                                                                             <td class="col-rev-badge">
-                                                                                                                <template if:true={rev.fotos}>
-                                                                                                                    <span class="rev-badge-fotos">📷 {rev.fotos}</span>
-                                                                                                                </template>
-                                                                                                                <template if:false={rev.fotos}>
-                                                                                                                    <span class="rev-badge-zero">—</span>
-                                                                                                                </template>
+                                                                                                                <div class="fotos-cell-wrap">
+                                                                                                                    <template if:true={rev.fotos}>
+                                                                                                                        <span class="rev-badge-fotos clickable-fotos" onclick={handlePreviewFotos} data-rev-id={rev.id} title="Ver fotos">📷 {rev.fotos}</span>
+                                                                                                                    </template>
+                                                                                                                    <template if:false={rev.fotos}>
+                                                                                                                        <span class="rev-badge-zero" title="Sin fotos">—</span>
+                                                                                                                    </template>
+                                                                                                                    <lightning-button-icon
+                                                                                                                        icon-name="utility:upload"
+                                                                                                                        variant="bare"
+                                                                                                                        size="x-small"
+                                                                                                                        alternative-text="Subir Foto"
+                                                                                                                        title="Subir Foto Manual"
+                                                                                                                        data-rev-id={rev.id}
+                                                                                                                        onclick={handleOpenUploadModal}
+                                                                                                                        class="upload-foto-btn slds-m-left_xx-small">
+                                                                                                                    </lightning-button-icon>
+                                                                                                                </div>
                                                                                                             </td>
 
                                                                                                             <!-- NC -->
@@ -1005,6 +1017,35 @@
                             disabled={isAssigning}
                             onclick={handleConfirmAssign}>
                         </lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Modal Subir Foto Manual -->
+        <template if:true={isUploadModalOpen}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container" style="max-width: 400px; width: 400px;">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Cerrar" onclick={handleCloseUploadModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Cerrar" size="small" variant="inverse"></lightning-icon>
+                            <span class="slds-assistive-text">Cerrar</span>
+                        </button>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Subir Foto Manual</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" style="min-height: 150px; text-align: center;">
+                        <lightning-file-upload
+                            label="Adjuntar Fotos"
+                            name="fileUploader"
+                            accept={acceptedPhotoFormats}
+                            record-id={uploadRevId}
+                            onuploadfinished={handleUploadFinished}
+                            multiple>
+                        </lightning-file-upload>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cerrar" onclick={handleCloseUploadModal}></lightning-button>
                     </footer>
                 </div>
             </section>

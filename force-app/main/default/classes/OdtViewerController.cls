@@ -774,19 +774,26 @@ public with sharing class OdtViewerController {
         if (allDocIds.isEmpty()) return;
         Set<Id> geoFotoIds = new Set<Id>();
         for (ContentVersion cv : [
-            SELECT ContentDocumentId FROM ContentVersion
-            WHERE ContentDocumentId IN :allDocIds AND Title LIKE 'GeoFoto_%' AND IsLatest = true
+            SELECT ContentDocumentId, FileType FROM ContentVersion
+            WHERE ContentDocumentId IN :allDocIds AND IsLatest = true
         ]) {
-            geoFotoIds.add(cv.ContentDocumentId);
+            if (cv.FileType == 'JPG' || cv.FileType == 'JPEG' || cv.FileType == 'PNG' || cv.FileType == 'HEIC' || cv.FileType == 'GIF') {
+                geoFotoIds.add(cv.ContentDocumentId);
+            }
         }
         for (Id revId : docsByRev.keySet()) {
             Map<String, Object> m = revById.get(revId);
             if (m == null) continue;
             Integer cnt = 0;
+            List<Id> fotoIds = new List<Id>();
             for (Id docId : docsByRev.get(revId)) {
-                if (geoFotoIds.contains(docId)) cnt++;
+                if (geoFotoIds.contains(docId)) {
+                    cnt++;
+                    fotoIds.add(docId);
+                }
             }
             m.put('fotos', cnt);
+            m.put('fotoIds', fotoIds);
         }
     }
 
