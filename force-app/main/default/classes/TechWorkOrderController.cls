@@ -293,6 +293,35 @@ public with sharing class TechWorkOrderController {
                 }
             }
 
+            // --- NUEVO: AUTO-MAPEO BULKIFICADO DE ZONAS DESDE TEXTO ---
+            Set<String> allZoneNamesToSearch = new Set<String>();
+            for (Object sedeObj : sedesPayload) {
+                for (Object traObj : (List<Object>)((Map<String, Object>)sedeObj).get('tratamientos')) {
+                    Map<String, Object> tra = (Map<String, Object>)traObj;
+                    if (!tra.containsKey('selectedZonesData') && tra.containsKey('zonas') && String.isNotBlank((String)tra.get('zonas'))) {
+                        for(String zn : ((String)tra.get('zonas')).split(',')) {
+                            allZoneNamesToSearch.add(zn.trim());
+                        }
+                    }
+                }
+            }
+
+            Map<String, List<String>> autoMapZonesToTemplates = new Map<String, List<String>>();
+            if (!allZoneNamesToSearch.isEmpty()) {
+                for(Zona_Servicio_Pyatz__c z : [SELECT Id, Name, (SELECT Plantilla__c FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId AND Name IN :allZoneNamesToSearch]) {
+                    if (!autoMapZonesToTemplates.containsKey(z.Name)) {
+                        autoMapZonesToTemplates.put(z.Name, new List<String>());
+                    }
+                    for(Plantilla_de_Zona__c pz : z.Plantillas_de_Zona__r) {
+                        if (String.isNotBlank(pz.Plantilla__c)) {
+                            autoMapZonesToTemplates.get(z.Name).add(pz.Plantilla__c);
+                        }
+                    }
+                }
+            }
+            // -----------------------------------------------------------
+
+
             // Precarga de estados actuales para evitar transiciones inválidas
             Map<Id, String> saCurrentStatusMap = new Map<Id, String>();
             Set<Id> saIdsToQuery = new Set<Id>();
@@ -330,15 +359,27 @@ public with sharing class TechWorkOrderController {
                                     Map<String, Object> pzr = (Map<String, Object>)pzrObj;
                                     if(pzr.containsKey('Plantilla__c')) {
                                         String zTemp = (String)pzr.get('Plantilla__c');
-                                        if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
+                                        if (String.isNotBlank(zTemp) && !zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
                                     }
                                 }
                             } else if (zone.containsKey('Plantilla_de_Formulario__c') && zone.get('Plantilla_de_Formulario__c') != null) {
                                 String zTemp = (String)zone.get('Plantilla_de_Formulario__c');
-                                if (!zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
+                                if (String.isNotBlank(zTemp) && !zoneTemplates.contains(zTemp)) zoneTemplates.add(zTemp);
                             }
                         }
                     }
+                    
+                    if (zoneTemplates.isEmpty() && !tra.containsKey('selectedZonesData') && tra.containsKey('zonas') && String.isNotBlank((String)tra.get('zonas'))) {
+                        for(String zn : ((String)tra.get('zonas')).split(',')) {
+                            String trimmed = zn.trim();
+                            if (autoMapZonesToTemplates.containsKey(trimmed)) {
+                                for (String pId : autoMapZonesToTemplates.get(trimmed)) {
+                                    if (!zoneTemplates.contains(pId)) zoneTemplates.add(pId);
+                                }
+                            }
+                        }
+                    }
+                    
                     if (zoneTemplates.isEmpty() && String.isNotBlank(defaultTemplate)) zoneTemplates.add(defaultTemplate);
                     
                     for (Object rowObj : (List<Object>)tra.get('schedulingRows')) {
@@ -423,6 +464,37 @@ public with sharing class TechWorkOrderController {
                     if (!oldARs.isEmpty()) delete oldARs;
                 }
 
+                // 3. RECUPERAR NOMBRES DE PLANTILLAS Y ASIGNAR TIPO_DE_REPORTE__C
+                Set<Id> allTemplateIds = new Set<Id>();
+                for (List<String> tList : templateIndexMap.values()) {
+                    for (String tId : tList) {
+                        if (String.isNotBlank(tId)) allTemplateIds.add((Id)tId);
+                    }
+                }
+                Map<Id, String> globalTemplateNames = new Map<Id, String>();
+                if (!allTemplateIds.isEmpty()) {
+                    for(Form_Template__c ft : [SELECT Id, Name FROM Form_Template__c WHERE Id IN :allTemplateIds]) {
+                        globalTemplateNames.put(ft.Id, ft.Name);
+                    }
+                }
+                
+                for (Integer i = 0; i < sasToUpsert.size(); i++) {
+                    List<String> tList = templateIndexMap.get(i);
+                    List<String> tNames = new List<String>();
+                    for (String tId : tList) {
+                        if (String.isNotBlank(tId) && globalTemplateNames.containsKey((Id)tId)) {
+                            tNames.add(globalTemplateNames.get((Id)tId));
+                        }
+                    }
+                    if (!tNames.isEmpty()) {
+                        String combined = String.join(tNames, ', ');
+                        if (combined.length() > 255) combined = combined.substring(0, 252) + '...';
+                        sasToUpsert[i].Tipo_de_Reporte__c = combined;
+                    } else {
+                        sasToUpsert[i].Tipo_de_Reporte__c = 'Sin Plantilla Asignada';
+                    }
+                }
+
                 System.debug('Upserting ' + sasToUpsert.size() + ' ServiceAppointments...');
                 upsert sasToUpsert;
                 
@@ -468,22 +540,28 @@ public with sharing class TechWorkOrderController {
                     if (!revsBySA.containsKey(currentSA.Id) || revsBySA.get(currentSA.Id).isEmpty()) {
                         Integer revCounter = 1;
                         List<String> templateIds = templateIndexMap.get(i);
-                        Map<Id, String> templateNamesMap = new Map<Id, String>();
+                        
                         if (!templateIds.isEmpty()) {
-                            List<Id> castedIds = new List<Id>();
-                            for(String s : templateIds) { castedIds.add((Id)s); }
-                            for(Form_Template__c ft : [SELECT Id, Name FROM Form_Template__c WHERE Id IN :castedIds]) {
-                                templateNamesMap.put(ft.Id, ft.Name);
+                            for (String templateId : templateIds) {
+                                if (String.isBlank(templateId)) continue;
+                                String tName = globalTemplateNames.get((Id)templateId);
+                                revsToUpsert.add(new Revision_Cita_Servicio__c(
+                                    Cita_Servicio__c = currentSA.Id, 
+                                    Numero_Revision__c = revCounter++, 
+                                    Tipo_Reporte__c = tName,
+                                    Status__c = 'En Proceso', 
+                                    Plantilla_de_Formulario__c = (Id)templateId, 
+                                    Fecha_Revision__c = Datetime.now(), 
+                                    Tecnico__c = saPrimaryUserId
+                                ));
                             }
-                        }
-                        for (String templateId : templateIds) {
-                            String tName = templateNamesMap.get((Id)templateId);
+                        } else {
+                            // Crear revisión genérica si no hay plantilla
                             revsToUpsert.add(new Revision_Cita_Servicio__c(
                                 Cita_Servicio__c = currentSA.Id, 
                                 Numero_Revision__c = revCounter++, 
-                                Tipo_Reporte__c = tName,
+                                Tipo_Reporte__c = 'Sin Plantilla Asignada',
                                 Status__c = 'En Proceso', 
-                                Plantilla_de_Formulario__c = (Id)templateId, 
                                 Fecha_Revision__c = Datetime.now(), 
                                 Tecnico__c = saPrimaryUserId
                             ));
