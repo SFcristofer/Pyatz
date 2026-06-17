@@ -8,9 +8,16 @@
 .rev-overview { padding: 16px; }
 .rev-banner { background: linear-gradient(135deg, #1a2035 0%, #2d3a5e 100%); color: #fff; padding: 20px 18px; border-radius: 14px; margin-bottom: 16px; }
 .rev-banner__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.rev-banner__right { display: flex; align-items: center; }
+.desktop-actions { display: flex; align-items: center; }
+@media (max-width: 768px) {
+    .desktop-actions { display: none; }
+}
 .rev-banner__account { font-size: 20px; font-weight: 700; }
 .rev-banner__meta { font-size: 13px; color: #aab; margin-bottom: 14px; }
 .btn-history-sa { background: rgba(255,255,255,0.15); border: none; border-radius: 8px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 34px; min-height: 34px; flex-shrink: 0; }
+.btn-verify { border: 1px solid #2e7d32; }
+.btn-unverify { border: 1px solid #c62828; }
 .rev-banner__progress { display: flex; align-items: center; gap: 12px; }
 .progress-bar-wrap { flex: 1; background: rgba(255,255,255,0.2); border-radius: 6px; height: 10px; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: #4caf50; border-radius: 6px; transition: width 0.4s ease; }

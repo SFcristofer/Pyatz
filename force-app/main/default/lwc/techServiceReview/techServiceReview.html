@@ -17,9 +17,26 @@
             <div class="rev-banner">
                 <div class="rev-banner__top">
                     <div class="rev-banner__account">{saInfo.accountName}</div>
-                    <button class="btn-history-sa" onclick={handleShowSAHistory} title="Historial de estados">
-                        <lightning-icon icon-name="utility:clock" size="x-small" variant="inverse"></lightning-icon>
-                    </button>
+                    <div class="rev-banner__right">
+                        <div class="desktop-actions">
+                            <button class="btn-history-sa" onclick={handleViewPDF} title="Generar PDF" style="margin-right: 8px;">
+                                <lightning-icon icon-name="utility:pdf_ext" size="x-small" variant="inverse"></lightning-icon>
+                            </button>
+                            <template if:false={isVerified}>
+                                <button class="btn-history-sa btn-verify" onclick={handleVerificarSA} title="Verificar Cita" style="margin-right: 8px; background: #2e7d32;">
+                                    <lightning-icon icon-name="utility:check" size="x-small" variant="inverse"></lightning-icon>
+                                </button>
+                            </template>
+                            <template if:true={isVerified}>
+                                <button class="btn-history-sa btn-unverify" onclick={handleDesverificarSA} title="Desverificar Cita" style="margin-right: 8px; background: #c62828;">
+                                    <lightning-icon icon-name="utility:close" size="x-small" variant="inverse"></lightning-icon>
+                                </button>
+                            </template>
+                        </div>
+                        <button class="btn-history-sa" onclick={handleShowSAHistory} title="Historial de estados">
+                            <lightning-icon icon-name="utility:clock" size="x-small" variant="inverse"></lightning-icon>
+                        </button>
+                    </div>
                 </div>
                 <div class="rev-banner__meta">Cita: {saInfo.saNumber} · OT: {saInfo.workOrderNumber}</div>
                 <div class="rev-banner__progress">
@@ -843,6 +860,42 @@
             </div>
         </template>
     </div>
+</template>
+
+<!-- Modal Verificar ODT -->
+<template if:true={showVerifyModal}>
+    <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={handleCancelVerificar}>
+                    <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                </button>
+                <h2 class="slds-modal__title">
+                    <lightning-icon icon-name="utility:check" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    Verificar Cita de Servicio
+                </h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="slds-form-element slds-m-bottom_small">
+                    <label class="slds-form-element__label">Nombre completo del Firmante</label>
+                    <div class="slds-form-element__control">
+                        <input type="text" class="slds-input" placeholder="Nombre completo de quien valida" value={modalFirmante} onchange={handleVerifyModalFirmanteChange} />
+                    </div>
+                </div>
+                <div class="slds-form-element">
+                    <label class="slds-form-element__label">Cargo del Firmante</label>
+                    <div class="slds-form-element__control">
+                        <input type="text" class="slds-input" placeholder="Puesto o cargo" value={modalCargo} onchange={handleVerifyModalCargoChange} />
+                    </div>
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <lightning-button label="Cancelar" onclick={handleCancelVerificar} class="slds-m-right_small"></lightning-button>
+                <lightning-button label="Verificar" variant="success" icon-name="utility:check" disabled={isVerifying} onclick={handleConfirmVerificar}></lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
 </template>
 
 </template>

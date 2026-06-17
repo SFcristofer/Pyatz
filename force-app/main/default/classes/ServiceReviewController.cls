@@ -17,6 +17,7 @@ public with sharing class ServiceReviewController {
         @AuraEnabled public List<RevisionSummary> revisionesList;
         @AuraEnabled public String  techName;
         @AuraEnabled public String  techInitials;
+        @AuraEnabled public Boolean isVerified;
     }
 
     public class RevisionSummary {
@@ -53,7 +54,7 @@ public with sharing class ServiceReviewController {
     public static SAInfo getServiceAppointmentInfo(Id saId) {
         ServiceAppointment sa = [
             SELECT Id, AppointmentNumber, Status, Subject,
-                   ParentRecordId, Revisiones__c
+                   ParentRecordId, Revisiones__c, Verificado__c
             FROM ServiceAppointment
             WHERE Id = :saId
             LIMIT 1
@@ -139,6 +140,7 @@ public with sharing class ServiceReviewController {
         info.revisionesList        = revList;
         info.techName              = techName;
         info.techInitials          = techInitials;
+        info.isVerified            = sa.Verificado__c;
         return info;
     }
 

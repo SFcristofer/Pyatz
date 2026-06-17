@@ -20,6 +20,8 @@ import getRevisionHistory        from '@salesforce/apex/ServiceReviewController.
 
 import getTemplateById  from '@salesforce/apex/FormTemplateController.getTemplateById';
 import getSAHistory     from '@salesforce/apex/TechCitasServicioController.getSAHistory';
+import verificarSA      from '@salesforce/apex/TechCitasServicioController.verificarSA';
+import desverificarSA   from '@salesforce/apex/TechCitasServicioController.desverificarSA';
 
 import getFormTemplates from '@salesforce/apex/FormTemplateController.getFormTemplates';
 import getFormTemplate  from '@salesforce/apex/FormTemplateController.getFormTemplate';
@@ -130,6 +132,13 @@ export default class TechServiceReview extends LightningElement {
     @track loadingRevHistory = false;
     @track revHistoryData    = [];
     @track revHistoryTitle   = '';
+
+    // Modal Verificar
+    @track showVerifyModal = false;
+    @track isVerifying = false;
+    @track modalFirmante = '';
+    @track modalCargo = '';
+
     get hasRevHistoryData() { return this.revHistoryData && this.revHistoryData.length > 0; }
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
@@ -221,6 +230,7 @@ export default class TechServiceReview extends LightningElement {
         const pct = Math.min(100, Math.round((this.saInfo.revisionesCompletadas / this.saInfo.maxRevisiones) * 100));
         return `width:${pct}%`;
     }
+    get isVerified()     { return this.saInfo && this.saInfo.isVerified; }
 
     // ─── Getters – photos ─────────────────────────────────────────────────────
 
@@ -414,6 +424,54 @@ export default class TechServiceReview extends LightningElement {
     }
 
     handleCloseSAHistory() { this.showSAHistory = false; }
+
+    handleVerificarSA() {
+        this.modalFirmante = '';
+        this.modalCargo    = '';
+        this.showVerifyModal = true;
+    }
+
+    handleVerifyModalFirmanteChange(e) { this.modalFirmante = e.target.value; }
+    handleVerifyModalCargoChange(e)    { this.modalCargo    = e.target.value; }
+
+    handleCancelVerificar() {
+        this.showVerifyModal = false;
+    }
+
+    handleConfirmVerificar() {
+        this.isVerifying = true;
+        verificarSA({ 
+            saId: this.recordId,
+            nombreFirmante: this.modalFirmante,
+            cargoFirmante: this.modalCargo
+        })
+        .then(() => {
+            this._toast('Éxito', 'Cita verificada correctamente', 'success');
+            this.showVerifyModal = false;
+            this._loadSAInfo_silent();
+        })
+        .catch(error => {
+            this._toast('Error', error.body ? error.body.message : error.message, 'error');
+        })
+        .finally(() => {
+            this.isVerifying = false;
+        });
+    }
+
+    handleDesverificarSA() {
+        desverificarSA({ saId: this.recordId })
+            .then(() => {
+                this._toast('Éxito', 'Verificación revertida', 'success');
+                this._loadSAInfo_silent();
+            })
+            .catch(error => {
+                this._toast('Error', error.body ? error.body.message : error.message, 'error');
+            });
+    }
+
+    handleViewPDF() {
+        window.open(`/apex/ServiceReviewPDF?id=${this.recordId}`, '_blank');
+    }
 
     handleShowRevHistory(event) {
         const id   = event.currentTarget.dataset.revId;
