@@ -1,10 +1,9 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import getCitasServicio        from '@salesforce/apex/TechCitasServicioController.getCitasServicio';
-import getVerificationStatus   from '@salesforce/apex/TechCitasServicioController.getVerificationStatus';
-import verificarODT            from '@salesforce/apex/TechCitasServicioController.verificarODT';
-import desverificarODT         from '@salesforce/apex/TechCitasServicioController.desverificarODT';
-import getSAHistory             from '@salesforce/apex/TechCitasServicioController.getSAHistory';
+import verificarSA             from '@salesforce/apex/TechCitasServicioController.verificarSA';
+import desverificarSA          from '@salesforce/apex/TechCitasServicioController.desverificarSA';
+import getSAHistory            from '@salesforce/apex/TechCitasServicioController.getSAHistory';
 
 const STATUS_CLASS_MAP = {
     'Completado': 'status-pill status-completado',
@@ -23,11 +22,9 @@ export default class TechCitasServicioList extends LightningElement {
     @track showModal      = false;
     @track modalUrl       = '';
     @track modalTitle     = '';
-    @track isVerificado      = false;
-    @track verificadoPor     = '';
-    @track fechaVerif        = '';
-    @track nombreFirmante    = '';
-    @track cargoFirmante     = '';
+    
+    // Verificación
+    @track verifyingSAId  = null;
     @track isVerifying       = false;
     @track showVerifyModal   = false;
     @track modalFirmante     = '';
@@ -39,7 +36,6 @@ export default class TechCitasServicioList extends LightningElement {
     @track loadingHistory    = false;
 
     _wiredResult;
-    _wiredVerifResult;
 
     @wire(getCitasServicio, { workOrderId: '$recordId' })
     wiredCitas(result) {
@@ -51,18 +47,6 @@ export default class TechCitasServicioList extends LightningElement {
         } else if (result.error) {
             this.hasError = true;
             this.errorMessage = result.error?.body?.message || 'Error al cargar citas de servicio.';
-        }
-    }
-
-    @wire(getVerificationStatus, { workOrderId: '$recordId' })
-    wiredVerification(result) {
-        this._wiredVerifResult = result;
-        if (result.data) {
-            this.isVerificado   = result.data.verificado  || false;
-            this.verificadoPor  = result.data.verificadoPor || '';
-            this.fechaVerif     = result.data.fechaVerificacion || '';
-            this.nombreFirmante = result.data.nombreFirmante || '';
-            this.cargoFirmante  = result.data.cargoFirmante  || '';
         }
     }
 
@@ -118,7 +102,8 @@ export default class TechCitasServicioList extends LightningElement {
         this.modalUrl   = '';
     }
 
-    handleVerificar() {
+    handleVerificar(event) {
+        this.verifyingSAId = event.currentTarget.dataset.saId;
         this.modalFirmante = '';
         this.modalCargo    = '';
         this.showVerifyModal = true;
@@ -129,32 +114,35 @@ export default class TechCitasServicioList extends LightningElement {
 
     handleCancelVerificar() {
         this.showVerifyModal = false;
+        this.verifyingSAId   = null;
     }
 
     async handleConfirmVerificar() {
         this.isVerifying     = true;
         this.showVerifyModal = false;
         try {
-            await verificarODT({
-                workOrderId:    this.recordId,
+            await verificarSA({
+                saId:           this.verifyingSAId,
                 nombreFirmante: this.modalFirmante,
                 cargoFirmante:  this.modalCargo
             });
-            await refreshApex(this._wiredVerifResult);
+            await refreshApex(this._wiredResult);
         } catch (e) {
-            console.error('Error al verificar OT:', e);
+            console.error('Error al verificar SA:', e);
         } finally {
             this.isVerifying = false;
+            this.verifyingSAId = null;
         }
     }
 
-    async handleDesverificar() {
+    async handleDesverificar(event) {
+        const saId = event.currentTarget.dataset.saId;
         this.isVerifying = true;
         try {
-            await desverificarODT({ workOrderId: this.recordId });
-            await refreshApex(this._wiredVerifResult);
+            await desverificarSA({ saId: saId });
+            await refreshApex(this._wiredResult);
         } catch (e) {
-            console.error('Error al desverificar OT:', e);
+            console.error('Error al desverificar SA:', e);
         } finally {
             this.isVerifying = false;
         }

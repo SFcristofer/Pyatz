@@ -220,6 +220,40 @@
     background: rgba(255,255,255,0.15);
 }
 
+/* ── Botones Verificación por SA en Header ── */
+.btn-verify-sa {
+    background: transparent;
+    border: 1px solid #69f0ae;
+    color: #69f0ae;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+}
+.btn-verify-sa:hover {
+    background: rgba(105,240,174,0.15);
+}
+
+.btn-verified-sa {
+    background: #1b5e20;
+    border: 1px solid #1b5e20;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-verified-sa:hover {
+    background: #0d3b10;
+}
+
 /* ── Modal ── */
 .modal-body {
     padding: 0;

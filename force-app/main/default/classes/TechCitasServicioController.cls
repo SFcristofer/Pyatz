@@ -18,12 +18,21 @@ public with sharing class TechCitasServicioController {
         @AuraEnabled public Integer            totalRevisiones       {get; set;}
         @AuraEnabled public Integer            revisionesCompletadas {get; set;}
         @AuraEnabled public List<RevisionInfo> revisiones            {get; set;}
+        
+        // Verificación a nivel SA
+        @AuraEnabled public Boolean            isVerificado          {get; set;}
+        @AuraEnabled public String             verificadoPor         {get; set;}
+        @AuraEnabled public String             fechaVerificacion     {get; set;}
+        @AuraEnabled public String             nombreFirmante        {get; set;}
+        @AuraEnabled public String             cargoFirmante         {get; set;}
     }
 
     @AuraEnabled(cacheable=true)
     public static List<CitaWrapper> getCitasServicio(Id workOrderId) {
         List<ServiceAppointment> sas = [
-            SELECT Id, AppointmentNumber, Status, Zonas_a_Tratar__c
+            SELECT Id, AppointmentNumber, Status, Zonas_a_Tratar__c,
+                   Verificado__c, Verificado_Por__c, Fecha_Verificacion__c,
+                   Nombre_Firmante__c, Cargo_Firmante__c
             FROM ServiceAppointment
             WHERE ParentRecordId = :workOrderId
             ORDER BY AppointmentNumber ASC
@@ -33,6 +42,11 @@ public with sharing class TechCitasServicioController {
 
         Set<Id> saIds = new Set<Id>();
         Map<Id, CitaWrapper> wrapBySA = new Map<Id, CitaWrapper>();
+
+        String[] meses = new String[]{
+            'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+            'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+        };
 
         for (ServiceAppointment sa : sas) {
             saIds.add(sa.Id);
@@ -44,6 +58,18 @@ public with sharing class TechCitasServicioController {
             w.totalRevisiones       = 0;
             w.revisionesCompletadas = 0;
             w.revisiones            = new List<RevisionInfo>();
+            
+            w.isVerificado          = sa.Verificado__c;
+            w.verificadoPor         = sa.Verificado_Por__c;
+            w.nombreFirmante        = sa.Nombre_Firmante__c;
+            w.cargoFirmante         = sa.Cargo_Firmante__c;
+            if (sa.Fecha_Verificacion__c != null) {
+                Datetime d = sa.Fecha_Verificacion__c;
+                w.fechaVerificacion = d.day() + ' / ' + meses[d.month() - 1] + ' / ' + d.year()
+                                    + ' ' + String.valueOf(d.hour()).leftPad(2,'0')
+                                    + ':' + String.valueOf(d.minute()).leftPad(2,'0');
+            }
+            
             wrapBySA.put(sa.Id, w);
         }
 
@@ -191,6 +217,30 @@ public with sharing class TechCitasServicioController {
     public static void desverificarODT(Id workOrderId) {
         update new WorkOrder(
             Id                    = workOrderId,
+            Verificado__c         = false,
+            Verificado_Por__c     = null,
+            Fecha_Verificacion__c = null,
+            Nombre_Firmante__c    = null,
+            Cargo_Firmante__c     = null
+        );
+    }
+
+    @AuraEnabled
+    public static void verificarSA(Id saId, String nombreFirmante, String cargoFirmante) {
+        update new ServiceAppointment(
+            Id                    = saId,
+            Verificado__c         = true,
+            Verificado_Por__c     = UserInfo.getName(),
+            Fecha_Verificacion__c = Datetime.now(),
+            Nombre_Firmante__c    = nombreFirmante,
+            Cargo_Firmante__c     = cargoFirmante
+        );
+    }
+
+    @AuraEnabled
+    public static void desverificarSA(Id saId) {
+        update new ServiceAppointment(
+            Id                    = saId,
             Verificado__c         = false,
             Verificado_Por__c     = null,
             Fecha_Verificacion__c = null,

@@ -4,40 +4,7 @@
             <span class="slds-text-heading_small">Citas de Servicio</span>
         </div>
         <div slot="actions">
-            <!-- Badge verificado -->
-            <template if:true={isVerificado}>
-                <span class="verificado-badge" title={fechaVerif}>
-                    <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse" class="badge-icon"></lightning-icon>
-                    Verificado
-                    <template if:true={nombreFirmante}>
-                        &nbsp;·&nbsp;{nombreFirmante}
-                        <template if:true={cargoFirmante}>&nbsp;({cargoFirmante})</template>
-                    </template>
-                </span>
-            </template>
 
-            <!-- Botón Verificar (solo cuando NO está verificado) -->
-            <template if:false={isVerificado}>
-                <lightning-button
-                    label="Verificar"
-                    icon-name="utility:check"
-                    variant="success"
-                    disabled={isVerifying}
-                    onclick={handleVerificar}>
-                </lightning-button>
-            </template>
-            &nbsp;
-            <!-- Botón Desverificar (solo cuando está verificado) -->
-            <template if:true={isVerificado}>
-                <lightning-button
-                    label="Desverificar"
-                    icon-name="utility:close"
-                    variant="destructive-text"
-                    disabled={isVerifying}
-                    onclick={handleDesverificar}>
-                </lightning-button>
-            </template>
-            &nbsp;
             <lightning-button
                 label="PDF"
                 icon-name="utility:pdf"
@@ -58,7 +25,7 @@
                         </button>
                         <h2 class="slds-modal__title">
                             <lightning-icon icon-name="utility:check" size="small" variant="inverse" class="slds-m-right_x-small"></lightning-icon>
-                            Verificar Orden de Trabajo
+                            Verificar Cita de Servicio
                         </h2>
                     </header>
                     <div class="slds-modal__content slds-p-around_medium">
@@ -216,6 +183,28 @@
                                 </div>
                                 <div class="card-header-right">
                                     <span class={cita.statusClass}>{cita.status}</span>
+
+                                    <!-- Botones Verificación -->
+                                    <template if:true={cita.isVerificado}>
+                                        <button class="btn-verified-sa"
+                                            title="Verificado por: {cita.nombreFirmante}. Clic para desverificar"
+                                            data-sa-id={cita.id}
+                                            onclick={handleDesverificar}
+                                            disabled={isVerifying}>
+                                            <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse"></lightning-icon>
+                                            Verificado
+                                        </button>
+                                    </template>
+                                    <template if:false={cita.isVerificado}>
+                                        <button class="btn-verify-sa"
+                                            title="Verificar esta Cita de Servicio"
+                                            data-sa-id={cita.id}
+                                            onclick={handleVerificar}
+                                            disabled={isVerifying}>
+                                            Verificar
+                                        </button>
+                                    </template>
+
                                     <button class="btn-history-sa"
                                         data-sa-id={cita.id}
                                         data-sa-num={cita.appointmentNumber}
@@ -280,6 +269,8 @@
                             <template if:false={cita.hasRevisiones}>
                                 <div class="no-revisiones">Sin revisiones registradas.</div>
                             </template>
+
+
 
                         </div>
                     </template>
