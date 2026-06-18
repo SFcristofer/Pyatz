@@ -223,11 +223,56 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     get isStep4() { return this.currentStep === '4'; }
 
     async handleNext() { 
-        if (this.currentStep === '1' && !this.estrategiaVenta) {
-            this.dispatchEvent(new ShowToastEvent({ title: 'Atención', message: 'Seleccione una Estrategia.', variant: 'warning' }));
-            return;
+        // PASO 1: Contrato (Estrategia)
+        if (this.currentStep === '1') {
+            if (!this.estrategiaVenta) {
+                this.dispatchEvent(new ShowToastEvent({ title: '¡Alto ahí! 🛑', message: 'Debes seleccionar una Categoría (Estrategia de Venta) para poder avanzar.', variant: 'error' }));
+                return;
+            }
         }
         
+        // PASO 2: Datos Técnicos
+        if (this.currentStep === '2') {
+            if (!this.asunto || this.asunto.trim() === '') {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Falta el Asunto 🛑', message: 'Por favor, escribe un Asunto para identificar este presupuesto.', variant: 'error' }));
+                return;
+            }
+            if (!this.selectedSedesObjects || this.selectedSedesObjects.length === 0) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Falta el Cliente 🛑', message: 'Debes seleccionar al menos un cliente de la tabla antes de continuar.', variant: 'error' }));
+                return;
+            }
+            if (!this.selectedContactIds || this.selectedContactIds.length === 0) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Falta el Contacto 🛑', message: 'Por favor, selecciona a quién va dirigido (Atención a) marcando un contacto de la lista.', variant: 'error' }));
+                return;
+            }
+            if (!this.selectedLines || this.selectedLines.length === 0) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Falta Línea de Negocio 🛑', message: 'Debes marcar al menos una Línea de Negocio (ej. Control de Plagas, Desinfección).', variant: 'error' }));
+                return;
+            }
+        }
+
+        // PASO 3: Detalles
+        if (this.currentStep === '3') {
+            if (!this.serviciosData || this.serviciosData.filter(s => !s.isSeparator).length === 0) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Presupuesto Vacío 🛑', message: 'No puedes avanzar sin agregar al menos un servicio o producto al presupuesto.', variant: 'error' }));
+                return;
+            }
+            if (!this.pagoTransferencia && !this.pagoTarjeta) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Falta Opción de Pago 🛑', message: 'Selecciona al menos una Opción de Pago (Transferencia o Tarjeta).', variant: 'error' }));
+                return;
+            }
+            if (!this.trabajoPuntual && !this.ventaProducto && !this.trabajoMantenimiento) {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Falta Tipo de Trabajo 🛑', message: 'Debes marcar al menos un Tipo de Trabajo (Puntual, Producto o Mantenimiento).', variant: 'error' }));
+                return;
+            }
+            
+            let rawWarranty = this.warranty ? this.warranty.replace(/<[^>]*>?/gm, '').trim() : '';
+            if (rawWarranty === '') {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Faltan Condiciones / Anexos 🛑', message: 'Es obligatorio agregar las Condiciones Comerciales o usar una plantilla para protegerte legalmente.', variant: 'error' }));
+                return;
+            }
+        }
+
         if (this.currentStep !== '4') {
             this.isLoading = true;
             try {
