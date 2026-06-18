@@ -140,19 +140,10 @@
                     </template>
                 </div>
 
-                <!-- SECCIÓN 2: CONFIGURACIÓN DE VISUALIZACIÓN Y RESPONSABLES -->
+                <!-- SECCIÓN 2: RESPONSABLES DEL CONTRATO -->
                 <div class="slds-grid slds-wrap slds-gutters slds-m-top_large">
-                    <!-- Columna Izquierda: Visualización -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
-                        <div class="slds-box slds-theme_shade">
-                            <p class="slds-text-title_bold slds-m-bottom_small">Opciones de Visualización</p>
-                            <lightning-input type="checkbox" label="Mostrar el importe total del contrato" checked={selections.show_total} onchange={handleToggle} data-id="show_total" class="slds-m-bottom_xx-small"></lightning-input>
-                            <lightning-input type="checkbox" label="Mostrar el importe en las líneas" checked={selections.show_line_prices} onchange={handleToggle} data-id="show_line_prices"></lightning-input>
-                        </div>
-                    </div>
-
-                    <!-- Columna Derecha: Responsables -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <!-- Columna Única: Responsables -->
+                    <div class="slds-col slds-size_1-of-1">
                         <div class="slds-box bg-light-blue">
                             <p class="slds-text-title_bold slds-m-bottom_small">Responsables del Contrato</p>
                             
