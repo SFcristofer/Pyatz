@@ -354,7 +354,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         let isToggle = false;
         if (event.target.type === 'checkbox') {
             val = event.target.checked;
-        } else if (event.currentTarget.tagName === 'LIGHTNING-BUTTON-ICON') {
+        } else if (event.currentTarget.tagName === 'LIGHTNING-BUTTON-ICON' || event.currentTarget.tagName === 'LIGHTNING-BUTTON') {
             isToggle = true;
         } else {
             val = event.target.value;
