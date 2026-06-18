@@ -164,7 +164,17 @@ export default class TechZoneBrowserDrawer extends LightningElement {
     }
 
     handleRowSelection(event) {
-        this.selectedZones = event.detail.selectedRows;
+        // IDs de la página actual
+        const currentPageIds = new Set(this.pagedZones.map(z => z.Id));
+        
+        // Filas seleccionadas devueltas por la tabla en esta página
+        const selectedRows = event.detail.selectedRows;
+        
+        // Conservar las selecciones globales que NO están en la página actual
+        let globalSelections = this.selectedZones.filter(z => !currentPageIds.has(z.Id));
+        
+        // Añadir las selecciones de la página actual
+        this.selectedZones = [...globalSelections, ...selectedRows];
     }
 
     handleConfirmSelection() {
