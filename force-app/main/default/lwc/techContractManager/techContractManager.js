@@ -471,17 +471,17 @@ export default class TechContractManager extends NavigationMixin(LightningElemen
     handleCloseEditModal() { this.showEditModal = false; }
 
     calculateTotals() {
-        // El total debe reflejar el presupuesto completo para ser consistente con la solicitud del usuario
-        const quote = this.availableQuotes.find(q => q.Id === this.selectedQuoteId);
-        if (quote && quote.GrandTotal > 0) {
-            this.totals = { total: quote.GrandTotal };
-        } else {
-            let total = 0;
-            this.quoteLineItems.forEach(item => {
-                total += (item.TotalPrice || 0) * 1.16;
-            });
-            this.totals = { total };
-        }
+        // Calculamos el total de forma dinámica sumando las partidas seleccionadas
+        // y agregando el IVA (16%) para que coincida exactamente con lo que saldrá en el PDF del contrato.
+        let subtotal = 0;
+        this.quoteLineItems.forEach(item => {
+            if (item.isSelected) {
+                subtotal += parseFloat(item.TotalPrice || 0);
+            }
+        });
+        
+        let totalConIva = subtotal * 1.16;
+        this.totals = { total: totalConIva, subtotal: subtotal };
     }
 
     handleToggle(event) {
