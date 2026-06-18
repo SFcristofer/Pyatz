@@ -120,7 +120,6 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                         ...row,
                         hasTechs: techPills.length > 0,
                         techPills: techPills,
-                        executedVariant: row.executed ? 'brand' : 'border-filled',
                         notesVariant: row.showNotes ? 'brand' : 'border-filled'
                     };
                 });
