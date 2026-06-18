@@ -156,19 +156,40 @@
                                         <p class="slds-text-title_bold slds-m-bottom_x-small">5. Selección de Zonas del Catálogo (Cuenta)</p>
                                         
                                         <template if:true={mappedHistoricalZones.length}>
-                                            <div class="zones-selection-grid">
-                                                <template for:each={mappedHistoricalZones} for:item="zona">
-                                                    <div key={zona.name} class="zone-checkbox-item">
-                                                        <lightning-input 
-                                                            type="checkbox" 
-                                                            label={zona.name} 
-                                                            name={zona.name}
-                                                            checked={zona.isSelected}
-                                                            data-name={zona.name}
-                                                            onchange={handleToggleZone}>
-                                                        </lightning-input>
-                                                    </div>
-                                                </template>
+                                            <div class="slds-scrollable_y slds-m-top_x-small" style="max-height: 250px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered slds-table_compact">
+                                                    <thead>
+                                                        <tr class="slds-line-height_reset" style="position: sticky; top: 0; z-index: 1; background: #f8fafc;">
+                                                            <th scope="col" style="width: 40%;"><div class="slds-truncate slds-text-title_caps" title="Zona">📍 ZONA</div></th>
+                                                            <th scope="col" style="width: 60%;"><div class="slds-truncate slds-text-title_caps" title="Reporte">📄 REPORTE ASIGNADO</div></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <template for:each={mappedHistoricalZones} for:item="group">
+                                                            <tr key={group.baseName}>
+                                                                <td data-label="Zona" class="slds-cell-wrap">
+                                                                    <div class="slds-text-title_bold" style="font-size: 0.75rem; color: #1e293b;">{group.baseName}</div>
+                                                                </td>
+                                                                <td data-label="Reporte" class="slds-cell-wrap slds-p-vertical_xx-small">
+                                                                    <div class="slds-grid slds-wrap">
+                                                                        <template for:each={group.templates} for:item="tpl">
+                                                                            <div key={tpl.name} class="slds-col slds-size_1-of-1 slds-m-bottom_none">
+                                                                                <lightning-input 
+                                                                                    type="checkbox" 
+                                                                                    label={tpl.label} 
+                                                                                    name={tpl.name}
+                                                                                    checked={tpl.isSelected}
+                                                                                    data-name={tpl.name}
+                                                                                    onchange={handleToggleZone}>
+                                                                                </lightning-input>
+                                                                            </div>
+                                                                        </template>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </template>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </template>
 
@@ -179,10 +200,12 @@
                                         </template>
 
                                         <div class="slds-m-top_small border-top slds-p-top_x-small">
-                                            <p class="slds-text-title_bold slds-m-bottom_xx-small" style="font-size: 0.7rem; color: #64748b;">ZONAS SELECCIONADAS:</p>
-                                            <template for:each={zonasAfectadas} for:item="zona">
-                                                <lightning-pill key={zona} label={zona} onremove={removeZona} name={zona} class="slds-m-right_xx-small slds-m-bottom_xx-small"></lightning-pill>
-                                            </template>
+                                            <p class="slds-text-title_bold slds-m-bottom_xx-small" style="font-size: 0.7rem; color: #64748b;">ZONAS Y REPORTES SELECCIONADOS:</p>
+                                            <div class="slds-grid slds-wrap">
+                                                <template for:each={formattedZonasAfectadas} for:item="zona">
+                                                    <lightning-pill key={zona.name} label={zona.label} onremove={removeZona} name={zona.name} class="slds-m-right_xx-small slds-m-bottom_xx-small" style="background-color: #f0fdf4; border-color: #bbf7d0;"></lightning-pill>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

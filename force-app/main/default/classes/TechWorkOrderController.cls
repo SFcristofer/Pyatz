@@ -300,21 +300,34 @@ public with sharing class TechWorkOrderController {
                     Map<String, Object> tra = (Map<String, Object>)traObj;
                     if (!tra.containsKey('selectedZonesData') && tra.containsKey('zonas') && String.isNotBlank((String)tra.get('zonas'))) {
                         for(String zn : ((String)tra.get('zonas')).split(',')) {
-                            allZoneNamesToSearch.add(zn.trim());
+                            String baseZone = zn.trim();
+                            if (baseZone.contains(' (')) {
+                                baseZone = baseZone.substringBeforeLast(' (').trim();
+                            }
+                            allZoneNamesToSearch.add(baseZone);
                         }
                     }
                 }
             }
 
             Map<String, List<String>> autoMapZonesToTemplates = new Map<String, List<String>>();
+            Map<String, List<String>> exactMapZonesToTemplates = new Map<String, List<String>>();
+            
             if (!allZoneNamesToSearch.isEmpty()) {
-                for(Zona_Servicio_Pyatz__c z : [SELECT Id, Name, (SELECT Plantilla__c FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId AND Name IN :allZoneNamesToSearch]) {
+                for(Zona_Servicio_Pyatz__c z : [SELECT Id, Name, (SELECT Plantilla__c, Plantilla__r.Name FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId AND Name IN :allZoneNamesToSearch]) {
                     if (!autoMapZonesToTemplates.containsKey(z.Name)) {
                         autoMapZonesToTemplates.put(z.Name, new List<String>());
                     }
                     for(Plantilla_de_Zona__c pz : z.Plantillas_de_Zona__r) {
                         if (String.isNotBlank(pz.Plantilla__c)) {
                             autoMapZonesToTemplates.get(z.Name).add(pz.Plantilla__c);
+                            if (String.isNotBlank(pz.Plantilla__r.Name)) {
+                                String exactKey = z.Name + ' (' + pz.Plantilla__r.Name + ')';
+                                if (!exactMapZonesToTemplates.containsKey(exactKey)) {
+                                    exactMapZonesToTemplates.put(exactKey, new List<String>());
+                                }
+                                exactMapZonesToTemplates.get(exactKey).add(pz.Plantilla__c);
+                            }
                         }
                     }
                 }
@@ -372,9 +385,16 @@ public with sharing class TechWorkOrderController {
                     if (zoneTemplates.isEmpty() && !tra.containsKey('selectedZonesData') && tra.containsKey('zonas') && String.isNotBlank((String)tra.get('zonas'))) {
                         for(String zn : ((String)tra.get('zonas')).split(',')) {
                             String trimmed = zn.trim();
-                            if (autoMapZonesToTemplates.containsKey(trimmed)) {
-                                for (String pId : autoMapZonesToTemplates.get(trimmed)) {
+                            if (exactMapZonesToTemplates.containsKey(trimmed)) {
+                                for (String pId : exactMapZonesToTemplates.get(trimmed)) {
                                     if (!zoneTemplates.contains(pId)) zoneTemplates.add(pId);
+                                }
+                            } else {
+                                String baseName = trimmed.contains(' (') ? trimmed.substringBeforeLast(' (').trim() : trimmed;
+                                if (autoMapZonesToTemplates.containsKey(baseName)) {
+                                    for (String pId : autoMapZonesToTemplates.get(baseName)) {
+                                        if (!zoneTemplates.contains(pId)) zoneTemplates.add(pId);
+                                    }
                                 }
                             }
                         }

@@ -44,11 +44,44 @@ export default class TechQuoteItemConfigurator extends LightningElement {
         this.zonasAfectadas.forEach(z => allPossibleZones.add(z));
         const selectedSet = new Set(this.zonasAfectadas.map(z => z.trim().toLowerCase()));
         
-        return Array.from(allPossibleZones).sort().map(zoneName => {
-            return {
+        const groups = {};
+        
+        Array.from(allPossibleZones).sort().forEach(zoneName => {
+            const isSelected = selectedSet.has(zoneName.trim().toLowerCase());
+            let baseName = zoneName;
+            let reportName = 'Estándar';
+            
+            const lastParenIndex = zoneName.lastIndexOf(' (');
+            if (lastParenIndex !== -1 && zoneName.endsWith(')')) {
+                baseName = zoneName.substring(0, lastParenIndex).trim();
+                reportName = zoneName.substring(lastParenIndex + 2, zoneName.length - 1).trim();
+            }
+            
+            if (!groups[baseName]) {
+                groups[baseName] = { baseName: baseName, templates: [] };
+            }
+            groups[baseName].templates.push({
                 name: zoneName,
-                isSelected: selectedSet.has(zoneName.trim().toLowerCase())
-            };
+                label: reportName,
+                isSelected: isSelected
+            });
+        });
+        
+        return Object.values(groups);
+    }
+
+    get formattedZonasAfectadas() {
+        return this.zonasAfectadas.map(z => {
+            let label = z;
+            const lastParenIndex = z.lastIndexOf(' (');
+            if (lastParenIndex !== -1 && z.endsWith(')')) {
+                const baseName = z.substring(0, lastParenIndex).trim();
+                const reportName = z.substring(lastParenIndex + 2, z.length - 1).trim();
+                label = `${baseName} • ${reportName}`;
+            } else {
+                label = `${z} • Estándar`;
+            }
+            return { name: z, label: label };
         });
     }
 

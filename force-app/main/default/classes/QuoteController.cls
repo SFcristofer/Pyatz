@@ -155,12 +155,39 @@ public with sharing class QuoteController {
 
     @AuraEnabled(cacheable=true)
     public static List<String> getHistoricalZones(Id accountId) {
-        List<String> zoneNames = new List<String>();
-        if (accountId == null) return zoneNames;
-        for (AggregateResult ar : [SELECT Name FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId GROUP BY Name ORDER BY Name ASC LIMIT 100]) {
-            zoneNames.add((String)ar.get('Name'));
+        if (accountId == null) return new List<String>();
+        
+        Set<String> baseNamesWithTemplates = new Set<String>();
+        Set<String> allBaseNames = new Set<String>();
+        List<String> combinedNames = new List<String>();
+        
+        for (Zona_Servicio_Pyatz__c z : [SELECT Name, (SELECT Plantilla__r.Name FROM Plantillas_de_Zona__r) FROM Zona_Servicio_Pyatz__c WHERE Cuenta__c = :accountId LIMIT 500]) {
+            allBaseNames.add(z.Name);
+            
+            if (!z.Plantillas_de_Zona__r.isEmpty()) {
+                Boolean hasValidTemplate = false;
+                for (Plantilla_de_Zona__c pz : z.Plantillas_de_Zona__r) {
+                    if (pz.Plantilla__c != null && String.isNotBlank(pz.Plantilla__r.Name)) {
+                        hasValidTemplate = true;
+                        String combined = z.Name + ' (' + pz.Plantilla__r.Name + ')';
+                        if (!combinedNames.contains(combined)) combinedNames.add(combined);
+                    }
+                }
+                if (hasValidTemplate) {
+                    baseNamesWithTemplates.add(z.Name);
+                }
+            }
         }
-        return zoneNames;
+        
+        List<String> finalNames = new List<String>();
+        for (String base : allBaseNames) {
+            if (!baseNamesWithTemplates.contains(base)) {
+                finalNames.add(base);
+            }
+        }
+        finalNames.addAll(combinedNames);
+        finalNames.sort();
+        return finalNames;
     }
 
     @AuraEnabled(cacheable=true)
