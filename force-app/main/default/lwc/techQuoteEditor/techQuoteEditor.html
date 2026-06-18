@@ -17,7 +17,7 @@
                 <div class="section-card slds-m-bottom_large">
                     <div class="section-header">
                         <div class="blue-square slds-m-right_small"></div>
-                        <h2 class="slds-text-heading_small">Estrategia de Venta</h2>
+                        <h2 class="slds-text-heading_small"><abbr class="slds-required" title="required">* </abbr>Estrategia de Venta</h2>
                     </div>
                     <div class="slds-p-around_large">
                         <lightning-radio-group name="estrategiaVenta"
@@ -26,6 +26,7 @@
                             value={estrategiaVenta}
                             onchange={handleEstrategiaChange}
                             type="button"
+                            required
                             variant="label-hidden"
                             class="custom-radio-group">
                         </lightning-radio-group>
@@ -48,7 +49,7 @@
                                         <lightning-input type="text" label="Número de Presupuesto" value={folio} readonly></lightning-input>
                                     </div>
                                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                                        <lightning-input type="text" label="Asunto" value={asunto} onchange={handleAsuntoChange}></lightning-input>
+                                        <lightning-input type="text" label="Asunto" value={asunto} onchange={handleAsuntoChange} required></lightning-input>
                                     </div>
                                 </div>
                             </div>
@@ -58,7 +59,7 @@
                             <div class="section-header slds-grid slds-grid_align-spread">
                                 <div class="slds-grid slds-grid_vertical-align-center">
                                     <lightning-icon icon-name="standard:location" size="small" class="slds-m-right_small"></lightning-icon>
-                                    <h2 class="slds-text-heading_small">Selección de Clientes</h2>
+                                    <h2 class="slds-text-heading_small"><abbr class="slds-required" title="required">* </abbr>Selección de Clientes</h2>
                                 </div>
                                 <div class="slds-grid slds-grid_vertical-align-center">
                                     <span class="slds-m-right_small slds-text-title_bold" style="color: #0070d2;">{sedeScopeLabel}</span>
@@ -106,13 +107,14 @@
                             <div class="slds-p-around_large">
                                 <div class="slds-grid slds-gutters slds-m-bottom_small">
                                     <div class="slds-col slds-size_1-of-1">
-                                        <p class="slds-text-title_bold slds-m-bottom_x-small">Dirigido a (Atención):</p>
+                                        <p class="slds-text-title_bold slds-m-bottom_x-small"><abbr class="slds-required" title="required">* </abbr>Dirigido a (Atención):</p>
                                         <lightning-checkbox-group
                                             name="contactSelector"
                                             label="Contactos disponibles"
                                             variant="label-hidden"
                                             options={contactOptions}
                                             value={selectedContactIds}
+                                            required
                                             onchange={handleContactChange}>
                                         </lightning-checkbox-group>
                                     </div>
@@ -127,7 +129,7 @@
                         <div class="section-card">
                             <div class="section-header">
                                 <lightning-icon icon-name="utility:tower" size="small" class="slds-m-right_small"></lightning-icon>
-                                <h2 class="slds-text-heading_small">Líneas de Negocio</h2>
+                                <h2 class="slds-text-heading_small"><abbr class="slds-required" title="required">* </abbr>Líneas de Negocio</h2>
                             </div>
                             <div class="slds-p-around_large">
                                 <div class="slds-grid slds-wrap">
@@ -148,7 +150,7 @@
             <!-- PASO 3: DETALLES -->
             <template if:true={isStep3}>
                 <div class="section-card slds-m-bottom_large">
-                    <div class="section-header"><h2 class="slds-text-heading_small">Partidas del Presupuesto</h2></div>
+                    <div class="section-header"><h2 class="slds-text-heading_small"><abbr class="slds-required" title="required">* </abbr>Partidas del Presupuesto</h2></div>
                     <div class="slds-p-around_none datatable-container">
                         <table class="slds-table slds-table_bordered slds-no-row-hover">
                             <thead>
@@ -280,7 +282,7 @@
                     <div class="section-header slds-grid slds-grid_align-spread">
                         <div class="slds-grid slds-grid_vertical-align-center">
                             <lightning-icon icon-name="utility:结_anexo" size="small" class="slds-m-right_small"></lightning-icon>
-                            <h2 class="slds-text-heading_small">Condiciones / Anexos</h2>
+                            <h2 class="slds-text-heading_small"><abbr class="slds-required" title="required">* </abbr>Condiciones / Anexos</h2>
                         </div>
                         <lightning-button-menu label="Usar Plantilla" onselect={handleApplyTemplate} data-field="warranty">
                             <template for:each={warrantyTemplates} for:item="tpl">
@@ -296,7 +298,7 @@
                 <div class="section-card slds-m-bottom_large">
                     <div class="section-header">
                         <lightning-icon icon-name="utility:moneybag" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
-                        <h2>Método de Pago</h2>
+                        <h2><abbr class="slds-required" title="required">* </abbr>Método de Pago</h2>
                     </div>
                     <div class="slds-p-around_large">
                         <div class="slds-grid slds-wrap slds-gutters">
