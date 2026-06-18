@@ -67,7 +67,7 @@
                                 </div>
                                 <div class="slds-col slds-grow slds-truncate slds-p-left_small">
                                     <span class="agent-name" title={row.resource.Name}>{row.resource.Name}</span>
-                                    <p class="agent-info">{row.resource.statusLabel} • {row.resource.workloadHours}h hoy</p>
+                                    <p class="agent-info">{row.resource.statusLabel} • {row.resource.workloadHours} / {row.resource.capacityHours} h</p>
                                 </div>
                             </div>
 
@@ -86,7 +86,7 @@
                                              title="Doble clic para editar fecha y horario">
                                             <div class="app-header slds-grid slds-grid_align-spread">
                                                 <span class="app-time">{app.formattedTime}</span>
-                                                <span class="app-duration">{app.Duration}h</span>
+                                                <span class="app-duration">{app.durationFormateado}</span>
                                             </div>
                                             <span class="app-client slds-truncate" title={app.AccountName}>{app.AccountName}</span>
                                             
@@ -113,7 +113,13 @@
                                                         </div>
                                                         <div class="popover-row">
                                                             <lightning-icon icon-name="utility:clock" size="xx-small" class="popover-icon"></lightning-icon>
-                                                            <div class="popover-text">{app.formattedTime} ({app.Duration} hrs)</div>
+                                                            <div class="popover-text">{app.formattedTime} ({app.durationFormateado})</div>
+                                                        </div>
+                                                        <div class="popover-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px solid #e5e7eb;">
+                                                            <lightning-icon icon-name="utility:checkin" size="xx-small" class="popover-icon"></lightning-icon>
+                                                            <div class="popover-text" style="font-size: 0.75rem; color: #4b5563;">
+                                                                Ida: {app.idaFormateado} | Esp: {app.esperaFormateado} | Reg: {app.regresoFormateado}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

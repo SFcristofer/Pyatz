@@ -86,16 +86,36 @@ export default class TechResourceCalendar extends NavigationMixin(LightningEleme
         const processed = rawResources.map(res => {
             const todayStr = new Date().toISOString().split('T')[0];
             const todayApps = this.appointments.filter(a => a.ServiceResourceId === res.Id && a.SchedStartTime.startsWith(todayStr));
-            const totalHours = todayApps.reduce((sum, a) => sum + (a.Duration || 0), 0);
+            
+            // ADR-002: Logística de tiempo dinámico por técnico
+            // Sumamos duración, ida, espera y regreso. Todo viene en minutos.
+            const totalHours = todayApps.reduce((sum, a) => {
+                const durationHours = (a.Duration || 0) / 60;
+                const idaHours = (a.ida || 0) / 60;
+                const esperaHours = (a.espera || 0) / 60;
+                const regresoHours = (a.regreso || 0) / 60;
+                return sum + durationHours + idaHours + esperaHours + regresoHours;
+            }, 0);
+
+            const todayDate = new Date();
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const todayName = dayNames[todayDate.getDay()];
+            const capacityHours = res.capacities ? (res.capacities[todayName] || 8) : 8;
 
             let statusColor = 'status-green';
             let statusLabel = 'Disponible';
-            if (totalHours > 6) { statusColor = 'status-red'; statusLabel = 'Saturado'; }
-            else if (totalHours > 3) { statusColor = 'status-yellow'; statusLabel = 'Ocupado'; }
+            if (capacityHours === 0 && totalHours > 0) {
+                statusColor = 'status-red'; statusLabel = 'Fuera de Horario';
+            } else if (totalHours >= capacityHours * 0.8) { 
+                statusColor = 'status-red'; statusLabel = 'Saturado'; 
+            } else if (totalHours >= capacityHours * 0.4) { 
+                statusColor = 'status-yellow'; statusLabel = 'Ocupado'; 
+            }
 
             return {
                 ...res,
-                workloadHours: totalHours,
+                workloadHours: totalHours.toFixed(1),
+                capacityHours: capacityHours.toFixed(1),
                 statusColor: `availability-dot ${statusColor}`,
                 statusLabel: statusLabel
             };
@@ -153,10 +173,20 @@ export default class TechResourceCalendar extends NavigationMixin(LightningEleme
                         else if (app.Status === 'None' || app.Status === 'Scheduled') statusClass += 'status-pending';
                         else statusClass += 'status-alert';
 
+                        // Calculate logistics values safely
+                        const idaMin = app.ida || 0;
+                        const esperaMin = app.espera || 0;
+                        const regresoMin = app.regreso || 0;
+                        const durMin = app.Duration || 0;
+
                         return {
                             ...app,
                             formattedTime: time,
-                            cssClass: statusClass
+                            cssClass: statusClass,
+                            idaFormateado: idaMin + 'm',
+                            esperaFormateado: esperaMin + 'm',
+                            regresoFormateado: regresoMin + 'm',
+                            durationFormateado: (durMin / 60).toFixed(1) + 'h'
                         };
                     });
 

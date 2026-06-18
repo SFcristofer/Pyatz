@@ -188,7 +188,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             startTime: row.startTime || '08:00:00.000',
                             locked: row.locked || false,
                             duration: row.duration || 60,
-                            arrivalMargin: row.arrivalMargin || 0,
+                            travelTime: row.travelTime || row.arrivalMargin || 0,
                             tecnicosIds: row.tecnicosIds || (row.tecnicoId ? [row.tecnicoId] : []),
                             executed: false,
                             showNotes: false,
@@ -239,7 +239,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                 startTime: '08:00:00.000',
                 locked: false,
                 duration: 60,
-                arrivalMargin: 0,
+                travelTime: 0,
                 tecnicosIds: [],
                 executed: false,
                 showNotes: false,
@@ -303,7 +303,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                             date: newDates[idx].date,
                             startTime: firstRow.startTime, 
                             duration: firstRow.duration,
-                            arrivalMargin: firstRow.arrivalMargin,
+                            travelTime: firstRow.travelTime,
                             tecnicosIds: firstRow.tecnicosIds,
                             notes: firstRow.notes 
                         };
@@ -382,21 +382,49 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
     currentModalTraId = null;
     currentModalRowIndex = null;
     @track currentModalTechs = [];
+    @track currentModalLogistica = {};
+
+    get selectedModalTechsData() {
+        return this.currentModalTechs.map(techId => {
+            const opt = this.tecnicosOptions.find(o => o.value === techId);
+            const log = this.currentModalLogistica[techId] || { ida: 0, espera: 0, regreso: 0 };
+            return {
+                id: techId,
+                label: opt ? opt.label : techId,
+                ida: log.ida,
+                espera: log.espera,
+                regreso: log.regreso
+            };
+        });
+    }
+
+    handleTechTimeChange(event) {
+        const techId = event.target.dataset.id;
+        const field = event.target.dataset.field;
+        const val = parseInt(event.target.value, 10) || 0;
+        if (!this.currentModalLogistica[techId]) {
+            this.currentModalLogistica[techId] = { ida: 0, espera: 0, regreso: 0 };
+        }
+        this.currentModalLogistica[techId][field] = val;
+    }
 
     openTechModal(event) {
         this.currentModalRowIndex = parseInt(event.currentTarget.dataset.rowIndex, 10);
         this.currentModalTraId = event.currentTarget.dataset.traId;
         
         let existingTechs = [];
+        let existingLog = {};
         this.sedesList.forEach(sede => {
             sede.tratamientos.forEach(tra => {
                 if (tra.id === this.currentModalTraId) {
                     existingTechs = tra.schedulingRows[this.currentModalRowIndex].tecnicosIds || [];
+                    existingLog = tra.schedulingRows[this.currentModalRowIndex].tecnicosLogistica || {};
                 }
             });
         });
         
         this.currentModalTechs = existingTechs;
+        this.currentModalLogistica = JSON.parse(JSON.stringify(existingLog));
         this.isTechModalOpen = true;
     }
 
@@ -405,6 +433,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
         this.currentModalTraId = null;
         this.currentModalRowIndex = null;
         this.currentModalTechs = [];
+        this.currentModalLogistica = {};
     }
 
     handleModalTechChange(event) {
@@ -413,6 +442,7 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
 
     saveTechModal() {
         const val = this.currentModalTechs;
+        const log = this.currentModalLogistica;
         this.sedesList = this.sedesList.map(sede => ({
             ...sede,
             tratamientos: sede.tratamientos.map(tra => {
@@ -420,7 +450,8 @@ export default class TechWorkOrderConsole extends NavigationMixin(LightningEleme
                     const newRows = [...tra.schedulingRows];
                     newRows[this.currentModalRowIndex] = { 
                         ...newRows[this.currentModalRowIndex], 
-                        tecnicosIds: val
+                        tecnicosIds: val,
+                        tecnicosLogistica: log
                     };
                     return { ...tra, schedulingRows: newRows };
                 }

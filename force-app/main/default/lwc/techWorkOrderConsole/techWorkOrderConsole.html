@@ -147,7 +147,6 @@
                                             <th class="" scope="col" style="width: 3rem;">#</th>
                                             <th class="" scope="col" style="width: 8rem;">Fecha</th>
                                             <th class="" scope="col" style="width: 7rem;">Hora Inicio</th>
-                                            <th class="" scope="col" style="width: 5rem;">Tolerancia</th>
                                             <th class="" scope="col">Técnicos Asignados</th>
                                             <th class="" scope="col" style="width: 8rem;">Acciones</th>
                                         </tr>
@@ -162,9 +161,7 @@
                                                 <td>
                                                     <lightning-input type="time" variant="label-hidden" value={row.startTime} data-field="startTime" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange}></lightning-input>
                                                 </td>
-                                                <td>
-                                                    <lightning-input type="number" variant="label-hidden" value={row.arrivalMargin} placeholder="+/- Min" data-field="arrivalMargin" data-row-index={idx} data-tra-id={tra.id} onchange={handleRowChange} title="Margen de llegada permitido"></lightning-input>
-                                                </td>
+                                                <!-- Min Traslado moved to Modal -->
                                                 <td>
                                                     <div class="slds-cell-wrap slds-grid slds-wrap slds-grid_vertical-align-center" style="min-width: 150px; gap: 4px;">
                                                         <template if:true={row.hasTechs}>
@@ -275,6 +272,32 @@
                             size="6"
                             disable-reordering>
                         </lightning-dual-listbox>
+
+                        <template if:true={selectedModalTechsData.length}>
+                            <h3 class="slds-text-heading_small slds-m-top_large slds-m-bottom_small slds-text-title_bold" style="color:#0070d2;">Tiempos Logísticos Individuales</h3>
+                            <div class="slds-scrollable_x">
+                                <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
+                                    <thead>
+                                        <tr>
+                                            <th>Técnico</th>
+                                            <th style="width: 100px;">Ida (Min)</th>
+                                            <th style="width: 100px;">Espera (Min)</th>
+                                            <th style="width: 100px;">Regreso (Min)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={selectedModalTechsData} for:item="tech">
+                                            <tr key={tech.id}>
+                                                <td class="slds-cell-wrap"><strong>{tech.label}</strong></td>
+                                                <td><lightning-input type="number" variant="label-hidden" value={tech.ida} data-id={tech.id} data-field="ida" onchange={handleTechTimeChange} placeholder="0"></lightning-input></td>
+                                                <td><lightning-input type="number" variant="label-hidden" value={tech.espera} data-id={tech.id} data-field="espera" onchange={handleTechTimeChange} placeholder="0"></lightning-input></td>
+                                                <td><lightning-input type="number" variant="label-hidden" value={tech.regreso} data-id={tech.id} data-field="regreso" onchange={handleTechTimeChange} placeholder="0"></lightning-input></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
                     </div>
                     <footer class="slds-modal__footer">
                         <button class="slds-button slds-button_neutral" onclick={closeTechModal}>Cancelar</button>

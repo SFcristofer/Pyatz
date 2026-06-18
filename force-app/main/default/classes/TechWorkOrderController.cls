@@ -72,7 +72,7 @@ public with sharing class TechWorkOrderController {
 
                 List<ServiceAppointment> sas = [SELECT Id, Duration, SchedStartTime, Status, ServiceNote, ArrivalWindowStartTime, ArrivalWindowEndTime, 
                                                 FSL__Pinned__c, Producto_Relacionado__c, Subject, Zonas_a_Tratar__c,
-                                                (SELECT ServiceResourceId FROM ServiceResources) 
+                                                (SELECT ServiceResourceId, EstimatedTravelTime, ActualTravelTime, FSL__EstimatedTravelTimeFrom__c FROM ServiceResources) 
                                                FROM ServiceAppointment WHERE ParentRecordId = :existingWO.Id ORDER BY SchedStartTime ASC];
                 
                 // Mapeo inteligente de citas existentes a tratamientos
@@ -113,13 +113,15 @@ public with sharing class TechWorkOrderController {
                         for (Integer i = 0; i < toConsume; i++) {
                             ServiceAppointment sa = pool.remove(0);
                             String firstTechId = '';
+                            Map<String, Object> logisticaMap = new Map<String, Object>();
                             for (AssignedResource ar : sa.ServiceResources) {
                                 if (String.isBlank(firstTechId)) firstTechId = ar.ServiceResourceId;
                                 techIds.add(ar.ServiceResourceId);
-                            }
-                            Integer margin = 0;
-                            if (sa.ArrivalWindowStartTime != null && sa.ArrivalWindowEndTime != null) {
-                                margin = Integer.valueOf((sa.ArrivalWindowEndTime.getTime() - sa.ArrivalWindowStartTime.getTime()) / (1000 * 60));
+                                logisticaMap.put(ar.ServiceResourceId, new Map<String, Object>{
+                                    'ida' => ar.EstimatedTravelTime != null ? Integer.valueOf(ar.EstimatedTravelTime) : 0,
+                                    'espera' => ar.ActualTravelTime != null ? Integer.valueOf(ar.ActualTravelTime) : 0,
+                                    'regreso' => ar.FSL__EstimatedTravelTimeFrom__c != null ? Integer.valueOf(ar.FSL__EstimatedTravelTimeFrom__c) : 0
+                                });
                             }
                             rows.add(new Map<String, Object>{
                                 'saId' => sa.Id,
@@ -128,10 +130,11 @@ public with sharing class TechWorkOrderController {
                                 'duration' => sa.Duration,
                                 'status' => sa.Status,
                                 'notes' => String.isNotBlank(sa.ServiceNote) ? sa.ServiceNote : '',
-                                'arrivalMargin' => margin,
+                                'travelTime' => 0,
                                 'locked' => sa.FSL__Pinned__c,
                                 'tecnicoId' => firstTechId,
-                                'tecnicosIds' => new List<String>(techIds)
+                                'tecnicosIds' => new List<String>(techIds),
+                                'tecnicosLogistica' => logisticaMap
                             });
                             // Solo sobreescribimos zonas si la cita trae algo útil (no vacío o default)
                             if (String.isNotBlank(sa.Zonas_a_Tratar__c) && sa.Zonas_a_Tratar__c != 'Sin descripción técnica') {
@@ -265,6 +268,7 @@ public with sharing class TechWorkOrderController {
             List<ServiceAppointment> sasToUpsert = new List<ServiceAppointment>();
             Set<Id> incomingSaIds = new Set<Id>();
             Map<Integer, List<String>> techIndexMap = new Map<Integer, List<String>>();
+            Map<Integer, Map<String, Object>> logisticaIndexMap = new Map<Integer, Map<String, Object>>();
             Map<Integer, List<String>> templateIndexMap = new Map<Integer, List<String>>();
             Map<Integer, Id> levantamientoIndexMap = new Map<Integer, Id>();
 
@@ -432,9 +436,9 @@ public with sharing class TechWorkOrderController {
                         sa.DueDate = Datetime.newInstance(d, Time.newInstance(23, 59, 59, 0));
                         sa.EarliestStartTime = sa.SchedStartTime.addMinutes(-60);
 
-                        Integer margin = row.get('arrivalMargin') != null ? Integer.valueOf(String.valueOf(row.get('arrivalMargin'))) : 0;
-                        sa.ArrivalWindowStartTime = sa.SchedStartTime.addMinutes(-margin);
-                        sa.ArrivalWindowEndTime = sa.SchedStartTime.addMinutes(margin);
+                        Integer travelTime = row.get('travelTime') != null ? Integer.valueOf(String.valueOf(row.get('travelTime'))) : 0;
+                        sa.ArrivalWindowStartTime = sa.SchedStartTime;
+                        sa.ArrivalWindowEndTime = sa.SchedStartTime.addMinutes(Integer.valueOf(sa.Duration));
 
                         if (row.get('locked') == true) sa.FSL__Pinned__c = true;
                         if (String.isNotBlank((String)row.get('notes'))) sa.ServiceNote = (String)row.get('notes');
@@ -459,8 +463,15 @@ public with sharing class TechWorkOrderController {
                             }
                         }
 
+                        // Recuperar logistica de la UI
+                        Map<String, Object> logistica = new Map<String, Object>();
+                        if (row.containsKey('tecnicosLogistica') && row.get('tecnicosLogistica') != null) {
+                            logistica = (Map<String, Object>)row.get('tecnicosLogistica');
+                        }
+
                         sasToUpsert.add(sa);
                         techIndexMap.put(saIdx, techs);
+                        logisticaIndexMap.put(saIdx, logistica);
                         templateIndexMap.put(saIdx, zoneTemplates);
                         levantamientoIndexMap.put(saIdx, levId);
                         saIdx++;
@@ -478,10 +489,12 @@ public with sharing class TechWorkOrderController {
                     }
                 }
 
-                // 2. BORRAR AssignedResources ANTES del upsert del ServiceAppointment.
-                if (!modifiableSaIds.isEmpty()) {
-                    List<AssignedResource> oldARs = [SELECT Id FROM AssignedResource WHERE ServiceAppointmentId IN :modifiableSaIds];
-                    if (!oldARs.isEmpty()) delete oldARs;
+                // Cargar AssignedResource existentes
+                List<AssignedResource> existingARsList = [SELECT Id, ServiceAppointmentId, ServiceResourceId FROM AssignedResource WHERE ServiceAppointmentId IN :incomingSaIds];
+                Map<Id, Map<Id, AssignedResource>> existingARsBySA = new Map<Id, Map<Id, AssignedResource>>();
+                for(AssignedResource ar : existingARsList) {
+                    if(!existingARsBySA.containsKey(ar.ServiceAppointmentId)) existingARsBySA.put(ar.ServiceAppointmentId, new Map<Id, AssignedResource>());
+                    existingARsBySA.get(ar.ServiceAppointmentId).put(ar.ServiceResourceId, ar);
                 }
 
                 // 3. RECUPERAR NOMBRES DE PLANTILLAS Y ASIGNAR TIPO_DE_REPORTE__C
@@ -548,13 +561,46 @@ public with sharing class TechWorkOrderController {
 
                 List<Revision_Cita_Servicio__c> revsToUpsert = new List<Revision_Cita_Servicio__c>();
                 List<AssignedResource> arsToIns = new List<AssignedResource>();
+                List<AssignedResource> arsToUpd = new List<AssignedResource>();
+                List<AssignedResource> arsToDel = new List<AssignedResource>();
 
                 Id firstUserOwnerId = null;
                 for (Integer i = 0; i < sasToUpsert.size(); i++) {
                     ServiceAppointment currentSA = sasToUpsert[i];
                     List<String> saTechSRIds = techIndexMap.get(i);
+                    Map<String, Object> logistica = logisticaIndexMap.get(i);
                     Id saPrimaryUserId = (!saTechSRIds.isEmpty() && srToUserId.containsKey((Id)saTechSRIds[0])) ? srToUserId.get((Id)saTechSRIds[0]) : UserInfo.getUserId();
                     if (firstUserOwnerId == null && !saTechSRIds.isEmpty()) firstUserOwnerId = srToUserId.get((Id)saTechSRIds[0]);
+
+                    for (String tId : saTechSRIds) {
+                        AssignedResource ar;
+                        if (currentSA.Id != null && existingARsBySA.containsKey(currentSA.Id) && existingARsBySA.get(currentSA.Id).containsKey((Id)tId)) {
+                            ar = existingARsBySA.get(currentSA.Id).get((Id)tId);
+                            existingARsBySA.get(currentSA.Id).remove((Id)tId);
+                        } else {
+                            if (currentSA.Id == null || modifiableSaIds.contains(currentSA.Id)) {
+                                ar = new AssignedResource(ServiceAppointmentId = currentSA.Id, ServiceResourceId = (Id)tId);
+                            } else {
+                                continue; // No creamos ARs nuevos si no es modificable
+                            }
+                        }
+
+                        if (logistica != null && logistica.containsKey(tId)) {
+                            Map<String, Object> techLog = (Map<String, Object>)logistica.get(tId);
+                            if (techLog.containsKey('ida') && techLog.get('ida') != null && String.valueOf(techLog.get('ida')) != '') ar.EstimatedTravelTime = Integer.valueOf(techLog.get('ida'));
+                            if (techLog.containsKey('espera') && techLog.get('espera') != null && String.valueOf(techLog.get('espera')) != '') ar.ActualTravelTime = Integer.valueOf(techLog.get('espera'));
+                            if (techLog.containsKey('regreso') && techLog.get('regreso') != null && String.valueOf(techLog.get('regreso')) != '') ar.FSL__EstimatedTravelTimeFrom__c = Integer.valueOf(techLog.get('regreso'));
+                        }
+                        
+                        if (ar.Id == null) {
+                            arsToIns.add(ar);
+                        } else {
+                            arsToUpd.add(ar);
+                        }
+                    }
+                    if (currentSA.Id != null && modifiableSaIds.contains(currentSA.Id) && existingARsBySA.containsKey(currentSA.Id)) {
+                        arsToDel.addAll(existingARsBySA.get(currentSA.Id).values());
+                    }
 
                     // Si no tiene revisiones, creamos nuevas
                     if (!revsBySA.containsKey(currentSA.Id) || revsBySA.get(currentSA.Id).isEmpty()) {
@@ -596,14 +642,6 @@ public with sharing class TechWorkOrderController {
                             }
                         }
                     }
-                    
-                    // Solo asignamos los técnicos nuevos si la cita era nueva o estaba en un estado modificable
-                    Boolean canChangeTech = (!incomingSaIds.contains(currentSA.Id)) || modifiableSaIds.contains(currentSA.Id);
-                    if (canChangeTech) {
-                        for (String tId : saTechSRIds) {
-                            arsToIns.add(new AssignedResource(ServiceAppointmentId = currentSA.Id, ServiceResourceId = (Id)tId));
-                        }
-                    }
                 }
                 
                 if (firstUserOwnerId != null && wo.OwnerId != firstUserOwnerId) {
@@ -611,6 +649,14 @@ public with sharing class TechWorkOrderController {
                 }
 
                 if (!revsToUpsert.isEmpty()) upsert revsToUpsert;
+                if (!arsToDel.isEmpty()) { 
+                    try { delete arsToDel; } 
+                    catch (Exception e) { throw new AuraHandledException('Error al eliminar técnicos: ' + e.getMessage()); } 
+                }
+                if (!arsToUpd.isEmpty()) { 
+                    try { update arsToUpd; } 
+                    catch (Exception e) { throw new AuraHandledException('Error al actualizar técnicos: ' + e.getMessage()); } 
+                }
                 if (!arsToIns.isEmpty()) { 
                     try { insert arsToIns; } 
                     catch (Exception e) { throw new AuraHandledException('Error al asignar técnicos: ' + e.getMessage()); } 
@@ -618,10 +664,9 @@ public with sharing class TechWorkOrderController {
             }
             System.debug('--- TechWorkOrder - Fin exitoso ---');
             return wo.Id;
-        } catch (AuraHandledException e) {
-            throw e;
         } catch (Exception e) { 
-            throw new AuraHandledException('Error Técnico: ' + e.getMessage() + ' (Línea: ' + e.getLineNumber() + ')'); 
+            System.debug('FATAL ERROR CAUGHT: ' + e.getMessage() + ' at line ' + e.getLineNumber());
+            throw new IllegalArgumentException('FATAL ERROR CAUGHT: ' + e.getMessage() + ' at line ' + e.getLineNumber());
         }
     }
 

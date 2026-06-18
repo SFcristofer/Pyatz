@@ -666,11 +666,11 @@
                                     <!-- Izquierda: Recibió del Cliente -->
                                     <td style="text-align:center; vertical-align:top; width:33.33%; padding:0 8pt;">
                                         <div style="font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:1pt; color:#555; margin-bottom:6pt; border-bottom:0.5pt solid #ccc; padding-bottom:2pt;">Recibi&#243; del Cliente</div>
-                                        <span style="height:55pt; display:block;">
+                                        <div style="height:55pt; width:100%; display:block;">
                                             <apex:outputPanel rendered="{!NOT(ISBLANK(clientSigUrl))}" layout="none">
-                                                <img src="{!clientSigUrl}" style="height:44pt; width:auto;" alt="Firma cliente"/>
+                                                <img src="{!clientSigUrl}" style="height:44pt; width:auto; margin-top:4pt;" alt="Firma cliente"/>
                                             </apex:outputPanel>
-                                        </span>
+                                        </div>
                                         <div class="cert-sig-line">
                                             <apex:outputPanel rendered="{!NOT(ISBLANK(nombreFirmante))}" layout="none">{!nombreFirmante}</apex:outputPanel>
                                             <apex:outputPanel rendered="{!AND(ISBLANK(nombreFirmante), NOT(ISBLANK(clientSigName)))}" layout="none">{!clientSigName}</apex:outputPanel>
@@ -684,14 +684,14 @@
                                     <!-- Centro: Firma Autorizada Pyatz -->
                                     <td style="text-align:center; vertical-align:top; width:33.33%; padding:0 8pt;">
                                         <div style="font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:1pt; color:#555; margin-bottom:6pt; border-bottom:0.5pt solid #ccc; padding-bottom:2pt;">Firma Autorizada Pyatz</div>
-                                        <span style="height:55pt; display:block;">
+                                        <div style="height:55pt; width:100%; display:block;">
                                             <apex:outputPanel rendered="{!AND(verificado, NOT(ISBLANK(pyatzSignatureUrl)))}" layout="none">
-                                                <img src="{!pyatzSignatureUrl}" style="height:44pt; width:auto;" alt="Firma Pyatz"/>
+                                                <img src="{!pyatzSignatureUrl}" style="height:44pt; width:auto; margin-top:4pt;" alt="Firma Pyatz"/>
                                             </apex:outputPanel>
                                             <apex:outputPanel rendered="{!NOT(verificado)}" layout="none">
                                                 <div style="height:44pt; border:0.5pt dashed #ccc; margin:4pt auto; width:100pt; display:block;"></div>
                                             </apex:outputPanel>
-                                        </span>
+                                        </div>
                                         <div class="cert-sig-line">
                                             <apex:outputPanel rendered="{!AND(verificado, NOT(ISBLANK(techName)))}" layout="none">{!techName}</apex:outputPanel>
                                             <apex:outputPanel rendered="{!NOT(AND(verificado, NOT(ISBLANK(techName))))}" layout="none">&#160;</apex:outputPanel>
@@ -701,9 +701,9 @@
                                     <!-- Derecha: Sello de la Empresa -->
                                     <td style="text-align:center; vertical-align:top; width:33.33%; padding:0 8pt;">
                                         <div style="font-size:6pt; font-weight:bold; text-transform:uppercase; letter-spacing:1pt; color:#555; margin-bottom:6pt; border-bottom:0.5pt solid #ccc; padding-bottom:2pt;">Sello de la Empresa</div>
-                                        <span style="height:55pt; display:block;">
-                                            <img src="{!$Resource.sello}" style="height:50pt; width:auto;" alt="Sello Pyatz"/>
-                                        </span>
+                                        <div style="height:55pt; width:100%; display:block;">
+                                            <img src="{!$Resource.sello}" style="height:50pt; width:auto; margin-top:2pt;" alt="Sello Pyatz"/>
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
