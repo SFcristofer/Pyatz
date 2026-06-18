@@ -22,7 +22,8 @@ import updateSASchedStartTime from '@salesforce/apex/OdtViewerController.updateS
 import updateSADetails from '@salesforce/apex/OdtViewerController.updateSADetails';
 import updateSAStatus from '@salesforce/apex/OdtViewerController.updateSAStatus';
 import getProductosForContract from '@salesforce/apex/OdtViewerController.getProductosForContract';
-import updateSAProducto from '@salesforce/apex/OdtViewerController.updateSAProducto';
+
+import getActivePicklistOptions from '@salesforce/apex/OdtViewerController.getActivePicklistOptions';
 
 const STATUS_MAP = {
     'Completed'       : { label: 'Verificada',         css: 'status-badge badge-green'  },
@@ -204,31 +205,18 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
         return opts;
     }
 
-    get saStatusOptions() {
-        return [
-            { value: 'Sin Estado',  label: 'Sin Estado'  },
-            { value: 'Programada',  label: 'Programada'  },
-            { value: 'En camino',   label: 'En camino'   },
-            { value: 'En curso',    label: 'En curso'    },
-            { value: 'En Sitio',    label: 'En Sitio'    },
-            { value: 'Completada',  label: 'Completada'  },
-            { value: 'Cancelada',   label: 'Cancelada'   }
-        ];
-    }
+    get saStatusOptions() { return this._saStatusOptions || []; }
 
-    get statusOptions() {
-        return [
-            { value: 'New',             label: 'Pendiente Ejecución' },
-            { value: 'Scheduled',       label: 'Programada'          },
-            { value: 'Dispatched',      label: 'Enviada'             },
-            { value: 'In Progress',     label: 'En Ejecución'        },
-            { value: 'On Site',         label: 'En Sitio'            },
-            { value: 'Completed',       label: 'Verificada'          },
-            { value: 'Cannot Complete', label: 'No Completada'       },
-            { value: 'Closed',          label: 'Cerrada'             },
-            { value: 'Canceled',        label: 'Cancelada'           }
-        ];
-    }
+    get statusOptions() { return this._woStatusOptions || []; }
+
+    @track _woStatusOptions = [];
+    @track _saStatusOptions = [];
+
+    @wire(getActivePicklistOptions, { objectName: 'WorkOrder', fieldName: 'Status' })
+    wiredWoStatus({ data }) { if (data) this._woStatusOptions = data; }
+
+    @wire(getActivePicklistOptions, { objectName: 'ServiceAppointment', fieldName: 'Status' })
+    wiredSaStatus({ data }) { if (data) this._saStatusOptions = data; }
 
     _wiredResult;
     @wire(getOdtsByAccount, { accountId: '$recordId' })
@@ -257,15 +245,15 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
     }
 
     _mapWo(wo) {
-        const info = STATUS_MAP[wo.status] || { label: wo.status, css: 'status-badge badge-gray' };
+        const info = STATUS_MAP[wo.status] || { css: 'status-badge badge-gray' };
         const isPending = PENDING_STATUSES.has(wo.status);
         return {
             ...wo,
             appointments: wo.appointments || [],
             statusRaw:    wo.status,
-            statusLabel:  info.label,
-            status:       info.label,
-            statusClass:  info.css,
+            statusLabel:  wo.status,
+            status:       wo.status,
+            statusClass:  info.css || 'status-badge badge-gray',
             isPending,
             selected:     false,
             rowClass:     'odt-row',
@@ -1161,3 +1149,4 @@ export default class TechOdtViewer extends NavigationMixin(LightningElement) {
         this.pdfModalUrl  = '';
     }
 }
+

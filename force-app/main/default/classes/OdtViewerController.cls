@@ -90,7 +90,7 @@ public with sharing class OdtViewerController {
         // 1. ServiceContracts
         Map<Id, Map<String, Object>> scMap = new Map<Id, Map<String, Object>>();
         for (ServiceContract sc : [
-            SELECT Id, ContractNumber, Status, StartDate, EndDate, Name
+            SELECT Id, ContractNumber, toLabel(Status), StartDate, EndDate, Name
             FROM ServiceContract
             WHERE AccountId = :accountId
             ORDER BY CreatedDate DESC
@@ -109,7 +109,7 @@ public with sharing class OdtViewerController {
         // 2. Todas las citas de servicio por WorkOrder (solo las que no tienen padre = no son hijas de fusión)
         Map<Id, List<Map<String, Object>>> woAppointments = new Map<Id, List<Map<String, Object>>>();
         for (ServiceAppointment sa : [
-            SELECT Id, AppointmentNumber, ParentRecordId, SchedStartTime, Duration, Status, Description,
+            SELECT Id, AppointmentNumber, ParentRecordId, SchedStartTime, Duration, toLabel(Status), Description,
                    Producto_Relacionado__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode,
                    (SELECT Id, ServiceResourceId, ServiceResource.Name FROM ServiceResources)
             FROM ServiceAppointment
@@ -256,7 +256,7 @@ public with sharing class OdtViewerController {
         };
 
         for (WorkOrder wo : [
-            SELECT Id, WorkOrderNumber, Status, StartDate, Subject, Description,
+            SELECT Id, WorkOrderNumber, toLabel(Status), StartDate, Subject, Description,
                    ServiceContractId, ServiceTerritoryId, ServiceTerritory.Name, Priority
             FROM WorkOrder
             WHERE AccountId = :accountId
@@ -488,7 +488,7 @@ public with sharing class OdtViewerController {
 
         // SAs sin padre de esos WOs
         List<ServiceAppointment> sas = [
-            SELECT Id, AppointmentNumber, SchedStartTime, Status, Revisiones__c,
+            SELECT Id, AppointmentNumber, SchedStartTime, toLabel(Status), Revisiones__c,
                    ParentRecordId, Producto_Relacionado__c,
                    Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode,
                    (SELECT ServiceResource.Name FROM ServiceResources LIMIT 1)
@@ -705,6 +705,23 @@ public with sharing class OdtViewerController {
     }
 
     // ── Helpers privados ──────────────────────────────────────────────────────
+
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getActivePicklistOptions(String objectName, String fieldName) {
+        List<Map<String, String>> options = new List<Map<String, String>>();
+        Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
+        if (sObjectType != null) {
+            Schema.SObjectField sObjectField = sObjectType.getDescribe().fields.getMap().get(fieldName);
+            if (sObjectField != null) {
+                for (Schema.PicklistEntry pe : sObjectField.getDescribe().getPicklistValues()) {
+                    if (pe.isActive()) {
+                        options.add(new Map<String, String>{ 'label' => pe.getLabel(), 'value' => pe.getValue() });
+                    }
+                }
+            }
+        }
+        return options;
+    }
 
     private static void recalcSAStatus(Id saId) {
         List<ServiceAppointment> sas = [

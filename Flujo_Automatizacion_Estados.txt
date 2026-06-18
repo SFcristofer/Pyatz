@@ -1,0 +1,36 @@
+=== CONTEXTO Y OBJETIVO DE LA AUTOMATIZACIÓN ===
+El objetivo es crear un "Efecto Cascada hacia Arriba" (Roll-up de Estados) para que el técnico de campo solo deba interactuar con los registros de nivel más bajo (las Revisiones). Al terminar las Revisiones, el sistema debe actualizar automáticamente los estados de la Cita de Servicio y de la Orden de Trabajo.
+
+=== OBJETOS Y CAMPOS INVOLUCRADOS ===
+1. Orden de Trabajo (WorkOrder)
+   - Campo clave: Status (Valores típicos: New, Scheduled, In Progress, Completed, Cannot Complete, Canceled, Closed)
+   
+2. Cita de Servicio (ServiceAppointment)
+   - Campo clave: Status (Valores típicos: Scheduled, Dispatched, In Progress, Completed, Cannot Complete, Canceled)
+   
+3. Revisión (Revision_Cita_Servicio__c)
+   - Campo clave: Status__c (Valores típicos: En Proceso, Pausado, Completada, Cancelada)
+
+
+=== LÓGICA DE NEGOCIO Y REGLAS DEL FLUJO ===
+
+NIVEL 1: Actualización de la Cita de Servicio (SA)
+* Evento Disparador: Se crea o actualiza un registro de Revision_Cita_Servicio__c y su Status__c pasa a ser 'Completada' o 'Cancelada'.
+* Acción: Consultar TODAS las Revisiones hermanas que pertenezcan a la misma Cita de Servicio.
+* Evaluaciones:
+  - ESCENARIO A (Pendientes): Si al menos una revisión sigue "En Proceso" o "Pausado" -> La SA mantiene su estado actual ("In Progress" / En curso).
+  - ESCENARIO B (Éxito Total): Si el 100% de las revisiones están "Completada" -> La SA cambia automáticamente a "Completed" (Completada).
+  - ESCENARIO C (Incidencia/Cancelación): Si todas las revisiones ya están cerradas (mezcla de Completadas y Canceladas, o todas Canceladas) -> La SA cambia a "Cannot Complete" (No Completada) o un estado de incidencia definido.
+
+NIVEL 2: Actualización de la Orden de Trabajo (WO)
+* Evento Disparador: Una Cita de Servicio (ServiceAppointment) cambia su estado a "Completed" o "Cannot Complete" (disparado ya sea por el humano o por el Nivel 1).
+* Acción: Consultar TODAS las Citas de Servicio que pertenezcan a la misma Orden de Trabajo padre.
+* Evaluaciones:
+  - ESCENARIO A (Trabajo en Curso): Si existe alguna cita en "Scheduled", "Dispatched" o "In Progress" -> La WO se queda en "In Progress" (En Ejecución).
+  - ESCENARIO B (Éxito Total): Si el 100% de las citas de servicio están "Completed" -> La WO cambia a "Completed", "Closed" o "Verificada".
+  - ESCENARIO C (Incidencia en ODT): Si todas las citas terminaron, pero al menos una está en "Cannot Complete" -> La WO cambia a "Cannot Complete" para que sea revisada por un supervisor en backoffice.
+
+=== CONSIDERACIONES FUTURAS AL IMPLEMENTAR ===
+- La implementación más limpia y fácil de mantener en Salesforce para esto es usar Record-Triggered Flows.
+- Si hay bloqueos de actualización por el volumen de citas, se podría optar por Triggers de Apex.
+- Deberá revisarse si el cambio de estado de la Cita de Servicio activa reglas de Field Service que interfieran, por lo que las transiciones de estado deben estar permitidas en el modelo de Status Transitions de Field Service Settings.
