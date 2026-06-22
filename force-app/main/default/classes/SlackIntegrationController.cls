@@ -1,5 +1,7 @@
 public with sharing class SlackIntegrationController {
     
+    // TODO: Migrar a Named Credentials. Una vez creada la Named Credential "Slack_API",
+    // elimina BOT_TOKEN y cambia API_URL a 'callout:Slack_API/'
     private static final String BOT_TOKEN = System.Label.Slack_Bot_Token;
     private static final String API_URL = 'https://slack.com/api/';
 
@@ -26,6 +28,7 @@ public with sharing class SlackIntegrationController {
             }
             return userMap;
         } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR, 'Error en getUserMap: ' + e.getMessage());
             return new Map<String, String>();
         }
     }
@@ -36,7 +39,8 @@ public with sharing class SlackIntegrationController {
     @AuraEnabled
     public static List<Map<String, String>> getChannels() {
         try {
-            String body = performCallout('conversations.list', 'GET', null);
+            String endpoint = 'conversations.list?exclude_archived=true&types=public_channel&limit=1000';
+            String body = performCallout(endpoint, 'GET', null);
             Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(body);
             
             List<Map<String, String>> channelList = new List<Map<String, String>>();
@@ -61,10 +65,6 @@ public with sharing class SlackIntegrationController {
         }
     }
 
-    /**
-     * Envía un mensaje con formato avanzado a Slack.
-     * Intenta unirse al canal automáticamente si no es miembro.
-     */
     /**
      * Recupera las respuestas de un hilo específico.
      */
@@ -140,6 +140,8 @@ public with sharing class SlackIntegrationController {
                     performCallout('conversations.join', 'POST', JSON.serialize(new Map<String, String>{'channel' => channelId}));
                     body = performCallout('conversations.history?channel=' + channelId + '&limit=15', 'GET', null);
                     response = (Map<String, Object>) JSON.deserializeUntyped(body);
+                } else {
+                    throw new AuraHandledException('Error de Slack: ' + error);
                 }
             }
 
@@ -206,15 +208,19 @@ public with sharing class SlackIntegrationController {
     @AuraEnabled
     public static void uploadFile(String channelId, String fileName, String base64Data) {
         try {
-            // 1. Obtener URL de subida
-            Map<String, Object> urlPayload = new Map<String, Object>{
-                'filename' => fileName,
-                'length' => EncodingUtil.base64Decode(base64Data).size()
-            };
-            String urlResponse = performCallout('files.getUploadExternalUrl', 'GET', null + '?filename=' + fileName + '&length=' + urlPayload.get('length'));
+            // Decodificamos el archivo una sola vez para evitar exceder el Heap Size
+            Blob fileBlob = EncodingUtil.base64Decode(base64Data);
+            
+            // 1. Obtener URL de subida (pasando los parámetros correctamente en la URL con URL Encode)
+            String encodedFileName = EncodingUtil.urlEncode(fileName, 'UTF-8');
+            String endpoint = 'files.getUploadExternalUrl?filename=' + encodedFileName + '&length=' + fileBlob.size();
+            
+            String urlResponse = performCallout(endpoint, 'GET', null);
             Map<String, Object> urlData = (Map<String, Object>) JSON.deserializeUntyped(urlResponse);
             
-            if (!(Boolean)urlData.get('ok')) throw new AuraHandledException('Slack Upload URL Error: ' + urlData.get('error'));
+            if (!(Boolean)urlData.get('ok')) {
+                throw new AuraHandledException('Slack Upload URL Error: ' + urlData.get('error'));
+            }
 
             String uploadUrl = (String)urlData.get('upload_url');
             String fileId = (String)urlData.get('file_id');
@@ -224,7 +230,7 @@ public with sharing class SlackIntegrationController {
             HttpRequest req = new HttpRequest();
             req.setEndpoint(uploadUrl);
             req.setMethod('POST');
-            req.setBodyAsBlob(EncodingUtil.base64Decode(base64Data));
+            req.setBodyAsBlob(fileBlob);
             h.send(req);
 
             // 3. Completar la subida y compartir en el canal
@@ -247,7 +253,10 @@ public with sharing class SlackIntegrationController {
         HttpRequest req = new HttpRequest();
         req.setEndpoint(API_URL + endpoint);
         req.setMethod(method);
+        
+        // TODO: Eliminar la siguiente línea una vez que se use la Named Credential
         req.setHeader('Authorization', 'Bearer ' + BOT_TOKEN);
+        
         req.setHeader('Content-Type', 'application/json; charset=utf-8');
         if (payload != null) req.setBody(payload);
         

@@ -41,7 +41,7 @@ export default class TechSlackModal extends LightningModal {
         // eslint-disable-next-line @lwc/lwc/no-async-operation
         this._refreshInterval = setInterval(() => {
             this.silentRefresh();
-        }, 5000); // Refresca cada 5 segundos
+        }, 15000); // Refresca cada 15 segundos
     }
 
     stopAutoRefresh() {
