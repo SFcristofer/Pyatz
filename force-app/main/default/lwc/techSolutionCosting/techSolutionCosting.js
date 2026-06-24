@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getOpportunitySolutions from '@salesforce/apex/SurveyController.getOpportunitySolutions';
+import getSolucionesOpp from '@salesforce/apex/SurveyController.getSolucionesOpp';
 import saveSolucion from '@salesforce/apex/SurveyController.saveSolucion';
 
 export default class TechSolutionCosting extends LightningElement {
@@ -17,15 +17,23 @@ export default class TechSolutionCosting extends LightningElement {
     }
 
     loadSolutions() {
-        getOpportunitySolutions({ oppId: this.recordId })
+        getSolucionesOpp({ recordId: this.recordId })
             .then(result => {
-                this.groupedSolutions = result.map(group => ({
-                    ...group,
-                    solutions: group.solutions.map(sol => ({
-                        ...sol,
-                        className: sol.id === this.selectedSolId ? 'sol-card active-sol' : 'sol-card'
-                    }))
-                }));
+                if (result && result.length > 0) {
+                    this.groupedSolutions = [{
+                        id: 'group-1',
+                        label: 'Soluciones Técnicas de la Oportunidad',
+                        solutions: result.map(sol => ({
+                            id: sol.Id,
+                            name: sol.Name,
+                            techDesc: sol.Descripcion_Detallada__c,
+                            commObs: sol.Observaciones_Comerciales__c,
+                            className: sol.Id === this.selectedSolId ? 'sol-card active-sol' : 'sol-card'
+                        }))
+                    }];
+                } else {
+                    this.groupedSolutions = [];
+                }
             })
             .catch(error => console.error('Error load solutions:', error));
     }

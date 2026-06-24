@@ -30,7 +30,7 @@ public with sharing class SurveyController {
     @AuraEnabled
     public static List<Solucion_Tecnica__c> getSolucionesOpp(Id recordId) {
         Id oppId = resolveOppId(recordId);
-        return [SELECT Id, Name, Descripcion_Detallada__c, 
+        return [SELECT Id, Name, Descripcion_Detallada__c, Observaciones_Comerciales__c,
                 (SELECT Id FROM Enlaces_Hallazgos__r) 
                 FROM Solucion_Tecnica__c 
                 WHERE Oportunidad__c = :oppId ORDER BY CreatedDate ASC];
