@@ -11,7 +11,7 @@ import savePhoto                 from '@salesforce/apex/ServiceReviewController.
 import getRevisionPhotos         from '@salesforce/apex/ServiceReviewController.getRevisionPhotos';
 import deletePhoto               from '@salesforce/apex/ServiceReviewController.deletePhoto';
 import saveSignature             from '@salesforce/apex/ServiceReviewController.saveSignature';
-import getRevisionSignature      from '@salesforce/apex/ServiceReviewController.getRevisionSignature';
+import getSASignature            from '@salesforce/apex/ServiceReviewController.getSASignature';
 import getRevisionData           from '@salesforce/apex/ServiceReviewController.getRevisionData';
 import setRevisionTemplate       from '@salesforce/apex/ServiceReviewController.setRevisionTemplate';
 import pauseRevision             from '@salesforce/apex/ServiceReviewController.pauseRevision';
@@ -102,6 +102,8 @@ export default class TechServiceReview extends LightningElement {
     _canvasReady     = false;
     _previewRendered = false;
 
+    @track isGlobalSignature = false;
+
     // ── Form ──────────────────────────────────────────────────────────────────
     @track selectedFormType  = '';
     @track formQuestions     = [];
@@ -158,7 +160,7 @@ export default class TechServiceReview extends LightningElement {
     }
 
     renderedCallback() {
-        if (this.currentStep === STEP_SIGNATURE) {
+        if (this.isGlobalSignature) {
             if (this.sigState === SIG_SIGNING && !this._canvasReady) {
                 this._initSignCanvas();
             }
@@ -207,12 +209,11 @@ export default class TechServiceReview extends LightningElement {
     }
 
     get pip1Class() { return this._pipClass(STEP_PHOTOS); }
-    get pip2Class() { return this._pipClass(STEP_SIGNATURE); }
-    get pip3Class() { return this._pipClass(STEP_FORM_SEL); }
-    get pip4Class() { return this._pipClass(STEP_FORM_FILL); }
+    get pip2Class() { return this._pipClass(STEP_FORM_SEL); }
+    get pip3Class() { return this._pipClass(STEP_FORM_FILL); }
 
     _pipClass(step) {
-        const order = [STEP_PHOTOS, STEP_FORM_SEL, STEP_FORM_FILL, STEP_SIGNATURE, STEP_DONE];
+        const order = [STEP_PHOTOS, STEP_FORM_SEL, STEP_FORM_FILL, STEP_DONE];
         const cur   = order.indexOf(this.currentStep);
         const idx   = order.indexOf(step);
         if (idx < cur)  return 'step-pip step-pip--done';
@@ -247,9 +248,22 @@ export default class TechServiceReview extends LightningElement {
     get sigStatePreview() { return this.sigState === SIG_PREVIEW; }
     get sigNameEmpty()    { return !this.signerName || !this.signerName.trim(); }
     get canSkipSignature(){ return false; }
-    get cantSaveRevision(){ return !this.signatureSaved || this.savingRevision; }
     get sigGpsDotClass()  { return this.sigGpsReady ? 'gps-dot gps-dot--ok' : 'gps-dot gps-dot--loading'; }
-    get isSignatureLocked() { return !this.hasPlantilla || !this.hasFormQuestions || !this.hasRevPhotos; }
+    get cantSaveRevision(){ return this.savingRevision; }
+    get hasFirmaGlobal()  { return this.saInfo && this.saInfo.hasFirmaGlobal; }
+    get nombreFirmanteGlobal() { return this.saInfo ? this.saInfo.nombreFirmanteGlobal : ''; }
+    get cargoFirmanteGlobal()  { return this.saInfo ? this.saInfo.cargoFirmanteGlobal : ''; }
+
+    get canSignGlobal() {
+        if (!this.saInfo) return false;
+        return this.saInfo.maxRevisiones > 0 && this.saInfo.revisionesCompletadas >= this.saInfo.maxRevisiones;
+    }
+    get disableSignGlobal() {
+        return !this.canSignGlobal;
+    }
+    get btnSignGlobalTitle() {
+        return this.canSignGlobal ? 'Firma de Cita de Servicio' : 'Debe completar todas las revisiones primero';
+    }
 
     // ─── Getters – form ───────────────────────────────────────────────────────
 
@@ -413,6 +427,17 @@ export default class TechServiceReview extends LightningElement {
         this._loadSAInfo();
     }
 
+    handleOpenGlobalSignature() {
+        this._canvasReady     = false;
+        this._previewRendered = false;
+        this._requestSigGPS();
+        this.isGlobalSignature = true;
+    }
+
+    handleCloseGlobalSignature() {
+        this.isGlobalSignature = false;
+    }
+
     handleShowSAHistory() {
         this.showSAHistory    = true;
         this.loadingSAHistory = true;
@@ -519,7 +544,7 @@ export default class TechServiceReview extends LightningElement {
         resumeP
             .then(() => Promise.all([
                 getRevisionData({ revisionId: id }),
-                getRevisionSignature({ revisionId: id }),
+                getSASignature({ saId: this.recordId }),
             ]))
             .then(([data, sigData]) => {
                 this.observaciones   = data.observaciones   || '';
@@ -643,10 +668,7 @@ export default class TechServiceReview extends LightningElement {
     }
 
     handleGoToSignature() {
-        this._canvasReady     = false;
-        this._previewRendered = false;
-        this._requestSigGPS();
-        this.currentStep = STEP_SIGNATURE;
+        this.handleSaveRevision();
     }
 
     handleNextFromFormSelect() {
@@ -950,7 +972,7 @@ export default class TechServiceReview extends LightningElement {
     }
 
     handleSaveSignature() {
-        if (!this.revisionId) return;
+        if (!this.recordId) return;
         const preview = this.template.querySelector('[data-id="previewCanvas"]');
         if (!preview || !this._cleanBase64) return;
 
@@ -961,7 +983,7 @@ export default class TechServiceReview extends LightningElement {
         const thumbB64  = this._sigThumb(preview);
 
         saveSignature({
-            revisionId:    this.revisionId,
+            saId:          this.recordId,
             base64Clean:   this._cleanBase64,
             base64Info:    infoB64,
             base64Thumb:   thumbB64,
@@ -971,13 +993,15 @@ export default class TechServiceReview extends LightningElement {
             signerCargo:   this.signerCargo,
         })
         .then(() => {
-            this._toast('Firma guardada', `Firma de ${this.signerName} registrada.`, 'success');
+            this._toast('Firma guardada', `Firma de ${this.signerName} registrada en la Cita.`, 'success');
             this.signatureSaved = true;
             this.savedSigName   = this.signerName;
             this.savedSigCargo  = this.signerCargo;
             this.savedSigThumb  = `data:image/png;base64,${thumbB64}`;
             this.sigState       = SIG_IDLE;
             this._canvasReady   = false;
+            this.isGlobalSignature = false;
+            this._loadSAInfo_silent();
         })
         .catch(err => {
             this._toast('Error', err.body?.message || 'No se pudo guardar la firma.', 'error');
@@ -1205,10 +1229,6 @@ export default class TechServiceReview extends LightningElement {
 
     handleSaveRevision() {
         if (!this.revisionId) return;
-        if (!this.signatureSaved) {
-            this._toast('Firma requerida', 'Debes registrar la firma del cliente antes de guardar. Para guardar sin firma usa "Guardar como Pausado".', 'warning');
-            return;
-        }
         this.savingRevision = true;
 
         const respuestas = this.formQuestions.map(q => ({

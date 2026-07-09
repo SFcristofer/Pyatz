@@ -146,7 +146,8 @@ public with sharing class ServiceReviewPDFController {
         this.saRecord = [
             SELECT Id, AppointmentNumber, Status, Subject, ParentRecordId,
                    Zonas_a_Tratar__c, Cita_Padre__c,
-                   Producto_Relacionado__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode
+                   Producto_Relacionado__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode,
+                   Nombre_Firmante__c, Cargo_Firmante__c
             FROM ServiceAppointment
             WHERE Id = :saId
             LIMIT 1
@@ -218,7 +219,7 @@ public with sharing class ServiceReviewPDFController {
 
         buildRevWrappers(revs, saZonaMap, saTratMap);
 
-        // Firma del cliente: última revisión completada con firma
+        // Firma del cliente: última revisión completada con firma (Fallback históricos)
         for (RevWrapper w : this.revWrappers) {
             if (w.hasSignature && w.rev.Status__c == 'Completada') {
                 this.clientSigUrl   = w.sigUrl;
@@ -226,6 +227,22 @@ public with sharing class ServiceReviewPDFController {
                 if (String.isNotBlank(w.rev.Nombre_Firmante__c)) {
                     this.nombreFirmante = w.rev.Nombre_Firmante__c;
                     this.cargoFirmante  = w.rev.Cargo_Firmante__c != null ? w.rev.Cargo_Firmante__c : '';
+                }
+            }
+        }
+
+        // Firma del cliente: buscar en la Cita de Servicio (SA) (Nuevo flujo global)
+        List<ContentDocumentLink> saLinks = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :saId];
+        if (!saLinks.isEmpty()) {
+            Set<Id> cDocIds = new Set<Id>();
+            for (ContentDocumentLink l : saLinks) cDocIds.add(l.ContentDocumentId);
+            List<ContentVersion> cvs = [SELECT Id, Description FROM ContentVersion WHERE ContentDocumentId IN :cDocIds AND Title LIKE 'SignClean_%' AND IsLatest = true ORDER BY CreatedDate DESC LIMIT 1];
+            if (!cvs.isEmpty()) {
+                this.clientSigUrl  = '/sfc/servlet.shepherd/version/download/' + cvs[0].Id;
+                this.clientSigName = cvs[0].Description;
+                if (String.isNotBlank(this.saRecord.Nombre_Firmante__c)) {
+                    this.nombreFirmante = this.saRecord.Nombre_Firmante__c;
+                    this.cargoFirmante  = this.saRecord.Cargo_Firmante__c != null ? this.saRecord.Cargo_Firmante__c : '';
                 }
             }
         }
@@ -352,7 +369,8 @@ public with sharing class ServiceReviewPDFController {
         List<ServiceAppointment> sas = [
             SELECT Id, AppointmentNumber, Status, Subject, SchedStartTime, SchedEndTime, Duration,
                    Zonas_a_Tratar__c, Cita_Padre__c,
-                   Producto_Relacionado__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode
+                   Producto_Relacionado__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode,
+                   Nombre_Firmante__c, Cargo_Firmante__c
             FROM ServiceAppointment
             WHERE ParentRecordId = :workOrderId
             ORDER BY SchedStartTime ASC NULLS LAST, AppointmentNumber ASC
@@ -457,7 +475,7 @@ public with sharing class ServiceReviewPDFController {
                 if (String.isNotBlank(w.tecnico)) { this.techName = w.tecnico; break; }
             }
             this.pyatzSignatureUrl = findSignatureUrl(this.techName);
-            // Firma cliente: última revisión firmada (puede ser de distinta SA)
+            // Firma cliente: última revisión firmada (Fallback históricos)
             for (RevWrapper w : this.revWrappers) {
                 if (w.hasSignature) {
                     this.clientSigUrl  = w.sigUrl;
@@ -465,6 +483,24 @@ public with sharing class ServiceReviewPDFController {
                     if (String.isNotBlank(w.rev.Nombre_Firmante__c)) {
                         this.nombreFirmante = w.rev.Nombre_Firmante__c;
                         this.cargoFirmante  = w.rev.Cargo_Firmante__c != null ? w.rev.Cargo_Firmante__c : '';
+                    }
+                }
+            }
+
+            // Firma cliente: buscar en todas las SAs (Nuevo flujo global)
+            List<ContentDocumentLink> saLinks = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId IN :saIds];
+            if (!saLinks.isEmpty()) {
+                Set<Id> cDocIds = new Set<Id>();
+                for (ContentDocumentLink l : saLinks) cDocIds.add(l.ContentDocumentId);
+                List<ContentVersion> cvs = [SELECT Id, Description FROM ContentVersion WHERE ContentDocumentId IN :cDocIds AND Title LIKE 'SignClean_%' AND IsLatest = true ORDER BY CreatedDate DESC LIMIT 1];
+                if (!cvs.isEmpty()) {
+                    this.clientSigUrl  = '/sfc/servlet.shepherd/version/download/' + cvs[0].Id;
+                    this.clientSigName = cvs[0].Description;
+                    for (ServiceAppointment sa : sas) {
+                        if (String.isNotBlank(sa.Nombre_Firmante__c)) {
+                            this.nombreFirmante = sa.Nombre_Firmante__c;
+                            this.cargoFirmante  = sa.Cargo_Firmante__c != null ? sa.Cargo_Firmante__c : '';
+                        }
                     }
                 }
             }

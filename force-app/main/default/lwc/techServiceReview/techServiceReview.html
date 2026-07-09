@@ -117,7 +117,101 @@
             </template>
 
             <!-- Acciones -->
-            <div class="rev-actions"></div>
+            <div class="rev-actions">
+                <template if:false={hasFirmaGlobal}>
+                    <button class="btn-primary" onclick={handleOpenGlobalSignature} disabled={disableSignGlobal} title={btnSignGlobalTitle}>
+                        <lightning-icon icon-name="utility:signature" size="x-small" variant="inverse" style="margin-right:8px;"></lightning-icon>
+                        Firmar Cita de Servicio
+                    </button>
+                    <template if:true={disableSignGlobal}>
+                        <p style="color:#d32f2f; font-size:12px; margin-top:8px; text-align:center;">
+                            <lightning-icon icon-name="utility:warning" size="xx-small" style="margin-right:4px;" variant="error"></lightning-icon>
+                            Debes completar todas las revisiones antes de poder firmar.
+                        </p>
+                    </template>
+                </template>
+                <template if:true={hasFirmaGlobal}>
+                    <div style="background:#e8f5e9; border:1px solid #4caf50; padding:10px; border-radius:6px; margin-top:10px; text-align:center;">
+                        <p style="margin:0; font-weight:bold; color:#2e7d32; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            <lightning-icon icon-name="utility:success" size="small" variant="success"></lightning-icon>
+                            Cita Firmada por {nombreFirmanteGlobal}
+                        </p>
+                        <template if:true={cargoFirmanteGlobal}>
+                            <p style="margin:4px 0 0; color:#1b5e20;">Cargo: {cargoFirmanteGlobal}</p>
+                        </template>
+                        <button class="btn-secondary slds-m-top_small" onclick={handleOpenGlobalSignature}>Actualizar Firma</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+
+    <!-- ══ MODAL FIRMA GLOBAL ══════════════════════════════════════════════════ -->
+    <template if:true={isGlobalSignature}>
+        <div class="modal-overlay" onclick={handleCloseGlobalSignature}></div>
+        <div class="modal-sheet" style="padding:0; display:flex; flex-direction:column; height: 90vh;">
+            <div class="modal-handle"></div>
+            <div style="padding:16px; border-bottom:1px solid #eee; background:#fff;">
+                <h2 style="font-size:16px; font-weight:600; margin:0;">Firma de Cita</h2>
+                <p style="color:#666; font-size:13px; margin:4px 0 0;">Esta firma aplicará para toda la Cita de Servicio.</p>
+            </div>
+            
+            <div style="flex:1; overflow-y:auto; padding:16px; background:#f4f6f9;">
+                <!-- IDLE: Input fields -->
+                <template if:true={sigStateIdle}>
+                    <div class="sig-intro">
+                        <div class="sig-intro__label">Nombre completo del Firmante</div>
+                        <lightning-input class="sig-intro__input" type="text" value={signerName} onchange={handleSignerNameChange} variant="label-hidden" placeholder="Nombre completo..."></lightning-input>
+                    </div>
+                    <div class="sig-intro slds-m-top_small">
+                        <div class="sig-intro__label">Cargo (Opcional)</div>
+                        <lightning-input class="sig-intro__input" type="text" value={signerCargo} onchange={handleSignerCargoChange} variant="label-hidden" placeholder="Dueño, Gerente, etc."></lightning-input>
+                    </div>
+                    <button class="btn-primary slds-m-top_medium" style="width:100%" onclick={handleGoSign} disabled={sigNameEmpty}>
+                        Siguiente →
+                    </button>
+                </template>
+
+                <!-- SIGNING: Canvas -->
+                <template if:true={sigStateSigning}>
+                    <div class="gps-bar">
+                        <div class={sigGpsDotClass}></div>
+                        <span class="gps-bar__text gps-bar__text--weak">{sigGpsLabel}</span>
+                    </div>
+                    <p style="font-size:12px;color:#888;margin-bottom:8px;">Pide al cliente que firme en el recuadro</p>
+                    <div class="sign-canvas-wrap">
+                        <canvas data-id="signCanvas" class="sign-canvas"></canvas>
+                    </div>
+                    <div class="sign-actions">
+                        <button class="btn-secondary" onclick={handleClearSignature}>Limpiar</button>
+                        <button class="btn-secondary" onclick={handleBackToIdle}>← Nombre</button>
+                        <button class="btn-primary" onclick={handleConfirmSign} disabled={canvasEmpty}>
+                            Continuar →
+                        </button>
+                    </div>
+                </template>
+
+                <!-- PREVIEW: Verify -->
+                <template if:true={sigStatePreview}>
+                    <div class="sign-preview-wrap">
+                        <canvas data-id="previewCanvas" class="sign-canvas"></canvas>
+                    </div>
+                    <p style="font-size:12px;color:#888;margin-bottom:8px;text-align:center;">Verifica que la firma sea correcta</p>
+                    <div class="sign-actions">
+                        <button class="btn-secondary" onclick={handleRetrySign}>← Repetir</button>
+                        <button class="btn-primary" onclick={handleSaveSignature} disabled={savingSignature}>
+                            <template if:true={savingSignature}>
+                                <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                            </template>
+                            <template if:false={savingSignature}>Guardar Firma</template>
+                        </button>
+                    </div>
+                </template>
+            </div>
+            
+            <div style="padding:16px; background:#fff; border-top:1px solid #eee;">
+                <button class="btn-secondary" style="width:100%" onclick={handleCloseGlobalSignature}>Cerrar</button>
+            </div>
         </div>
     </template>
 
@@ -166,34 +260,7 @@
                         </template>
                     </div>
 
-                    <!-- Firma -->
-                    <div class="resume-card">
-                        <div class="resume-card__header">
-                            <span class="resume-card__title">Firma del Cliente</span>
-                            <button class="resume-nav-btn" onclick={handleResumeGoSignature} disabled={isSignatureLocked}>
-                                <template if:true={signatureSaved}>Cambiar</template>
-                                <template if:false={signatureSaved}>Firmar</template>
-                                <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
-                            </button>
-                        </div>
-                        <template if:true={isSignatureLocked}>
-                            <div class="sig-required-hint" style="margin-top: 8px;">
-                                <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
-                                Requiere agregar fotografías y contestar el formulario antes de firmar.
-                            </div>
-                        </template>
-                        <template if:true={signatureSaved}>
-                            <div class="resume-sig-row">
-                                <template if:true={savedSigThumb}>
-                                    <img src={savedSigThumb} class="resume-sig-thumb" alt="Firma" />
-                                </template>
-                                <span class="resume-sig-name">✓ {savedSigName}</span>
-                            </div>
-                        </template>
-                        <template if:false={signatureSaved}>
-                            <p class="resume-card__empty">Sin firma registrada</p>
-                        </template>
-                    </div>
+
 
                     <!-- Tipo de Reporte -->
                     <div class="resume-card">
@@ -265,16 +332,10 @@
 
                     <!-- Guardar -->
                     <div class="resume-footer">
-                        <template if:false={signatureSaved}>
-                            <div class="sig-required-hint">
-                                <lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon>
-                                Se requiere la firma para <strong>completar</strong>. Sin firma se guardará como <strong>Pausado</strong>.
-                            </div>
-                            <button class="btn-pause-outline btn-full" onclick={handleShowPauseConfirm} disabled={pausingRevision}>
-                                <lightning-icon icon-name="utility:pause" size="x-small"></lightning-icon>
-                                Guardar como Pausado
-                            </button>
-                        </template>
+                        <button class="btn-pause-outline btn-full" onclick={handleShowPauseConfirm} disabled={pausingRevision}>
+                            <lightning-icon icon-name="utility:pause" size="x-small"></lightning-icon>
+                            Guardar como Pausado
+                        </button>
                         <button class="btn-start" onclick={handleSaveRevision} disabled={cantSaveRevision}>
                             <template if:true={savingRevision}>
                                 <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
@@ -314,7 +375,6 @@
                 <div class={pip1Class}></div>
                 <div class={pip2Class}></div>
                 <div class={pip3Class}></div>
-                <div class={pip4Class}></div>
             </div>
 
             <!-- Body -->
@@ -426,88 +486,7 @@
                     </template>
                 </template>
 
-                <!-- ── STEP 2: FIRMA ──────────────────────────────────────── -->
-                <template if:true={isStepSignature}>
 
-                    <!-- Firma ya guardada -->
-                    <template if:true={signatureSaved}>
-                        <div class="sig-saved-preview">
-                            <template if:true={savedSigThumb}>
-                                <img src={savedSigThumb} class="sig-saved-thumb" alt="Firma" />
-                            </template>
-                            <div>
-                                <div class="sig-saved-name">✓ {savedSigName}</div>
-                                <template if:true={savedSigCargo}>
-                                    <div class="sig-saved-cargo">{savedSigCargo}</div>
-                                </template>
-                                <button class="sig-saved-btn" onclick={handleResign}>Volver a firmar</button>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Idle: pedir nombre y cargo -->
-                    <template if:true={sigStateIdle}>
-                        <div class="sig-intro">
-                            <div class="sig-intro__label">Nombre completo del Firmante</div>
-                            <lightning-input
-                                type="text"
-                                placeholder="Nombre completo del Firmante"
-                                value={signerName}
-                                onchange={handleSignerNameChange}
-                                variant="label-hidden">
-                            </lightning-input>
-                            <div class="sig-intro__label" style="margin-top:10px;">Cargo del Firmante</div>
-                            <lightning-input
-                                type="text"
-                                placeholder="Cargo del Firmante"
-                                value={signerCargo}
-                                onchange={handleSignerCargoChange}
-                                variant="label-hidden">
-                            </lightning-input>
-                        </div>
-                        <div class="sig-step-btns">
-                            <button class="btn-primary btn-full" onclick={handleGoSign} disabled={sigNameEmpty}>
-                                <lightning-icon icon-name="utility:signature" size="small" variant="inverse"></lightning-icon>
-                                Iniciar Firma
-                            </button>
-                        </div>
-                    </template>
-
-                    <!-- Signing: canvas -->
-                    <template if:true={sigStateSigning}>
-                        <div class="gps-bar">
-                            <div class={sigGpsDotClass}></div>
-                            <span class="gps-bar__text gps-bar__text--weak">{sigGpsLabel}</span>
-                        </div>
-                        <p style="font-size:12px;color:#888;margin-bottom:8px;">Pide al cliente que firme en el recuadro</p>
-                        <div class="sign-canvas-wrap">
-                            <canvas data-id="signCanvas" class="sign-canvas"></canvas>
-                        </div>
-                        <div class="sign-actions">
-                            <button class="btn-secondary" onclick={handleClearSignature}>Limpiar</button>
-                            <button class="btn-secondary" onclick={handleBackToIdle}>← Nombre</button>
-                            <button class="btn-primary" onclick={handleConfirmSign} disabled={canvasEmpty}>
-                                Continuar →
-                            </button>
-                        </div>
-                    </template>
-
-                    <!-- Preview firma -->
-                    <template if:true={sigStatePreview}>
-                        <p style="font-size:12px;color:#888;margin-bottom:8px;">Vista previa de la firma con datos verificados</p>
-                        <canvas data-id="previewCanvas" class="preview-canvas-sig"></canvas>
-                        <div class="sign-actions" style="margin-top:12px;">
-                            <button class="btn-secondary" onclick={handleRetrySign}>Reintentar</button>
-                            <button class="btn-primary" onclick={handleSaveSignature} disabled={savingSignature}>
-                                <template if:true={savingSignature}>
-                                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
-                                </template>
-                                <template if:false={savingSignature}>Guardar Firma</template>
-                            </button>
-                        </div>
-                    </template>
-
-                </template>
 
                 <!-- ── STEP 3: TIPO DE FORMULARIO ────────────────────────── -->
                 <template if:true={isStepFormSelect}>
@@ -626,10 +605,7 @@
                                 <span class="done-summary__label">Fotos</span>
                                 <span class="done-summary__val">{revPhotoCount}</span>
                             </div>
-                            <div class="done-summary__row">
-                                <span class="done-summary__label">Firma</span>
-                                <span class="done-summary__val">{savedSigName}</span>
-                            </div>
+
                         </div>
                         <button class="btn-secondary btn-full" onclick={handleBackToOverview}>
                             ← Volver a la cita
@@ -664,39 +640,33 @@
                         </button>
                     </template>
 
-                    <!-- Paso 2b: Llenar formulario → siguiente es Firma -->
+                    <!-- Paso 2b: Llenar formulario y Guardar -->
                     <template if:true={isStepFormFill}>
-                        <button class="btn-primary" onclick={handleGoToSignature}>
-                            Siguiente → Firma
-                        </button>
-                    </template>
-
-                    <!-- Paso 3: Firma → Guardar -->
-                    <template if:true={isStepSignature}>
                         <template if:true={isResumeMode}>
-                            <button class="btn-secondary" onclick={handleCancelWizard}>← Revisión</button>
-                            <template if:true={signatureSaved}>
-                                <button class="btn-primary" onclick={handleCancelWizard}>✓ Listo</button>
-                            </template>
+                            <button class="btn-secondary" onclick={handleCancelWizard}>Revisión</button>
+                            <button class="btn-primary" onclick={handleSaveRevision} disabled={cantSaveRevision}>
+                                <template if:true={savingRevision}>
+                                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                                </template>
+                                <template if:false={savingRevision}>
+                                    ✓ Listo
+                                </template>
+                            </button>
                         </template>
                         <template if:false={isResumeMode}>
-                            <template if:false={signatureSaved}>
-                                <button class="btn-pause-outline" onclick={handleShowPauseConfirm} disabled={pausingRevision}>
-                                    <lightning-icon icon-name="utility:pause" size="x-small"></lightning-icon>
-                                    Guardar como Pausado
-                                </button>
-                            </template>
-                            <template if:true={signatureSaved}>
-                                <button class="btn-primary" onclick={handleSaveRevision} disabled={savingRevision}>
-                                    <template if:true={savingRevision}>
-                                        <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
-                                    </template>
-                                    <template if:false={savingRevision}>
-                                        <lightning-icon icon-name="utility:save" size="small" variant="inverse"></lightning-icon>
-                                        Guardar Revisión
-                                    </template>
-                                </button>
-                            </template>
+                            <button class="btn-pause-outline" onclick={handleShowPauseConfirm} disabled={cantSaveRevision}>
+                                <lightning-icon icon-name="utility:pause" size="x-small"></lightning-icon>
+                                Guardar Pausado
+                            </button>
+                            <button class="btn-primary" onclick={handleSaveRevision} disabled={cantSaveRevision}>
+                                <template if:true={savingRevision}>
+                                    <lightning-spinner size="x-small" alternative-text="Guardando" variant="inverse"></lightning-spinner>
+                                </template>
+                                <template if:false={savingRevision}>
+                                    <lightning-icon icon-name="utility:save" size="small" variant="inverse"></lightning-icon>
+                                    Guardar
+                                </template>
+                            </button>
                         </template>
                     </template>
 
