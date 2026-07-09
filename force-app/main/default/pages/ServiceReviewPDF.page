@@ -144,8 +144,7 @@
             <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
             <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
 
-            <!-- ══ CERTIFICADO DE SERVICIO (solo modo consolidado) ════════════════ -->
-            <apex:outputPanel rendered="{!isConsolidated}" layout="none">
+            <!-- ══ CERTIFICADO DE SERVICIO ════════════════ -->
             <table style="width:100%; border-collapse:collapse;">
                 <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
                 <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
@@ -252,10 +251,7 @@
                 </div>
                 </td></tr></tbody>
             </table>
-            </apex:outputPanel>
-
-            <!-- ══ PRODUCTOS CONTRATADOS — una página por producto (solo consolidado) ══ -->
-            <apex:outputPanel rendered="{!isConsolidated}" layout="none">
+            <!-- ══ PRODUCTOS CONTRATADOS — una página por producto ══ -->
             <apex:outputPanel rendered="{!hasLineItems}" layout="none">
             <apex:repeat value="{!lineItems}" var="li">
             <table style="width:100%; border-collapse:collapse; page-break-before:always;">
@@ -282,7 +278,6 @@
                 </td></tr></tbody>
             </table>
             </apex:repeat>
-            </apex:outputPanel>
             </apex:outputPanel>
 
             <!-- ══ Cada revisión en su propia tabla outer con thead/tfoot propios ══

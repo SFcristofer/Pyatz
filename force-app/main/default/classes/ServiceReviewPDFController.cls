@@ -145,7 +145,7 @@ public with sharing class ServiceReviewPDFController {
 
         this.saRecord = [
             SELECT Id, AppointmentNumber, Status, Subject, ParentRecordId,
-                   Zonas_a_Tratar__c, Cita_Padre__c,
+                   Zonas_a_Tratar__c, Cita_Padre__c, SchedStartTime, SchedEndTime, Duration,
                    Producto_Relacionado__c, Producto_Relacionado__r.Name, Producto_Relacionado__r.ProductCode,
                    Nombre_Firmante__c, Cargo_Firmante__c
             FROM ServiceAppointment
@@ -153,16 +153,32 @@ public with sharing class ServiceReviewPDFController {
             LIMIT 1
         ];
 
+        if (this.saRecord.SchedStartTime != null) {
+            String inicio = this.saRecord.SchedStartTime.format('dd/MM/yy HH:mm');
+            if (this.saRecord.Duration != null) {
+                Datetime fin = this.saRecord.SchedStartTime.addMinutes(Integer.valueOf(this.saRecord.Duration));
+                this.firstSaSchedule = inicio + ' - ' + fin.format('HH:mm');
+            } else {
+                this.firstSaSchedule = inicio;
+            }
+        }
+
         if (this.saRecord.ParentRecordId != null) {
             try {
                 WorkOrder wo = [
-                    SELECT WorkOrderNumber, Account.Name, Nombre_Firmante__c, Cargo_Firmante__c
+                    SELECT Id, WorkOrderNumber, Subject, ServiceContractId,
+                           Account.Name, Account.Phone, Account.Industry,
+                           Account.BillingStreet, Account.BillingCity,
+                           Account.BillingPostalCode, Account.BillingState,
+                           Account.Calle_de_envio__c, Account.No_Ext__c, Account.No_Int__c,
+                           Account.Colonia__c, Account.Ciudad_de_envio__c,
+                           Account.Codigo_postal_de_envio__c, Account.Estado_o_provincia_de_envio__c,
+                           ServiceTerritory.Name,
+                           Verificado__c, Verificado_Por__c, Fecha_Verificacion__c,
+                           Nombre_Firmante__c, Cargo_Firmante__c
                     FROM WorkOrder WHERE Id = :this.saRecord.ParentRecordId LIMIT 1
                 ];
-                this.accountName    = wo.Account != null ? wo.Account.Name : '';
-                this.workOrderNum   = wo.WorkOrderNumber;
-                this.nombreFirmante = wo.Nombre_Firmante__c != null ? wo.Nombre_Firmante__c : '';
-                this.cargoFirmante  = wo.Cargo_Firmante__c  != null ? wo.Cargo_Firmante__c  : '';
+                loadWorkOrderAndAccountData(wo);
             } catch (Exception e) {}
         }
 
@@ -292,78 +308,10 @@ public with sharing class ServiceReviewPDFController {
             'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
         };
 
-        this.accountName  = wo.Account != null ? wo.Account.Name : '';
-        this.workOrderNum = wo.WorkOrderNumber;
-        this.woSubject    = wo.Subject != null ? wo.Subject : '';
-
-        // ── Datos cuenta ────────────────────────────────────────────────────────
-        if (wo.Account != null) {
-            this.accountPhone = wo.Account.Phone != null ? wo.Account.Phone : '';
-            // Dirección: preferir campos de envío, caer a billing
-            String calle    = String.isNotBlank(wo.Account.Calle_de_envio__c)
-                              ? wo.Account.Calle_de_envio__c
-                              : (wo.Account.BillingStreet != null ? wo.Account.BillingStreet : '');
-            String noExt    = wo.Account.No_Ext__c != null ? ' #' + wo.Account.No_Ext__c : '';
-            String noInt    = wo.Account.No_Int__c != null && wo.Account.No_Int__c != 'S/N'
-                              ? ' Int. ' + wo.Account.No_Int__c : '';
-            String colonia  = wo.Account.Colonia__c != null ? wo.Account.Colonia__c : '';
-            this.accountDireccion = calle + noExt + noInt
-                                  + (String.isNotBlank(colonia) ? ', Col. ' + colonia : '');
-            String cp       = String.isNotBlank(wo.Account.Codigo_postal_de_envio__c)
-                              ? wo.Account.Codigo_postal_de_envio__c
-                              : (wo.Account.BillingPostalCode != null ? wo.Account.BillingPostalCode : '');
-            String ciudad   = String.isNotBlank(wo.Account.Ciudad_de_envio__c)
-                              ? wo.Account.Ciudad_de_envio__c
-                              : (wo.Account.BillingCity != null ? wo.Account.BillingCity : '');
-            this.accountMunicipio = (String.isNotBlank(cp) ? cp + ' ' : '') + ciudad;
-            this.accountEstado    = String.isNotBlank(wo.Account.Estado_o_provincia_de_envio__c)
-                                  ? wo.Account.Estado_o_provincia_de_envio__c
-                                  : (wo.Account.BillingState != null ? wo.Account.BillingState : '');
-            this.accountActividad = wo.Account.Industry != null ? wo.Account.Industry : '';
-        }
-        this.accountSede = wo.ServiceTerritory != null && wo.ServiceTerritory.Name != null
-                           ? wo.ServiceTerritory.Name : this.accountName;
+        loadWorkOrderAndAccountData(wo);
 
         Datetime now = Datetime.now();
         this.fechaSA = now.day() + ' / ' + meses[now.month() - 1] + ' / ' + now.year();
-
-        // ── Firmante ────────────────────────────────────────────────────────────
-        this.nombreFirmante = wo.Nombre_Firmante__c != null ? wo.Nombre_Firmante__c : '';
-        this.cargoFirmante  = wo.Cargo_Firmante__c  != null ? wo.Cargo_Firmante__c  : '';
-
-        // ── Verificación ────────────────────────────────────────────────────────
-        this.verificado = wo.Verificado__c;
-        if (wo.Verificado__c) {
-            this.verificadoPor = wo.Verificado_Por__c;
-            if (wo.Fecha_Verificacion__c != null) {
-                Datetime d = wo.Fecha_Verificacion__c;
-                this.fechaVerificacion = d.day() + ' / ' + meses[d.month() - 1] + ' / ' + d.year()
-                    + ' ' + String.valueOf(d.hour()).leftPad(2,'0')
-                    + ':' + String.valueOf(d.minute()).leftPad(2,'0');
-            }
-            if (String.isNotBlank(wo.Verificado_Por__c)) {
-                this.verificacionSigUrl = findSignatureUrl(wo.Verificado_Por__c);
-            }
-        }
-
-        // ── Contrato y productos ─────────────────────────────────────────────────
-        if (wo.ServiceContractId != null) {
-            try {
-                ServiceContract sc = [
-                    SELECT Id, ContractNumber, Name, EndDate, Quote_Source__c
-                    FROM ServiceContract WHERE Id = :wo.ServiceContractId LIMIT 1
-                ];
-                this.contractNumber = sc.ContractNumber != null ? sc.ContractNumber : '';
-                this.contractName   = sc.Name != null ? sc.Name : '';
-                if (sc.EndDate != null) {
-                    this.contractEndDate = sc.EndDate.day() + '/' + String.valueOf(sc.EndDate.month()).leftPad(2,'0')
-                                        + '/' + String.valueOf(sc.EndDate.year()).right(2);
-                }
-                if (sc.Quote_Source__c != null) {
-                    loadQuoteLineItems(sc.Quote_Source__c);
-                }
-            } catch (Exception e) { /* sin contrato */ }
-        }
 
         // ── Citas de servicio ────────────────────────────────────────────────────
         List<ServiceAppointment> sas = [
@@ -510,6 +458,74 @@ public with sharing class ServiceReviewPDFController {
         ApexPages.currentPage().getHeaders().put('content-disposition',
             'inline; filename="Certificado-OT' + this.workOrderNum
             + (String.isNotBlank(safeAcct) ? '-' + safeAcct : '') + '.pdf"');
+    }
+
+    private void loadWorkOrderAndAccountData(WorkOrder wo) {
+        this.accountName  = wo.Account != null ? wo.Account.Name : '';
+        this.workOrderNum = wo.WorkOrderNumber;
+        this.woSubject    = wo.Subject != null ? wo.Subject : '';
+
+        if (wo.Account != null) {
+            this.accountPhone = wo.Account.Phone != null ? wo.Account.Phone : '';
+            String calle    = String.isNotBlank(wo.Account.Calle_de_envio__c)
+                              ? wo.Account.Calle_de_envio__c
+                              : (wo.Account.BillingStreet != null ? wo.Account.BillingStreet : '');
+            String noExt    = wo.Account.No_Ext__c != null ? ' #' + wo.Account.No_Ext__c : '';
+            String noInt    = wo.Account.No_Int__c != null && wo.Account.No_Int__c != 'S/N'
+                              ? ' Int. ' + wo.Account.No_Int__c : '';
+            String colonia  = wo.Account.Colonia__c != null ? wo.Account.Colonia__c : '';
+            this.accountDireccion = calle + noExt + noInt
+                                  + (String.isNotBlank(colonia) ? ', Col. ' + colonia : '');
+            String cp       = String.isNotBlank(wo.Account.Codigo_postal_de_envio__c)
+                              ? wo.Account.Codigo_postal_de_envio__c
+                              : (wo.Account.BillingPostalCode != null ? wo.Account.BillingPostalCode : '');
+            String ciudad   = String.isNotBlank(wo.Account.Ciudad_de_envio__c)
+                              ? wo.Account.Ciudad_de_envio__c
+                              : (wo.Account.BillingCity != null ? wo.Account.BillingCity : '');
+            this.accountMunicipio = (String.isNotBlank(cp) ? cp + ' ' : '') + ciudad;
+            this.accountEstado    = String.isNotBlank(wo.Account.Estado_o_provincia_de_envio__c)
+                                  ? wo.Account.Estado_o_provincia_de_envio__c
+                                  : (wo.Account.BillingState != null ? wo.Account.BillingState : '');
+            this.accountActividad = wo.Account.Industry != null ? wo.Account.Industry : '';
+        }
+        this.accountSede = wo.ServiceTerritory != null && wo.ServiceTerritory.Name != null
+                           ? wo.ServiceTerritory.Name : this.accountName;
+
+        this.nombreFirmante = wo.Nombre_Firmante__c != null ? wo.Nombre_Firmante__c : '';
+        this.cargoFirmante  = wo.Cargo_Firmante__c  != null ? wo.Cargo_Firmante__c  : '';
+
+        this.verificado = wo.Verificado__c;
+        if (wo.Verificado__c) {
+            this.verificadoPor = wo.Verificado_Por__c;
+            if (wo.Fecha_Verificacion__c != null) {
+                String[] meses = new String[]{'Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'};
+                Datetime d = wo.Fecha_Verificacion__c;
+                this.fechaVerificacion = d.day() + ' / ' + meses[d.month() - 1] + ' / ' + d.year()
+                    + ' ' + String.valueOf(d.hour()).leftPad(2,'0')
+                    + ':' + String.valueOf(d.minute()).leftPad(2,'0');
+            }
+            if (String.isNotBlank(wo.Verificado_Por__c)) {
+                this.verificacionSigUrl = findSignatureUrl(wo.Verificado_Por__c);
+            }
+        }
+
+        if (wo.ServiceContractId != null) {
+            try {
+                ServiceContract sc = [
+                    SELECT Id, ContractNumber, Name, EndDate, Quote_Source__c
+                    FROM ServiceContract WHERE Id = :wo.ServiceContractId LIMIT 1
+                ];
+                this.contractNumber = sc.ContractNumber != null ? sc.ContractNumber : '';
+                this.contractName   = sc.Name != null ? sc.Name : '';
+                if (sc.EndDate != null) {
+                    this.contractEndDate = sc.EndDate.day() + '/' + String.valueOf(sc.EndDate.month()).leftPad(2,'0')
+                                        + '/' + String.valueOf(sc.EndDate.year()).right(2);
+                }
+                if (sc.Quote_Source__c != null) {
+                    loadQuoteLineItems(sc.Quote_Source__c);
+                }
+            } catch (Exception e) { /* sin contrato */ }
+        }
     }
 
     private void loadQuoteLineItems(Id quoteId) {
