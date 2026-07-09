@@ -528,20 +528,7 @@
                                                             <div class="obs-txt">{!w.rev.Observaciones__c}</div>
                                                         </div>
                                                     </apex:outputPanel>
-                                                    <div class="sig-area" style="margin-top:{!IF(w.hasObs,'4pt','0')};">
-                                                        <div class="sig-lbl">Validaci&#243;n y conformidad del cliente</div>
-                                                        <apex:outputPanel rendered="{!w.hasSignature}" layout="none">
-                                                            <img src="{!w.sigUrl}" class="sig-img" alt="Firma"/>
-                                                        </apex:outputPanel>
-                                                        <apex:outputPanel rendered="{!NOT(w.hasSignature)}" layout="none">
-                                                            <div class="no-sig">Sin firma registrada</div>
-                                                        </apex:outputPanel>
-                                                        <div class="sig-line">
-                                                            <apex:outputPanel rendered="{!w.hasSignature}" layout="none">{!w.sigName}</apex:outputPanel>
-                                                            <apex:outputPanel rendered="{!NOT(w.hasSignature)}" layout="none">&#160;</apex:outputPanel>
-                                                        </div>
-                                                        <div class="sig-role">Cliente / Responsable de instalaci&#243;n</div>
-                                                    </div>
+
                                                 </td>
                                                 <td width="70%" style="vertical-align:top;">
                                                     <div class="photos-title">
