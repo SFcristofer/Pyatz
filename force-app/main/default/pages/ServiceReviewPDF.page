@@ -2,13 +2,7 @@
     <html>
         <head>
             <style type="text/css">
-                @page { 
-                    size: letter; 
-                    margin-top: 3.3cm; 
-                    margin-bottom: 2.3cm; 
-                    margin-left: 0; 
-                    margin-right: 0; 
-                }
+                @page { size: letter; margin: 0; }
                 @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
                 @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
 
@@ -152,6 +146,8 @@
 
             <!-- ══ CERTIFICADO DE SERVICIO ════════════════ -->
             <table style="width:100%; border-collapse:collapse;">
+                <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
+                <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
                 <tbody><tr><td style="padding:0; vertical-align:top;">
                 <div style="padding:0 28pt;">
 
@@ -257,7 +253,9 @@
             </table>
             <!-- ══ PRODUCTOS CONTRATADOS ══ -->
             <apex:outputPanel rendered="{!hasLineItems}" layout="none">
-            <table style="width:100%; border-collapse:collapse;">
+            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+                <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
+                <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
                 <tbody>
                 <tr><td style="padding:0; vertical-align:top;">
                     <div style="padding:0 28pt;">
@@ -265,7 +263,7 @@
                     </div>
                 </td></tr>
                 <apex:repeat value="{!lineItems}" var="li">
-                <tr><td style="padding:0; vertical-align:top;">
+                <tr style="page-break-inside: avoid;"><td style="padding:0; vertical-align:top;">
                     <div style="padding:0 28pt; margin-bottom: 10pt;">
                         <apex:outputPanel rendered="{!li.hasSectionHeader}" layout="none">
                             <div class="prod-sep-hdr">{!li.sectionHeader}</div>
@@ -293,6 +291,12 @@
                  Las siguientes usan page-break-before:always en la tabla outer.   -->
             <apex:repeat value="{!revWrappers}" var="w">
             <table style="width:100%; border-collapse:collapse; {!IF(AND(w.isFirst, NOT(isConsolidated)),'','page-break-before:always;')}">
+                <thead>
+                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </thead>
+                <tfoot>
+                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
+                </tfoot>
                 <tbody>
                     <tr>
                         <td style="padding:0; vertical-align:top;">
