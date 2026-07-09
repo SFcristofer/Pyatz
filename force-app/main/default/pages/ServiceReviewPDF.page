@@ -599,21 +599,17 @@
 
                             <table style="width:100%; border-collapse:collapse; margin-bottom:12pt;">
                                 <tr>
-                                    <td class="kpi-cell" width="25%">
+                                    <td class="kpi-cell" width="33.3%">
                                         <div class="kpi-num">{!totalRevs}</div>
                                         <div class="kpi-lbl">Revisiones realizadas</div>
                                     </td>
-                                    <td class="kpi-cell" width="25%">
+                                    <td class="kpi-cell" width="33.3%">
                                         <div class="kpi-num">{!totalFotos}</div>
                                         <div class="kpi-lbl">Fotos de evidencia</div>
                                     </td>
-                                    <td class="kpi-cell" width="25%">
+                                    <td class="kpi-cell" width="33.3%">
                                         <div class="kpi-num" style="color:#e65100;">{!totalDeficiencias}</div>
                                         <div class="kpi-lbl">No conformidades</div>
-                                    </td>
-                                    <td class="kpi-cell" width="25%">
-                                        <div class="kpi-num">{!totalFirmadas}</div>
-                                        <div class="kpi-lbl">Firmadas por cliente</div>
                                     </td>
                                 </tr>
                             </table>
