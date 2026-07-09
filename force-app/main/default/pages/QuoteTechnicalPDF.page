@@ -132,9 +132,17 @@
                                 </apex:outputPanel>
                             </apex:outputPanel>
                         </apex:repeat>
+                    </tbody>
+                    <tfoot><tr><td colspan="4" class="ftr-spacer"></td></tr></tfoot>
+                </table>
 
-                        <!-- BLOQUE: TOTALES (Inyectados como fila de la misma tabla) -->
-                        <tr style="page-break-inside:avoid;"><td colspan="4" style="padding-top:20pt;">
+                <!-- NUEVA TABLA PARA TOTALES Y FIRMAS -->
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr><td class="hdr-spacer"></td></tr></thead>
+                    <tfoot><tr><td class="ftr-spacer"></td></tr></tfoot>
+                    <tbody>
+                        <!-- BLOQUE: TOTALES -->
+                        <tr style="page-break-inside:avoid;"><td style="padding-top:20pt;">
                             <table class="tbl-totals">
                                 <apex:outputPanel rendered="{!showSubtotal}" layout="none">
                                     <tr><td class="tot-lbl">SUBTOTAL 1</td><td class="tot-val"><apex:outputText value="{0, number, currency}"><apex:param value="{!calcSubtotal1}"/></apex:outputText></td></tr>
@@ -163,13 +171,14 @@
                             </table>
                         </td></tr>
 
-                        <!-- BLOQUE: GARANTÍA Y FIRMAS (Inyectados como fila de la misma tabla) -->
+                        <!-- BLOQUE: GARANTÍA -->
                         <apex:outputPanel rendered="{!NOT(ISBLANK(technicalQuote.Warranty_Text__c))}" layout="none">
-                            <tr><td colspan="4" style="padding-top:24pt;">
+                            <tr><td style="padding-top:24pt;">
                                 <div class="warranty-block"><div style="font-weight:bold; font-size:11pt; margin-bottom:6pt; text-transform:uppercase;">Condiciones / Anexos / Cl&#225;usulas</div><apex:outputText escape="false" value="{!technicalQuote.Warranty_Text__c}"/></div>
                             </td></tr>
                         </apex:outputPanel>
-                        <tr><td colspan="4" style="padding-top:40pt;">
+                        <!-- BLOQUE: FIRMAS -->
+                        <tr><td style="padding-top:40pt;">
                             <div style="page-break-inside:avoid;">
                                 <table class="tbl-sig">
                                     <tr>
@@ -184,7 +193,6 @@
                             </div>
                         </td></tr>
                     </tbody>
-                    <tfoot><tr><td colspan="4" class="ftr-spacer"></td></tr></tfoot>
                 </table>
             </div>
             <img src="{!$Resource.FooterPDF}" class="footer-img"/>
