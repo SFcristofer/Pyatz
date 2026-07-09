@@ -18,6 +18,9 @@ public with sharing class ServiceReviewController {
         @AuraEnabled public String  techName;
         @AuraEnabled public String  techInitials;
         @AuraEnabled public Boolean isVerified;
+        @AuraEnabled public Boolean hasFirmaGlobal;
+        @AuraEnabled public String  nombreFirmanteGlobal;
+        @AuraEnabled public String  cargoFirmanteGlobal;
     }
 
     public class RevisionSummary {
@@ -54,7 +57,8 @@ public with sharing class ServiceReviewController {
     public static SAInfo getServiceAppointmentInfo(Id saId) {
         ServiceAppointment sa = [
             SELECT Id, AppointmentNumber, Status, Subject,
-                   ParentRecordId, Revisiones__c, Verificado__c
+                   ParentRecordId, Revisiones__c, Verificado__c,
+                   Nombre_Firmante__c, Cargo_Firmante__c
             FROM ServiceAppointment
             WHERE Id = :saId
             LIMIT 1
@@ -141,6 +145,9 @@ public with sharing class ServiceReviewController {
         info.techName              = techName;
         info.techInitials          = techInitials;
         info.isVerified            = sa.Verificado__c;
+        info.hasFirmaGlobal        = String.isNotBlank(sa.Nombre_Firmante__c);
+        info.nombreFirmanteGlobal  = sa.Nombre_Firmante__c;
+        info.cargoFirmanteGlobal   = sa.Cargo_Firmante__c;
         return info;
     }
 
@@ -367,45 +374,45 @@ public with sharing class ServiceReviewController {
     // ─── Signature ────────────────────────────────────────────────────────────
 
     @AuraEnabled
-    public static void saveSignature(Id revisionId, String base64Clean, String base64Info,
+    public static void saveSignature(Id saId, String base64Clean, String base64Info,
                                      String base64Thumb, String filenameClean,
                                      String filenameInfo, String signerName, String signerCargo) {
         String description = String.isNotBlank(signerCargo)
             ? signerName + ' | ' + signerCargo
             : signerName;
-        insertCVAndLink(filenameClean, base64Clean, description, revisionId);
-        insertCVAndLink(filenameInfo,  base64Info,  description, revisionId);
+        insertCVAndLink(filenameClean, base64Clean, description, saId);
+        insertCVAndLink(filenameInfo,  base64Info,  description, saId);
         if (String.isNotBlank(base64Thumb)) {
-            insertCVAndLink('Thumb_' + filenameInfo, base64Thumb, description, revisionId);
+            insertCVAndLink('Thumb_' + filenameInfo, base64Thumb, description, saId);
         }
-        Revision_Cita_Servicio__c rev = new Revision_Cita_Servicio__c(
-            Id                 = revisionId,
+        ServiceAppointment sa = new ServiceAppointment(
+            Id                 = saId,
             Nombre_Firmante__c = signerName,
             Cargo_Firmante__c  = signerCargo
         );
-        update rev;
+        update sa;
     }
 
     @AuraEnabled(cacheable=false)
-    public static Map<String, String> getRevisionSignature(Id revisionId) {
+    public static Map<String, String> getSASignature(Id saId) {
         Map<String, String> result = new Map<String, String>();
 
         // Obtener nombre y cargo desde el registro
         try {
-            Revision_Cita_Servicio__c rev = [
+            ServiceAppointment sa = [
                 SELECT Nombre_Firmante__c, Cargo_Firmante__c
-                FROM Revision_Cita_Servicio__c
-                WHERE Id = :revisionId LIMIT 1
+                FROM ServiceAppointment
+                WHERE Id = :saId LIMIT 1
             ];
-            if (String.isNotBlank(rev.Nombre_Firmante__c)) {
-                result.put('signerName',  rev.Nombre_Firmante__c);
-                result.put('signerCargo', rev.Cargo_Firmante__c != null ? rev.Cargo_Firmante__c : '');
+            if (String.isNotBlank(sa.Nombre_Firmante__c)) {
+                result.put('signerName',  sa.Nombre_Firmante__c);
+                result.put('signerCargo', sa.Cargo_Firmante__c != null ? sa.Cargo_Firmante__c : '');
             }
         } catch (Exception e) {}
 
         // Obtener thumbnail de la firma
         List<ContentDocumentLink> links = [
-            SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :revisionId
+            SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :saId
         ];
         if (!links.isEmpty()) {
             Set<Id> docIds = new Set<Id>();

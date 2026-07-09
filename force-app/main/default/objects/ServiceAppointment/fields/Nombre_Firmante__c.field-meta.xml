@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Nombre_Firmante__c</fullName>
-    <description>Nombre de la persona que firmó/aprobó la cita.</description>
     <externalId>false</externalId>
     <label>Nombre del Firmante</label>
     <length>255</length>
