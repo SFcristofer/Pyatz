@@ -256,11 +256,15 @@
             <table style="width:100%; border-collapse:collapse; page-break-before:always;">
                 <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
                 <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
-                <tbody><tr><td style="padding:0; vertical-align:top;">
-                <div style="padding:0 28pt;">
-                    <div class="section-title">P R O D U C T O S &nbsp; C O N T R A T A D O S</div>
-                    <apex:repeat value="{!lineItems}" var="li">
-                    <div style="page-break-inside: avoid; margin-bottom: 12pt;">
+                <tbody>
+                <tr><td style="padding:0; vertical-align:top;">
+                    <div style="padding:0 28pt;">
+                        <div class="section-title">P R O D U C T O S &nbsp; C O N T R A T A D O S</div>
+                    </div>
+                </td></tr>
+                <apex:repeat value="{!lineItems}" var="li">
+                <tr><td style="padding:0; vertical-align:top;">
+                    <div style="padding:0 28pt; page-break-inside: avoid; margin-bottom: 12pt;">
                         <apex:outputPanel rendered="{!li.hasSectionHeader}" layout="none">
                             <div class="prod-sep-hdr">{!li.sectionHeader}</div>
                         </apex:outputPanel>
@@ -276,9 +280,9 @@
                             </div>
                         </apex:outputPanel>
                     </div>
-                    </apex:repeat>
-                </div>
-                </td></tr></tbody>
+                </td></tr>
+                </apex:repeat>
+                </tbody>
             </table>
             </apex:outputPanel>
 
