@@ -253,6 +253,7 @@
             </table>
             <!-- ══ PRODUCTOS CONTRATADOS ══ -->
             <apex:outputPanel rendered="{!hasLineItems}" layout="none">
+            <apex:repeat value="{!lineItems}" var="li">
             <table style="width:100%; border-collapse:collapse; page-break-before:always; -fs-table-paginate: paginate;">
                 <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
                 <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
@@ -260,11 +261,6 @@
                 <tr><td style="padding:0; vertical-align:top;">
                     <div style="padding:0 28pt;">
                         <div class="section-title">P R O D U C T O S &nbsp; C O N T R A T A D O S</div>
-                    </div>
-                </td></tr>
-                <apex:repeat value="{!lineItems}" var="li">
-                <tr style="page-break-inside: avoid;"><td style="padding:0; vertical-align:top;">
-                    <div style="padding:0 28pt; margin-bottom: 10pt;">
                         <apex:outputPanel rendered="{!li.hasSectionHeader}" layout="none">
                             <div class="prod-sep-hdr">{!li.sectionHeader}</div>
                         </apex:outputPanel>
@@ -281,16 +277,16 @@
                         </apex:outputPanel>
                     </div>
                 </td></tr>
-                </apex:repeat>
                 </tbody>
             </table>
+            </apex:repeat>
             </apex:outputPanel>
 
             <!-- ══ Cada revisión en su propia tabla outer con thead/tfoot propios ══
-                 La primera tabla incluye también el banner del documento.
-                 Las siguientes usan page-break-before:always en la tabla outer.   -->
+                 Las revisiones siempre inician en una hoja nueva (page-break-before:always)
+                 y tienen -fs-table-paginate para repetir el thead/tfoot en múltiples hojas. -->
             <apex:repeat value="{!revWrappers}" var="w">
-            <table style="width:100%; border-collapse:collapse; {!IF(AND(w.isFirst, NOT(isConsolidated)),'','page-break-before:always;')}">
+            <table style="width:100%; border-collapse:collapse; page-break-before:always; -fs-table-paginate: paginate;">
                 <thead>
                     <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
                 </thead>
