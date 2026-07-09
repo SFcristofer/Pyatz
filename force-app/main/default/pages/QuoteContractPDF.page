@@ -71,7 +71,7 @@
                 .tbl-sig      { width:100%; border-collapse:collapse; }
                 .tbl-sig td   { text-align:center; vertical-align:bottom; width:33.33%; padding:0 10pt; }
                 .sig-space    { height:65pt; display:block; }
-                .sig-line     { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; margin:0 8pt; }
+                .sig-line     { border-top:1pt solid #555; padding-top:4pt; font-size:8.5pt; margin:0 8pt; height:55pt; }
                 .sig-stamp    { border:1pt solid #ccc; width:55pt; height:55pt; margin:0 auto 8pt auto; font-size:8pt; color:#bbb; line-height:55pt; }
             </style>
         </head>
