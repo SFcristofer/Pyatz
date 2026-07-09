@@ -253,7 +253,7 @@
             </table>
             <!-- ══ PRODUCTOS CONTRATADOS ══ -->
             <apex:outputPanel rendered="{!hasLineItems}" layout="none">
-            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
+            <table style="width:100%; border-collapse:collapse; page-break-before:always; -fs-table-paginate: paginate;">
                 <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
                 <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
                 <tbody>
