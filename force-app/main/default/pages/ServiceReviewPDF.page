@@ -2,17 +2,28 @@
     <html>
         <head>
             <style type="text/css">
-                @page { size: letter; margin: 0; }
+                @page { 
+                    size: letter; 
+                    margin-top: 3.3cm; 
+                    margin-bottom: 2.3cm; 
+                    margin-left: 0; 
+                    margin-right: 0; 
+                    @top-center { content: element(header); }
+                    @bottom-center { content: element(footer); }
+                }
                 @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Regular.ttf'); font-weight:normal; font-style:normal; }
                 @font-face { font-family:'Poppins'; src: url('{!$Resource.Poppins}/Poppins-Bold.ttf');    font-weight:bold;   font-style:normal; }
 
                 * { box-sizing: border-box; }
                 body { font-family:'Poppins','Helvetica','Arial',sans-serif; font-size:9pt; color:#2c2c2c; line-height:1.45; margin:0; padding:0; }
 
-                .header-img   { width:100%; display:block; position:fixed; top:0; left:0; z-index:1000; }
-                .footer-img   { width:100%; display:block; position:fixed; bottom:0; left:0; height:1.5cm; z-index:1000; }
+                div.header-div { position: running(header); width: 100%; }
+                div.footer-div { position: running(footer); width: 100%; }
+                
+                .header-img   { width:100%; display:block; margin:0; padding:0; }
+                .footer-img   { width:100%; display:block; height:1.5cm; margin:0; padding:0; }
                 .watermark    { position:fixed; top:30%; width:100%; z-index:-1; }
-                .page-counter { position:fixed; top:0.45cm; right:14pt; font-size:7pt; color:#fff; z-index:1001; }
+                .page-counter { position:absolute; top:0.45cm; right:14pt; font-size:7pt; color:#fff; z-index:1001; }
                 .pgNum:before   { content: counter(page); }
                 .pgCount:before { content: counter(pages); }
 
@@ -139,15 +150,17 @@
             </style>
         </head>
         <body>
-            <img src="{!$Resource.HeaderPDF}" class="header-img"/>
-            <img src="{!$Resource.FooterPDF}" class="footer-img"/>
-            <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
+            <div class="header-div">
+                <img src="{!$Resource.HeaderPDF}" class="header-img"/>
+                <div class="page-counter">P&#225;g. <span class="pgNum"></span> de <span class="pgCount"></span></div>
+            </div>
+            <div class="footer-div">
+                <img src="{!$Resource.FooterPDF}" class="footer-img"/>
+            </div>
             <img src="{!$Resource.WatermarkPDF}" class="watermark"/>
 
             <!-- ══ CERTIFICADO DE SERVICIO ════════════════ -->
             <table style="width:100%; border-collapse:collapse;">
-                <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
-                <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
                 <tbody><tr><td style="padding:0; vertical-align:top;">
                 <div style="padding:0 28pt;">
 
@@ -253,9 +266,7 @@
             </table>
             <!-- ══ PRODUCTOS CONTRATADOS ══ -->
             <apex:outputPanel rendered="{!hasLineItems}" layout="none">
-            <table style="width:100%; border-collapse:collapse; page-break-before:always;">
-                <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
-                <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
+            <table style="width:100%; border-collapse:collapse;">
                 <tbody>
                 <tr><td style="padding:0; vertical-align:top;">
                     <div style="padding:0 28pt;">
@@ -291,12 +302,6 @@
                  Las siguientes usan page-break-before:always en la tabla outer.   -->
             <apex:repeat value="{!revWrappers}" var="w">
             <table style="width:100%; border-collapse:collapse; {!IF(AND(w.isFirst, NOT(isConsolidated)),'','page-break-before:always;')}">
-                <thead>
-                    <tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
-                </thead>
-                <tfoot>
-                    <tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr>
-                </tfoot>
                 <tbody>
                     <tr>
                         <td style="padding:0; vertical-align:top;">
