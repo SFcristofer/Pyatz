@@ -34,6 +34,20 @@
                 .row-item td          { padding:7pt 6pt; font-size:10pt; border-bottom:0.5pt solid #f0f0f0; background-color:#fff; vertical-align:middle; }
                 .row-detail td        { padding:3pt 32pt 10pt 16pt; border-bottom:0.5pt solid #eee; font-size:9pt; color:#444; line-height:1.15; }
                 .detail-inner         { border-left:2pt solid #dde; padding-left:10pt; }
+                .detail-inner b, .detail-inner strong { font-weight: bold; }
+                .detail-inner i, .detail-inner em { font-style: italic; }
+                .detail-inner u { text-decoration: underline; }
+                .detail-inner p { margin: 2pt 0; }
+                .detail-inner h1 { font-size: 16pt; font-weight: bold; margin-bottom: 4pt; }
+                .detail-inner h2 { font-size: 13pt; font-weight: bold; margin-bottom: 3pt; }
+                .detail-inner h3 { font-size: 11pt; font-weight: bold; margin-bottom: 2pt; }
+                .detail-inner .ql-size-small { font-size: 7.5pt; }
+                .detail-inner .ql-size-large { font-size: 11.5pt; }
+                .detail-inner .ql-size-huge  { font-size: 14pt; }
+                .detail-inner .ql-align-center { text-align: center; display: block; }
+                .detail-inner .ql-align-right  { text-align: right; display: block; }
+                .detail-inner .ql-align-justify { text-align: justify; display: block; }
+                .detail-inner ul, .detail-inner ol { margin: 2pt 0 2pt 15pt; padding: 0; }
                 .detail-inner img     { max-width:100% !important; height:auto !important; }
 
                 .tbl-totals           { width:210pt; border-collapse:collapse; margin-left:auto; margin-top:14pt; }
@@ -308,7 +322,7 @@
             </table>
 
             <!-- ═══ SECCIÓN 2, 2b y 3 UNIFICADAS: SERVICIOS, TOTALES Y FIRMAS ══════════════════ -->
-            <div class="content-body" style="page-break-before:always;">
+            <div class="content-body">
                 <table class="tbl-svc" style="width:100%; border-collapse:collapse;">
                     <thead>
                         <tr><td colspan="4" style="height:3.8cm; padding:0; line-height:0; font-size:0; border:none;">&#160;</td></tr>
@@ -349,9 +363,17 @@
                                 </apex:outputPanel>
                             </apex:outputPanel>
                         </apex:repeat>
+                    </tbody>
+                    <tfoot><tr><td colspan="4" style="height:2.3cm; padding:0; line-height:0; font-size:0; border:none;">&#160;</td></tr></tfoot>
+                </table>
 
-                        <!-- BLOQUE: TOTALES + CONDICIONES (Inyectados como fila de la misma tabla) -->
-                        <tr style="page-break-inside:avoid;"><td colspan="4" style="padding-top:20pt;">
+                <!-- NUEVA TABLA PARA TOTALES Y FIRMAS -->
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr><td style="height:3.8cm; padding:0; line-height:0; font-size:0; border:none;">&#160;</td></tr></thead>
+                    <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0; border:none;">&#160;</td></tr></tfoot>
+                    <tbody>
+                        <!-- BLOQUE: TOTALES + CONDICIONES -->
+                        <tr style="page-break-inside:avoid;"><td style="padding-top:20pt;">
                             <apex:outputPanel rendered="{!config['show_total']}">
                                 <table class="tbl-totals">
                                     <apex:outputPanel rendered="{!showSubtotal}" layout="none">
@@ -408,8 +430,8 @@
                             </apex:outputPanel>
                         </td></tr>
 
-                        <!-- BLOQUE: GARANTÍA Y FIRMAS (Inyectados como fila de la misma tabla) -->
-                        <tr><td colspan="4" style="padding-top:24pt;">
+                        <!-- BLOQUE: GARANTÍA Y FIRMAS -->
+                        <tr><td style="padding-top:24pt;">
                             <div style="page-break-inside:avoid; width:100%;">
                                 <apex:outputPanel rendered="{!NOT(ISBLANK(quoteRecord.Warranty_Text__c))}">
                                     <div class="warranty-block" style="border-top:none; margin-top:0; padding-top:0;">
@@ -451,7 +473,6 @@
                         </td></tr>
 
                     </tbody>
-                    <tfoot><tr><td colspan="4" style="height:2.3cm; padding:0; line-height:0; font-size:0; border:none;">&#160;</td></tr></tfoot>
                 </table>
             </div>
 
