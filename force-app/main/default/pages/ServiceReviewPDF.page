@@ -251,33 +251,35 @@
                 </div>
                 </td></tr></tbody>
             </table>
-            <!-- ══ PRODUCTOS CONTRATADOS — una página por producto ══ -->
+            <!-- ══ PRODUCTOS CONTRATADOS ══ -->
             <apex:outputPanel rendered="{!hasLineItems}" layout="none">
-            <apex:repeat value="{!lineItems}" var="li">
             <table style="width:100%; border-collapse:collapse; page-break-before:always;">
                 <thead><tr><td style="height:3.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></thead>
                 <tfoot><tr><td style="height:2.3cm; padding:0; line-height:0; font-size:0;">&#160;</td></tr></tfoot>
                 <tbody><tr><td style="padding:0; vertical-align:top;">
                 <div style="padding:0 28pt;">
                     <div class="section-title">P R O D U C T O S &nbsp; C O N T R A T A D O S</div>
-                    <apex:outputPanel rendered="{!li.hasSectionHeader}" layout="none">
-                        <div class="prod-sep-hdr">{!li.sectionHeader}</div>
-                    </apex:outputPanel>
-                    <div class="prod-item-hdr">
-                        <apex:outputPanel rendered="{!NOT(ISBLANK(li.code))}" layout="none">
-                            <span style="color:#0070d2;">{!li.code}</span>&#160;
+                    <apex:repeat value="{!lineItems}" var="li">
+                    <div style="page-break-inside: avoid; margin-bottom: 12pt;">
+                        <apex:outputPanel rendered="{!li.hasSectionHeader}" layout="none">
+                            <div class="prod-sep-hdr">{!li.sectionHeader}</div>
                         </apex:outputPanel>
-                        {!li.nombre}
-                    </div>
-                    <apex:outputPanel rendered="{!li.hasDescripcion}" layout="none">
-                        <div class="prod-desc">
-                            <apex:outputText value="{!li.descripcion}" escape="false"/>
+                        <div class="prod-item-hdr">
+                            <apex:outputPanel rendered="{!NOT(ISBLANK(li.code))}" layout="none">
+                                <span style="color:#0070d2;">{!li.code}</span>&#160;
+                            </apex:outputPanel>
+                            {!li.nombre}
                         </div>
-                    </apex:outputPanel>
+                        <apex:outputPanel rendered="{!li.hasDescripcion}" layout="none">
+                            <div class="prod-desc">
+                                <apex:outputText value="{!li.descripcion}" escape="false"/>
+                            </div>
+                        </apex:outputPanel>
+                    </div>
+                    </apex:repeat>
                 </div>
                 </td></tr></tbody>
             </table>
-            </apex:repeat>
             </apex:outputPanel>
 
             <!-- ══ Cada revisión en su propia tabla outer con thead/tfoot propios ══
