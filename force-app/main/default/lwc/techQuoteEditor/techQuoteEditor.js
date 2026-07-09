@@ -537,6 +537,14 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
     }
     handleClosePdfModal() { this.showPdfModal = false; this.pdfUrl = ''; }
     
+    handleOpenPdfNewWindow() {
+        if (this.pdfUrl) {
+            window.open(this.pdfUrl, '_blank');
+        } else if (this.recordId) {
+            window.open(`/apex/QuoteTechnicalPDF?id=${this.recordId}&t=${Date.now()}`, '_blank');
+        }
+    }
+    
     handleAsuntoChange(event) { this.asunto = event.target.value; }
     handleIntroChange(event) { this.introduccion = event.target.value; }
     handleWarrantyChange(event) { this.warranty = event.target.value; }

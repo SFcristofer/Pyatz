@@ -336,6 +336,7 @@
                             <lightning-icon icon-name="doctype:pdf" size="small" variant="inverse" class="slds-m-right_small"></lightning-icon>
                             <h2 class="slds-text-heading_small text-white">Revisión Final del Documento</h2>
                         </div>
+                        <lightning-button label="Abrir en ventana nueva" icon-name="utility:new_window" variant="inverse" onclick={handleOpenPdfNewWindow}></lightning-button>
                     </div>
                     <div class="pdf-workspace-container">
                         <template if:true={pdfUrl}>
