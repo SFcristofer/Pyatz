@@ -25,6 +25,11 @@ export default class TechSlackModal extends LightningModal {
     @track selectedThreadTs = null;
     @track threadRootMsg = null;
     userMap = {};
+    userList = []; // Array de usuarios para el buscador
+    @track showUserDropdown = false;
+    @track filteredUsers = [];
+    mentionSearchTerm = '';
+    mentionStartIndex = -1;
     _refreshInterval; // Variable para el temporizador
 
     async connectedCallback() {
@@ -90,6 +95,8 @@ export default class TechSlackModal extends LightningModal {
     async loadUserMap() {
         try {
             this.userMap = await getUserMap();
+            // Convertimos el mapa a lista para el buscador de menciones
+            this.userList = Object.keys(this.userMap).map(id => ({ id: id, name: this.userMap[id] }));
         } catch (error) { console.error('Error cargando usuarios'); }
     }
 
@@ -236,7 +243,34 @@ export default class TechSlackModal extends LightningModal {
     }
 
     handleMessageChange(event) {
-        this.messageText = event.detail.value;
+        const text = event.detail.value;
+        this.messageText = text;
+
+        // Detectar si el usuario está escribiendo una mención al final del texto
+        const mentionMatch = text.match(/(?:\s|^)@(\S*)$/);
+        
+        if (mentionMatch) {
+            this.mentionSearchTerm = mentionMatch[1].toLowerCase();
+            this.mentionStartIndex = text.lastIndexOf('@' + mentionMatch[1]);
+            
+            this.filteredUsers = this.userList.filter(u => u.name && u.name.toLowerCase().includes(this.mentionSearchTerm));
+            this.showUserDropdown = this.filteredUsers.length > 0;
+        } else {
+            this.showUserDropdown = false;
+        }
+    }
+
+    handleUserSelect(event) {
+        const selectedName = event.currentTarget.dataset.name;
+        const beforeMention = this.messageText.substring(0, this.mentionStartIndex);
+        
+        // Reemplazamos la mención parcial por el nombre completo
+        this.messageText = beforeMention + '@' + selectedName + ' ';
+        this.showUserDropdown = false;
+        
+        // Regresar el foco al textarea
+        const textarea = this.template.querySelector('lightning-textarea');
+        if (textarea) textarea.focus();
     }
 
     openFilePicker() {
@@ -278,9 +312,22 @@ export default class TechSlackModal extends LightningModal {
         if (!this.messageText || !this.selectedChannelId) return;
         
         this.isSending = true;
+        this.showUserDropdown = false; // Cerrar menú por seguridad
+
+        // TRADUCTOR DE MENCIONES: Convertir @Nombre a <@ID>
+        let payloadText = this.messageText;
+        this.userList.forEach(user => {
+            if (user.name) {
+                // Escapar caracteres especiales del nombre
+                const safeName = user.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(^|\\s)@${safeName}(?=\\s|$)`, 'g');
+                payloadText = payloadText.replace(regex, `$1<@${user.id}>`);
+            }
+        });
+
         try {
             const timestamp = await sendMessage({
-                message: this.messageText,
+                message: payloadText, // Enviamos el texto traducido
                 phase: this.currentPhase,
                 recordId: this.recordId,
                 channelId: this.selectedChannelId,

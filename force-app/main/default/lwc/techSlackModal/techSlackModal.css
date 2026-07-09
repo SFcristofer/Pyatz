@@ -61,4 +61,32 @@
 .chat-input-wrapper { border: 1px solid #616061; border-radius: 8px; background: white; padding: 5px; }
 .slack-textarea { --slds-c-textarea-shadow: none; --slds-c-textarea-spacing-block-start: 5px; }
 .input-actions { padding: 5px 10px; border-top: 1px solid #eee; margin-top: 5px; }
-.toolbar { color: #616061; }
+.toolbar { color: #616061; }/* --- Estilos para Menciones (@) --- */
+.mentions-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 10px;
+    background: white;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999;
+    width: 250px;
+    margin-bottom: 5px;
+    list-style: none;
+    padding: 0;
+}
+
+.mention-item {
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f3f2f2;
+}
+
+.mention-item:hover {
+    background-color: #f3f2f2;
+}

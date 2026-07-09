@@ -89,7 +89,19 @@
                 </div>
 
                 <!-- Input Real -->
-                <div class="chat-input-container">
+                <div class="chat-input-container" style="position: relative;">
+                    <!-- Dropdown de Menciones -->
+                    <template if:true={showUserDropdown}>
+                        <ul class="mentions-dropdown">
+                            <template for:each={filteredUsers} for:item="user">
+                                <li key={user.id} data-name={user.name} onclick={handleUserSelect} class="mention-item">
+                                    <lightning-icon icon-name="standard:user" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                    {user.name}
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+
                     <div class="chat-input-wrapper">
                         <lightning-textarea
                             variant="label-hidden"

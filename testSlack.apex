@@ -1,0 +1,10 @@
+String BOT_TOKEN = System.Label.Slack_Bot_Token;
+String endpoint = 'https://slack.com/api/conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=1000';
+Http h = new Http();
+HttpRequest req = new HttpRequest();
+req.setEndpoint(endpoint);
+req.setMethod('GET');
+req.setHeader('Authorization', 'Bearer ' + BOT_TOKEN);
+req.setHeader('Content-Type', 'application/json; charset=utf-8');
+HttpResponse res = h.send(req);
+System.debug('SLACK_RESPONSE: ' + res.getBody());
