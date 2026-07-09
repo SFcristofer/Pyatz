@@ -584,6 +584,29 @@ export default class TechOperations360 extends NavigationMixin(LightningElement)
     handleNewOpportunity() { this.isCreationModalOpen = true; }
     closeCreationModal() { this.isCreationModalOpen = false; }
 
+    // --- OPCIONES PARA TIPO DE VENTA (CUSTOM PICKLIST) ---
+    tipoVentaOptions = [
+        { label: 'Póliza', value: 'Póliza' },
+        { label: 'Extraordinario', value: 'Extraordinario' },
+        { label: 'Bomberazo', value: 'Bomberazo' },
+        { label: 'Venta en Línea', value: 'Venta en Línea' },
+        { label: 'CEDIS', value: 'CEDIS' }
+    ];
+    selectedTipoVenta = 'Póliza'; // Valor por defecto
+
+    handleTipoVentaChange(event) {
+        this.selectedTipoVenta = event.detail.value;
+    }
+
+    handleOpportunitySubmit(event) {
+        event.preventDefault(); // Detener el envío estándar
+        const fields = event.detail.fields;
+        fields.Tipo_de_venta__c = this.selectedTipoVenta;
+        
+        // Ejecutamos el envío manualmente
+        this.template.querySelector('.creation-form').submit(fields);
+    }
+
     openSummaryModal() { this.isSummaryModalOpen = true; }
     closeSummaryModal() { this.isSummaryModalOpen = false; }
 

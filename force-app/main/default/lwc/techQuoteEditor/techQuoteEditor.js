@@ -309,8 +309,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     get estrategiaOptions() {
         return [
-            { label: 'E1 - Póliza Anual', value: 'E1' }, { label: 'E2 - Extraordinario', value: 'E2' },
-            { label: 'E3 - Cliente Nuevo', value: 'E3' }, { label: 'E4 - Retardantes', value: 'E4' }, { label: 'E5 - Cedis', value: 'E5' }
+            { label: 'Estrategia 1', value: 'E1' }, { label: 'Estrategia 2', value: 'E2' },
+            { label: 'Estrategia 3', value: 'E3' }, { label: 'Estrategia 4', value: 'E4' }, { label: 'Estrategia 5', value: 'E5' }
         ];
     }
 

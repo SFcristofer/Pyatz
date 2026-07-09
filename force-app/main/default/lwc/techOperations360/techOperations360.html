@@ -229,7 +229,7 @@
                     <h2 class="slds-text-heading_medium">Nuevo Proyecto Pyatz</h2>
                 </header>
                 <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-record-edit-form object-api-name="Opportunity" onsuccess={handleOpportunitySuccess}>
+                    <lightning-record-edit-form object-api-name="Opportunity" onsubmit={handleOpportunitySubmit} onsuccess={handleOpportunitySuccess} class="creation-form">
                         <lightning-messages></lightning-messages>
                         
                         <!-- RENDERIZADO POR SECCIONES PARA MAYOR PROFESIONALISMO -->
@@ -246,7 +246,15 @@
                                     <lightning-input-field field-name="CloseDate" required></lightning-input-field>
                                 </div>
                                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-horizontal_small">
-                                    <lightning-input-field field-name="Tipo_de_venta__c"></lightning-input-field>
+                                    <lightning-combobox
+                                        label="Tipo de venta"
+                                        value={selectedTipoVenta}
+                                        options={tipoVentaOptions}
+                                        onchange={handleTipoVentaChange}>
+                                    </lightning-combobox>
+                                    <div class="slds-hide">
+                                        <lightning-input-field field-name="Tipo_de_venta__c"></lightning-input-field>
+                                    </div>
                                 </div>
                             </div>
                         </div>
