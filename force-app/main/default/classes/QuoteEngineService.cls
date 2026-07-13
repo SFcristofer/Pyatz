@@ -31,6 +31,7 @@ public with sharing class QuoteEngineService {
                 q.Markers_Data__c = (String)p.get('markersData'); q.Technical_Sedes__c = (String)p.get('technicalSedes');
                 q.Description = (String)p.get('observacionesPago');
                 q.Estrategia_Venta__c = (String)p.get('estrategiaVenta');
+                q.Subestrategia_Venta__c = (String)p.get('subestrategiaVenta');
                 q.Business_Lines_Selected__c = businessLines;
                 q.Show_Subtotal__c = showSubtotal;
                 q.Show_Tax__c = showTax;
@@ -48,7 +49,7 @@ public with sharing class QuoteEngineService {
                     ContactId = contactId, Introduction_Text__c = (String)p.get('intro'), 
                     Warranty_Text__c = (String)p.get('warranty'), Markers_Data__c = (String)p.get('markersData'), 
                     Technical_Sedes__c = (String)p.get('technicalSedes'), Description = (String)p.get('observacionesPago'), 
-                    Estrategia_Venta__c = (String)p.get('estrategiaVenta'), Business_Lines_Selected__c = businessLines, 
+                    Estrategia_Venta__c = (String)p.get('estrategiaVenta'), Subestrategia_Venta__c = (String)p.get('subestrategiaVenta'), Business_Lines_Selected__c = businessLines, 
                     ExpirationDate = Date.today().addDays(30),
                     Show_Subtotal__c = showSubtotal,
                     Show_Tax__c = showTax,

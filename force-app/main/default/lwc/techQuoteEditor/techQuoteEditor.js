@@ -64,6 +64,8 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
 
     // --- ESTRATEGIA Y NECESIDAD ---
     @track estrategiaVenta = '';
+    @track subestrategiaVenta = '';
+    @track subestrategiaOptions = [];
     @track necesidadId = '';
     @track necesidadNombre = '';
     @track necesidadSeleccionada = '';
@@ -169,7 +171,11 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
                             if (decoded.serviciosData) this.serviciosData = decoded.serviciosData;
                             if (decoded.selectedSedesIds) this.selectedSedesIds = decoded.selectedSedesIds;
                             if (decoded.selectedSedesObjects) this.selectedSedesObjects = decoded.selectedSedesObjects;
-                            if (decoded.estrategiaVenta) this.estrategiaVenta = decoded.estrategiaVenta;
+                            if (decoded.estrategiaVenta) {
+                                this.estrategiaVenta = decoded.estrategiaVenta;
+                                this.updateSubestrategiaOptions();
+                            }
+                            if (decoded.subestrategiaVenta) this.subestrategiaVenta = decoded.subestrategiaVenta;
                             if (decoded.selectedContactIds) this.selectedContactIds = decoded.selectedContactIds;
                             if (decoded.selectedContactNames) this.selectedContactNames = decoded.selectedContactNames;
                             if (decoded.selectedLines) {
@@ -227,6 +233,10 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         if (this.currentStep === '1') {
             if (!this.estrategiaVenta) {
                 this.dispatchEvent(new ShowToastEvent({ title: '¡Alto ahí! 🛑', message: 'Debes seleccionar una Categoría (Estrategia de Venta) para poder avanzar.', variant: 'error' }));
+                return;
+            }
+            if (this.subestrategiaOptions.length > 0 && !this.subestrategiaVenta) {
+                this.dispatchEvent(new ShowToastEvent({ title: '¡Alto ahí! 🛑', message: 'Debes seleccionar una opción para la estrategia seleccionada.', variant: 'error' }));
                 return;
             }
         }
@@ -314,6 +324,21 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         ];
     }
 
+    updateSubestrategiaOptions() {
+        const SUBESTRATEGIA_MAP = {
+            'E1': [{ label: 'Póliza fija', value: 'Póliza fija' }, { label: 'Programado', value: 'Programado' }],
+            'E2': [{ label: 'Extraordinario', value: 'Extraordinario' }, { label: 'Bomberazo', value: 'Bomberazo' }, { label: 'Venta de producto', value: 'Venta de producto' }],
+            'E3': [{ label: 'Proyecto especial (o a la medida)', value: 'Proyecto especial (o a la medida)' }],
+            'E4': [{ label: 'Venta de producto', value: 'Venta de producto' }],
+            'E5': [{ label: 'Venta de producto', value: 'Venta de producto' }]
+        };
+        this.subestrategiaOptions = SUBESTRATEGIA_MAP[this.estrategiaVenta] || [];
+    }
+
+    handleSubestrategiaChange(event) {
+        this.subestrategiaVenta = event.target.value;
+    }
+
     get sedeScopeLabel() { return this.isGlobalSedeSearch ? 'Búsqueda Global' : 'Solo este Cliente'; }
     get sedeSearchPlaceholder() { return this.isGlobalSedeSearch ? 'Buscar en todo Salesforce...' : 'Filtrar registros de este cliente...'; }
     get maxRowSelection() { return this.estrategiaVenta === 'E5' ? 200 : 1; }
@@ -331,7 +356,12 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         return total;
     }
 
-    handleEstrategiaChange(event) { this.estrategiaVenta = event.target.value; this.autoFillAsunto(); }
+    handleEstrategiaChange(event) { 
+        this.estrategiaVenta = event.target.value; 
+        this.subestrategiaVenta = '';
+        this.updateSubestrategiaOptions();
+        this.autoFillAsunto(); 
+    }
     autoFillAsunto() {
         const folioDisplay = (this.folio && this.folio !== 'POR GENERAR') ? this.folio : 'POR GENERAR';
         const oppName = this.opportunityName || 'Sin Oportunidad';
@@ -403,7 +433,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         const markers = { 
             serviciosData: this.serviciosData, selectedSedesIds: this.selectedSedesIds, selectedSedesObjects: this.selectedSedesObjects, 
-            estrategiaVenta: this.estrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre, 
+            estrategiaVenta: this.estrategiaVenta, subestrategiaVenta: this.subestrategiaVenta, necesidadId: this.necesidadId, necesidadNombre: this.necesidadNombre, 
             pagoTransferencia: this.pagoTransferencia, pagoTarjeta: this.pagoTarjeta, trabajoPuntual: this.trabajoPuntual, 
             ventaProducto: this.ventaProducto, trabajoMantenimiento: this.trabajoMantenimiento, observacionesPago: this.observacionesPago,
             selectedContactIds: this.selectedContactIds, selectedContactNames: this.selectedContactNames,
@@ -416,6 +446,7 @@ export default class TechQuoteEditor extends NavigationMixin(LightningElement) {
             markersData: encoded, technicalSedes: this.selectedSedesObjects.map(s => s.Name).join(', '),
             lineItems: JSON.stringify(this.serviciosData), showIntro: true, showWarranty: true,
             estrategiaVenta: this.estrategiaVenta,
+            subestrategiaVenta: this.subestrategiaVenta,
             businessLines: this.selectedLines.join(', '),
             showSubtotal: this.showSubtotal,
             showDiscount: this.showDiscount,

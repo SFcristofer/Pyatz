@@ -30,6 +30,21 @@
                             variant="label-hidden"
                             class="custom-radio-group">
                         </lightning-radio-group>
+                        
+                        <template if:true={subestrategiaOptions.length}>
+                            <div class="slds-m-top_medium">
+                                <lightning-radio-group name="subestrategiaVenta"
+                                    label="Opción"
+                                    options={subestrategiaOptions}
+                                    value={subestrategiaVenta}
+                                    onchange={handleSubestrategiaChange}
+                                    type="button"
+                                    required
+                                    variant="label-hidden"
+                                    class="custom-radio-group subestrategia-group">
+                                </lightning-radio-group>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </template>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Subestrategia_Venta__c</fullName>
+    <externalId>false</externalId>
+    <label>Subestrategia de Venta</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Póliza fija</fullName>
+                <default>false</default>
+                <label>Póliza fija</label>
+            </value>
+            <value>
+                <fullName>Programado</fullName>
+                <default>false</default>
+                <label>Programado</label>
+            </value>
+            <value>
+                <fullName>Extraordinario</fullName>
+                <default>false</default>
+                <label>Extraordinario</label>
+            </value>
+            <value>
+                <fullName>Bomberazo</fullName>
+                <default>false</default>
+                <label>Bomberazo</label>
+            </value>
+            <value>
+                <fullName>Venta de producto</fullName>
+                <default>false</default>
+                <label>Venta de producto</label>
+            </value>
+            <value>
+                <fullName>Proyecto especial (o a la medida)</fullName>
+                <default>false</default>
+                <label>Proyecto especial (o a la medida)</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
