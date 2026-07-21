@@ -28,7 +28,7 @@ private class FloorPlanControllerTest {
             ControlPoint__c = cp.Id,
             VisitDate__c = DateTime.now(),
             TechnicianUser__c = UserInfo.getUserId(),
-            Result__c = 'No Activity',
+            Result__c = 'No Activity (default)',
             Quantity__c = 0,
             Observations__c = 'Test observation'
         );
@@ -48,7 +48,7 @@ private class FloorPlanControllerTest {
         ControlPoint__c cp = [SELECT Id FROM ControlPoint__c LIMIT 1];
         List<ControlPointVisit__c> visits = FloorPlanController.getRecentVisits(cp.Id);
         System.assertEquals(1, visits.size(), 'Debe retornar 1 visita');
-        System.assertEquals('No Activity', visits[0].Result__c);
+        System.assertEquals('No Activity (default)', visits[0].Result__c);
     }
 
     @isTest
@@ -87,14 +87,14 @@ private class FloorPlanControllerTest {
     @isTest
     static void testLogVisit_NoActivity() {
         ControlPoint__c cp = [SELECT Id, Status__c FROM ControlPoint__c LIMIT 1];
-        FloorPlanController.logVisit(cp.Id, 'No Activity', 0, 'Sin actividad');
+        FloorPlanController.logVisit(cp.Id, 'No Activity (default)', 0, 'Sin actividad');
 
         List<ControlPointVisit__c> visits = [SELECT Id, Result__c FROM ControlPointVisit__c WHERE ControlPoint__c = :cp.Id ORDER BY VisitDate__c DESC];
         System.assertEquals(2, visits.size());
-        System.assertEquals('No Activity', visits[0].Result__c);
+        System.assertEquals('No Activity (default)', visits[0].Result__c);
 
         ControlPoint__c updated = [SELECT Status__c, LastVisitDate__c FROM ControlPoint__c WHERE Id = :cp.Id];
-        System.assertEquals('Active', updated.Status__c, 'Estado no debe cambiar con No Activity');
+        System.assertEquals('Active', updated.Status__c, 'Estado no debe cambiar con No Activity (default)');
         System.assertEquals(Date.today(), updated.LastVisitDate__c);
     }
 
@@ -145,7 +145,7 @@ private class FloorPlanControllerTest {
         System.assertEquals(1, wrappers.size(), 'Debe retornar 1 wrapper');
         System.assertEquals('Trap', wrappers[0].point.PointType__c);
         System.assertEquals(1, wrappers[0].visits.size(), 'Debe retornar 1 visita embebida');
-        System.assertEquals('No Activity', wrappers[0].visits[0].Result__c);
+        System.assertEquals('No Activity (default)', wrappers[0].visits[0].Result__c);
     }
 
     @isTest

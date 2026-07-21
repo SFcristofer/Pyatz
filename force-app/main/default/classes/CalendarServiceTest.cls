@@ -10,11 +10,42 @@ private class CalendarServiceTest {
             StageName = 'Prospecting', CloseDate = Date.today().addDays(30)
         );
         insert opp;
-        Task t = new Task(Subject = 'Test Call', WhatId = opp.Id, Status = 'Open', TaskSubtype = 'Call');
+        Contact c = new Contact(FirstName = 'Test', LastName = 'Contact', Phone = '555-1234');
+        insert c;
+        Task t = new Task(Subject = 'Test Call', WhatId = opp.Id, WhoId = c.Id, Status = 'Open', TaskSubtype = 'Call');
         insert t;
-        Event e = new Event(Subject = 'Test Event', WhatId = opp.Id,
+        Event e = new Event(Subject = 'Test Event', WhatId = opp.Id, WhoId = c.Id,
             StartDateTime = Datetime.now(), EndDateTime = Datetime.now().addHours(1));
         insert e;
+        EmailMessage em = new EmailMessage(Subject = 'Test Email', RelatedToId = opp.Id, ToAddress = 'test@example.com', Status = '3');
+        insert em;
+
+        Profile p = [SELECT Id FROM Profile LIMIT 1];
+        User u = new User(Alias = 'stdu', Email='standarduser@testorg.com', 
+            EmailEncodingKey='UTF-8', LastName='Testing', LanguageLocaleKey='en_US', 
+            LocaleSidKey='en_US', ProfileId = p.Id, 
+            TimeZoneSidKey='America/Los_Angeles', UserName='standarduser_' + Math.random() + '@testorg.com');
+        insert u;
+
+        OperatingHours oh = new OperatingHours(Name = 'Test Hours', TimeZone = 'America/Los_Angeles');
+        insert oh;
+        TimeSlot ts = new TimeSlot(OperatingHoursId = oh.Id, DayOfWeek = 'Monday', Type = 'Normal', StartTime = Time.newInstance(9, 0, 0, 0), EndTime = Time.newInstance(17, 0, 0, 0));
+        insert ts;
+
+        ServiceResource sr = new ServiceResource(Name = 'Test Resource', RelatedRecordId = u.Id, IsActive = true, ResourceType = 'T');
+        insert sr;
+        ServiceTerritory st = new ServiceTerritory(Name = 'Test Territory', OperatingHoursId = oh.Id, IsActive = true);
+        insert st;
+        ServiceTerritoryMember stm = new ServiceTerritoryMember(ServiceResourceId = sr.Id, ServiceTerritoryId = st.Id, OperatingHoursId = oh.Id, EffectiveStartDate = Datetime.now().addDays(-1));
+        insert stm;
+
+        ServiceAppointment sa = new ServiceAppointment(ParentRecordId = opp.Id, SchedStartTime = Datetime.now().addDays(1), SchedEndTime = Datetime.now().addDays(1).addHours(1), Status = 'None', Subject = 'SA Test');
+        insert sa;
+        AssignedResource ar = new AssignedResource(ServiceAppointmentId = sa.Id, ServiceResourceId = sr.Id, EstimatedTravelTime = 10, ActualTravelTime = 15);
+        insert ar;
+        
+        ServiceAppointment sa2 = new ServiceAppointment(ParentRecordId = opp.Id, SchedStartTime = Datetime.now().addDays(1), SchedEndTime = Datetime.now().addDays(1).addHours(1), Status = 'None', Subject = 'SA Test Unassigned');
+        insert sa2;
     }
 
     @isTest

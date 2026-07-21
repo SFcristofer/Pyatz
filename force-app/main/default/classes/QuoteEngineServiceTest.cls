@@ -5,16 +5,18 @@ private class QuoteEngineServiceTest {
     static void makeData() {
         Account acc = new Account(Name = 'QES Account');
         insert acc;
-        Pricebook2 pb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        Id pbId = Test.getStandardPricebookId();
+        Pricebook2 stdPb = new Pricebook2(Id = pbId, IsActive = true);
+        try { update stdPb; } catch (Exception e) {}
         Opportunity opp = new Opportunity(
-            Name = 'QES Opp', AccountId = acc.Id, Pricebook2Id = pb.Id,
+            Name = 'QES Opp', AccountId = acc.Id, Pricebook2Id = pbId,
             StageName = 'Prospecting', CloseDate = Date.today().addDays(30)
         );
         insert opp;
         Product2 prod = new Product2(Name = 'QES Product', IsActive = true, Family = 'BIOENZIMÁTICO');
         insert prod;
         PricebookEntry pbe = new PricebookEntry(
-            Pricebook2Id = pb.Id, Product2Id = prod.Id, UnitPrice = 500, IsActive = true
+            Pricebook2Id = pbId, Product2Id = prod.Id, UnitPrice = 500, IsActive = true
         );
         insert pbe;
     }
@@ -41,8 +43,8 @@ private class QuoteEngineServiceTest {
     @isTest
     static void testSaveTechnicalData_updateExistingQuote() {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
-        Pricebook2 pb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-        Quote existing = new Quote(Name = 'Existing', OpportunityId = opp.Id, Pricebook2Id = pb.Id, Status = 'Draft');
+        Id pbId = Test.getStandardPricebookId();
+        Quote existing = new Quote(Name = 'Existing', OpportunityId = opp.Id, Pricebook2Id = pbId, Status = 'Draft');
         insert existing;
 
         Map<String, Object> data = new Map<String, Object>{
@@ -62,8 +64,8 @@ private class QuoteEngineServiceTest {
     @isTest
     static void testSaveTechnicalData_withLineItems() {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
-        Pricebook2 pb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-        PricebookEntry pbe = [SELECT Id FROM PricebookEntry WHERE Pricebook2.IsStandard = true LIMIT 1];
+        Id pbId = Test.getStandardPricebookId();
+        PricebookEntry pbe = [SELECT Id FROM PricebookEntry LIMIT 1];
 
         List<Map<String, Object>> items = new List<Map<String, Object>>{
             new Map<String, Object>{

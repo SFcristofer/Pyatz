@@ -27,8 +27,7 @@ private class FileServiceTest {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
         ContentVersion cv = new ContentVersion(
             Title = 'test.pdf', PathOnClient = 'test.pdf',
-            VersionData = Blob.valueOf('pdf content'), IsMajorVersion = true,
-            FileType = 'PDF'
+            VersionData = Blob.valueOf('pdf content'), IsMajorVersion = true
         );
         insert cv;
         Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
@@ -97,8 +96,7 @@ private class FileServiceTest {
         ContentVersion cv = new ContentVersion(
             Title = '[FOTO_1] - Evidencia',
             PathOnClient = 'img.jpg',
-            VersionData = Blob.valueOf('img'), IsMajorVersion = true,
-            FileType = 'JPG'
+            VersionData = Blob.valueOf('img'), IsMajorVersion = true
         );
         insert cv;
         Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;

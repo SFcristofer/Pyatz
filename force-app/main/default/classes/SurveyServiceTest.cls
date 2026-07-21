@@ -81,6 +81,63 @@ private class SurveyServiceTest {
     }
 
     @isTest
+    static void testSaveInspectionResult() {
+        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
+        ServiceAppointment sa = new ServiceAppointment(ParentRecordId = opp.Id, Status = 'None', Subject = 'SA Test');
+        insert sa;
+        
+        Inspeccion_Tecnica__c it = new Inspeccion_Tecnica__c(Cita_Servicio__c = sa.Id, Tipo_Reporte__c = 'TEST');
+        insert it;
+        
+        Test.startTest();
+        SurveyService.saveInspectionResult(sa.Id, '{"key":"val"}', 'No deficiencies');
+        Test.stopTest();
+        
+        Inspeccion_Tecnica__c updated = [SELECT Respuestas_JSON__c, Deficiencias_Detectadas__c FROM Inspeccion_Tecnica__c WHERE Id = :it.Id];
+        System.assertEquals('{"key":"val"}', updated.Respuestas_JSON__c);
+        System.assertEquals('No deficiencies', updated.Deficiencias_Detectadas__c);
+    }
+    
+    @isTest
+    static void testSaveInspectionResult_error() {
+        Boolean err = false;
+        Test.startTest();
+        try {
+            SurveyService.saveInspectionResult(null, '{"key":"val"}', 'No deficiencies');
+        } catch (Exception e) {
+            err = true;
+        }
+        Test.stopTest();
+        System.assert(err);
+    }
+
+    @isTest
+    static void testGetInspectionData_null() {
+        Map<String, Object> res = SurveyService.getInspectionData(null);
+        System.assertEquals(0, res.size());
+    }
+
+    @isTest
+    static void testGetInspectionData_withData() {
+        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
+        ServiceAppointment sa = new ServiceAppointment(ParentRecordId = opp.Id, Status = 'None', Subject = 'SA Test');
+        insert sa;
+        
+        Levantamiento_Tecnico__c lev = [SELECT Id FROM Levantamiento_Tecnico__c LIMIT 1];
+        
+        Inspeccion_Tecnica__c it = new Inspeccion_Tecnica__c(Cita_Servicio__c = sa.Id, Levantamiento_Tecnico__c = lev.Id, Respuestas_JSON__c = '{"key":"val"}');
+        insert it;
+        
+        Test.startTest();
+        Map<String, Object> result = SurveyService.getInspectionData(sa.Id);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, result);
+        System.assertEquals('{"key":"val"}', result.get('existingData'));
+        System.assertEquals('TEST', result.get('reportType'));
+    }
+
+    @isTest
     static void testTagLatestPhotos() {
         Account acc = [SELECT Id FROM Account LIMIT 1];
         ContentVersion cv = new ContentVersion(

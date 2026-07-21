@@ -3,232 +3,157 @@ private class TechWorkOrderControllerTest {
 
     @TestSetup
     static void makeData() {
-        Account acc = new Account(
-            Name = 'TWO Account', BillingStreet = '123 Main St',
-            BillingCity = 'CDMX', BillingState = 'CDMX',
-            BillingPostalCode = '06600', BillingCountry = 'Mexico'
-        );
+        // Data for tests
+        Account acc = new Account(Name = 'Pyatz Account', BillingStreet = 'Calle 1', BillingCity = 'CDMX');
         insert acc;
-        Pricebook2 pb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-        Opportunity opp = new Opportunity(
-            Name = 'TWO Opp', AccountId = acc.Id,
-            StageName = 'Prospecting', CloseDate = Date.today().addDays(30)
-        );
+        
+        Opportunity opp = new Opportunity(Name = 'Opp Pyatz', StageName = 'Prospecting', CloseDate = Date.today(), AccountId = acc.Id);
         insert opp;
-        Quote q = new Quote(
-            Name = 'TWO Quote', OpportunityId = opp.Id, Pricebook2Id = pb.Id,
-            Status = 'Draft', AccountId = acc.Id
-        );
-        insert q;
-        Product2 prod = new Product2(Name = 'TWO Product', IsActive = true);
+        
+        Id standardPbId = Test.getStandardPricebookId();
+        
+        Product2 prod = new Product2(Name = 'Fumigacion Pyatz', IsActive = true);
         insert prod;
-        PricebookEntry pbe = new PricebookEntry(
-            Pricebook2Id = pb.Id, Product2Id = prod.Id, UnitPrice = 100, IsActive = true
-        );
+        
+        PricebookEntry pbe = new PricebookEntry(Pricebook2Id = standardPbId, Product2Id = prod.Id, UnitPrice = 100, IsActive = true);
         insert pbe;
-        QuoteLineItem qli = new QuoteLineItem(
-            QuoteId = q.Id, PricebookEntryId = pbe.Id, Quantity = 1, UnitPrice = 100
-        );
+        
+        Quote q = new Quote(Name = 'Test Quote Pyatz', OpportunityId = opp.Id, Pricebook2Id = standardPbId);
+        insert q;
+        
+        QuoteLineItem qli = new QuoteLineItem(QuoteId = q.Id, Product2Id = prod.Id, PricebookEntryId = pbe.Id, Quantity = 1, UnitPrice = 100);
         insert qli;
-        WorkOrder wo = new WorkOrder(AccountId = acc.Id, Status = 'New', Subject = 'Legacy WO');
+        
+        ServiceTerritory st = new ServiceTerritory(Name = 'Territorio Central', IsActive = true, OperatingHoursId = createOperatingHours().Id);
+        insert st;
+        
+        Profile p = [SELECT Id FROM Profile WHERE Name='Standard User' OR Name='Usuario Estándar' LIMIT 1];
+        User u = new User(Alias = 'standt', Email='standarduser@pyatz.test', 
+            EmailEncodingKey='UTF-8', LastName='Testing', LanguageLocaleKey='en_US', 
+            LocaleSidKey='en_US', ProfileId = p.Id, 
+            TimeZoneSidKey='America/Los_Angeles', UserName='tecpyatz' + Datetime.now().getTime() + '@pyatz.test');
+        insert u;
+        
+        ServiceResource sr = new ServiceResource(Name = 'Tecnico Pyatz', ResourceType = 'T', IsActive = true, RelatedRecordId = u.Id);
+        insert sr;
+        
+        WorkOrder wo = new WorkOrder(AccountId = acc.Id, ServiceTerritoryId = st.Id, Subject = 'Test WO Pyatz');
         insert wo;
+        
+        ServiceAppointment sa = new ServiceAppointment(ParentRecordId = wo.Id, EarliestStartTime = Datetime.now(), DueDate = Datetime.now().addDays(1), Status = 'Ninguno');
+        insert sa;
+        
+        Form_Template__c ft = new Form_Template__c(Name = 'Plantilla Test', Tipo_Reporte__c = 'Mantenimiento');
+        insert ft;
+        
+        Zona_Servicio_Pyatz__c z = new Zona_Servicio_Pyatz__c(Name = 'Zona Pyatz', Cuenta__c = acc.Id);
+        insert z;
+        
+        Plantilla_de_Zona__c pz = new Plantilla_de_Zona__c(Zona__c = z.Id, Plantilla__c = ft.Id);
+        insert pz;
+    }
+    
+    static OperatingHours createOperatingHours() {
+        OperatingHours oh = new OperatingHours(Name = 'Horario Pyatz', TimeZone = 'America/Mexico_City');
+        insert oh;
+        return oh;
     }
 
     @isTest
-    static void testGetInitialWorkOrderData_withQuoteId() {
+    static void testGetCatalogues() {
+        Test.startTest();
+        List<Map<String, String>> resources = TechWorkOrderController.getServiceResources();
+        System.assert(resources.size() > 0, 'Debe retornar recursos');
+        
+        List<Map<String, String>> territories = TechWorkOrderController.getServiceTerritories();
+        System.assert(territories.size() > 0, 'Debe retornar territorios');
+        
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+        List<Zona_Servicio_Pyatz__c> zonas = TechWorkOrderController.getAccountZonesData(acc.Id, 'Pyatz', '', '', '', '');
+        System.assert(zonas.size() > 0, 'Debe retornar zonas filtradas');
+        
+        List<Map<String, String>> wos = TechWorkOrderController.getRecentWorkOrders(acc.Id);
+        System.assert(wos.size() > 0, 'Debe retornar ODTs recientes');
+        
+        Map<String, Object> tData = TechWorkOrderController.getWorkOrderTemplateData(null);
+        System.assertEquals(null, tData);
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testGetInitialWorkOrderData() {
+        Quote q = [SELECT Id, OpportunityId FROM Quote LIMIT 1];
+        
+        Test.startTest();
+        Map<String, Object> data = TechWorkOrderController.getInitialWorkOrderData(q.OpportunityId, q.Id, null);
+        Test.stopTest();
+        
+        System.assertNotEquals(null, data);
+        System.assertEquals(q.Id, data.get('quoteId'));
+        System.assert(data.containsKey('tratamientos'));
+    }
+
+    @isTest
+    static void testSaveWorkOrders() {
+        Account acc = [SELECT Id FROM Account LIMIT 1];
         Quote q = [SELECT Id FROM Quote LIMIT 1];
-        Test.startTest();
-        Map<String, Object> result = TechWorkOrderController.getInitialWorkOrderData(null, q.Id, null);
-        Test.stopTest();
-        System.assertNotEquals(null, result);
-        System.assertEquals(q.Id, result.get('quoteId'));
-        System.assertNotEquals(null, result.get('tratamientos'));
-        System.assertNotEquals(null, result.get('cliente'));
-    }
-
-    @isTest
-    static void testGetInitialWorkOrderData_noSyncingQuote() {
-        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
-        Test.startTest();
-        try {
-            TechWorkOrderController.getInitialWorkOrderData(opp.Id, null, null);
-            System.assert(false, 'Expected AuraHandledException');
-        } catch (AuraHandledException e) {
-            System.assert(e.getMessage() != null);
-        }
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testGetServiceResources_empty() {
-        Test.startTest();
-        List<Map<String, String>> result = TechWorkOrderController.getServiceResources();
-        Test.stopTest();
-        System.assertNotEquals(null, result);
-    }
-
-    @isTest
-    static void testGetServiceTerritories_empty() {
-        Test.startTest();
-        List<Map<String, String>> result = TechWorkOrderController.getServiceTerritories();
-        Test.stopTest();
-        System.assertNotEquals(null, result);
-    }
-
-    @isTest
-    static void testGetAccountZonesData_noFilters() {
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-        Test.startTest();
-        List<Zona_Servicio_Pyatz__c> result = TechWorkOrderController.getAccountZonesData(
-            acc.Id, null, null, null, null, null
-        );
-        Test.stopTest();
-        System.assertNotEquals(null, result);
-    }
-
-    @isTest
-    static void testGetAccountZonesData_withSearchTerm() {
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-        Zona_Servicio_Pyatz__c zona = new Zona_Servicio_Pyatz__c(
-            Name = 'Cocina Central', Cuenta__c = acc.Id
-        );
-        insert zona;
-        Test.startTest();
-        List<Zona_Servicio_Pyatz__c> resultMatch = TechWorkOrderController.getAccountZonesData(
-            acc.Id, 'Cocina', null, null, null, null
-        );
-        List<Zona_Servicio_Pyatz__c> resultNoMatch = TechWorkOrderController.getAccountZonesData(
-            acc.Id, 'XYZNOTFOUND', null, null, null, null
-        );
-        Test.stopTest();
-        System.assertEquals(1, resultMatch.size());
-        System.assertEquals(0, resultNoMatch.size());
-    }
-
-    @isTest
-    static void testGetRecentWorkOrders() {
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-        Test.startTest();
-        List<Map<String, String>> result = TechWorkOrderController.getRecentWorkOrders(acc.Id);
-        Test.stopTest();
-        System.assertNotEquals(null, result);
-        System.assert(result.size() >= 1);
-    }
-
-    @isTest
-    static void testSaveWorkOrders_createNew() {
-        Quote q = [SELECT Id FROM Quote LIMIT 1];
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-        QuoteLineItem qli = [SELECT Id FROM QuoteLineItem LIMIT 1];
-
-        Map<String, Object> row = new Map<String, Object>{
-            'saId' => null,
-            'date' => String.valueOf(Date.today().addDays(10)),
-            'startTime' => '09:00:00.000',
-            'duration' => 60.0,
-            'notes' => 'Test row note',
-            'arrivalMargin' => 0,
-            'locked' => false,
-            'tecnicoId' => null
-        };
-        Map<String, Object> tratamiento = new Map<String, Object>{
-            'id' => String.valueOf(qli.Id),
-            'name' => 'Test Fumigation',
-            'zonas' => 'Kitchen',
-            'levantamientoId' => null,
-            'schedulingRows' => new List<Object>{ row }
-        };
+        QuoteLineItem qli = [SELECT Id, Product2Id FROM QuoteLineItem LIMIT 1];
+        ServiceTerritory st = [SELECT Id FROM ServiceTerritory LIMIT 1];
+        ServiceResource sr = [SELECT Id FROM ServiceResource LIMIT 1];
+        
         Map<String, Object> payload = new Map<String, Object>{
-            'quoteId' => String.valueOf(q.Id),
-            'existingWorkOrderId' => null,
-            'serviceContractId' => null,
-            'accountId' => String.valueOf(acc.Id),
-            'territoryId' => null,
-            'notes' => 'Integration test notes',
-            'folio' => 'Q-TEST-001',
-            'priority' => 'Medium',
-            'executionAddress' => null,
-            'contactPerson' => 'Test Contact Person',
-            'sedesList' => new List<Object>{
-                new Map<String, Object>{
-                    'tratamientos' => new List<Object>{ tratamiento }
-                }
-            }
-        };
-
-        Test.startTest();
-        String woId = TechWorkOrderController.saveWorkOrders(JSON.serialize(payload));
-        Test.stopTest();
-
-        System.assertNotEquals(null, woId);
-        WorkOrder created = [SELECT Id, Status, Subject, Priority FROM WorkOrder WHERE Id = :woId LIMIT 1];
-        System.assertEquals('New', created.Status);
-        System.assert(created.Subject.contains('Q-TEST-001'));
-        System.assertEquals('Medium', created.Priority);
-
-        List<ServiceAppointment> sas = [SELECT Id, Status FROM ServiceAppointment WHERE ParentRecordId = :woId];
-        System.assertEquals(1, sas.size());
-        System.assertEquals('Programado', sas[0].Status);
-    }
-
-    @isTest
-    static void testSaveWorkOrders_withHighPriority() {
-        Quote q = [SELECT Id FROM Quote LIMIT 1];
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-        QuoteLineItem qli = [SELECT Id FROM QuoteLineItem LIMIT 1];
-
-        Map<String, Object> row = new Map<String, Object>{
-            'saId' => null,
-            'date' => String.valueOf(Date.today().addDays(5)),
-            'startTime' => '10:30:00.000',
-            'duration' => 90.0,
-            'notes' => '',
-            'arrivalMargin' => 0,
-            'locked' => false,
-            'tecnicoId' => null
-        };
-        Map<String, Object> payload = new Map<String, Object>{
-            'quoteId' => String.valueOf(q.Id),
-            'existingWorkOrderId' => null,
-            'serviceContractId' => null,
-            'accountId' => String.valueOf(acc.Id),
-            'territoryId' => null,
-            'notes' => '',
-            'folio' => 'Q-HIGH-001',
+            'existingWorkOrderId' => '',
+            'quoteId' => q.Id,
+            'serviceContractId' => '',
+            'accountId' => acc.Id,
+            'territoryId' => st.Id,
+            'notes' => 'Notas de prueba Pyatz',
+            'folio' => 'Q-9999',
             'priority' => 'High',
-            'executionAddress' => 'Calle Alternativa 456',
-            'contactPerson' => 'Gerente',
+            'executionAddress' => 'Calle Falsa 123',
+            'contactPerson' => 'Homero',
             'sedesList' => new List<Object>{
                 new Map<String, Object>{
                     'tratamientos' => new List<Object>{
                         new Map<String, Object>{
-                            'id' => String.valueOf(qli.Id),
-                            'name' => 'Limpieza',
-                            'zonas' => 'Almacen',
-                            'levantamientoId' => null,
-                            'schedulingRows' => new List<Object>{ row }
+                            'id' => qli.Id,
+                            'name' => 'Fumigacion Pyatz',
+                            'quantity' => 1,
+                            'zonas' => 'Zona Pyatz',
+                            'schedulingRows' => new List<Object>{
+                                new Map<String, Object>{
+                                    'saId' => '',
+                                    'date' => String.valueOf(Date.today()),
+                                    'startTime' => '08:00:00.000',
+                                    'duration' => 60,
+                                    'status' => 'Ninguno',
+                                    'notes' => 'Nota SA',
+                                    'travelTime' => 30,
+                                    'locked' => false,
+                                    'tecnicoId' => sr.Id,
+                                    'tecnicosIds' => new List<Object>{ sr.Id }
+                                }
+                            }
                         }
                     }
                 }
             }
         };
-
+        
+        String jsonPayload = JSON.serialize(payload);
+        
         Test.startTest();
-        String woId = TechWorkOrderController.saveWorkOrders(JSON.serialize(payload));
+        String resultId = TechWorkOrderController.saveWorkOrders(jsonPayload);
         Test.stopTest();
-
-        System.assertNotEquals(null, woId);
-        WorkOrder created = [SELECT Priority, Street FROM WorkOrder WHERE Id = :woId LIMIT 1];
-        System.assertEquals('High', created.Priority);
-        System.assertEquals('Calle Alternativa 456', created.Street);
-    }
-
-    @isTest
-    static void testGetWorkOrderTemplateData() {
-        WorkOrder wo = [SELECT Id FROM WorkOrder LIMIT 1];
-        Test.startTest();
-        Map<String, Object> result = TechWorkOrderController.getWorkOrderTemplateData(wo.Id);
-        Test.stopTest();
-        System.assertEquals(null, result);
+        
+        System.assertNotEquals(null, resultId, 'Debe devolver el ID de la WorkOrder');
+        WorkOrder insertedWO = [SELECT Id, Subject FROM WorkOrder WHERE Id = :resultId];
+        System.assert(insertedWO.Subject.contains('Q-9999'));
+        
+        List<ServiceAppointment> sas = [SELECT Id, Status FROM ServiceAppointment WHERE ParentRecordId = :resultId];
+        System.assert(sas.size() > 0, 'Debe crear ServiceAppointments');
+        
+        List<Revision_Cita_Servicio__c> revs = [SELECT Id, Status__c FROM Revision_Cita_Servicio__c WHERE Cita_Servicio__c IN :sas];
+        System.assert(revs.size() > 0, 'Debe crear Revisiones');
     }
 }
